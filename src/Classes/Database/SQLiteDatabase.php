@@ -29,7 +29,7 @@ class SQLiteDatabase extends Database
     }
 
     public function databaseExists() {
-        $query = $this->query("SELECT name FROM sqlite_master WHERE type='table' AND name='QUIZ'");
+        $query = $this->query("SELECT name FROM sqlite_master WHERE type='table' AND name='PARTICIPANT'");
         $result = $query->fetch();
         return $result;
     }

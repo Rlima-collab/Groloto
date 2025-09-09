@@ -41,7 +41,7 @@ class MySQLDatabase extends Database
     }
 
     public function databaseExists() {
-        $query = $this->query("SHOW TABLES LIKE 'QUIZ'");
+        $query = $this->query("SHOW TABLES LIKE 'PARTICIPANT'");
         $result = $query->fetch();
         return $result;
     }

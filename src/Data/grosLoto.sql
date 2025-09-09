@@ -1,70 +1,99 @@
-DROP TABLE IF EXISTS PARTICIPE;
-DROP TABLE IF EXISTS QUESTION;
-DROP TABLE IF EXISTS QUIZ;
-DROP TABLE IF EXISTS UTILISATEUR;
+-- Nettoyage
+DROP TABLE IF EXISTS PARTICIPANT;
+DROP TABLE IF EXISTS PUBLIC;
+DROP TABLE IF EXISTS COMMUNICATION;
+DROP TABLE IF EXISTS STOCK;
+DROP TABLE IF EXISTS MECENE;
+DROP TABLE IF EXISTS PLANNING;
+DROP TABLE IF EXISTS BENEVOLE;
 
-CREATE TABLE QUIZ
-(
-    id_Quiz INT NOT NULL,
-    name_Q  VARCHAR(42),
-    theme   VARCHAR(42),
-    PRIMARY KEY (id_Quiz)
+-- Table des bénévoles
+CREATE TABLE BENEVOLE(
+    id_benevole INT NOT NULL,
+    nom VARCHAR(42),
+    prenom VARCHAR(42),
+    disponibilites VARCHAR(250),
+    PRIMARY KEY (id_benevole)
 );
 
-CREATE TABLE QUESTION
-(
-    id_Q    INT NOT NULL,
-    id_Quiz INT NOT NULL,
-    type_Q  VARCHAR(42),
-    label   VARCHAR(42),
-    choices VARCHAR(250),
-    correct VARCHAR(42),
-    PRIMARY KEY (id_Q, id_Quiz),
-    FOREIGN KEY (id_Quiz) REFERENCES QUIZ (id_Quiz)
+-- Table planning (qui fait quoi et quand)
+CREATE TABLE PLANNING(
+    id_planning INT NOT NULL,
+    id_benevole INT NOT NULL,
+    poste VARCHAR(42),
+    jour DATE NOT NULL,
+    heure_debut TIME NOT NULL,
+    heure_fin TIME NOT NULL,
+    PRIMARY KEY (id_planning),
+    FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id_benevole)
 );
 
-CREATE TABLE UTILISATEUR
-(
-    uuid   VARCHAR NOT NULL,
-    nom_U  VARCHAR(42) UNIQUE,
-    mdp    VARCHAR(42),
-    type_U VARCHAR(42),
-    PRIMARY KEY (uuid)
+-- Table des mécènes
+CREATE TABLE MECENE(
+    id_mecene INT NOT NULL,
+    nom VARCHAR(42),
+    contact VARCHAR(100),
+    lot_offert VARCHAR(100),
+    montant FLOAT,
+    PRIMARY KEY (id_mecene)
 );
 
-CREATE TABLE PARTICIPE
-(
-    id_Quiz INT NOT NULL,
-    uuid    VARCHAR NOT NULL,
-    score   FLOAT,
-    date    DATE DEFAULT (current_timestamp),
-    PRIMARY KEY (id_Quiz, uuid, date),
-    FOREIGN KEY (id_Quiz) REFERENCES QUIZ (id_Quiz),
-    FOREIGN KEY (uuid) REFERENCES UTILISATEUR (uuid)
+-- Table des stocks
+CREATE TABLE STOCK(
+    id_stock  INT NOT NULL,
+    categorie VARCHAR(42),
+    article VARCHAR(100),
+    quantite INT,
+    prix FLOAT,
+    annee YEAR,
+    PRIMARY KEY (id_stock)
 );
 
+-- Table communication
+CREATE TABLE COMMUNICATION(
+    id_com INT NOT NULL,
+    date DATE NOT NULL DEFAULT (current_date),
+    support VARCHAR(42),
+    depense FLOAT,
+    PRIMARY KEY (id_com)
+);
 
-INSERT INTO UTILISATEUR (uuid, nom_U, mdp, type_U) VALUES
-(1, 'admin', '$2y$10$qu4kz0lfn6FwNV08OCsTnOVZnrsTzFIM7pu3FAzGJrqItUyvxtksy', 'ADM');
+-- Table public (import HelloAsso)
+CREATE TABLE PUBLIC (
+    id_public INT NOT NULL,
+    nom VARCHAR(42),
+    prenom VARCHAR(42),
+    email VARCHAR(100),
+    annee YEAR,
+    PRIMARY KEY (id_public)
+);
 
+-- Table participation (qui participe à quoi, optionnel)
+CREATE TABLE PARTICIPANT(
+    id_benevole INT NOT NULL,
+    id_planning INT NOT NULL,
+    PRIMARY KEY (id_benevole, id_planning),
+    FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id_benevole),
+    FOREIGN KEY (id_planning) REFERENCES PLANNING(id_planning)
+);
 
--- Insérer les quiz
-INSERT INTO QUIZ (id_Quiz, name_Q, theme) VALUES
-                                              (1, 'Quiz Animaux', 'Animaux'),
-                                              (2, 'Quiz Villes', 'Villes');
+-- Données de test
+INSERT INTO BENEVOLE (id_benevole, nom, prenom, disponibilites) VALUES
+(1, 'Durand', 'Alice', 'Lundi matin; Mardi soir'),
+(2, 'Martin', 'Paul', 'Mercredi après-midi; Samedi');
 
--- Insérer les questions pour le Quiz Animaux
-INSERT INTO QUESTION (id_Q, id_Quiz, type_Q, label, choices, correct) VALUES
-(1, 1, 'checkbox', 'Quels animaux peuvent nager ?', 'Poisson;Chien;Éléphant', 'Poisson;Chien'),
-(2, 1, 'text', 'Quel animal miaule ?', null, 'chat'),
-(3, 1, 'checkbox', 'Lequel de ces animaux a des plumes ?', 'Oiseau;Serpent;Chien', 'Oiseau'),
-(4, 1, 'text', "De quelle couleur est le cheval d'Henry IV ?", null, 'blanc'),
-(5, 1, 'checkbox', "Quels animaux vivent dans l'océan ?", 'Dauphin;Cheval;Requin', 'Dauphin;Requin');
+INSERT INTO MECENE (id_mecene, nom, contact, lot_offert, montant) VALUES
+(1, 'Supermarché X', 'contact@superx.fr', 'Panier garni', 200),
+(2, 'Banque Y', 'banque.y@mail.fr', 'Chèque cadeau', 500);
 
--- Insérer les questions pour le Quiz Villes
-INSERT INTO QUESTION (id_Q, id_Quiz, type_Q, label, choices, correct) VALUES
-(1, 2, 'checkbox', 'Dans quelle ville peut-on voir la Tour Eiffel ?', 'Paris;New York;Londres', 'Paris'),
-(2, 2, 'text', 'Quelle ville est la capitale de la France ?', null, 'Paris'),
-(3, 2, 'checkbox', 'Quel est le nom de la capitale du Japon ?', 'Séoul;Tokyo;Pékin', 'Tokyo'),
-(4, 2, 'text', 'Dans quelle ville trouve-t-on le Colisée ?', null, 'Rome'),
-(5, 2, 'checkbox', 'Dans quelle ville peut-on voir la Statue de la Liberté ?', 'Paris;Londres;New York', 'New York');
+INSERT INTO STOCK (id_stock, categorie, article, quantite, prix, annee) VALUES
+(1, 'Bar', 'Bouteilles d''eau', 100, 0.50, 2025),
+(2, 'Restauration', 'Sandwichs', 50, 2.00, 2025);
+
+INSERT INTO COMMUNICATION (id_com, date, support, depense) VALUES
+(1, CURRENT_DATE, 'Affiche A3', 120),
+(2, CURRENT_DATE, 'Facebook Ads', 80);
+
+INSERT INTO PUBLIC (id_public, nom, prenom, email, annee) VALUES
+(1, 'Lefevre', 'Julie', 'julie.lefevre@mail.fr', 2025),
+(2, 'Nguyen', 'Bao', 'bao.nguyen@mail.fr', 2025);
