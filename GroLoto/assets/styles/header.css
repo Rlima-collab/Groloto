@@ -1,0 +1,49 @@
+/* Container et alignement */
+.site-header {
+    background-color: #fff;
+    padding: 15px 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Logo */
+.logo img {
+    height: 50px;
+}
+
+/* Navigation */
+.main-nav ul {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.main-nav li {
+    margin-left: 25px;
+}
+
+.main-nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.main-nav a:hover {
+    color: #007bff;
+}
+
+/* Icône de paramètres */
+.gear-icon {
+    height: 24px;
+    width: 24px;
+}

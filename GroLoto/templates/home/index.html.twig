@@ -1,20 +1,22 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>{% block title %}Mon Site{% endblock %}</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin:0; padding:0; }
-        header, footer { background: #eee; padding: 15px; text-align: center; }
-        nav a { margin: 0 10px; text-decoration: none; color: #333; }
-        main { padding: 20px; min-height: 70vh; }
-    </style>
-</head>
-<body>
-    {% include 'partials/header.html.twig' %}
-    <main>
-        {% block body %}{% endblock %}
-    </main>
-    {% include 'partials/footer.html.twig' %}
-</body>
-</html>
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block body %}
+<h1>Bienvenue sur notre site !</h1>
+<p>Ceci est la page d'accueil avec header et footer.</p>
+
+<section>
+    <h2>Nos services</h2>
+    <ul>
+        <li>Service 1</li>
+        <li>Service 2</li>
+        <li>Service 3</li>
+    </ul>
+</section>
+
+<section>
+    <h2>À propos de nous</h2>
+    <p>Texte descriptif de l'entreprise ou du projet.</p>
+</section>
+{% endblock %}

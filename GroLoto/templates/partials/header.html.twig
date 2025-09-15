@@ -1,7 +1,16 @@
-<header>
-    <nav>
-        <a href="{{ path('app_home') }}">Accueil</a>
-        <a href="{{ path('app_about') }}">À propos</a>
-        <a href="{{ path('app_contact') }}">Contact</a>
-    </nav>
+<header class="site-header">
+    <div class="container">
+        <div class="logo">
+            <img src="{{ asset('images/logo.png') }}" alt="Groloto Logo">
+        </div>
+        <nav class="nav-menu">
+            <a href="#">Dashboard</a>
+            <a href="#">Bénévoles</a>
+            <a href="#">Mécènes & Lots</a>
+            <a href="#">Stocks</a>
+            <a href="#">Communication</a>
+            <a href="#">Public</a>
+            <a href="#"><span class="settings">⚙</span></a>
+        </nav>
+    </div>
 </header>
