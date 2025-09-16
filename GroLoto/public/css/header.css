@@ -1,0 +1,46 @@
+/* ---- HEADER ---- */
+.site-header {
+    background: white;
+    border-bottom: 1px solid #eee;
+    padding: 10px 20px;
+}
+
+.site-header .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ---- LOGO ---- */
+.site-header .logo img {
+    height: 35px;
+    margin-left: 10px;
+}
+
+/* ---- NAVIGATION ---- */
+.nav-menu {
+    display: flex;
+    gap: 20px;
+    margin-right: 10px;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    font-size: 14px;
+    color: #444;
+    font-weight: 500;
+    display: flex;
+    align-items: center; /* aligne le texte */
+}
+
+.nav-menu a:hover {
+    color: #006909;
+}
+
+/* ---- PARAMÈTRE ⚙ ---- */
+.nav-menu .settings {
+    font-size: 20px;
+    cursor: pointer;
+    position: relative;
+    top: -3px; /* remonte légèrement l’icône */
+}
