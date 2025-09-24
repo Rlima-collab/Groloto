@@ -1,61 +1,108 @@
 <?php
 namespace App\Entity;
 
+use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 #[ORM\Table(name: "UTILISATEUR")]
-class Utilisateur
+#[UniqueEntity(fields: ["email"], message: "Cette adresse email est déjà utilisée")]
+class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private ?int $id = null;
+    private $id;
 
-    #[ORM\ManyToOne(targetEntity: Role::class)]
+    #[ORM\ManyToOne(targetEntity: "Role")]
     #[ORM\JoinColumn(name: "id_role", referencedColumnName: "id", nullable: false)]
-    private ?Role $role = null;
+    private $role;
 
-    #[ORM\Column(type: "string", unique: true)]
-    private string $email;
-
-    #[ORM\Column(type: "string", nullable: true)]
-    private ?string $mot_de_passe = null;
-
-    #[ORM\Column(type: "string", nullable: true)]
-    private ?string $prenom = null;
+    #[ORM\Column(type: "string", length: 180, unique: true)]
+    #[Assert\NotBlank(message: "L'email est obligatoire")]
+    #[Assert\Email(message: "L'email n'est pas valide")]
+    private $email;
 
     #[ORM\Column(type: "string", nullable: true)]
-    private ?string $nom = null;
+    private $mot_de_passe;
 
     #[ORM\Column(type: "string", nullable: true)]
-    private ?string $telephone = null;
+    private $prenom;
+
+    #[ORM\Column(type: "string", nullable: true)]
+    private $nom;
+
+    #[ORM\Column(type: "string", nullable: true)]
+    private $telephone;
 
     #[ORM\Column(type: "datetime", nullable: true)]
-    private ?\DateTimeInterface $date_creation = null;
+    private $date_creation;
 
     #[ORM\Column(type: "datetime", nullable: true)]
-    private ?\DateTimeInterface $date_modification = null;
+    private $date_modification;
 
-    // === Getters & Setters ===
+    // UserInterface methods
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
 
+    public function getUsername(): string
+    {
+        return (string) $this->email;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = [];
+        if ($this->role) {
+            switch ($this->role->getNom()) {
+                case 'admin':
+                    $roles[] = 'ROLE_ADMIN';
+                    break;
+                case 'benevole':
+                    $roles[] = 'ROLE_BENEVOLE';
+                    break;
+                case 'mecene':
+                    $roles[] = 'ROLE_MECENE';
+                    break;
+                default:
+                    $roles[] = 'ROLE_USER';
+            }
+        }
+        
+        // Garantir que chaque utilisateur a au moins ROLE_USER
+        $roles[] = 'ROLE_USER';
+        
+        return array_unique($roles);
+    }
+
+    public function getPassword(): string
+    {
+        return $this->mot_de_passe;
+    }
+
+    public function getSalt(): ?string
+    {
+        return null;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Si vous stockez des données sensibles temporaires sur l'utilisateur, effacez-les ici
+    }
+
+    // Getters & Setters
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getRole(): ?Role
-    {
-        return $this->role;
-    }
-
-    public function setRole(?Role $role): self
-    {
-        $this->role = $role;
-        return $this;
-    }
-
-    public function getEmail(): string
+    public function getEmail(): ?string
     {
         return $this->email;
     }
@@ -71,9 +118,20 @@ class Utilisateur
         return $this->mot_de_passe;
     }
 
-    public function setMotDePasse(?string $mot_de_passe): self
+    public function setMotDePasse(string $mot_de_passe): self
     {
         $this->mot_de_passe = $mot_de_passe;
+        return $this;
+    }
+
+    public function getRole(): ?Role
+    {
+        return $this->role;
+    }
+
+    public function setRole(?Role $role): self
+    {
+        $this->role = $role;
         return $this;
     }
 

@@ -1,49 +1,49 @@
 <?php
 namespace App\Entity;
 
+use App\Repository\RoleRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: RoleRepository::class)]
 #[ORM\Table(name: "ROLE")]
 class Role
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private ?int $id = null;
+    private $id;
 
     #[ORM\Column(type: "string", unique: true)]
-    private string $nom;
+    private $nom;
 
     #[ORM\Column(type: "text", nullable: true)]
-    private ?string $description = null;
+    private $description;
 
-    // === Getters & Setters ===
-
-    public function getId(): ?int
-    {
-        return $this->id;
+    // getters & setters
+    public function getId(): ?int 
+    { 
+        return $this->id; 
     }
-
-    public function getNom(): string
-    {
-        return $this->nom;
+    
+    public function getNom(): ?string 
+    { 
+        return $this->nom; 
     }
-
-    public function setNom(string $nom): self
-    {
-        $this->nom = $nom;
-        return $this;
+    
+    public function setNom(string $nom): self 
+    { 
+        $this->nom = $nom; 
+        return $this; 
     }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
+    
+    public function getDescription(): ?string 
+    { 
+        return $this->description; 
     }
-
-    public function setDescription(?string $description): self
-    {
-        $this->description = $description;
-        return $this;
+    
+    public function setDescription(?string $description): self 
+    { 
+        $this->description = $description; 
+        return $this; 
     }
 }

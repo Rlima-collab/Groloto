@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Inscription</h4>
+                </div>
+                <div class="card-body">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    {% if errors %}
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="prenom" class="form-label">Prénom</label>
+                                    <input type="text" name="prenom" id="prenom" 
+                                           class="form-control" value="{{ app.request.get('prenom') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nom" class="form-label">Nom</label>
+                                    <input type="text" name="nom" id="nom" 
+                                           class="form-control" value="{{ app.request.get('nom') }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" name="email" id="email" 
+                                   class="form-control" value="{{ app.request.get('email') }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="telephone" class="form-label">Téléphone</label>
+                            <input type="tel" name="telephone" id="telephone" 
+                                   class="form-control" value="{{ app.request.get('telephone') }}">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Mot de passe *</label>
+                                    <input type="password" name="password" id="password" 
+                                           class="form-control" required minlength="6">
+                                    <div class="form-text">Au moins 6 caractères</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="confirm_password" class="form-label">Confirmer le mot de passe *</label>
+                                    <input type="password" name="confirm_password" id="confirm_password" 
+                                           class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Je souhaite m'inscrire en tant que *</label>
+                            <select name="role" id="role" class="form-select" required>
+                                <option value="">Choisir un rôle</option>
+                                {% for role in roles %}
+                                    {% if role.nom != 'admin' %}
+                                        <option value="{{ role.id }}" 
+                                                {% if app.request.get('role') == role.id %}selected{% endif %}>
+                                            {{ role.nom|capitalize }}
+                                            {% if role.description %}
+                                                - {{ role.description }}
+                                            {% endif %}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button class="btn btn-primary" type="submit">
+                                S'inscrire
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <p>Déjà un compte ? 
+                            <a href="{{ path('app_login') }}" class="text-decoration-none">
+                                Se connecter
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
