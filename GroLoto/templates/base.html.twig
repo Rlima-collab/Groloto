@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Mon Site{% endblock %}</title>
-    <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 </head>
 <body>
     {% include 'partials/header.html.twig' %}
+    
     <main>
         {% block body %}{% endblock %}
     </main>
+    
     {% include 'partials/footer.html.twig' %}
 </body>
 </html>
