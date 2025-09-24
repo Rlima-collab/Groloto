@@ -8,13 +8,15 @@
             </a>
         </div>
         <nav class="nav-menu">
-            <a href="#">Tableau de bord</a>
+            <a href="/">Tableau de bord</a>
             <a href="#">Bénévoles</a>
             <a href="#">Mécènes & Lots</a>
-            <a href="#">Stocks</a>
+            <a class="nav-link" href="{{ path('stocks') }}">Stocks</a>
             <a href="#">Communication</a>
             <a href="#">Public</a>
             <a href="#"><span class="settings">⚙</span></a>
+            <a class="nav-link" href="{{ path('app_login') }}">Connexion</a>
+
         </nav>
     </div>
 </header>

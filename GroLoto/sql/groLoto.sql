@@ -101,9 +101,11 @@ CREATE TABLE STOCK (
   quantite INTEGER DEFAULT 0,
   unite TEXT,
   seuil INTEGER DEFAULT 0,
+  valeur_unitaire REAL DEFAULT 0.0,
   notes TEXT,
   derniere_modif DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
 
 CREATE TABLE HISTORIQUE_STOCK (
   id INTEGER PRIMARY KEY,
@@ -202,3 +204,92 @@ VALUES (1, 'admin@groloto.local', 'Admin', 'Groloto');
 
 INSERT INTO EVENEMENT (nom, description, date_debut, date_fin, lieu) 
 VALUES ('Groloto 2024', 'Loto caritatif annuel', '2024-11-15', '2024-11-15', 'Salle des fêtes');
+
+-- Données de test pour STOCK
+INSERT INTO STOCK (nom, categorie, quantite, unite, seuil, valeur_unitaire, notes)
+VALUES
+  ('Panier gourmand', 'resto', 15, 'pièces', 5, 10.0, 'Lots donnés par Boulangerie Martin'),
+  ('Bon d''achat restaurant', 'resto', 3, 'bons', 10, 30.0, 'Offert par Restaurant Le Gourmet'),
+  ('Coffret livres', 'autre', 25, 'coffrets', 8, 25.0, 'Don Librairie des Arts'),
+  ('Séance spa', 'autre', 2, 'tickets', 5, 50.0, 'Centre bien-être partenaire'),
+  ('Pack boissons', 'bar', 50, 'bouteilles', 20, 5.0, 'Lots pour le bar'),
+  ('Décoration de salle', 'deco', 10, 'kits', 2, 12.0, 'Décos pour l''événement');
+
+
+
+-- Données de test pour HISTORIQUE_STOCK
+INSERT INTO HISTORIQUE_STOCK (id_stock, type_changement, quantite, raison, id_utilisateur)
+VALUES
+  (1, 'entree', 10, 'Don initial Boulangerie Martin', 1),
+  (2, 'sortie', 2, 'Lots utilisés pour tombola', 1),
+  (3, 'entree', 15, 'Don Librairie des Arts', 1),
+  (4, 'sortie', 1, 'Prix événement test', 1),
+  (5, 'entree', 50, 'Commande boissons sponsor', 1),
+  (6, 'sortie', 3, 'Utilisé pour préparation salle', 1);
+
+
+INSERT INTO ROLE (nom, description) VALUES
+('admin','Administrateur organisation'),
+('benevole','Bénévole participant aux événements'),
+('mecene','Partenaire/mécène offrant des lots ou financements');
+
+
+INSERT INTO UTILISATEUR (id_role, email, prenom, nom, telephone)
+VALUES 
+(2, 'benevole1@groloto.local', 'Alice', 'Durand', '0612345678'),
+(3, 'mecene1@groloto.local', 'Jean', 'Martin', '0712345678');
+
+
+INSERT INTO BENEVOLE (id_utilisateur, adresse, contact_urgence, notes, actif)
+VALUES
+(2, '12 rue des Lilas, Tours', 'M. Durand 0611111111', 'Disponible surtout les week-ends', 1);
+
+
+INSERT INTO MECENE (id_utilisateur, organisation, nom_contact, email_contact, telephone_contact, adresse)
+VALUES
+(3, 'Boulangerie Martin', 'Jean Martin', 'contact@boulangeriemartin.fr', '0712345678', '15 avenue de la République, Tours');
+
+
+INSERT INTO LOT (id_mecene, titre, description, quantite, valeur_estimee)
+VALUES
+(1, 'Panier gourmand premium', 'Composé de produits artisanaux', 5, 50.0),
+(1, 'Bon d''achat 50€', 'Utilisable dans la boulangerie', 10, 50.0);
+
+
+INSERT INTO CONVENTION (id_mecene, nom_modele, url_pdf, date_signature, methode_signature)
+VALUES
+(1, 'Modele partenariat standard', '/docs/conventions/convention1.pdf', '2024-10-01', 'electronique');
+
+
+INSERT INTO CRENEAU (id_evenement, titre, poste_requis, debut, fin, max_personnes, notes)
+VALUES
+(1, 'Accueil participants', 'accueil', '2024-11-15 18:00:00', '2024-11-15 19:00:00', 3, 'Accueil et orientation des participants'),
+(1, 'Service bar', 'bar', '2024-11-15 19:00:00', '2024-11-15 22:00:00', 2, 'Préparer et servir les boissons');
+
+
+INSERT INTO AFFECTATION_CRENEAU (id_creneau, id_benevole, id_utilisateur, statut, notes)
+VALUES
+(1, 1, 2, 'confirme', 'Alice affectée à l''accueil');
+
+
+INSERT INTO DISPONIBILITE_BENEVOLE (id_benevole, id_evenement, debut, fin, notes)
+VALUES
+(1, 1, '2024-11-15 17:00:00', '2024-11-15 23:00:00', 'Disponible toute la durée de l''événement');
+
+
+INSERT INTO COMMUNICATION (id_evenement, titre, type, date_prevue, statut, budget, notes)
+VALUES
+(1, 'Campagne Facebook', 'post', '2024-10-15 10:00:00', 'programme', 50.0, 'Campagne sponsorisée Facebook'),
+(1, 'Affiches locales', 'affiche', '2024-10-20 09:00:00', 'fait', 30.0, 'Affiches imprimées et distribuées en ville');
+
+
+INSERT INTO HELLOASSO (id_evenement, id_externe, prenom, nom, email, telephone, type_ticket, date_achat)
+VALUES
+(1, 'HA12345', 'Paul', 'Lemoine', 'paul.lemoine@example.com', '0611223344', 'Entrée standard', '2024-10-10 15:00:00');
+
+
+INSERT INTO PARAMETRE (cle, valeur)
+VALUES
+('site_name', 'Groloto Manager'),
+('devise', '€'),
+('email_contact', 'contact@groloto.local');
