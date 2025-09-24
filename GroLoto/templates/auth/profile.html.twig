@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Mon profil</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Email</strong></label>
+                                <p class="form-control-plaintext">{{ user.email }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Rôle</strong></label>
+                                <p class="form-control-plaintext">
+                                    <span class="badge bg-{% if user.role.nom == 'admin' %}danger{% elseif user.role.nom == 'benevole' %}primary{% else %}success{% endif %}">
+                                        {{ user.role.nom|capitalize }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Prénom</strong></label>
+                                <p class="form-control-plaintext">{{ user.prenom ?? 'Non renseigné' }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Nom</strong></label>
+                                <p class="form-control-plaintext">{{ user.nom ?? 'Non renseigné' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Téléphone</strong></label>
+                                <p class="form-control-plaintext">{{ user.telephone ?? 'Non renseigné' }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Membre depuis</strong></label>
+                                <p class="form-control-plaintext">{{ user.dateCreation ? user.dateCreation|date('d/m/Y') : 'Non renseigné' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if user.role.description %}
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Description du rôle</strong></label>
+                        <p class="form-control-plaintext text-muted">{{ user.role.description }}</p>
+                    </div>
+                    {% endif %}
+
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('dashboard') }}" class="btn btn-secondary">
+                            ← Retour au tableau de bord
+                        </a>
+                        <div>
+                            <button class="btn btn-outline-primary" onclick="alert('Fonctionnalité à venir')">
+                                Modifier mon profil
+                            </button>
+                            <a href="{{ path('app_logout') }}" class="btn btn-outline-danger ms-2">
+                                Déconnexion
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
