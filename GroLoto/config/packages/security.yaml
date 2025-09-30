@@ -25,7 +25,7 @@ security:
                 always_use_default_target_path: true
             logout:
                 path: app_logout
-                target: app_login
+                target: dashboard
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
