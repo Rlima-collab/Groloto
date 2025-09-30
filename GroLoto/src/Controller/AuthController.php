@@ -135,4 +135,17 @@ class AuthController extends AbstractController
             'errors' => $errors,
         ]);
     }
+
+    #[Route('/profile', name: 'app_profile')]
+    public function profile(): Response
+    {
+        // Vérifier que l'utilisateur est connecté
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        $user = $this->getUser();
+        
+        return $this->render('auth/profile.html.twig', [
+            'user' => $user,
+        ]);
+    }
 }
