@@ -4,31 +4,29 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: "BENEVOLE")]
+#[ORM\Table(name: 'BENEVOLE')]
 class Benevole
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer")]
-    private ?int $id = null;
+    #[ORM\Column(type: 'integer')]
+    private $id;
 
     #[ORM\OneToOne(targetEntity: Utilisateur::class)]
-    #[ORM\JoinColumn(name: "id_utilisateur", referencedColumnName: "id", nullable: false)]
-    private ?Utilisateur $utilisateur = null;
+    #[ORM\JoinColumn(name: 'id_utilisateur', referencedColumnName: 'id', unique: true)]
+    private $utilisateur;
 
-    #[ORM\Column(type: "text", nullable: true)]
-    private ?string $adresse = null;
+    #[ORM\Column(type: 'text', nullable: true)]
+    private $adresse;
 
-    #[ORM\Column(type: "text", nullable: true)]
-    private ?string $contact_urgence = null;
+    #[ORM\Column(type: 'text', nullable: true)]
+    private $contactUrgence;
 
-    #[ORM\Column(type: "text", nullable: true)]
-    private ?string $notes = null;
+    #[ORM\Column(type: 'text', nullable: true)]
+    private $notes;
 
-    #[ORM\Column(type: "boolean")]
-    private bool $actif = true;
-
-    // === Getters & Setters ===
+    #[ORM\Column(type: 'boolean', options: ['default' => 1])]
+    private $actif;
 
     public function getId(): ?int
     {
@@ -59,12 +57,12 @@ class Benevole
 
     public function getContactUrgence(): ?string
     {
-        return $this->contact_urgence;
+        return $this->contactUrgence;
     }
 
-    public function setContactUrgence(?string $contact): self
+    public function setContactUrgence(?string $contactUrgence): self
     {
-        $this->contact_urgence = $contact;
+        $this->contactUrgence = $contactUrgence;
         return $this;
     }
 
@@ -79,7 +77,7 @@ class Benevole
         return $this;
     }
 
-    public function isActif(): bool
+    public function isActif(): ?bool
     {
         return $this->actif;
     }

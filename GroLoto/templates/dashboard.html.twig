@@ -1,11 +1,9 @@
 {% extends 'base.html.twig' %}
-
 {% block body %}
 <div class="page-header">
     <h1 class="page-title">Dashboard Groloto</h1>
     <p class="page-description">Gérez votre événement caritatif en toute simplicité</p>
 </div>
-
 <!-- Key Metrics Cards -->
 <div class="metrics-grid">
     <div class="card metric-card yellow-border">
@@ -15,10 +13,9 @@
         </div>
         <div class="card-content">
             <div class="metric-value">{{ volunteers_count }}</div>
-            <p class="metric-change positive">+12 ce mois</p>
+            <p class="metric-change positive">+{{ new_volunteers }} ce mois</p>
         </div>
     </div>
-
     <div class="card metric-card green-border">
         <div class="card-header">
             <span class="metric-title">Mécènes</span>
@@ -26,10 +23,9 @@
         </div>
         <div class="card-content">
             <div class="metric-value">{{ sponsors_count }}</div>
-            <p class="metric-change positive">+5 ce mois</p>
+            <p class="metric-change positive">+{{ new_sponsors }} ce mois</p>
         </div>
     </div>
-
     <div class="card metric-card blue-border">
         <div class="card-header">
             <span class="metric-title">Lots disponibles</span>
@@ -37,10 +33,9 @@
         </div>
         <div class="card-content">
             <div class="metric-value">{{ prizes_count }}</div>
-            <p class="metric-change warning">3 en rupture</p>
+            <p class="metric-change warning">{{ out_of_stock }} en rupture</p>
         </div>
     </div>
-
     <div class="card metric-card yellow-border">
         <div class="card-header">
             <span class="metric-title">Stock total</span>
@@ -52,7 +47,6 @@
         </div>
     </div>
 </div>
-
 <!-- Calendar and Quick Actions -->
 <div class="dashboard-grid">
     <!-- Calendar -->
@@ -62,42 +56,23 @@
         </div>
         <div class="card-content">
             <div class="events-list">
-                <div class="event-item yellow-accent">
-                    <div class="event-date">
-                        <div class="event-month">MAR</div>
-                        <div class="event-day">15</div>
+                {% for event in events %}
+                    <div class="event-item {{ loop.index0 % 3 == 0 ? 'yellow-accent' : loop.index0 % 3 == 1 ? 'green-accent' : 'blue-accent' }}">
+                        <div class="event-date">
+                            <div class="event-month">{{ event.dateDebut|date('M')|upper }}</div>
+                            <div class="event-day">{{ event.dateDebut|date('d') }}</div>
+                        </div>
+                        <div class="event-details">
+                            <h4 class="event-title">{{ event.nom }}</h4>
+                            <p class="event-time">{{ event.dateDebut|date('H\\hi') }} - {{ event.lieu }}</p>
+                        </div>
                     </div>
-                    <div class="event-details">
-                        <h4 class="event-title">Réunion bénévoles</h4>
-                        <p class="event-time">14h00 - Salle communale</p>
-                    </div>
-                </div>
-
-                <div class="event-item green-accent">
-                    <div class="event-date">
-                        <div class="event-month">MAR</div>
-                        <div class="event-day">22</div>
-                    </div>
-                    <div class="event-details">
-                        <h4 class="event-title">Collecte de lots</h4>
-                        <p class="event-time">10h00 - Centre commercial</p>
-                    </div>
-                </div>
-
-                <div class="event-item blue-accent">
-                    <div class="event-date">
-                        <div class="event-month">AVR</div>
-                        <div class="event-day">05</div>
-                    </div>
-                    <div class="event-details">
-                        <h4 class="event-title">Événement Groloto</h4>
-                        <p class="event-time">19h00 - Salle des fêtes</p>
-                    </div>
-                </div>
+                {% else %}
+                    <p>Aucun événement à venir.</p>
+                {% endfor %}
             </div>
         </div>
     </div>
-
     <!-- Quick Actions -->
     <div class="card actions-card">
         <div class="card-header">
@@ -110,17 +85,14 @@
                     <span class="btn-icon">👥</span>
                     Ajouter un bénévole
                 </button>
-
                 <button class="action-btn green">
                     <span class="btn-icon">🎁</span>
                     Nouveau mécène
                 </button>
-
                 <button class="action-btn blue">
                     <span class="btn-icon">📦</span>
                     Ajouter un lot
                 </button>
-
                 <button class="action-btn gray">
                     <span class="btn-icon">💬</span>
                     Planifier communication
