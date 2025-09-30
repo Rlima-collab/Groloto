@@ -1,14 +1,21 @@
 .site-header {
+    width: 100%;
+    left: 0;
+    top: 0;
     background: white;
     border-bottom: 1px solid #eee;
     padding: 10px 20px;
 }
 
+
 .site-header .container {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    max-width: none;
+    width: 100%;
 }
+
 
 .site-header .logo img {
     height: 35px;
@@ -40,4 +47,41 @@
     position: relative;
     top: -3px;
     font-weight: bold;
+}
+
+.nav-menu a.btn-login {
+    position: relative;
+    padding: 8px 18px;
+    border-radius: 25px;
+    background: linear-gradient(90deg, #0a1419 0%, #1f2b38 50%, #0a1419 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    overflow: hidden;
+    display: inline-block;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nav-menu a.btn-login::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+    transform: skewX(-20deg);
+    transition: none;
+}
+
+.nav-menu a.btn-login:hover::before {
+    left: 100%;
+    transition: left 1s ease;
+}
+
+.nav-menu a.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
