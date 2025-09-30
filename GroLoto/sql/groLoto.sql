@@ -21,11 +21,6 @@ CREATE TABLE ROLE (
   description TEXT
 );
 
-INSERT INTO ROLE (nom, description) VALUES
-('admin','Administrateur organisation'),
-('benevole','Bénévole'),
-('mecene','Mécène');
-
 CREATE TABLE UTILISATEUR (
   id INTEGER PRIMARY KEY,
   id_role INTEGER NOT NULL,
@@ -199,8 +194,19 @@ CREATE TABLE PARAMETRE (
 );
 
 -- Exemple d’insertion
-INSERT INTO UTILISATEUR (id_role, email, prenom, nom) 
-VALUES (1, 'admin@groloto.local', 'Admin', 'Groloto');
+-- Événements à venir
+INSERT INTO EVENEMENT (nom, description, date_debut, date_fin, lieu)
+VALUES
+('Tournoi de belote 2025', 'Compétition amicale avec lots pour les gagnants', '2025-11-01', '2025-11-01', 'Maison des associations'),
+
+('Soirée quizz caritative', 'Quiz généraliste pour récolter des fonds', '2025-11-02', '2025-11-02', 'Salle municipale'),
+
+('Concert solidaire', 'Concert avec groupes locaux au profit de l’association', '2025-11-03', '2025-11-03', 'Parc central'),
+
+('Vide-grenier Groloto', 'Vide-grenier pour collecter des fonds pour les projets associatifs', '2025-11-04', '2025-11-04', 'Place du marché'),
+
+('Groloto 2025', 'Loto caritatif annuel édition 2025', '2025-11-15', '2025-11-15', 'Salle des fêtes');
+
 
 INSERT INTO EVENEMENT (nom, description, date_debut, date_fin, lieu) 
 VALUES ('Groloto 2024', 'Loto caritatif annuel', '2024-11-15', '2024-11-15', 'Salle des fêtes');

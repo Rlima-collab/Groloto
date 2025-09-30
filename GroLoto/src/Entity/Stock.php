@@ -12,31 +12,29 @@ class Stock
     #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[ORM\Column(type: "string", nullable: false)]
-    private string $nom;
+    #[ORM\Column(type: "string", length: 255, nullable: false)]
+    private ?string $nom = null;
 
-    #[ORM\Column(type: "string", nullable: true)]
+    #[ORM\Column(type: "string", length: 50, nullable: true)]
     private ?string $categorie = null;
 
-    #[ORM\Column(type: "integer")]
-    private int $quantite = 0;
+    #[ORM\Column(type: "integer", options: ["default" => 0])]
+    private ?int $quantite = 0;
 
-    #[ORM\Column(type: "string", nullable: true)]
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
     private ?string $unite = null;
 
-    #[ORM\Column(type: "integer")]
-    private int $seuil = 0;
+    #[ORM\Column(type: "integer", options: ["default" => 0])]
+    private ?int $seuil = 0;
 
-    #[ORM\Column(type: "float", nullable: false, options: ["default" => 0])]
-    private float $valeur_unitaire = 0;
+    #[ORM\Column(type: "float", options: ["default" => 0.0])]
+    private ?float $valeur_unitaire = 0.0;
 
     #[ORM\Column(type: "text", nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\Column(type: "datetime", nullable: true)]
+    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private ?\DateTimeInterface $derniere_modif = null;
-
-    // === Getters & setters ===
 
     public function getId(): ?int
     {
@@ -61,6 +59,9 @@ class Stock
 
     public function setCategorie(?string $categorie): self
     {
+        if ($categorie !== null && !in_array($categorie, ['bar', 'resto', 'deco', 'autre'])) {
+            throw new \InvalidArgumentException("La catégorie doit être l'une des suivantes : bar, resto, deco, autre.");
+        }
         $this->categorie = $categorie;
         return $this;
     }
@@ -98,14 +99,14 @@ class Stock
         return $this;
     }
 
-    public function getValeurUnitaire(): float
+    public function getValeurUnitaire(): ?float
     {
         return $this->valeur_unitaire;
     }
 
-    public function setValeurUnitaire(float $valeur): self
+    public function setValeurUnitaire(float $valeur_unitaire): self
     {
-        $this->valeur_unitaire = $valeur;
+        $this->valeur_unitaire = $valeur_unitaire;
         return $this;
     }
 
@@ -125,9 +126,9 @@ class Stock
         return $this->derniere_modif;
     }
 
-    public function setDerniereModif(?\DateTimeInterface $date): self
+    public function setDerniereModif(?\DateTimeInterface $derniere_modif): self
     {
-        $this->derniere_modif = $date;
+        $this->derniere_modif = $derniere_modif;
         return $this;
     }
 }
