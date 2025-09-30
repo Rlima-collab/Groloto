@@ -14,9 +14,44 @@
             <a class="nav-link" href="{{ path('stocks') }}">Stocks</a>
             <a href="#">Communication</a>
             <a href="#">Public</a>
-            <a href="#"><span class="settings">⚙</span></a>
-            <a class="nav-link" href="{{ path('app_login') }}">Connexion</a>
-
+            
+            {% if app.user %}
+                <div class="settings-dropdown">
+                    <a href="#" onclick="toggleSettingsMenu(event)"><span class="settings">⚙</span></a>
+                    <div class="settings-menu" id="settingsMenu">
+                        <a href="#">Profil</a>
+                        <a href="{{ path('app_logout') }}">Déconnexion</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{{ path('app_login') }}">Connexion</a>
+            {% endif %}
         </nav>
     </div>
 </header>
+
+<script>
+function toggleSettingsMenu(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const menu = document.getElementById('settingsMenu');
+    
+    // Toggle la visibilité du menu
+    if (menu.style.display === 'block') {
+        menu.style.display = 'none';
+    } else {
+        menu.style.display = 'block';
+    }
+}
+
+// Fermer le menu si on clique ailleurs
+document.addEventListener('click', function(event) {
+    const menu = document.getElementById('settingsMenu');
+    const settingsDropdown = document.querySelector('.settings-dropdown');
+    
+    if (menu && settingsDropdown && !settingsDropdown.contains(event.target)) {
+        menu.style.display = 'none';
+    }
+});
+</script>
