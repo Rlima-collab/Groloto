@@ -4,7 +4,7 @@
     <div class="container">
         <div class="logo">
             <a href="/">
-                <img src="{{ asset('images/logo.png') }}" alt="Groloto Logo">
+                <img src="{{ asset('images/logo_gro.png') }}" alt="Groloto Logo">
             </a>
         </div>
         <nav class="nav-menu">
@@ -13,7 +13,7 @@
             <a href="#">Mécènes & Lots</a>
             <a class="nav-link" href="{{ path('stocks') }}">Stocks</a>
             <a href="#">Communication</a>
-            <a href="#">Public</a>
+            <a class="nav-link" href="{{ path('public_index') }}">Public</a>
             
             {% if app.user %}
                 <div class="settings-dropdown">
