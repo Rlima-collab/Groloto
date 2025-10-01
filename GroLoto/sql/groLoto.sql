@@ -37,9 +37,7 @@ CREATE TABLE UTILISATEUR (
 CREATE TABLE BENEVOLE (
   id INTEGER PRIMARY KEY,
   id_utilisateur INTEGER NOT NULL UNIQUE,
-  adresse TEXT,
-  contact_urgence TEXT,
-  notes TEXT,
+  remarque TEXT,
   actif BOOLEAN DEFAULT 1,
   FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
@@ -47,11 +45,8 @@ CREATE TABLE BENEVOLE (
 CREATE TABLE MECENE (
   id INTEGER PRIMARY KEY,
   id_utilisateur INTEGER,
-  organisation TEXT,
-  nom_contact TEXT,
-  email_contact TEXT,
-  telephone_contact TEXT,
-  adresse TEXT,
+  organisation TEXT NOT NULL,
+  siret TEXT NOT NULL,
   FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
@@ -96,7 +91,7 @@ CREATE TABLE STOCK (
   unite TEXT,
   seuil INTEGER DEFAULT 0,
   valeur_unitaire REAL DEFAULT 0.0,
-  notes TEXT,
+  remarque TEXT,
   derniere_modif DATETIME DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT check_categorie CHECK (categorie IN ('bar', 'resto', 'deco', 'autre'))
 );
@@ -122,7 +117,7 @@ CREATE TABLE DISPONIBILITE_BENEVOLE (
   id_evenement INTEGER NOT NULL,
   debut DATETIME,
   fin DATETIME,
-  notes TEXT,
+  remarque TEXT,
   date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
   FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
@@ -136,7 +131,7 @@ CREATE TABLE CRENEAU (
   debut DATETIME NOT NULL,
   fin DATETIME NOT NULL,
   max_personnes INTEGER DEFAULT 1,
-  notes TEXT,
+  remarque TEXT,
   date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT check_poste_requis CHECK (poste_requis IN ('bar', 'accueil', 'cuisine', 'technique', 'autre')),
   FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
@@ -149,7 +144,7 @@ CREATE TABLE AFFECTATION_CRENEAU (
   id_utilisateur INTEGER,
   date_affectation DATETIME DEFAULT CURRENT_TIMESTAMP,
   statut TEXT DEFAULT 'assigne',
-  notes TEXT,
+  remarque TEXT,
   CONSTRAINT check_statut CHECK (statut IN ('assigne', 'confirme', 'annule')),
   FOREIGN KEY (id_creneau) REFERENCES CRENEAU(id),
   FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
@@ -164,7 +159,7 @@ CREATE TABLE COMMUNICATION (
   date_prevue DATETIME,
   statut TEXT DEFAULT 'brouillon',
   budget REAL DEFAULT 0.0,
-  notes TEXT,
+  remarque TEXT,
   date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT check_type CHECK (type IN ('post', 'affiche', 'flyer', 'email', 'autre')),
   CONSTRAINT check_statut CHECK (statut IN ('brouillon', 'programme', 'fait', 'annule')),
@@ -204,6 +199,7 @@ CREATE TABLE HISTORIQUE_EVENEMENT (
   FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
+
 -- Insertions
 INSERT INTO ROLE (nom, description) VALUES
   ('admin', 'Administrateur organisation'),
@@ -216,13 +212,13 @@ VALUES
   (2, 'benevole1@groloto.local', 'Alice', 'Durand', '0612345678'),
   (3, 'mecene1@groloto.local', 'Jean', 'Martin', '0712345678');
 
-INSERT INTO BENEVOLE (id_utilisateur, adresse, contact_urgence, notes, actif)
+INSERT INTO BENEVOLE (id_utilisateur, remarque, actif)
 VALUES
-  (2, '12 rue des Lilas, Tours', 'M. Durand 0611111111', 'Disponible surtout les week-ends', 1);
+  (2, 'Disponible surtout les week-ends', 1);
 
-INSERT INTO MECENE (id_utilisateur, organisation, nom_contact, email_contact, telephone_contact, adresse)
+INSERT INTO MECENE (id_utilisateur, organisation, siret)
 VALUES
-  (3, 'Boulangerie Martin', 'Jean Martin', 'contact@boulangeriemartin.fr', '0712345678', '15 avenue de la République, Tours');
+  (3, 'Boulangerie Martin', '12345678901234');
 
 INSERT INTO EVENEMENT (nom, description, date_debut, date_fin, lieu)
 VALUES
@@ -241,7 +237,7 @@ VALUES
   (1, 'creation', 'Création du Tournoi de belote 2025', 1, '2025-09-01 08:00:00'),
   (2, 'creation', 'Création de la Soirée quizz caritative', 1, '2025-09-02 09:00:00');
 
-INSERT INTO STOCK (nom, categorie, quantite, unite, seuil, valeur_unitaire, notes)
+INSERT INTO STOCK (nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque)
 VALUES
   ('Panier gourmand', 'resto', 15, 'pièces', 5, 10.0, 'Lots donnés par Boulangerie Martin'),
   ('Bon d''achat restaurant', 'resto', 3, 'bons', 10, 30.0, 'Offert par Restaurant Le Gourmet'),
@@ -268,20 +264,20 @@ INSERT INTO CONVENTION (id_mecene, nom_modele, url_pdf, date_signature, methode_
 VALUES
   (1, 'Modele partenariat standard', '/docs/conventions/convention1.pdf', '2024-10-01', 'electronique');
 
-INSERT INTO CRENEAU (id_evenement, titre, poste_requis, debut, fin, max_personnes, notes)
+INSERT INTO CRENEAU (id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque)
 VALUES
   (6, 'Accueil participants', 'accueil', '2024-11-15 18:00:00', '2024-11-15 19:00:00', 3, 'Accueil et orientation des participants'),
   (6, 'Service bar', 'bar', '2024-11-15 19:00:00', '2024-11-15 22:00:00', 2, 'Préparer et servir les boissons');
 
-INSERT INTO AFFECTATION_CRENEAU (id_creneau, id_benevole, id_utilisateur, statut, notes)
+INSERT INTO AFFECTATION_CRENEAU (id_creneau, id_benevole, id_utilisateur, statut, remarque)
 VALUES
   (1, 1, 2, 'confirme', 'Alice affectée à l''accueil');
 
-INSERT INTO DISPONIBILITE_BENEVOLE (id_benevole, id_evenement, debut, fin, notes)
+INSERT INTO DISPONIBILITE_BENEVOLE (id_benevole, id_evenement, debut, fin, remarque)
 VALUES
   (1, 6, '2024-11-15 17:00:00', '2024-11-15 23:00:00', 'Disponible toute la durée de l''événement');
 
-INSERT INTO COMMUNICATION (id_evenement, titre, type, date_prevue, statut, budget, notes)
+INSERT INTO COMMUNICATION (id_evenement, titre, type, date_prevue, statut, budget, remarque)
 VALUES
   (6, 'Campagne Facebook', 'post', '2024-10-15 10:00:00', 'programme', 50.0, 'Campagne sponsorisée Facebook'),
   (6, 'Affiches locales', 'affiche', '2024-10-20 09:00:00', 'fait', 30.0, 'Affiches imprimées et distribuées en ville');

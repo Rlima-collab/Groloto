@@ -10,23 +10,18 @@ class Benevole
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private ?int $id = null;
 
     #[ORM\OneToOne(targetEntity: Utilisateur::class)]
     #[ORM\JoinColumn(name: 'id_utilisateur', referencedColumnName: 'id', unique: true)]
-    private $utilisateur;
+    private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    private $adresse;
-
-    #[ORM\Column(type: 'text', nullable: true)]
-    private $contactUrgence;
-
-    #[ORM\Column(type: 'text', nullable: true)]
-    private $notes;
+    private ?string $remarque = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => 1])]
-    private $actif;
+    private bool $actif = true;
+
 
     public function getId(): ?int
     {
@@ -44,40 +39,18 @@ class Benevole
         return $this;
     }
 
-    public function getAdresse(): ?string
+    public function getRemarque(): ?string
     {
-        return $this->adresse;
+        return $this->remarque;
     }
 
-    public function setAdresse(?string $adresse): self
+    public function setRemarque(?string $remarque): self
     {
-        $this->adresse = $adresse;
+        $this->remarque = $remarque;
         return $this;
     }
 
-    public function getContactUrgence(): ?string
-    {
-        return $this->contactUrgence;
-    }
-
-    public function setContactUrgence(?string $contactUrgence): self
-    {
-        $this->contactUrgence = $contactUrgence;
-        return $this;
-    }
-
-    public function getNotes(): ?string
-    {
-        return $this->notes;
-    }
-
-    public function setNotes(?string $notes): self
-    {
-        $this->notes = $notes;
-        return $this;
-    }
-
-    public function isActif(): ?bool
+    public function isActif(): bool
     {
         return $this->actif;
     }

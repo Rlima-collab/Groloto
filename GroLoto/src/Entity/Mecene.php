@@ -16,20 +16,11 @@ class Mecene
     #[ORM\JoinColumn(name: "id_utilisateur", referencedColumnName: "id", nullable: true)]
     private ?Utilisateur $utilisateur = null;
 
-    #[ORM\Column(type: "string", nullable: true)]
-    private ?string $organisation = null;
+    #[ORM\Column(type: "string", nullable: false)]
+    private string $organisation;
 
-    #[ORM\Column(type: "string", nullable: true)]
-    private ?string $nom_contact = null;
-
-    #[ORM\Column(type: "string", nullable: true)]
-    private ?string $email_contact = null;
-
-    #[ORM\Column(type: "string", nullable: true)]
-    private ?string $telephone_contact = null;
-
-    #[ORM\Column(type: "text", nullable: true)]
-    private ?string $adresse = null;
+    #[ORM\Column(type: "string", nullable: false)]
+    private string $siret;
 
     // === Getters & Setters ===
 
@@ -49,58 +40,25 @@ class Mecene
         return $this;
     }
 
-    public function getOrganisation(): ?string
+    public function getOrganisation(): string
     {
         return $this->organisation;
     }
 
-    public function setOrganisation(?string $organisation): self
+    public function setOrganisation(string $organisation): self
     {
         $this->organisation = $organisation;
         return $this;
     }
 
-    public function getNomContact(): ?string
+    public function getSiret(): string
     {
-        return $this->nom_contact;
+        return $this->siret;
     }
 
-    public function setNomContact(?string $nom_contact): self
+    public function setSiret(string $siret): self
     {
-        $this->nom_contact = $nom_contact;
-        return $this;
-    }
-
-    public function getEmailContact(): ?string
-    {
-        return $this->email_contact;
-    }
-
-    public function setEmailContact(?string $email_contact): self
-    {
-        $this->email_contact = $email_contact;
-        return $this;
-    }
-
-    public function getTelephoneContact(): ?string
-    {
-        return $this->telephone_contact;
-    }
-
-    public function setTelephoneContact(?string $telephone_contact): self
-    {
-        $this->telephone_contact = $telephone_contact;
-        return $this;
-    }
-
-    public function getAdresse(): ?string
-    {
-        return $this->adresse;
-    }
-
-    public function setAdresse(?string $adresse): self
-    {
-        $this->adresse = $adresse;
+        $this->siret = $siret;
         return $this;
     }
 }

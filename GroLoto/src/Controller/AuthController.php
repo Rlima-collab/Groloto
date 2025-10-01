@@ -55,11 +55,9 @@ class AuthController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
-        RoleRepository $roleRepository,
-        ValidatorInterface $validator
+        RoleRepository $roleRepository
     ): Response {
         $errors = [];
-        $user = new Utilisateur();
 
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
@@ -68,8 +66,7 @@ class AuthController extends AbstractController
             $prenom = $request->request->get('prenom');
             $nom = $request->request->get('nom');
             $telephone = $request->request->get('telephone');
-            $adresse = $request->request->get('adresse');
-            $contactUrgence = $request->request->get('contact_urgence');
+            $remarque = $request->request->get('remarque');
 
             // Validation basique
             if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -87,6 +84,7 @@ class AuthController extends AbstractController
                 if (!$role) {
                     $errors[] = "Rôle bénévole introuvable";
                 } else {
+                    $user = new Utilisateur();
                     $user->setEmail($email);
                     $user->setMotDePasse($userPasswordHasher->hashPassword($user, $password));
                     $user->setPrenom($prenom);
@@ -102,8 +100,7 @@ class AuthController extends AbstractController
                     // Création du bénévole lié
                     $benevole = new \App\Entity\Benevole();
                     $benevole->setUtilisateur($user);
-                    $benevole->setAdresse($adresse);
-                    $benevole->setContactUrgence($contactUrgence);
+                    $benevole->setRemarque($remarque);
                     $benevole->setActif(true);
 
                     $entityManager->persist($benevole);
@@ -120,16 +117,15 @@ class AuthController extends AbstractController
         ]);
     }
 
+
     #[Route('/register/mecene', name: 'app_register_mecene')]
     public function registerMecene(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
-        RoleRepository $roleRepository,
-        ValidatorInterface $validator
+        RoleRepository $roleRepository
     ): Response {
         $errors = [];
-        $user = new Utilisateur();
 
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
@@ -139,6 +135,7 @@ class AuthController extends AbstractController
             $nom = $request->request->get('nom');
             $telephone = $request->request->get('telephone');
             $organisation = $request->request->get('organisation');
+            $siret = $request->request->get('siret');
 
             // Validation basique
             if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -150,12 +147,19 @@ class AuthController extends AbstractController
             if ($password !== $confirmPassword) {
                 $errors[] = "Les mots de passe ne correspondent pas";
             }
+            if (empty($organisation)) {
+                $errors[] = "L'organisation est obligatoire";
+            }
+            if (empty($siret) || !preg_match('/^[0-9]{14}$/', $siret)) {
+                $errors[] = "Le numéro SIRET doit contenir exactement 14 chiffres";
+            }
 
             if (empty($errors)) {
                 $role = $roleRepository->findOneBy(['nom' => 'mecene']);
                 if (!$role) {
                     $errors[] = "Rôle mécène introuvable";
                 } else {
+                    $user = new Utilisateur();
                     $user->setEmail($email);
                     $user->setMotDePasse($userPasswordHasher->hashPassword($user, $password));
                     $user->setPrenom($prenom);
@@ -172,6 +176,7 @@ class AuthController extends AbstractController
                     $mecene = new \App\Entity\Mecene();
                     $mecene->setUtilisateur($user);
                     $mecene->setOrganisation($organisation);
+                    $mecene->setSiret($siret);
 
                     $entityManager->persist($mecene);
                     $entityManager->flush();
