@@ -16,7 +16,7 @@
 }
 
 /* =============== MÉTRIQUES CARDS =============== */
-.metrics-grid {
+.benevoles-page .metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 3rem;
@@ -32,7 +32,7 @@
 
 /* Pour les écrans plus petits */
 @media (max-width: 768px) {
-  .metrics-grid {
+  .benevoles-page .metrics-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
     padding: 0 20px;
@@ -40,14 +40,14 @@
 }
 
 @media (max-width: 1024px) and (min-width: 769px) {
-  .metrics-grid {
+  .benevoles-page .metrics-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
     padding: 0 20px;
   }
 }
 
-.card {
+.benevoles-page .card {
   background-color: #ffffff;
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -56,30 +56,30 @@
   width: 100%;
 }
 
-.card:hover {
+.benevoles-page .card:hover {
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-.metric-card {
+.benevoles-page .metric-card {
   position: relative;
   overflow: hidden;
 }
 
-.card-header {
+.benevoles-page .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 2rem 2rem 0.5rem 2rem;
 }
 
-.metric-title {
+.benevoles-page .metric-title {
   font-size: 1rem;
   font-weight: 600;
   color: #6b7280;
   margin: 0;
 }
 
-.icon {
+.benevoles-page .icon {
   width: 2.5rem;
   height: 2.5rem;
   display: flex;
@@ -91,11 +91,11 @@
   font-size: 1.25rem;
 }
 
-.card-content {
+.benevoles-page .card-content {
   padding: 0 2rem 2rem 2rem;
 }
 
-.metric-value {
+.benevoles-page .metric-value {
   font-size: 3rem;
   font-weight: 700;
   color: #111827;
@@ -103,17 +103,17 @@
   line-height: 1;
 }
 
-.metric-change {
+.benevoles-page .metric-change {
   font-size: 1rem;
   margin: 0;
   color: #059669;
   font-weight: 500;
 }
 
-.metric-change.positive { color: #059669; }
-.metric-change.negative { color: #dc2626; }
+.benevoles-page .metric-change.positive { color: #059669; }
+.benevoles-page .metric-change.negative { color: #dc2626; }
 
-.btn-metric {
+.benevoles-page .btn-metric {
   display: inline-block;
   padding: 0.5rem 1rem;
   background: #3b82f6;
@@ -125,14 +125,14 @@
   transition: background-color 0.2s;
 }
 
-.btn-metric:hover {
+.benevoles-page .btn-metric:hover {
   background: #2563eb;
   color: white;
   text-decoration: none;
 }
 
 /* =============== ONGLETS =============== */
-.tabs {
+.benevoles-page .tabs {
   display: flex;
   width: 100%;
   margin: 0 -20px 2rem -20px;
@@ -147,7 +147,7 @@
   width: calc(100vw - 40px);
 }
 
-.tab {
+.benevoles-page .tab {
   flex: 1;
   text-align: center;
   padding: 1rem 1.5rem;
@@ -166,23 +166,23 @@
   font-weight: 500;
 }
 
-.tab:hover {
+.benevoles-page .tab:hover {
   background: #f3f4f6;
   color: #374151;
 }
 
-.tab.selected {
+.benevoles-page .tab.selected {
   background: #ffffff;
   color: #111827;
   border-bottom: 2px solid #3b82f6;
 }
 
-.tab-icon {
+.benevoles-page .tab-icon {
   font-size: 1.125rem;
 }
 
 /* =============== MAIN CONTENT =============== */
-.main-content {
+.benevoles-page .main-content {
   margin-top: 0;
   margin-left: -20px;
   margin-right: -20px;
@@ -193,7 +193,7 @@
   width: calc(100vw - 40px);
 }
 
-.main-card {
+.benevoles-page .main-card {
   margin-bottom: 0;
   border-radius: 0;
   box-shadow: none;
@@ -201,25 +201,25 @@
   background: transparent;
 }
 
-.main-card .card-header {
+.benevoles-page .main-card .card-header {
   padding: 1.5rem;
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.main-card .card-content {
+.benevoles-page .main-card .card-content {
   padding: 1.5rem;
   background: #ffffff;
 }
 
-.card-title {
+.benevoles-page .card-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #111827;
   margin: 0 0 0.25rem 0;
 }
 
-.card-description {
+.benevoles-page .card-description {
   font-size: 0.875rem;
   color: #6b7280;
   margin: 0;
@@ -233,7 +233,7 @@
   margin-top: 1.5rem;
 }
 
-.benevole-card {
+.benevoles-page .benevole-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
@@ -241,7 +241,7 @@
   transition: box-shadow 0.2s;
 }
 
-.benevole-card:hover {
+.benevoles-page .benevole-card:hover {
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
@@ -278,25 +278,25 @@
   margin-bottom: 1rem;
 }
 
-.info-item {
+.benevoles-page .info-item {
   display: flex;
   align-items: center;
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
 }
 
-.info-icon {
+.benevoles-page .info-icon {
   margin-right: 0.75rem;
   font-size: 1rem;
   width: 1.25rem;
   color: #6b7280;
 }
 
-.info-text {
+.benevoles-page .info-text {
   color: #374151;
 }
 
-.benevole-notes {
+.benevoles-page .benevole-notes {
   background: #f9fafb;
   padding: 0.75rem;
   border-radius: 0.375rem;
@@ -306,13 +306,13 @@
   border-left: 3px solid #3b82f6;
 }
 
-.benevole-actions {
+.benevoles-page .benevole-actions {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
 
-.btn {
+.benevoles-page .btn {
   display: inline-block;
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
@@ -324,66 +324,66 @@
   cursor: pointer;
 }
 
-.btn-small {
+.benevoles-page .btn-small {
   padding: 0.375rem 0.75rem;
   font-size: 0.75rem;
 }
 
-.btn-primary {
+.benevoles-page .btn-primary {
   background: #3b82f6;
   color: white;
 }
 
-.btn-primary:hover {
+.benevoles-page .btn-primary:hover {
   background: #2563eb;
   color: white;
   text-decoration: none;
 }
 
-.btn-secondary {
+.benevoles-page .btn-secondary {
   background: #6b7280;
   color: white;
 }
 
-.btn-secondary:hover {
+.benevoles-page .btn-secondary:hover {
   background: #4b5563;
   color: white;
   text-decoration: none;
 }
 
-.btn-danger {
+.benevoles-page .btn-danger {
   background: #dc2626;
   color: white;
 }
 
-.btn-danger:hover {
+.benevoles-page .btn-danger:hover {
   background: #b91c1c;
   color: white;
   text-decoration: none;
 }
 
 /* =============== ÉTAT VIDE =============== */
-.empty-state {
+.benevoles-page .empty-state {
   text-align: center;
   padding: 4rem 1.5rem;
   color: #6b7280;
 }
 
-.empty-icon {
+.benevoles-page .empty-icon {
   font-size: 3rem;
   margin-bottom: 1.5rem;
   opacity: 0.5;
   color: #9ca3af;
 }
 
-.empty-state h3 {
+.benevoles-page .empty-state h3 {
   font-size: 1.25rem;
   color: #374151;
   margin-bottom: 0.75rem;
   font-weight: 600;
 }
 
-.empty-state p {
+.benevoles-page .empty-state p {
   font-size: 0.875rem;
   margin-bottom: 2rem;
 }
