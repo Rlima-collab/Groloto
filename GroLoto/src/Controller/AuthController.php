@@ -42,21 +42,24 @@ class AuthController extends AbstractController
         throw new \LogicException('Cette méthode peut être vide - elle sera interceptée par la clé logout dans votre firewall.');
     }
 
-    #[Route('/register', name: 'app_register')]
-    public function register(
+    
+
+    #[Route('/register', name: 'app_register_choice')]
+    public function registerChoice(): Response
+    {
+        return $this->render('auth/register_choice.html.twig');
+    }
+
+    #[Route('/register/benevole', name: 'app_register_benevole')]
+    public function registerBenevole(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
         RoleRepository $roleRepository,
         ValidatorInterface $validator
     ): Response {
-        // Si l'utilisateur est déjà connecté, rediriger vers le dashboard
-        if ($this->getUser()) {
-            return $this->redirectToRoute('dashboard');
-        }
-
-        $user = new Utilisateur();
         $errors = [];
+        $user = new Utilisateur();
 
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
@@ -65,40 +68,24 @@ class AuthController extends AbstractController
             $prenom = $request->request->get('prenom');
             $nom = $request->request->get('nom');
             $telephone = $request->request->get('telephone');
-            $roleId = $request->request->get('role');
+            $adresse = $request->request->get('adresse');
+            $contactUrgence = $request->request->get('contact_urgence');
 
-            // Validation des données
-            if (empty($email)) {
-                $errors[] = 'L\'email est obligatoire';
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = 'L\'email n\'est pas valide';
+            // Validation basique
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "Email invalide";
             }
-
-            if (empty($password)) {
-                $errors[] = 'Le mot de passe est obligatoire';
-            } elseif (strlen($password) < 6) {
-                $errors[] = 'Le mot de passe doit contenir au moins 6 caractères';
+            if (empty($password) || strlen($password) < 6) {
+                $errors[] = "Le mot de passe doit faire au moins 6 caractères";
             }
-
             if ($password !== $confirmPassword) {
-                $errors[] = 'Les mots de passe ne correspondent pas';
+                $errors[] = "Les mots de passe ne correspondent pas";
             }
 
-            if (empty($roleId)) {
-                $errors[] = 'Vous devez sélectionner un rôle';
-            }
-
-            // Vérifier si l'email n'existe pas déjà
-            $existingUser = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
-            if ($existingUser) {
-                $errors[] = 'Cette adresse email est déjà utilisée';
-            }
-
-            // Si pas d'erreurs, créer l'utilisateur
             if (empty($errors)) {
-                $role = $roleRepository->find($roleId);
+                $role = $roleRepository->findOneBy(['nom' => 'benevole']);
                 if (!$role) {
-                    $errors[] = 'Rôle invalide';
+                    $errors[] = "Rôle bénévole introuvable";
                 } else {
                     $user->setEmail($email);
                     $user->setMotDePasse($userPasswordHasher->hashPassword($user, $password));
@@ -109,30 +96,95 @@ class AuthController extends AbstractController
                     $user->setDateCreation(new \DateTime());
                     $user->setDateModification(new \DateTime());
 
-                    // Valider l'entité
-                    $validationErrors = $validator->validate($user);
-                    if (count($validationErrors) > 0) {
-                        foreach ($validationErrors as $error) {
-                            $errors[] = $error->getMessage();
-                        }
-                    } else {
-                        $entityManager->persist($user);
-                        $entityManager->flush();
+                    $entityManager->persist($user);
+                    $entityManager->flush();
 
-                        $this->addFlash('success', 'Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.');
-                        return $this->redirectToRoute('app_login');
-                    }
+                    // Création du bénévole lié
+                    $benevole = new \App\Entity\Benevole();
+                    $benevole->setUtilisateur($user);
+                    $benevole->setAdresse($adresse);
+                    $benevole->setContactUrgence($contactUrgence);
+                    $benevole->setActif(true);
+
+                    $entityManager->persist($benevole);
+                    $entityManager->flush();
+
+                    $this->addFlash('success', 'Compte bénévole créé avec succès !');
+                    return $this->redirectToRoute('app_login');
                 }
             }
         }
 
-        // Récupérer tous les rôles pour le formulaire
-        $roles = $roleRepository->findAll();
-
-        return $this->render('auth/register.html.twig', [
-            'user' => $user,
-            'roles' => $roles,
+        return $this->render('auth/register_benevole.html.twig', [
             'errors' => $errors,
         ]);
     }
+
+    #[Route('/register/mecene', name: 'app_register_mecene')]
+    public function registerMecene(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface $entityManager,
+        RoleRepository $roleRepository,
+        ValidatorInterface $validator
+    ): Response {
+        $errors = [];
+        $user = new Utilisateur();
+
+        if ($request->isMethod('POST')) {
+            $email = $request->request->get('email');
+            $password = $request->request->get('password');
+            $confirmPassword = $request->request->get('confirm_password');
+            $prenom = $request->request->get('prenom');
+            $nom = $request->request->get('nom');
+            $telephone = $request->request->get('telephone');
+            $organisation = $request->request->get('organisation');
+
+            // Validation basique
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "Email invalide";
+            }
+            if (empty($password) || strlen($password) < 6) {
+                $errors[] = "Le mot de passe doit faire au moins 6 caractères";
+            }
+            if ($password !== $confirmPassword) {
+                $errors[] = "Les mots de passe ne correspondent pas";
+            }
+
+            if (empty($errors)) {
+                $role = $roleRepository->findOneBy(['nom' => 'mecene']);
+                if (!$role) {
+                    $errors[] = "Rôle mécène introuvable";
+                } else {
+                    $user->setEmail($email);
+                    $user->setMotDePasse($userPasswordHasher->hashPassword($user, $password));
+                    $user->setPrenom($prenom);
+                    $user->setNom($nom);
+                    $user->setTelephone($telephone);
+                    $user->setRole($role);
+                    $user->setDateCreation(new \DateTime());
+                    $user->setDateModification(new \DateTime());
+
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+
+                    // Création du mécène lié
+                    $mecene = new \App\Entity\Mecene();
+                    $mecene->setUtilisateur($user);
+                    $mecene->setOrganisation($organisation);
+
+                    $entityManager->persist($mecene);
+                    $entityManager->flush();
+
+                    $this->addFlash('success', 'Compte mécène créé avec succès !');
+                    return $this->redirectToRoute('app_login');
+                }
+            }
+        }
+
+        return $this->render('auth/register_mecene.html.twig', [
+            'errors' => $errors,
+        ]);
+    }
+
 }

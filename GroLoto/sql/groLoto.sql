@@ -21,11 +21,6 @@ CREATE TABLE ROLE (
   description TEXT
 );
 
-INSERT INTO ROLE (nom, description) VALUES
-('admin','Administrateur organisation'),
-('benevole','Bénévole'),
-('mecene','Mécène');
-
 CREATE TABLE UTILISATEUR (
   id INTEGER PRIMARY KEY,
   id_role INTEGER NOT NULL,
