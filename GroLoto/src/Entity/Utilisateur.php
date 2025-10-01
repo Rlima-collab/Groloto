@@ -16,90 +16,49 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    private $id;
+    private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: "Role")]
+    #[ORM\ManyToOne(targetEntity: Role::class)]
     #[ORM\JoinColumn(name: "id_role", referencedColumnName: "id", nullable: false)]
-    private $role;
+    private ?Role $role = null;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
     #[Assert\NotBlank(message: "L'email est obligatoire")]
     #[Assert\Email(message: "L'email n'est pas valide")]
-    private $email;
+    private ?string $email = null;
 
-    #[ORM\Column(type: "string", nullable: true)]
-    private $mot_de_passe;
+    #[ORM\Column(type: "string", length: 255)]
+    private ?string $mot_de_passe = '';
 
-    #[ORM\Column(type: "string", nullable: true)]
-    private $prenom;
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $prenom = null;
 
-    #[ORM\Column(type: "string", nullable: true)]
-    private $nom;
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $nom = null;
 
-    #[ORM\Column(type: "string", nullable: true)]
-    private $telephone;
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $telephone = null;
 
-    #[ORM\Column(type: "datetime", nullable: true)]
-    private $date_creation;
+    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
+    private ?\DateTimeInterface $date_creation = null;
 
-    #[ORM\Column(type: "datetime", nullable: true)]
-    private $date_modification;
+    #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
+    private ?\DateTimeInterface $date_modification = null;
 
-    // UserInterface methods
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
-
-    public function getUsername(): string
-    {
-        return (string) $this->email;
-    }
-
-    public function getRoles(): array
-    {
-        $roles = [];
-        if ($this->role) {
-            switch ($this->role->getNom()) {
-                case 'admin':
-                    $roles[] = 'ROLE_ADMIN';
-                    break;
-                case 'benevole':
-                    $roles[] = 'ROLE_BENEVOLE';
-                    break;
-                case 'mecene':
-                    $roles[] = 'ROLE_MECENE';
-                    break;
-                default:
-                    $roles[] = 'ROLE_USER';
-            }
-        }
-        
-        // Garantir que chaque utilisateur a au moins ROLE_USER
-        $roles[] = 'ROLE_USER';
-        
-        return array_unique($roles);
-    }
-
-    public function getPassword(): string
-    {
-        return $this->mot_de_passe;
-    }
-
-    public function getSalt(): ?string
-    {
-        return null;
-    }
-
-    public function eraseCredentials(): void
-    {
-        // Si vous stockez des données sensibles temporaires sur l'utilisateur, effacez-les ici
-    }
-
-    // Getters & Setters
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getRole(): ?Role
+    {
+        return $this->role;
+    }
+
+    public function setRole(Role $role): self
+    {
+        $this->role = $role;
+        return $this;
     }
 
     public function getEmail(): ?string
@@ -121,17 +80,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setMotDePasse(string $mot_de_passe): self
     {
         $this->mot_de_passe = $mot_de_passe;
-        return $this;
-    }
-
-    public function getRole(): ?Role
-    {
-        return $this->role;
-    }
-
-    public function setRole(?Role $role): self
-    {
-        $this->role = $role;
         return $this;
     }
 
@@ -173,7 +121,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->date_creation;
     }
 
-    public function setDateCreation(?\DateTimeInterface $date_creation): self
+    public function setDateCreation(\DateTimeInterface $date_creation): self
     {
         $this->date_creation = $date_creation;
         return $this;
@@ -184,9 +132,53 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->date_modification;
     }
 
-    public function setDateModification(?\DateTimeInterface $date_modification): self
+    public function setDateModification(\DateTimeInterface $date_modification): self
     {
         $this->date_modification = $date_modification;
         return $this;
+    }
+
+    // UserInterface and PasswordAuthenticatedUserInterface methods
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = [];
+        if ($this->role) {
+            switch ($this->role->getNom()) {
+                case 'admin':
+                    $roles[] = 'ROLE_ADMIN';
+                    break;
+                case 'benevole':
+                    $roles[] = 'ROLE_BENEVOLE';
+                    break;
+                case 'mecene':
+                    $roles[] = 'ROLE_MECENE';
+                    break;
+                default:
+                    $roles[] = 'ROLE_USER';
+            }
+        }
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
+    }
+
+    public function getPassword(): string
+    {
+        return (string) $this->mot_de_passe;
+    }
+
+    public function getSalt(): ?string
+    {
+        return null;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // No sensitive temporary data to erase in this implementation
+        // If you store temporary plaintext passwords or other sensitive data, clear them here
     }
 }
