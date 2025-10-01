@@ -1,0 +1,276 @@
+/* =============== GESTION DES BÉNÉVOLES =============== */
+
+body {
+    font-family: 'Montserrat', Arial, sans-serif;
+    background: #f7f8fa;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 100%; /* Prend toute la largeur */
+    margin: 20px auto;
+    padding: 0 15px; /* Padding réduit sur les côtés */
+}
+
+h1 {
+    color: #23408e;
+    font-size: 2.2rem;
+    margin-bottom: 0.2em;
+}
+
+.subtitle {
+    color: #444;
+    font-size: 1.1rem;
+    margin-bottom: 1.5em;
+}
+
+/* =============== ONGLETS =============== */
+.tabs {
+    display: flex;
+    width: 100%;
+    margin: 0 auto 3em auto;
+    background: #f8f9fa;
+    border-radius: 0;
+    overflow: visible;
+    box-shadow: none;
+    gap: 2px;
+}
+
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 14px 20px;
+    font-size: 15px;
+    color: #6c757d;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 6px;
+}
+
+.tab.selected {
+    background: #ffffff;
+    color: #495057;
+    border-color: #5a5a5a;
+    border-bottom: 3px solid #5a5a5a;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,123,255,0.1);
+}
+
+.tab:not(.selected):hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.tab-icon {
+    font-size: 16px;
+}
+
+.tab-text {
+    font-size: 14px;
+}
+
+/* =============== CARTES BÉNÉVOLES =============== */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 colonnes égales */
+    gap: 25px; /* Plus d'espace entre les cartes */
+    margin-bottom: 2em;
+    padding: 0 10px; /* Padding léger sur les côtés */
+}
+
+.card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(35,64,142,0.07);
+    padding: 24px 20px 20px 20px; /* Plus de padding */
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: 320px; /* Hauteur minimale pour uniformiser */
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 20px rgba(35,64,142,0.15);
+}
+
+.card h2 {
+    color: #23408e;
+    font-size: 1.2rem;
+    margin: 0 0 8px 0;
+}
+
+/* =============== BADGES =============== */
+.badge {
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 12px;
+    font-size: 0.95em;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.badge.confirme {
+    background: #0cc96e;
+    color: #fff;
+}
+
+.badge.attente {
+    background: #ffb300;
+    color: #fff;
+}
+
+/* =============== INFORMATIONS CONTACT =============== */
+.info {
+    color: #444;
+    font-size: 1em;
+    margin: 2px 0 0 0;
+    display: flex;
+    align-items: center;
+}
+
+.info i {
+    margin-right: 7px;
+    color: #23408e;
+}
+
+/* =============== COMPÉTENCES ET DISPONIBILITÉS =============== */
+.competences, .dispos {
+    margin: 10px 0 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.competence {
+    background: #e9eaf3;
+    color: #23408e;
+    border-radius: 8px;
+    padding: 3px 12px;
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+.dispo {
+    background: #fff7e0;
+    color: #b48a00;
+    border-radius: 8px;
+    padding: 3px 12px;
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+/* =============== BOUTONS D'ACTIONS =============== */
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.btn {
+    flex: 1;
+    background: #f2f3f7;
+    color: #23408e;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 0;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background: #e9eaf3;
+}
+
+.btn.delete {
+    background: #fff0f0;
+    color: #d32f2f;
+    max-width: 40px;
+    flex: none;
+    padding: 8px 0;
+}
+
+.btn.delete:hover {
+    background: #ffd6d6;
+}
+
+/* =============== RESPONSIVE =============== */
+@media (max-width: 1400px) {
+    .cards {
+        grid-template-columns: repeat(4, 1fr); /* 4 colonnes sur écrans moyens */
+    }
+}
+
+@media (max-width: 1100px) {
+    .cards {
+        grid-template-columns: repeat(3, 1fr); /* 3 colonnes sur tablettes */
+        gap: 18px;
+    }
+    
+    .tabs {
+        width: 98%; /* Plus large sur tablettes */
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .tabs {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .tab {
+        padding: 14px 0;
+        font-size: 1.1rem;
+        border-right: none;
+        border-bottom: 2px solid #fff;
+    }
+    
+    .tab:last-child {
+        border-bottom: none;
+    }
+    
+    .cards {
+        grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur mobile */
+        gap: 15px;
+    }
+    
+    .card {
+        padding: 18px 16px 14px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cards {
+        grid-template-columns: 1fr; /* 1 colonne sur très petits écrans */
+        gap: 12px;
+    }
+    
+    .tab {
+        font-size: 1rem;
+        padding: 12px 0;
+    }
+}

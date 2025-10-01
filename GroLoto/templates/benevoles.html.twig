@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Bénévoles{% endblock %}
+
+{% block body %}
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
+
+<div class="container">
+    <h1>Gestion des Bénévoles</h1>
+    <div class="subtitle">Inscriptions, disponibilités et planning</div>
+    
+    <div class="tabs">
+        <a href="{{ path('benevoles') }}" class="tab selected">
+            <span class="tab-icon">👥</span>
+            <span class="tab-text">Liste des bénévoles</span>
+        </a>
+        <a href="#" class="tab">
+            <span class="tab-icon">📅</span>
+            <span class="tab-text">Planning</span>
+        </a>
+    </div>
+    
+    <div class="cards">
+        {% for benevole in benevoles %}
+        <div class="card">
+            <h2>{{ benevole.nom }} 
+                <span class="badge {{ benevole.statut }}">
+                    {% if benevole.statut == 'confirme' %}Confirmé{% else %}En attente{% endif %}
+                </span>
+            </h2>
+            
+            <div class="info"><i>✉️</i>{{ benevole.email }}</div>
+            <div class="info"><i>📞</i>{{ benevole.telephone }}</div>
+            
+            <div class="competences">
+                {% for competence in benevole.competences %}
+                    <span class="competence">{{ competence }}</span>
+                {% endfor %}
+            </div>
+            
+            <div class="dispos">
+                {% for dispo in benevole.disponibilites %}
+                    <span class="dispo">{{ dispo }}</span>
+                {% endfor %}
+            </div>
+            
+            <div class="actions">
+                <a href="#" class="btn">Modifier</a>
+                <a href="#" class="btn delete">🗑️</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
