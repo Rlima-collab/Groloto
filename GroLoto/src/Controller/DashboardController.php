@@ -18,7 +18,6 @@ class DashboardController extends AbstractController
     #[Route('/', name: 'dashboard')]
     public function index(): Response
     {
-        // Définir les dates pour le mois actuel
         $firstDayOfMonth = (new \DateTime('first day of this month'))->format('Y-m-d 00:00:00');
         $firstDayOfNextMonth = (new \DateTime('first day of next month'))->format('Y-m-d 00:00:00');
 
@@ -31,8 +30,8 @@ class DashboardController extends AbstractController
 
         // Nouveaux bénévoles ce mois
         $newVolunteers = $this->entityManager->createQuery(
-            'SELECT COUNT(b.id) FROM App\Entity\Benevole b 
-             JOIN b.utilisateur u 
+            'SELECT COUNT(b.id) FROM App\Entity\Benevole b
+             JOIN b.utilisateur u
              WHERE u.date_creation >= :firstDay AND u.date_creation < :nextMonth'
         )
         ->setParameters(['firstDay' => $firstDayOfMonth, 'nextMonth' => $firstDayOfNextMonth])
@@ -46,8 +45,8 @@ class DashboardController extends AbstractController
 
         // Nouveaux mécènes ce mois
         $newSponsors = $this->entityManager->createQuery(
-            'SELECT COUNT(m.id) FROM App\Entity\Mecene m 
-             LEFT JOIN m.utilisateur u 
+            'SELECT COUNT(m.id) FROM App\Entity\Mecene m
+             LEFT JOIN m.utilisateur u
              WHERE u.date_creation >= :firstDay AND u.date_creation < :nextMonth'
         )
         ->setParameters(['firstDay' => $firstDayOfMonth, 'nextMonth' => $firstDayOfNextMonth])
@@ -73,12 +72,22 @@ class DashboardController extends AbstractController
 
         // Prochains événements
         $events = $this->entityManager->createQuery(
-            'SELECT e FROM App\Entity\Evenement e 
-             WHERE e.date_debut >= :today 
+            'SELECT e FROM App\Entity\Evenement e
+             WHERE e.date_debut >= :today
              ORDER BY e.date_debut ASC'
         )
         ->setParameter('today', new \DateTime())
         ->setMaxResults(3)
+        ->getResult();
+
+        // Historique des événements
+        $eventHistory = $this->entityManager->createQuery(
+            'SELECT h, e, u FROM App\Entity\HistoriqueEvenement h
+             JOIN h.evenement e
+             LEFT JOIN h.utilisateur u
+             ORDER BY h.date_action DESC'
+        )
+        ->setMaxResults(5)
         ->getResult();
 
         return $this->render('dashboard.html.twig', [
@@ -90,6 +99,7 @@ class DashboardController extends AbstractController
             'out_of_stock' => $outOfStock ?? 0,
             'stock_value' => $stockValue ?? 0,
             'events' => $events,
+            'event_history' => $eventHistory,
         ]);
     }
 }

@@ -1,10 +1,18 @@
 {% extends 'base.html.twig' %}
 {% block body %}
-<div class="page-header">
-    <h1 class="page-title">Dashboard Groloto</h1>
-    <p class="page-description">Gérez votre événement caritatif en toute simplicité</p>
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Bienvenue sur Groloto Manager</h1>
+        <p class="hero-description">Organisez vos événements caritatifs avec simplicité et efficacité.</p>
+        <a href="#events" class="hero-btn yellow">Découvrir les événements</a>
+    </div>
 </div>
-<!-- Key Metrics Cards -->
+
+<div class="page-header">
+    <h1 class="page-title">Tableau de bord Groloto</h1>
+</div>
+
 <div class="metrics-grid">
     <div class="card metric-card yellow-border">
         <div class="card-header">
@@ -47,7 +55,7 @@
         </div>
     </div>
 </div>
-<!-- Calendar and Quick Actions -->
+
 <div class="dashboard-grid">
     <!-- Calendar -->
     <div class="card calendar-card">
@@ -77,7 +85,6 @@
     <div class="card actions-card">
         <div class="card-header">
             <h3 class="card-title">Actions rapides</h3>
-            <p class="card-description">Accès direct aux fonctions principales</p>
         </div>
         <div class="card-content">
             <div class="actions-list">
@@ -97,6 +104,39 @@
                     <span class="btn-icon">💬</span>
                     Planifier communication
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="full-width-container">
+    <div class="card history-card">
+        <div class="card-header">
+            <h3 class="card-title">🕒 Historique des événements</h3>
+        </div>
+        <div class="card-content">
+            <div class="history-list">
+                {% for history in event_history %}
+                    <div class="history-item {{ loop.index0 % 3 == 0 ? 'yellow-accent' : loop.index0 % 3 == 1 ? 'green-accent' : 'blue-accent' }}">
+                        <div class="history-date">
+                            <div class="history-day">{{ history.dateAction|date('d') }}</div>
+                            <div class="history-month">{{ history.dateAction|date('M')|upper }}</div>
+                        </div>
+                        <div class="history-details">
+                            <h4 class="history-title">{{ history.evenement.nom }} - {{ history.action|capitalize }}</h4>
+                            <p class="history-description">{{ history.description|default('Aucune description') }}</p>
+                            <p class="history-meta">
+                                {% if history.utilisateur %}
+                                    Par {{ history.utilisateur.prenom }} {{ history.utilisateur.nom }} le {{ history.dateAction|date('d/m/Y H:i') }}
+                                {% else %}
+                                    Action système le {{ history.dateAction|date('d/m/Y H:i') }}
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                {% else %}
+                    <p>Aucun historique d'événement disponible.</p>
+                {% endfor %}
             </div>
         </div>
     </div>
