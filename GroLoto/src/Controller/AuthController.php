@@ -68,7 +68,6 @@ class AuthController extends AbstractController
             $telephone = $request->request->get('telephone');
             $remarque = $request->request->get('remarque');
 
-            // Validation basique
             if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $errors[] = "Email invalide";
             }
@@ -80,34 +79,42 @@ class AuthController extends AbstractController
             }
 
             if (empty($errors)) {
-                $role = $roleRepository->findOneBy(['nom' => 'benevole']);
-                if (!$role) {
-                    $errors[] = "Rôle bénévole introuvable";
+                $existingUser = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
+                if ($existingUser) {
+                    $errors[] = "Cet email est déjà utilisé, merci d'en choisir un autre.";
                 } else {
-                    $user = new Utilisateur();
-                    $user->setEmail($email);
-                    $user->setMotDePasse($userPasswordHasher->hashPassword($user, $password));
-                    $user->setPrenom($prenom);
-                    $user->setNom($nom);
-                    $user->setTelephone($telephone);
-                    $user->setRole($role);
-                    $user->setDateCreation(new \DateTime());
-                    $user->setDateModification(new \DateTime());
+                    $role = $roleRepository->findOneBy(['nom' => 'benevole']);
+                    if (!$role) {
+                        $errors[] = "Rôle bénévole introuvable";
+                    } else {
+                        $user = new Utilisateur();
+                        $user->setEmail($email);
+                        $user->setMotDePasse($userPasswordHasher->hashPassword($user, $password));
+                        $user->setPrenom($prenom);
+                        $user->setNom($nom);
+                        $user->setTelephone($telephone);
+                        $user->setRole($role);
+                        $user->setDateCreation(new \DateTime());
+                        $user->setDateModification(new \DateTime());
 
-                    $entityManager->persist($user);
-                    $entityManager->flush();
+                        try {
+                            $entityManager->persist($user);
+                            $entityManager->flush();
 
-                    // Création du bénévole lié
-                    $benevole = new \App\Entity\Benevole();
-                    $benevole->setUtilisateur($user);
-                    $benevole->setRemarque($remarque);
-                    $benevole->setActif(true);
+                            $benevole = new \App\Entity\Benevole();
+                            $benevole->setUtilisateur($user);
+                            $benevole->setRemarque($remarque);
+                            $benevole->setActif(true);
 
-                    $entityManager->persist($benevole);
-                    $entityManager->flush();
+                            $entityManager->persist($benevole);
+                            $entityManager->flush();
 
-                    $this->addFlash('success', 'Compte bénévole créé avec succès !');
-                    return $this->redirectToRoute('app_login');
+                            $this->addFlash('success', 'Compte bénévole créé avec succès !');
+                            return $this->redirectToRoute('app_login');
+                        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+                            $errors[] = "Cet email est déjà utilisé, merci d'en choisir un autre.";
+                        }
+                    }
                 }
             }
         }
@@ -116,6 +123,7 @@ class AuthController extends AbstractController
             'errors' => $errors,
         ]);
     }
+
 
 
     #[Route('/register/mecene', name: 'app_register_mecene')]
@@ -137,7 +145,6 @@ class AuthController extends AbstractController
             $organisation = $request->request->get('organisation');
             $siret = $request->request->get('siret');
 
-            // Validation basique
             if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $errors[] = "Email invalide";
             }
@@ -155,34 +162,42 @@ class AuthController extends AbstractController
             }
 
             if (empty($errors)) {
-                $role = $roleRepository->findOneBy(['nom' => 'mecene']);
-                if (!$role) {
-                    $errors[] = "Rôle mécène introuvable";
+                $existingUser = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
+                if ($existingUser) {
+                    $errors[] = "Cet email est déjà utilisé, merci d'en choisir un autre.";
                 } else {
-                    $user = new Utilisateur();
-                    $user->setEmail($email);
-                    $user->setMotDePasse($userPasswordHasher->hashPassword($user, $password));
-                    $user->setPrenom($prenom);
-                    $user->setNom($nom);
-                    $user->setTelephone($telephone);
-                    $user->setRole($role);
-                    $user->setDateCreation(new \DateTime());
-                    $user->setDateModification(new \DateTime());
+                    $role = $roleRepository->findOneBy(['nom' => 'mecene']);
+                    if (!$role) {
+                        $errors[] = "Rôle mécène introuvable";
+                    } else {
+                        $user = new Utilisateur();
+                        $user->setEmail($email);
+                        $user->setMotDePasse($userPasswordHasher->hashPassword($user, $password));
+                        $user->setPrenom($prenom);
+                        $user->setNom($nom);
+                        $user->setTelephone($telephone);
+                        $user->setRole($role);
+                        $user->setDateCreation(new \DateTime());
+                        $user->setDateModification(new \DateTime());
 
-                    $entityManager->persist($user);
-                    $entityManager->flush();
+                        try {
+                            $entityManager->persist($user);
+                            $entityManager->flush();
 
-                    // Création du mécène lié
-                    $mecene = new \App\Entity\Mecene();
-                    $mecene->setUtilisateur($user);
-                    $mecene->setOrganisation($organisation);
-                    $mecene->setSiret($siret);
+                            $mecene = new \App\Entity\Mecene();
+                            $mecene->setUtilisateur($user);
+                            $mecene->setOrganisation($organisation);
+                            $mecene->setSiret($siret);
 
-                    $entityManager->persist($mecene);
-                    $entityManager->flush();
+                            $entityManager->persist($mecene);
+                            $entityManager->flush();
 
-                    $this->addFlash('success', 'Compte mécène créé avec succès !');
-                    return $this->redirectToRoute('app_login');
+                            $this->addFlash('success', 'Compte mécène créé avec succès !');
+                            return $this->redirectToRoute('app_login');
+                        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+                            $errors[] = "Cet email est déjà utilisé, merci d'en choisir un autre.";
+                        }
+                    }
                 }
             }
         }
@@ -191,6 +206,7 @@ class AuthController extends AbstractController
             'errors' => $errors,
         ]);
     }
+
 
     #[Route('/profile', name: 'app_profile')]
     public function profile(): Response

@@ -31,7 +31,7 @@ class Stock
     private ?float $valeur_unitaire = 0.0;
 
     #[ORM\Column(type: "text", nullable: true)]
-    private ?string $notes = null;
+    private ?string $remarque = null;
 
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private ?\DateTimeInterface $derniere_modif = null;
@@ -110,14 +110,14 @@ class Stock
         return $this;
     }
 
-    public function getNotes(): ?string
+    public function getRemarque(): ?string
     {
-        return $this->notes;
+        return $this->remarque;
     }
 
-    public function setNotes(?string $notes): self
+    public function setRemarque(?string $remarque): self
     {
-        $this->notes = $notes;
+        $this->remarque = $remarque;
         return $this;
     }
 
