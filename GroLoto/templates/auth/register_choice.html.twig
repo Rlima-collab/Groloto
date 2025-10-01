@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choix d'inscription{% endblock %}
+
+
+{% block body %}
+<div class="registration-choice-container">
+    <div class="registration-hero">
+        <div class="shine"></div>
+        <div class="registration-content">
+            <h1 class="registration-title">Rejoignez-nous !</h1>
+            <p class="registration-subtitle">Choisissez le type de compte qui vous correspond</p>
+            
+            <div class="registration-options">
+                <a href="{{ path('app_register_benevole') }}" class="registration-card benevole">
+                    <div class="registration-card-content">
+                        <div class="registration-card-text">
+                            <h2 class="registration-card-title">Bénévole</h2>
+                            <p class="registration-card-description">
+                                Donnez de votre temps et participez activement à nos actions solidaires
+                            </p>
+                        </div>
+                        <div class="registration-arrow">→</div>
+                    </div>
+                </a>
+                
+                <a href="{{ path('app_register_mecene') }}" class="registration-card mecene">
+                    <div class="registration-card-content">
+                        <div class="registration-card-text">
+                            <h2 class="registration-card-title">Mécène</h2>
+                            <p class="registration-card-description">
+                                Soutenez nos projets par votre générosité et vos contributions
+                            </p>
+                        </div>
+                        <div class="registration-arrow">→</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
