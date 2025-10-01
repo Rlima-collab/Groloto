@@ -7,11 +7,11 @@ use App\Repository\RoleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class PublicController extends AbstractController
 {
-    #[Route('/public', name: 'app_public')]
+    #[Route('/public', name: 'public_index')]
     public function index(
         UtilisateurRepository $utilisateurRepository,
         RoleRepository $roleRepository,
@@ -48,7 +48,7 @@ class PublicController extends AbstractController
         
         return $repository->createQueryBuilder('u')
             ->select('COUNT(u.id)')
-            ->where('u.dateCreation >= :dateLimit')
+            ->where('u.date_creation >= :dateLimit')
             ->setParameter('dateLimit', $dateLimit)
             ->getQuery()
             ->getSingleScalarResult();
@@ -61,7 +61,7 @@ class PublicController extends AbstractController
         
         return $repository->createQueryBuilder('u')
             ->select('COUNT(u.id)')
-            ->where('u.dateCreation <= :dateLimit')
+            ->where('u.date_creation <= :dateLimit')
             ->setParameter('dateLimit', $dateLimit)
             ->getQuery()
             ->getSingleScalarResult();
@@ -126,8 +126,8 @@ class PublicController extends AbstractController
             
             $count = $repository->createQueryBuilder('u')
                 ->select('COUNT(u.id)')
-                ->where('u.dateCreation >= :debut')
-                ->andWhere('u.dateCreation <= :fin')
+                ->where('u.date_creation >= :debut')
+                ->andWhere('u.date_creation <= :fin')
                 ->setParameter('debut', $debutMois)
                 ->setParameter('fin', $finMois)
                 ->getQuery()

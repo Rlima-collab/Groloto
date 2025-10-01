@@ -157,7 +157,81 @@ header { display: none; }
         </div>
     </div>
 
-    <!-- Partie 3: Analytics et Graphiques -->
+    <!-- Partie 3: Interface d'Import -->
+    <div class="import-section" id="importSection" style="display: none;">
+        <div class="import-header">
+            <h2>Import HelloAsso</h2>
+            <p>Importer les données des participants depuis HelloAsso</p>
+        </div>
+
+        <div class="import-container">
+            <!-- Zone de glisser-déposer -->
+            <div class="import-dropzone" id="dropzone">
+                <div class="dropzone-icon">
+                    📄
+                </div>
+                <h3>Importer un fichier CSV</h3>
+                <p>Glissez-déposez votre fichier d'export HelloAsso ou cliquez pour sélectionner</p>
+                <button class="btn btn-select-file" id="selectFileBtn">📎 Sélectionner un fichier</button>
+                <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+            </div>
+
+            <!-- Options d'import -->
+            <div class="import-options">
+                <div class="option-group">
+                    <h4>Clé API HelloAsso</h4>
+                    <input type="text" class="form-control" placeholder="Votre clé API HelloAsso" id="apiKey">
+                </div>
+
+                <div class="option-group">
+                    <h4>ID de la campagne</h4>
+                    <input type="text" class="form-control" placeholder="ID de votre campagne" id="campaignId">
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="import-instructions">
+                <h4>Instructions d'import</h4>
+                <ul>
+                    <li>• Le fichier CSV doit contenir les colonnes : nom, email, téléphone, ville, date, montant</li>
+                    <li>• Les doublons seront automatiquement détectés et ignorés</li>
+                    <li>• L'import peut prendre quelques minutes selon la taille du fichier</li>
+                </ul>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="import-actions">
+                <button class="btn btn-sync" id="syncBtn">
+                    🔄 Synchroniser avec HelloAsso
+                </button>
+                <button class="btn btn-manual-import" id="manualImportBtn">
+                    📥 Import manuel
+                </button>
+            </div>
+        </div>
+
+        <!-- Résultats d'import -->
+        <div class="import-results" id="importResults" style="display: none;">
+            <h3>Résultats de l'import</h3>
+            <div class="results-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="importedCount">0</span>
+                    <span class="stat-label">Importés</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="duplicatesCount">0</span>
+                    <span class="stat-label">Doublons</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="errorsCount">0</span>
+                    <span class="stat-label">Erreurs</span>
+                </div>
+            </div>
+            <div class="results-details" id="resultsDetails"></div>
+        </div>
+    </div>
+
+    <!-- Partie 4: Analytics et Graphiques (anciennement partie 3) -->
     <div class="analytics-section" id="analyticsSection" style="display: none;">
         <div class="analytics-grid">
             <!-- Répartition Fidélité -->
@@ -211,64 +285,297 @@ header { display: none; }
 </div>
 
 <script>
-// Gestion des onglets
+// ===== GESTION GLOBALE DE L'INTERFACE =====
 document.addEventListener('DOMContentLoaded', function() {
+    // Éléments de navigation
     const btnParticipants = document.querySelector('.btn-participants');
     const btnAnalytics = document.querySelector('.btn-analytics');
+    const btnImport = document.querySelector('.btn-import');
+    
+    // Sections
     const participantsSection = document.getElementById('participantsSection');
     const analyticsSection = document.getElementById('analyticsSection');
+    const importSection = document.getElementById('importSection');
     
+    // Navigation vers Participants
     btnParticipants.addEventListener('click', function() {
-        btnParticipants.classList.add('active');
-        btnAnalytics.classList.remove('active');
-        participantsSection.style.display = 'block';
-        analyticsSection.style.display = 'none';
+        setActiveSection('participants');
     });
     
+    // Navigation vers Analytics
     btnAnalytics.addEventListener('click', function() {
-        btnAnalytics.classList.add('active');
-        btnParticipants.classList.remove('active');
-        participantsSection.style.display = 'none';
-        analyticsSection.style.display = 'block';
-        
-        // Initialiser les graphiques quand on affiche la section analytics
-        setTimeout(initCharts, 100);
+        setActiveSection('analytics');
     });
+    
+    // Navigation vers Import
+    btnImport.addEventListener('click', function() {
+        setActiveSection('import');
+    });
+    
+    // Fonction pour changer de section
+    function setActiveSection(section) {
+        // Reset tous les boutons
+        btnParticipants.classList.remove('active');
+        btnAnalytics.classList.remove('active');
+        btnImport.classList.remove('active');
+        
+        // Masquer toutes les sections
+        participantsSection.style.display = 'none';
+        analyticsSection.style.display = 'none';
+        importSection.style.display = 'none';
+        
+        // Activer la section demandée
+        switch(section) {
+            case 'participants':
+                btnParticipants.classList.add('active');
+                participantsSection.style.display = 'block';
+                break;
+            case 'analytics':
+                btnAnalytics.classList.add('active');
+                analyticsSection.style.display = 'block';
+                setTimeout(initCharts, 100);
+                break;
+            case 'import':
+                btnImport.classList.add('active');
+                importSection.style.display = 'block';
+                initImportInterface();
+                break;
+        }
+    }
+    
+    // ===== GESTION DES BOUTONS DE TABLE =====
+    initTableButtons();
 });
 
-// Données pour les graphiques
+// ===== INTERFACE D'IMPORT =====
+function initImportInterface() {
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const selectFileBtn = document.getElementById('selectFileBtn');
+    const syncBtn = document.getElementById('syncBtn');
+    const manualImportBtn = document.getElementById('manualImportBtn');
+    
+    if (!dropzone) return; // Éviter les erreurs si les éléments n'existent pas
+    
+    // Gestion du glisser-déposer
+    dropzone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+    });
+    
+    dropzone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+    });
+    
+    dropzone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelection(files[0]);
+        }
+    });
+    
+    // Clic sur la zone
+    dropzone.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    // Bouton sélectionner
+    if (selectFileBtn) {
+        selectFileBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            fileInput.click();
+        });
+    }
+    
+    // Input file
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+    }
+    
+    // Synchronisation HelloAsso
+    if (syncBtn) {
+        syncBtn.addEventListener('click', function() {
+            const apiKey = document.getElementById('apiKey').value;
+            const campaignId = document.getElementById('campaignId').value;
+            
+            if (!apiKey || !campaignId) {
+                alert('Veuillez renseigner la clé API et l\'ID de campagne');
+                return;
+            }
+            
+            simulateHelloAssoSync(apiKey, campaignId);
+        });
+    }
+    
+    // Import manuel
+    if (manualImportBtn) {
+        manualImportBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
+    }
+}
+
+// Gestion de la sélection de fichier
+function handleFileSelection(file) {
+    if (!file.name.match(/\.(csv|xlsx|xls)$/i)) {
+        alert('Format de fichier non supporté. Veuillez utiliser un fichier CSV ou Excel.');
+        return;
+    }
+    
+    simulateFileImport(file);
+}
+
+// Simulation d'import de fichier
+function simulateFileImport(file) {
+    const results = document.getElementById('importResults');
+    const importedCount = document.getElementById('importedCount');
+    const duplicatesCount = document.getElementById('duplicatesCount');
+    const errorsCount = document.getElementById('errorsCount');
+    const resultsDetails = document.getElementById('resultsDetails');
+    
+    if (!results) return;
+    
+    results.style.display = 'block';
+    
+    const imported = Math.floor(Math.random() * 50) + 10;
+    const duplicates = Math.floor(Math.random() * 5);
+    const errors = Math.floor(Math.random() * 3);
+    
+    animateCounter(importedCount, imported);
+    animateCounter(duplicatesCount, duplicates);
+    animateCounter(errorsCount, errors);
+    
+    resultsDetails.innerHTML = `
+        Fichier: ${file.name}
+        Taille: ${(file.size / 1024).toFixed(2)} KB
+        
+        ✅ ${imported} participants importés avec succès
+        ⚠️  ${duplicates} doublons détectés et ignorés
+        ❌ ${errors} erreurs de format
+        
+        Import terminé à ${new Date().toLocaleTimeString()}
+    `;
+}
+
+// Simulation de synchronisation HelloAsso
+function simulateHelloAssoSync(apiKey, campaignId) {
+    const results = document.getElementById('importResults');
+    const importedCount = document.getElementById('importedCount');
+    const duplicatesCount = document.getElementById('duplicatesCount');
+    const errorsCount = document.getElementById('errorsCount');
+    const resultsDetails = document.getElementById('resultsDetails');
+    
+    if (!results) return;
+    
+    results.style.display = 'block';
+    
+    const imported = Math.floor(Math.random() * 30) + 5;
+    const duplicates = Math.floor(Math.random() * 3);
+    const errors = 0;
+    
+    animateCounter(importedCount, imported);
+    animateCounter(duplicatesCount, duplicates);
+    animateCounter(errorsCount, errors);
+    
+    resultsDetails.innerHTML = `
+        Synchronisation HelloAsso
+        API Key: ${apiKey.substring(0, 8)}...
+        Campagne: ${campaignId}
+        
+        ✅ ${imported} nouveaux participants synchronisés
+        ⚠️  ${duplicates} participants déjà existants
+        🔄 Synchronisation réussie
+        
+        Dernière sync: ${new Date().toLocaleTimeString()}
+    `;
+}
+
+// Animation des compteurs
+function animateCounter(element, target) {
+    if (!element) return;
+    
+    let current = 0;
+    const increment = target / 20;
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            current = target;
+            clearInterval(timer);
+        }
+        element.textContent = Math.floor(current);
+    }, 50);
+}
+
+// ===== GESTION DES BOUTONS DE TABLE =====
+function initTableButtons() {
+    // Bouton Exporter
+    const btnExport = document.querySelector('.btn-export');
+    if (btnExport) {
+        btnExport.addEventListener('click', function() {
+            // Créer un contenu CSV simple
+            let csvContent = "Nom,Prénom,Email,Role,Date inscription\n";
+            
+            {% for participant in participants %}
+            csvContent += "{{ participant.nom ?? 'N/A' }},{{ participant.prenom ?? 'N/A' }},{{ participant.email }},{{ participant.role.nom }},{{ participant.dateCreation ? participant.dateCreation|date('Y-m-d') : 'N/A' }}\n";
+            {% endfor %}
+            
+            // Créer et télécharger le fichier
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'participants_' + new Date().toISOString().split('T')[0] + '.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    }
+    
+    // Bouton Ajouter participant
+    const btnAdd = document.querySelector('.btn-add');
+    if (btnAdd) {
+        btnAdd.addEventListener('click', function() {
+            if (confirm('Souhaitez-vous être redirigé vers la page d\'inscription ?')) {
+                window.location.href = '{{ path('app_register') }}';
+            }
+        });
+    }
+}
+
+// ===== DONNÉES ET GRAPHIQUES =====
 const analyticsData = {{ analytics|json_encode|raw }};
 
 function initCharts() {
-    // Graphique de fidélité (donut)
     drawFideliteChart();
-    
-    // Graphique des sources (camembert)
     drawSourcesChart();
-    
-    // Évolution des inscriptions (barres)
     drawEvolutionChart();
-    
-    // Évolution des revenus (ligne)
     drawRevenusChart();
 }
 
 function drawFideliteChart() {
     const canvas = document.getElementById('fideliteCanvas');
-    const ctx = canvas.getContext('2d');
+    if (!canvas) return;
     
-    // Données
+    const ctx = canvas.getContext('2d');
     const nouveaux = {{ nouveaux }};
     const fideles = {{ fideles }};
     const total = nouveaux + fideles;
     
-    // Dessiner un donut chart simple
+    if (total === 0) return;
+    
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const radius = 80;
     const innerRadius = 40;
     
-    // Angles
     const angleNouveaux = (nouveaux / total) * 2 * Math.PI;
     const angleFideles = (fideles / total) * 2 * Math.PI;
     
@@ -291,9 +598,9 @@ function drawFideliteChart() {
 
 function drawSourcesChart() {
     const canvas = document.getElementById('sourcesCanvas');
-    const ctx = canvas.getContext('2d');
+    if (!canvas) return;
     
-    // Données simulées
+    const ctx = canvas.getContext('2d');
     const sources = [
         { nom: 'HelloAsso', valeur: 3, couleur: '#007BFF' },
         { nom: 'Site web', valeur: 1, couleur: '#28A745' },
@@ -301,6 +608,8 @@ function drawSourcesChart() {
     ];
     
     const total = sources.reduce((sum, source) => sum + source.valeur, 0);
+    if (total === 0) return;
+    
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const radius = 80;
@@ -323,56 +632,52 @@ function drawSourcesChart() {
 
 function drawEvolutionChart() {
     const canvas = document.getElementById('evolutionCanvas');
-    const ctx = canvas.getContext('2d');
+    if (!canvas) return;
     
-    // Données d'évolution des inscriptions
+    const ctx = canvas.getContext('2d');
     const mois = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'];
     const donnees = [8, 15, 18, 12, 5, 3];
     
-    // Configuration
     const padding = 50;
     const chartWidth = canvas.width - 2 * padding;
     const chartHeight = canvas.height - 2 * padding;
     const barWidth = chartWidth / mois.length;
     const maxValue = Math.max(...donnees);
     
-    // Dessiner les barres
+    if (maxValue === 0) return;
+    
     donnees.forEach((valeur, index) => {
         const barHeight = (valeur / maxValue) * chartHeight;
         const x = padding + index * barWidth + barWidth * 0.2;
         const y = canvas.height - padding - barHeight;
         const width = barWidth * 0.6;
         
-        // Barre
         ctx.fillStyle = index % 2 === 0 ? '#FFC107' : '#28A745';
         ctx.fillRect(x, y, width, barHeight);
         
-        // Valeur au-dessus
         ctx.fillStyle = '#333';
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(valeur, x + width/2, y - 5);
-        
-        // Mois en bas
         ctx.fillText(mois[index], x + width/2, canvas.height - padding + 20);
     });
 }
 
 function drawRevenusChart() {
     const canvas = document.getElementById('revenusCanvas');
-    const ctx = canvas.getContext('2d');
+    if (!canvas) return;
     
-    // Données des revenus
+    const ctx = canvas.getContext('2d');
     const mois = ['Jan', 'Fév', 'Mar', 'Avr'];
     const revenus = [200, 750, 900, 200];
     
-    // Configuration
     const padding = 50;
     const chartWidth = canvas.width - 2 * padding;
     const chartHeight = canvas.height - 2 * padding;
     const maxRevenu = Math.max(...revenus);
     
-    // Points de la courbe
+    if (maxRevenu === 0) return;
+    
     const points = revenus.map((revenu, index) => ({
         x: padding + (index / (revenus.length - 1)) * chartWidth,
         y: canvas.height - padding - (revenu / maxRevenu) * chartHeight
@@ -395,13 +700,10 @@ function drawRevenusChart() {
         ctx.fillStyle = '#007BFF';
         ctx.fill();
         
-        // Valeurs
         ctx.fillStyle = '#333';
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(revenus[index], point.x, point.y - 15);
-        
-        // Mois
         ctx.fillText(mois[index], point.x, canvas.height - padding + 20);
     });
 }

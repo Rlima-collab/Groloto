@@ -45,6 +45,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private ?\DateTimeInterface $date_modification = null;
 
+    public function __construct()
+    {
+        $this->date_creation = new \DateTime();
+        $this->date_modification = new \DateTime();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
