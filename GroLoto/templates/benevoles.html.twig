@@ -3,12 +3,46 @@
 {% block title %}Gestion des Bénévoles{% endblock %}
 
 {% block body %}
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
+<div class="benevoles-page">
+<div class="page-header">
+    <h1 class="page-title">Gestion des Bénévoles</h1>
+    <p class="page-description">Inscriptions, disponibilités et planning</p>
+</div>
+
+<!-- Key Metrics Cards -->
+<div class="metrics-grid">
+    <div class="card metric-card">
+        <div class="card-header">
+            <span class="metric-title">Total bénévoles</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ metriques.total }}</div>
+            <p class="metric-change positive">Bénévoles actifs</p>
+        </div>
+    </div>
+
+    <div class="card metric-card">
+        <div class="card-header">
+            <span class="metric-title">Nouveaux ce mois</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ metriques.nouveaux }}</div>
+            <p class="metric-change positive">Inscriptions récentes</p>
+        </div>
+    </div>
+
+    <div class="card metric-card">
+        <div class="card-header">
+            <span class="metric-title">Disponibles</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ metriques.disponibles }}</div>
+            <p class="metric-change positive">Prêts à aider</p>
+        </div>
+    </div>
+</div>
 
 <div class="container">
-    <h1>Gestion des Bénévoles</h1>
-    <div class="subtitle">Inscriptions, disponibilités et planning</div>
     
     <div class="tabs">
         <a href="{{ path('benevoles') }}" class="tab selected">
@@ -21,36 +55,67 @@
         </a>
     </div>
     
-    <div class="cards">
-        {% for benevole in benevoles %}
-        <div class="card">
-            <h2>{{ benevole.nom }} 
-                <span class="badge {{ benevole.statut }}">
-                    {% if benevole.statut == 'confirme' %}Confirmé{% else %}En attente{% endif %}
-                </span>
-            </h2>
-            
-            <div class="info"><i>✉️</i>{{ benevole.email }}</div>
-            <div class="info"><i>📞</i>{{ benevole.telephone }}</div>
-            
-            <div class="competences">
-                {% for competence in benevole.competences %}
-                    <span class="competence">{{ competence }}</span>
-                {% endfor %}
+    <!-- Liste des bénévoles -->
+    <div class="main-content">
+        <div class="card main-card">
+            <div class="card-header">
+                <h2 class="card-title">Liste des Bénévoles</h2>
+                <p class="card-description">Gestion des bénévoles inscrits</p>
             </div>
-            
-            <div class="dispos">
-                {% for dispo in benevole.disponibilites %}
-                    <span class="dispo">{{ dispo }}</span>
-                {% endfor %}
-            </div>
-            
-            <div class="actions">
-                <a href="#" class="btn">Modifier</a>
-                <a href="#" class="btn delete">🗑️</a>
+            <div class="card-content">
+                {% if benevoles|length > 0 %}
+                    <div class="benevoles-grid">
+                        {% for benevole in benevoles %}
+                            <div class="benevole-card">
+                                <div class="benevole-header">
+                                    <h3 class="benevole-name">
+                                        {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}
+                                    </h3>
+                                    <span class="badge status success">Actif</span>
+                                </div>
+                                
+                                <div class="benevole-info">
+                                    <div class="info-item">
+                                        <span class="info-icon">✉️</span>
+                                        <span class="info-text">{{ benevole.utilisateur.email }}</span>
+                                    </div>
+                                    {% if benevole.utilisateur.telephone %}
+                                    <div class="info-item">
+                                        <span class="info-icon">📞</span>
+                                        <span class="info-text">{{ benevole.utilisateur.telephone }}</span>
+                                    </div>
+                                    {% endif %}
+                                    <div class="info-item">
+                                        <span class="info-icon">📅</span>
+                                        <span class="info-text">Inscrit le {{ benevole.utilisateur.dateCreation|date('d/m/Y') }}</span>
+                                    </div>
+                                </div>
+
+                                {% if benevole.remarque %}
+                                <div class="benevole-notes">
+                                    <strong>Notes:</strong> {{ benevole.remarque|slice(0, 50) }}{% if benevole.remarque|length > 50 %}...{% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <div class="benevole-actions">
+                                    <a href="#" class="btn btn-small btn-primary">Modifier</a>
+                                    <a href="#" class="btn btn-small btn-secondary">Planning</a>
+                                    <a href="#" class="btn btn-small btn-danger">🗑️</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <h3>Aucun bénévole trouvé</h3>
+                        <p>Commencez par ajouter des bénévoles à votre base de données.</p>
+                        <a href="#" class="btn btn-primary">Ajouter un bénévole</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
-        {% endfor %}
     </div>
+</div>
 </div>
 {% endblock %}
