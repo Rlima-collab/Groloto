@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+{% block title %}Gestion des Mécènes{% endblock %}
+{% block body %}
+<div class="mecenes-page">
+    <div class="page-header">
+        <h1 class="page-title">Gestion des Mécènes</h1>
+        <p class="page-description">Inscriptions, lots et conventions</p>
+    </div>
+    <!-- Key Metrics Cards -->
+    <div class="metrics-grid">
+        <div class="card metric-card">
+            <div class="card-header">
+                <span class="metric-title">Total mécènes</span>
+            </div>
+            <div class="card-content">
+                <div class="metric-value">{{ metriques.total }}</div>
+                <p class="metric-change positive">Mécènes actifs</p>
+            </div>
+        </div>
+        <div class="card metric-card">
+            <div class="card-header">
+                <span class="metric-title">Nouveaux ce mois</span>
+            </div>
+            <div class="card-content">
+                <div class="metric-value">{{ metriques.nouveaux }}</div>
+                <p class="metric-change positive">Inscriptions récentes</p>
+            </div>
+        </div>
+        <div class="card metric-card">
+            <div class="card-header">
+                <span class="metric-title">Lots disponibles</span>
+            </div>
+            <div class="card-content">
+                <div class="metric-value">{{ metriques.disponibles }}</div>
+                <p class="metric-change positive">Prêts à être utilisés</p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="tabs">
+            <a href="{{ path('mecenes') }}" class="tab selected">
+                <span class="tab-icon">👥</span>
+                <span class="tab-text">Liste des mécènes</span>
+            </a>
+            <a href="#" class="tab">
+                <span class="tab-icon">🎁</span>
+                <span class="tab-text">Lots</span>
+            </a>
+            <a href="#" class="tab">
+                <span class="tab-icon">📜</span>
+                <span class="tab-text">Conventions</span>
+            </a>
+        </div>
+        <!-- Liste des mécènes -->
+        <div class="main-content">
+            <div class="card main-card">
+                <div class="card-header">
+                    <h2 class="card-title">Liste des Mécènes</h2>
+                    <p class="card-description">Gestion des mécènes inscrits</p>
+                </div>
+                <div class="card-content">
+                    {% if mecenes|length > 0 %}
+                        <div class="mecenes-grid">
+                            {% for mecene in mecenes %}
+                                <div class="mecene-card">
+                                    <div class="mecene-header">
+                                        <h3 class="mecene-name">
+                                            {{ mecene.utilisateur.prenom }} {{ mecene.utilisateur.nom }} ({{ mecene.organisation }})
+                                        </h3>
+                                        <span class="badge status success">Actif</span>
+                                    </div>
+                                    <div class="mecene-info">
+                                        <div class="info-item">
+                                            <span class="info-icon">✉️</span>
+                                            <span class="info-text">{{ mecene.utilisateur.email }}</span>
+                                        </div>
+                                        {% if mecene.utilisateur.telephone %}
+                                            <div class="info-item">
+                                                <span class="info-icon">📞</span>
+                                                <span class="info-text">{{ mecene.utilisateur.telephone }}</span>
+                                            </div>
+                                        {% endif %}
+                                        <div class="info-item">
+                                            <span class="info-icon">🔍</span>
+                                            <span class="info-text">SIRET: {{ mecene.siret }}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-icon">📅</span>
+                                            <span class="info-text">Inscrit le {{ mecene.utilisateur.dateCreation|date('d/m/Y') }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="mecene-actions">
+                                        <a href="#" class="btn btn-small btn-primary">Modifier</a>
+                                        <a href="#" class="btn btn-small btn-secondary">Lots</a>
+                                        <a href="#" class="btn btn-small btn-secondary">Conventions</a>
+                                        <a href="#" class="btn btn-small btn-danger">🗑️</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">👥</div>
+                            <h3>Aucun mécène trouvé</h3>
+                            <p>Commencez par ajouter des mécènes à votre base de données.</p>
+                            <a href="#" class="btn btn-primary">Ajouter un mécène</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
