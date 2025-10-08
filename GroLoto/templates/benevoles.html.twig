@@ -2,6 +2,67 @@
 
 {% block title %}Gestion des Bénévoles{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <style>
+        .fc-event {
+            border: none;
+            padding: 2px;
+            border-radius: 3px;
+        }
+        
+        .fc-event-title {
+            color: white;
+        }
+        
+        .fc-col-header-cell {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .fc-dayGridWeek-view .fc-daygrid-day-frame {
+            min-height: 150px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Charger FullCalendar dynamiquement
+        function loadFullCalendar() {
+            return new Promise((resolve, reject) => {
+                if (typeof FullCalendar !== 'undefined') {
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = '{{ asset('fullcalendar.min.js') }}';
+                script.onload = () => {
+                    console.log('FullCalendar script loaded');
+                    // Attendre un peu que FullCalendar soit disponible
+                    const checkFC = () => {
+                        if (typeof FullCalendar !== 'undefined') {
+                            console.log('FullCalendar is now available');
+                            resolve();
+                        } else {
+                            setTimeout(checkFC, 10);
+                        }
+                    };
+                    checkFC();
+                };
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Variable globale pour le calendrier
+        window.calendarInstance = null;
+    </script>
+{% endblock %}
+
 {% block body %}
 <div class="benevoles-page">
 <div class="page-header">
@@ -45,18 +106,18 @@
 <div class="container">
     
     <div class="tabs">
-        <a href="{{ path('benevoles') }}" class="tab selected">
+        <a href="#" class="tab" id="tab-benevoles" onclick="showTab('benevoles')">
             <span class="tab-icon">👥</span>
             <span class="tab-text">Liste des bénévoles</span>
         </a>
-        <a href="#" class="tab">
+        <a href="#" class="tab" id="tab-planning" onclick="showTab('planning')">
             <span class="tab-icon">📅</span>
             <span class="tab-text">Planning</span>
         </a>
     </div>
     
     <!-- Liste des bénévoles -->
-    <div class="main-content">
+    <div id="content-benevoles" class="tab-content main-content">
         <div class="card main-card">
             <div class="card-header">
                 <h2 class="card-title">Liste des Bénévoles</h2>
@@ -116,6 +177,154 @@
             </div>
         </div>
     </div>
+    
+    <!-- Planning des créneaux -->
+    <div id="content-planning" class="tab-content main-content" style="display: none;">
+        <div class="card main-card">
+            <div class="card-header">
+                <h2 class="card-title">Planning des Créneaux</h2>
+                <p class="card-description">Planification pour les vendredis, samedis et dimanches</p>
+            </div>
+            <div class="card-content">
+                <div class="row" style="display: flex; gap: 20px;">
+                    <div style="flex: 2;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Calendrier des créneaux (Week-end seulement)</h5>
+                            </div>
+                            <div class="card-content">
+                                <div id="calendar"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 1;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Créneaux à venir</h5>
+                            </div>
+                            <div class="card-content">
+                                {% if creneaux_proches is defined and creneaux_proches is not empty %}
+                                    {% for creneau in creneaux_proches %}
+                                        <div class="card" style="margin-bottom: 10px; padding: 10px; border: 1px solid #ddd;">
+                                            <h6>{{ creneau.titre }}</h6>
+                                            <p style="font-size: 0.9em; margin: 5px 0;">
+                                                📅 {{ creneau.debut|date('d/m/Y H:i') }}
+                                                {% if creneau.posteRequis %}
+                                                    <br>💼 {{ creneau.posteRequis }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div style="text-align: center; padding: 20px; color: #666;">
+                                        ℹ️ Aucun créneau planifié.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </div>
+
+<script>
+function showTab(tabName) {
+    console.log('Changing to tab:', tabName);
+    
+    // Masquer tous les contenus
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.style.display = 'none';
+    });
+    
+    // Désactiver tous les onglets
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('selected');
+    });
+    
+    // Afficher le contenu sélectionné
+    document.getElementById('content-' + tabName).style.display = 'block';
+    
+    // Activer l'onglet sélectionné
+    document.getElementById('tab-' + tabName).classList.add('selected');
+    
+    // Initialiser et rendre le calendrier si c'est l'onglet planning
+    if (tabName === 'planning') {
+        console.log('Onglet planning activé, chargement de FullCalendar...');
+        
+        loadFullCalendar().then(() => {
+            console.log('FullCalendar prêt, initialisation du calendrier...');
+            
+            const calendarEl = document.getElementById('calendar');
+            
+            if (calendarEl && typeof FullCalendar !== 'undefined') {
+                // Vérifier si le calendrier existe déjà
+                if (!window.calendarInstance) {
+                    console.log('Création du calendrier...');
+                    
+                    const events = {{ creneaux|json_encode|raw }};
+                    console.log('Événements pour le calendrier:', events);
+                    
+                    window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'dayGridMonth',
+                        locale: 'fr',
+                        height: 'auto',
+                        hiddenDays: [1, 2, 3, 4], // Masquer lundi à jeudi
+                        events: events,
+                        eventClick: function(info) {
+                            const event = info.event;
+                            const props = event.extendedProps;
+                            
+                            let details = 'Titre: ' + event.title + '\n';
+                            details += 'Début: ' + event.start.toLocaleString() + '\n';
+                            details += 'Fin: ' + event.end.toLocaleString() + '\n';
+                            
+                            if (props.evenement) {
+                                details += 'Événement: ' + props.evenement + '\n';
+                            }
+                            if (props.poste_requis) {
+                                details += 'Poste: ' + props.poste_requis + '\n';
+                            }
+                            if (props.max_personnes) {
+                                details += 'Max personnes: ' + props.max_personnes + '\n';
+                            }
+                            if (props.notes) {
+                                details += 'Notes: ' + props.notes + '\n';
+                            }
+                            
+                            alert(details);
+                        },
+                        eventDisplay: 'block'
+                    });
+                }
+                
+                console.log('Rendu du calendrier...');
+                window.calendarInstance.render();
+            } else {
+                console.error('Element calendar ou FullCalendar non trouvé');
+            }
+        }).catch(error => {
+            console.error('Erreur lors du chargement de FullCalendar:', error);
+        });
+    }
+}
+
+// Initialiser avec l'onglet bénévoles actif
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded');
+    
+    // Activer l'onglet bénévoles par défaut
+    document.getElementById('tab-benevoles').classList.add('selected');
+    
+    // Précharger FullCalendar en arrière-plan
+    loadFullCalendar().then(() => {
+        console.log('FullCalendar préchargé avec succès');
+    }).catch(error => {
+        console.error('Erreur lors du préchargement de FullCalendar:', error);
+    });
+});
+</script>
 {% endblock %}
