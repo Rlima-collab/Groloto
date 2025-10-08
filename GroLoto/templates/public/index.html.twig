@@ -448,20 +448,52 @@ function exportToCSV() {
     if (!table) return;
     
     let csv = [];
-    const rows = table.querySelectorAll('tr');
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody');
     
-    rows.forEach(row => {
-        const cols = row.querySelectorAll('td, th');
-        const rowData = [];
-        cols.forEach(col => {
-            // Nettoyer le texte
-            let text = col.textContent.trim().replace(/\s+/g, ' ');
-            // Échapper les guillemets
-            text = text.replace(/"/g, '""');
-            rowData.push(`"${text}"`);
+    // Exporter l'en-tête
+    if (thead) {
+        const headerRow = thead.querySelector('tr');
+        if (headerRow) {
+            const cols = headerRow.querySelectorAll('th');
+            const rowData = [];
+            cols.forEach(col => {
+                let text = col.textContent.trim().replace(/\s+/g, ' ');
+                text = text.replace(/"/g, '""');
+                rowData.push(`"${text}"`);
+            });
+            csv.push(rowData.join(','));
+        }
+    }
+    
+    // Exporter uniquement les lignes visibles (non filtrées)
+    if (tbody) {
+        const rows = tbody.querySelectorAll('tr');
+        let exportedCount = 0;
+        
+        rows.forEach(row => {
+            // Vérifier si la ligne est visible (pas cachée par les filtres)
+            if (row.style.display !== 'none') {
+                const cols = row.querySelectorAll('td');
+                const rowData = [];
+                cols.forEach(col => {
+                    // Nettoyer le texte
+                    let text = col.textContent.trim().replace(/\s+/g, ' ');
+                    // Échapper les guillemets
+                    text = text.replace(/"/g, '""');
+                    rowData.push(`"${text}"`);
+                });
+                csv.push(rowData.join(','));
+                exportedCount++;
+            }
         });
-        csv.push(rowData.join(','));
-    });
+        
+        // Vérifier s'il y a des données à exporter
+        if (exportedCount === 0) {
+            showNotification('⚠️ Aucun participant à exporter avec les filtres actuels', 'warning');
+            return;
+        }
+    }
     
     const csvContent = csv.join('\n');
     const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -475,8 +507,15 @@ function exportToCSV() {
     link.click();
     document.body.removeChild(link);
     
-    // Message de confirmation
-    showNotification('✅ Export CSV réussi !', 'success');
+    // Message de confirmation avec le nombre de participants exportés
+    const totalRows = tbody ? tbody.querySelectorAll('tr').length : 0;
+    const visibleRows = tbody ? Array.from(tbody.querySelectorAll('tr')).filter(r => r.style.display !== 'none').length : 0;
+    
+    if (visibleRows < totalRows) {
+        showNotification(`✅ Export CSV réussi ! (${visibleRows}/${totalRows} participants exportés)`, 'success');
+    } else {
+        showNotification('✅ Export CSV réussi !', 'success');
+    }
 }
 
 // Fonction pour filtrer les participants
