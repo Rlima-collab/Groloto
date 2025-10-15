@@ -119,4 +119,15 @@ class HistoriqueStock
         $this->date_creation = $date_creation;
         return $this;
     }
+
+    public function isEntree(): bool
+    {
+        return $this->type_changement === 'entree';
+    }
+
+    public function isSortie(): bool
+    {
+        return $this->type_changement === 'sortie';
+    }
+
 }

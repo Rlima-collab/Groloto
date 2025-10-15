@@ -1,0 +1,130 @@
+<!-- ⚙️ Mouvements -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">📊 Analyse des Mouvements de Stock</h3>
+    </div>
+    <div class="card-content">
+        <p class="text-muted">Visualisation des entrées, sorties et niveaux critiques.</p>
+        
+        <div class="charts-grid">
+            <!-- Entrées / Sorties -->
+            <div class="chart-box">
+                <h4>Évolution des entrées et sorties</h4>
+                <canvas id="mouvementsChart"></canvas>
+            </div>
+
+            <!-- Répartition par catégorie -->
+            <div class="chart-box">
+                <h4>Répartition des articles par catégorie</h4>
+                <canvas id="categoriesChart"></canvas>
+            </div>
+
+            <!-- États critiques -->
+            <div class="chart-box">
+                <h4>État global des stocks</h4>
+                <canvas id="etatStockChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- === Script Chart.js === -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1️⃣ Evolution des entrées/sorties
+    const ctx1 = document.getElementById('mouvementsChart');
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: ['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'J-1', 'Aujourd\'hui'],
+            datasets: [
+                {
+                    label: 'Entrées',
+                    data: [12, 19, 7, 15, 12, 9, 18],
+                    borderColor: '#00b894',
+                    backgroundColor: 'rgba(0,184,148,0.2)',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'Sorties',
+                    data: [10, 5, 8, 12, 14, 7, 9],
+                    borderColor: '#d63031',
+                    backgroundColor: 'rgba(214,48,49,0.2)',
+                    tension: 0.3,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    // 2️⃣ Répartition par catégorie
+    const ctx2 = document.getElementById('categoriesChart');
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Bar', 'Restauration', 'Culture', 'Bien-être', 'Autre'],
+            datasets: [{
+                label: 'Catégories',
+                data: [12, 20, 8, 5, 7],
+                backgroundColor: ['#0984e3', '#00b894', '#6c5ce7', '#fdcb6e', '#d63031'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    // 3️⃣ Statut global (critique / faible / normal)
+    const ctx3 = document.getElementById('etatStockChart');
+    new Chart(ctx3, {
+        type: 'bar',
+        data: {
+            labels: ['Critique', 'Faible', 'Normal'],
+            datasets: [{
+                label: 'Nombre d’articles',
+                data: [2, 3, 15],
+                backgroundColor: ['#e74c3c', '#f1c40f', '#2ecc71'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+});
+</script>
+
+<style>
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.chart-box {
+    background: #fff;
+    padding: 1.2rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.chart-box h4 {
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+    color: #333;
+    font-weight: 600;
+}
+</style>
