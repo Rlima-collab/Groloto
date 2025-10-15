@@ -35,10 +35,6 @@ class Mecene
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'mecenes')]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?Utilisateur $utilisateur = null;
-
     public function __construct(?string $nom = null)
     {
         $this->nom = $nom;
