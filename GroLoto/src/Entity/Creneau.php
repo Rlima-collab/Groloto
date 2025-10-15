@@ -1,9 +1,10 @@
 <?php
 namespace App\Entity;
 
+use App\Repository\CreneauRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: CreneauRepository::class)]
 #[ORM\Table(name: "CRENEAU")]
 class Creneau
 {

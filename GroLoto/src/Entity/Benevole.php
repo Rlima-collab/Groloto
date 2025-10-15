@@ -1,9 +1,10 @@
 <?php
 namespace App\Entity;
 
+use App\Repository\BenevoleRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: BenevoleRepository::class)]
 #[ORM\Table(name: 'BENEVOLE')]
 class Benevole
 {

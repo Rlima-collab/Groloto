@@ -13,6 +13,10 @@ class Mecene
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
+    #[ORM\OneToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(name: "utilisateur_id", referencedColumnName: "id", nullable: true)]
+    private ?Utilisateur $utilisateur = null;
+
     #[ORM\Column(type: 'string', length: 180, nullable: true)]
     private ?string $nom = null;
 
