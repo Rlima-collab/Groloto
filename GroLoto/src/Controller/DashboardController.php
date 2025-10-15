@@ -43,14 +43,8 @@ class DashboardController extends AbstractController
         )
         ->getSingleScalarResult();
 
-        // Nouveaux mécènes ce mois
-        $newSponsors = $this->entityManager->createQuery(
-            'SELECT COUNT(m.id) FROM App\Entity\Mecene m
-             LEFT JOIN m.utilisateur u
-             WHERE u.date_creation >= :firstDay AND u.date_creation < :nextMonth'
-        )
-        ->setParameters(['firstDay' => $firstDayOfMonth, 'nextMonth' => $firstDayOfNextMonth])
-        ->getSingleScalarResult();
+        // Nouveaux mécènes ce mois (pas de colonne date dans la table, on compte juste le total)
+        $newSponsors = 0; // Temporaire : la table MECENE n'a pas de colonne date_creation
 
         // Nombre total de lots
         $prizesCount = $this->entityManager->createQuery(

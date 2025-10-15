@@ -184,6 +184,37 @@ document.querySelectorAll('.tab-btn').forEach(button => {
         document.getElementById(target).classList.add('active');
     });
 });
+
+// === JS pour les actions rapides ===
+document.addEventListener('DOMContentLoaded', function() {
+    // Bouton "Ajouter un article" - Redirige vers l'onglet Ajouter
+    document.querySelector('.action-btn.green').addEventListener('click', function() {
+        document.querySelector('.tab-btn[data-tab="ajouter"]').click();
+    });
+
+    // Bouton "Entrée de stock" - Redirige vers l'onglet Ajouter avec type "entrée"
+    document.querySelector('.action-btn.blue').addEventListener('click', function() {
+        document.querySelector('.tab-btn[data-tab="ajouter"]').click();
+        setTimeout(() => {
+            const typeSelect = document.getElementById('type');
+            if (typeSelect) typeSelect.value = 'entree';
+        }, 100);
+    });
+
+    // Bouton "Sortie de stock" - Redirige vers l'onglet Ajouter avec type "sortie"
+    document.querySelector('.action-btn.red').addEventListener('click', function() {
+        document.querySelector('.tab-btn[data-tab="ajouter"]').click();
+        setTimeout(() => {
+            const typeSelect = document.getElementById('type');
+            if (typeSelect) typeSelect.value = 'sortie';
+        }, 100);
+    });
+
+    // Bouton "Exporter inventaire" - Redirige vers l'onglet Historique
+    document.querySelector('.action-btn.gray').addEventListener('click', function() {
+        document.querySelector('.tab-btn[data-tab="historique"]').click();
+    });
+});
 </script>
 
 <!-- === CSS du menu (identique au visuel) === -->
