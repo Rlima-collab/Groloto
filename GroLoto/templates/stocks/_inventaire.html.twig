@@ -1,0 +1,124 @@
+<!-- === Résumé des stocks (cartes) === -->
+<div class="metrics-grid">
+    <div class="card metric-card yellow-border">
+        <div class="card-header">
+            <span class="metric-title">Articles</span>
+            <span class="icon yellow">📦</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ total_items }}</div>
+            <p class="metric-change positive">Inventaire actuel</p>
+        </div>
+    </div>
+
+    <div class="card metric-card green-border">
+        <div class="card-header">
+            <span class="metric-title">Valeur totale</span>
+            <span class="icon green">💰</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">€{{ stock_value|number_format(0, ',', ' ') }}</div>
+            <p class="metric-change positive">Estimation globale</p>
+        </div>
+    </div>
+
+    <div class="card metric-card red-border">
+        <div class="card-header">
+            <span class="metric-title">Alertes stock</span>
+            <span class="icon red">⚠</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ low_stock_count }}</div>
+            <p class="metric-change negative">Articles critiques</p>
+        </div>
+    </div>
+
+    <div class="card metric-card blue-border">
+        <div class="card-header">
+            <span class="metric-title">Catégories</span>
+            <span class="icon blue">📊</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ categories_count }}</div>
+            <p class="metric-change">Types d’articles</p>
+        </div>
+    </div>
+</div>
+
+<!-- === Inventaire complet === -->
+<div class="dashboard-grid">
+    <div class="card inventory-card">
+        <div class="card-header">
+            <h3 class="card-title">📦 Inventaire des lots</h3>
+        </div>
+        <div class="card-content">
+            <div class="table-wrapper">
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>Article</th>
+                            <th>Catégorie</th>
+                            <th class="text-right">Stock</th>
+                            <th class="text-right">Seuil</th>
+                            <th class="text-right">Valeur estimée</th>
+                            <th>Unité</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in stock_items %}
+                            <tr>
+                                <td class="name">{{ item.getNom() }}</td>
+                                <td><span class="badge category">{{ item.getCategorie()|capitalize }}</span></td>
+                                <td class="text-right">{{ item.getQuantite() }}</td>
+                                <td class="text-right">{{ item.getSeuil() }}</td>
+                                <td class="text-right value">€{{ (item.getQuantite() * 10)|number_format(0, ',', ' ') }}</td>
+                                <td><span class="badge unit">{{ item.getUnite() }}</span></td>
+                                <td>
+                                    {% if item.getQuantite() <= item.getSeuil() * 0.5 %}
+                                        <span class="badge status danger">Critique</span>
+                                    {% elseif item.getQuantite() <= item.getSeuil() %}
+                                        <span class="badge status warning">Faible</span>
+                                    {% else %}
+                                        <span class="badge status success">Normal</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="empty">Aucun article en stock</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- === Actions rapides === -->
+    <div class="card actions-card">
+        <div class="card-header">
+            <h3 class="card-title">⚡ Actions rapides</h3>
+        </div>
+        <div class="card-content">
+            <div class="actions-list">
+                <button class="action-btn green">
+                    <span class="btn-icon">➕</span>
+                    Ajouter un article
+                </button>
+                <button class="action-btn blue">
+                    <span class="btn-icon">⬆</span>
+                    Entrée de stock
+                </button>
+                <button class="action-btn red">
+                    <span class="btn-icon">⬇</span>
+                    Sortie de stock
+                </button>
+                <button class="action-btn gray">
+                    <span class="btn-icon">📤</span>
+                    Exporter inventaire
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

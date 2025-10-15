@@ -7,6 +7,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use App\Entity\Mecene;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 #[ORM\Table(name: "UTILISATEUR")]
@@ -27,8 +30,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Email(message: "L'email n'est pas valide")]
     private ?string $email = null;
 
-    #[ORM\Column(type: "string", length: 255)]
-    private ?string $mot_de_passe = '';
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $mot_de_passe = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     private ?string $prenom = null;
@@ -45,10 +48,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private ?\DateTimeInterface $date_modification = null;
 
+    #[ORM\OneToMany(targetEntity: Mecene::class, mappedBy: 'utilisateur')]
+    private Collection $mecenes;
+
     public function __construct()
     {
         $this->date_creation = new \DateTime();
         $this->date_modification = new \DateTime();
+        $this->mecenes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -186,5 +193,33 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // No sensitive temporary data to erase in this implementation
         // If you store temporary plaintext passwords or other sensitive data, clear them here
+    }
+
+    /** @return Collection<int, Mecene> */
+    public function getMecenes(): Collection
+    {
+        return $this->mecenes;
+    }
+
+    public function addMecene(Mecene $mecene): self
+    {
+        if (!$this->mecenes->contains($mecene)) {
+            $this->mecenes[] = $mecene;
+            $mecene->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMecene(Mecene $mecene): self
+    {
+        if ($this->mecenes->removeElement($mecene)) {
+            // set the owning side to null (unless already changed)
+            if ($mecene->getUtilisateur() === $this) {
+                $mecene->setUtilisateur(null);
+            }
+        }
+
+        return $this;
     }
 }

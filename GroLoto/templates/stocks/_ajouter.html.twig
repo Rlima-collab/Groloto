@@ -1,0 +1,168 @@
+<div class="ajouter-container">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">➕ Mouvement de Stock</h3>
+            <p class="subtitle">Enregistrer une entrée ou sortie de stock</p>
+        </div>
+
+        <div class="card-content">
+            <form method="post" action="{{ path('stock_ajouter_mouvement') }}" class="stock-form">
+                <div class="form-grid">
+                    <!-- Article -->
+                    <div class="form-group">
+                        <label for="article">Article *</label>
+                        <select id="article" name="article" required>
+                            <option value="" disabled selected style="color: #999;">Sélectionner un article</option>
+                            {% for item in stock_items %}
+                                <option value="{{ item.id }}" data-quantite="{{ item.quantite }}" data-unite="{{ item.unite }}">
+                                    {{ item.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div id="stock-info" class="stock-info" style="display: none;">
+                            <span class="stock-badge"> Stock actuel : <strong id="stock-quantite">0</strong> <span id="stock-unite"></span></span>
+                        </div>
+                    </div>
+
+                    <!-- Type de mouvement -->
+                    <div class="form-group">
+                        <label for="type">Type de mouvement *</label>
+                        <select id="type" name="type" required>
+                            <option value="" disabled selected style="color: #999;">Entrée ou sortie</option>
+                            <option value="entree">Entrée</option>
+                            <option value="sortie">Sortie</option>
+                        </select>
+                    </div>
+
+                    <!-- Quantité -->
+                    <div class="form-group">
+                        <label for="quantite">Quantité *</label>
+                        <input type="number" id="quantite" name="quantite" min="1" value="0" required>
+                    </div>
+
+                    <!-- Motif -->
+                    <div class="form-group">
+                        <label for="raison">Motif *</label>
+                        <input type="text" id="raison" name="raison" placeholder="Don, tirage au sort, etc." required>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="form-group full-width">
+                        <label for="notes">Notes</label>
+                        <input type="text" id="notes" name="notes" placeholder="Informations complémentaires">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Enregistrer le mouvement</button>
+                    <button type="reset" class="btn btn-secondary">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.ajouter-container {
+    margin-top: 1rem;
+}
+.subtitle {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    display: block;
+}
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+.form-group select option:disabled {
+    color: #999;
+}
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+.stock-info {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: #e7f3ff;
+    border-left: 3px solid #007bff;
+    border-radius: 4px;
+}
+.stock-badge {
+    font-size: 0.9rem;
+    color: #0056b3;
+}
+.stock-badge strong {
+    font-size: 1.1rem;
+    color: #003d82;
+}
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+}
+.btn {
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+}
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+.btn-secondary {
+    background-color: #e9ecef;
+    color: #333;
+}
+.btn-secondary:hover {
+    background-color: #d6d8db;
+}
+.icon {
+    margin-right: 0.4rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const articleSelect = document.getElementById('article');
+    const stockInfo = document.getElementById('stock-info');
+    const stockQuantite = document.getElementById('stock-quantite');
+    const stockUnite = document.getElementById('stock-unite');
+
+    articleSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            const quantite = selectedOption.getAttribute('data-quantite');
+            const unite = selectedOption.getAttribute('data-unite');
+            
+            stockQuantite.textContent = quantite;
+            stockUnite.textContent = unite;
+            stockInfo.style.display = 'block';
+        } else {
+            stockInfo.style.display = 'none';
+        }
+    });
+});
+</script>

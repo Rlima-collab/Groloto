@@ -1,12 +1,14 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Gestion des Stocks{% endblock %}
+
 {% block body %}
 <div class="page-header">
     <h1 class="page-title">Gestion des Stocks</h1>
     <p class="page-description">Suivi des lots, entrées/sorties et alertes</p>
 </div>
 
-<!-- Cartes de résumé -->
+<!-- 🔸 Cartes de résumé -->
 <div class="metrics-grid">
     <div class="card metric-card yellow-border">
         <div class="card-header">
@@ -53,15 +55,23 @@
     </div>
 </div>
 
-<!-- 🔹 Onglets de navigation -->
+<!-- 🔹 Barre d’onglets -->
 <div class="tabs-nav">
-    <button class="tab-btn active" data-tab="inventaire">📦 Inventaire</button>
-    <button class="tab-btn" data-tab="mouvements">⚙️ Mouvements</button>
-    <button class="tab-btn" data-tab="historique">🕓 Historique</button>
-    <button class="tab-btn" data-tab="ajouter">➕ Ajouter</button>
+    <button class="tab-btn active" data-tab="inventaire">
+        <span class="icon">📦</span> Inventaire
+    </button>
+    <button class="tab-btn" data-tab="mouvements">
+        <span class="icon">⚙️</span> Mouvements
+    </button>
+    <button class="tab-btn" data-tab="historique">
+        <span class="icon">🕓</span> Historique
+    </button>
+    <button class="tab-btn" data-tab="ajouter">
+        <span class="icon">➕</span> Ajouter
+    </button>
 </div>
 
-<!-- 🔹 Contenu des onglets -->
+<!-- 🔹 Contenu des sections -->
 <div class="tabs-content">
 
     <!-- ✅ Inventaire -->
@@ -89,17 +99,13 @@
                                 {% for item in stock_items %}
                                     <tr>
                                         <td class="name">{{ item.getNom() }}</td>
-                                        <td>
-                                            <span class="badge category">{{ item.getCategorie()|capitalize }}</span>
-                                        </td>
+                                        <td><span class="badge category">{{ item.getCategorie()|capitalize }}</span></td>
                                         <td class="text-right">{{ item.getQuantite() }}</td>
                                         <td class="text-right">{{ item.getSeuil() }}</td>
                                         <td class="text-right value">
                                             €{{ (item.getQuantite() * 10)|number_format(0, ',', ' ') }}
                                         </td>
-                                        <td>
-                                            <span class="badge unit">{{ item.getUnite() }}</span>
-                                        </td>
+                                        <td><span class="badge unit">{{ item.getUnite() }}</span></td>
                                         <td>
                                             {% if item.getQuantite() <= item.getSeuil() * 0.5 %}
                                                 <span class="badge status danger">Critique</span>
@@ -121,7 +127,7 @@
                 </div>
             </div>
 
-            <!-- Actions rapides -->
+            <!-- ⚡ Actions rapides -->
             <div class="card actions-card">
                 <div class="card-header">
                     <h3 class="card-title">⚡ Actions rapides</h3>
@@ -152,49 +158,27 @@
 
     <!-- ⚙️ Mouvements -->
     <section id="mouvements" class="tab-section">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">⚙️ Mouvements de stock</h3>
-            </div>
-            <div class="card-content">
-                <p class="text-muted">Ici apparaîtront les entrées et sorties récentes.</p>
-            </div>
-        </div>
+        {% include 'stocks/_mouvements.html.twig' %}
     </section>
+
 
     <!-- 🕓 Historique -->
     <section id="historique" class="tab-section">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">🕓 Historique complet</h3>
-            </div>
-            <div class="card-content">
-                <p class="text-muted">Liste complète des actions passées sur le stock.</p>
-            </div>
-        </div>
+        {% include 'stocks/_historique.html.twig' %}
     </section>
 
     <!-- ➕ Ajouter -->
     <section id="ajouter" class="tab-section">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">➕ Ajouter un article</h3>
-            </div>
-            <div class="card-content">
-                <p class="text-muted">Formulaire d’ajout à venir...</p>
-            </div>
-        </div>
+        {% include 'stocks/_ajouter.html.twig' %}
     </section>
 </div>
 
-<!-- JS pour changer de section -->
+<!-- === JS pour navigation entre sections === -->
 <script>
 document.querySelectorAll('.tab-btn').forEach(button => {
     button.addEventListener('click', () => {
-        // activer bouton
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
-        // afficher section
         const target = button.dataset.tab;
         document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
         document.getElementById(target).classList.add('active');
@@ -202,38 +186,55 @@ document.querySelectorAll('.tab-btn').forEach(button => {
 });
 </script>
 
-<!-- CSS -->
+<!-- === CSS du menu (identique au visuel) === -->
 <style>
 .tabs-nav {
     display: flex;
-    gap: 0.5rem;
-    margin: 1.5rem 0;
-    border-bottom: 2px solid #eee;
-}
-.tab-btn {
-    flex: 1;
-    padding: 0.75rem 1rem;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0 1.5rem;
+    padding: 0.75rem;
     background: #f8f9fa;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    border-radius: 8px 8px 0 0;
-    transition: all 0.3s;
-}
-.tab-btn.active {
-    background: #fff;
-    border-bottom: 3px solid #ffd500;
-    color: #222;
+    border-radius: 10px;
 }
 
-/* Sections */
-.tabs-content {
-    width: 100%;
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: transparent;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #555;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
+
+.tab-btn.active {
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    color: #000;
+    font-weight: 600;
+}
+
+.tab-btn:hover {
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    color: #111;
+}
+
+.tab-btn .icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
 .tab-section {
     display: none;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.2s ease;
 }
 .tab-section.active {
     display: block;
