@@ -199,7 +199,6 @@ CREATE TABLE HISTORIQUE_EVENEMENT (
   FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
-
 -- Insertions
 INSERT INTO ROLE (nom, description) VALUES
   ('admin', 'Administrateur organisation'),

@@ -1,19 +1,19 @@
 <?php
+// src/Entity/Utilisateur.php
 namespace App\Entity;
 
 use App\Repository\UtilisateurRepository;
-use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use App\Entity\Mecene;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 #[ORM\Table(name: "UTILISATEUR")]
-#[UniqueEntity(fields: ["email"], message: "Cette adresse email est déjà utilisée")]
+#[UniqueEntity(fields: ['email'], message: "Cette adresse email est déjà utilisée.")]
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -26,8 +26,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Role $role = null;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
-    #[Assert\NotBlank(message: "L'email est obligatoire")]
-    #[Assert\Email(message: "L'email n'est pas valide")]
+    #[Assert\NotBlank(message: "L'email est obligatoire.")]
+    #[Assert\Email(message: "L'email n'est pas valide.")]
     private ?string $email = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
@@ -57,6 +57,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->date_modification = new \DateTime();
         $this->mecenes = new ArrayCollection();
     }
+
+    // === Getters & Setters ===
 
     public function getId(): ?int
     {
@@ -90,7 +92,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->mot_de_passe;
     }
 
-    public function setMotDePasse(string $mot_de_passe): self
+    public function setMotDePasse(?string $mot_de_passe): self
     {
         $this->mot_de_passe = $mot_de_passe;
         return $this;
@@ -151,50 +153,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // UserInterface and PasswordAuthenticatedUserInterface methods
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
-
-    public function getRoles(): array
-    {
-        $roles = [];
-        if ($this->role) {
-            switch ($this->role->getNom()) {
-                case 'admin':
-                    $roles[] = 'ROLE_ADMIN';
-                    break;
-                case 'benevole':
-                    $roles[] = 'ROLE_BENEVOLE';
-                    break;
-                case 'mecene':
-                    $roles[] = 'ROLE_MECENE';
-                    break;
-                default:
-                    $roles[] = 'ROLE_USER';
-            }
-        }
-        $roles[] = 'ROLE_USER';
-        return array_unique($roles);
-    }
-
-    public function getPassword(): string
-    {
-        return (string) $this->mot_de_passe;
-    }
-
-    public function getSalt(): ?string
-    {
-        return null;
-    }
-
-    public function eraseCredentials(): void
-    {
-        // No sensitive temporary data to erase in this implementation
-        // If you store temporary plaintext passwords or other sensitive data, clear them here
-    }
-
     /** @return Collection<int, Mecene> */
     public function getMecenes(): Collection
     {
@@ -207,19 +165,55 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
             $this->mecenes[] = $mecene;
             $mecene->setUtilisateur($this);
         }
-
         return $this;
     }
 
     public function removeMecene(Mecene $mecene): self
     {
         if ($this->mecenes->removeElement($mecene)) {
-            // set the owning side to null (unless already changed)
             if ($mecene->getUtilisateur() === $this) {
                 $mecene->setUtilisateur(null);
             }
         }
-
         return $this;
+    }
+
+    // === Implémentation UserInterface ===
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = ['ROLE_USER'];
+
+        if ($this->role) {
+            $nom = $this->role->getNom();
+            $roles[] = match ($nom) {
+                'admin' => 'ROLE_ADMIN',
+                'benevole' => 'ROLE_BENEVOLE',
+                'mecene' => 'ROLE_MECENE',
+                default => 'ROLE_USER',
+            };
+        }
+
+        return array_unique($roles);
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->mot_de_passe;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Rien à effacer ici (pas de données temporaires sensibles)
+    }
+
+    public function getSalt(): ?string
+    {
+        return null;
     }
 }
