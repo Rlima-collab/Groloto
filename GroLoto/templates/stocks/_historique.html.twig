@@ -56,11 +56,11 @@
                             <div class="mouvement-item {{ mouvement.type }}">
                                 <div class="mouvement-icon">
                                     {% if mouvement.type == 'entree' %}
-                                        ⬆
+                                        <i class="bi bi-arrow-up-circle text-success"></i>
                                     {% elseif mouvement.type == 'sortie' %}
-                                        ⬇
+                                        <i class="bi bi-arrow-down-circle text-danger"></i>
                                     {% else %}
-                                        ⚙
+                                        <i class="bi bi-sliders text-warning"></i>
                                     {% endif %}
                                 </div>
                                 <div class="mouvement-info">

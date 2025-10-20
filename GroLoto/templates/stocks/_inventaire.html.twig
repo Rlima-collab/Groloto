@@ -3,7 +3,7 @@
     <div class="card metric-card yellow-border">
         <div class="card-header">
             <span class="metric-title">Articles</span>
-            <span class="icon yellow">📦</span>
+            <span class="icon yellow"><i class="bi bi-box"></i></span>
         </div>
         <div class="card-content">
             <div class="metric-value">{{ total_items }}</div>
@@ -14,7 +14,7 @@
     <div class="card metric-card green-border">
         <div class="card-header">
             <span class="metric-title">Valeur totale</span>
-            <span class="icon green">💰</span>
+            <span class="icon green"><i class="bi bi-cash-coin"></i></span>
         </div>
         <div class="card-content">
             <div class="metric-value">€{{ stock_value|number_format(0, ',', ' ') }}</div>
@@ -25,7 +25,7 @@
     <div class="card metric-card red-border">
         <div class="card-header">
             <span class="metric-title">Alertes stock</span>
-            <span class="icon red">⚠</span>
+            <span class="icon red"><i class="bi bi-exclamation-triangle"></i></span>
         </div>
         <div class="card-content">
             <div class="metric-value">{{ low_stock_count }}</div>
@@ -36,7 +36,7 @@
     <div class="card metric-card blue-border">
         <div class="card-header">
             <span class="metric-title">Catégories</span>
-            <span class="icon blue">📊</span>
+            <span class="icon blue"><i class="bi bi-tags"></i></span>
         </div>
         <div class="card-content">
             <div class="metric-value">{{ categories_count }}</div>
@@ -49,7 +49,7 @@
 <div class="dashboard-grid">
     <div class="card inventory-card">
         <div class="card-header">
-            <h3 class="card-title">📦 Inventaire des lots</h3>
+            <h3 class="card-title"><i class="bi bi-box me-2"></i>Inventaire des lots</h3>
         </div>
         <div class="card-content">
             <div class="table-wrapper">

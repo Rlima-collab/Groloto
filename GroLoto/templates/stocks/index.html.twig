@@ -8,12 +8,12 @@
     <p class="page-description">Suivi des lots, entrées/sorties et alertes</p>
 </div>
 
-<!-- 🔸 Cartes de résumé -->
+<!-- Cartes de résumé -->
 <div class="metrics-grid">
     <div class="card metric-card yellow-border">
         <div class="card-header">
             <span class="metric-title">Articles</span>
-            <span class="icon yellow">📦</span>
+            <span class="icon yellow"></span>
         </div>
         <div class="card-content">
             <div class="metric-value">{{ total_items }}</div>
@@ -24,7 +24,7 @@
     <div class="card metric-card green-border">
         <div class="card-header">
             <span class="metric-title">Valeur totale</span>
-            <span class="icon green">💰</span>
+            <span class="icon green"></span>
         </div>
         <div class="card-content">
             <div class="metric-value">€{{ stock_value|number_format(0, ',', ' ') }}</div>
@@ -35,7 +35,7 @@
     <div class="card metric-card red-border">
         <div class="card-header">
             <span class="metric-title">Alertes stock</span>
-            <span class="icon red">⚠</span>
+            <span class="icon red"></span>
         </div>
         <div class="card-content">
             <div class="metric-value">{{ low_stock_count }}</div>
@@ -46,7 +46,7 @@
     <div class="card metric-card blue-border">
         <div class="card-header">
             <span class="metric-title">Catégories</span>
-            <span class="icon blue">📊</span>
+            <span class="icon blue"></span>
         </div>
         <div class="card-content">
             <div class="metric-value">{{ categories_count }}</div>
@@ -55,119 +55,90 @@
     </div>
 </div>
 
-<!-- 🔹 Barre d’onglets -->
+<!-- Barre d’onglets -->
 <div class="tabs-nav">
     <button class="tab-btn active" data-tab="inventaire">
-        <span class="icon">📦</span> Inventaire
+        <span class="icon"></span> Inventaire
     </button>
     <button class="tab-btn" data-tab="mouvements">
-        <span class="icon">⚙️</span> Mouvements
+        <span class="icon"></span> Mouvements
     </button>
     <button class="tab-btn" data-tab="historique">
-        <span class="icon">🕓</span> Historique
+        <span class="icon"></span> Historique
     </button>
     <button class="tab-btn" data-tab="ajouter">
-        <span class="icon">➕</span> Ajouter
+        <span class="icon"></span> Ajouter
     </button>
 </div>
 
 <!-- 🔹 Contenu des sections -->
 <div class="tabs-content">
 
-    <!-- ✅ Inventaire -->
+    <!-- Inventaire -->
     <section id="inventaire" class="tab-section active">
-        <div class="dashboard-grid">
-            <div class="card inventory-card">
-                <div class="card-header">
-                    <h3 class="card-title">📦 Inventaire des lots</h3>
-                </div>
-                <div class="card-content">
-                    <div class="table-wrapper">
-                        <table class="inventory-table">
-                            <thead>
-                                <tr>
-                                    <th>Article</th>
-                                    <th>Catégorie</th>
-                                    <th class="text-right">Stock</th>
-                                    <th class="text-right">Seuil</th>
-                                    <th class="text-right">Valeur estimée</th>
-                                    <th>Unité</th>
-                                    <th>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in stock_items %}
-                                    <tr>
-                                        <td class="name">{{ item.getNom() }}</td>
-                                        <td><span class="badge category">{{ item.getCategorie()|capitalize }}</span></td>
-                                        <td class="text-right">{{ item.getQuantite() }}</td>
-                                        <td class="text-right">{{ item.getSeuil() }}</td>
-                                        <td class="text-right value">
-                                            €{{ (item.getQuantite() * 10)|number_format(0, ',', ' ') }}
-                                        </td>
-                                        <td><span class="badge unit">{{ item.getUnite() }}</span></td>
-                                        <td>
-                                            {% if item.getQuantite() <= item.getSeuil() * 0.5 %}
-                                                <span class="badge status danger">Critique</span>
-                                            {% elseif item.getQuantite() <= item.getSeuil() %}
-                                                <span class="badge status warning">Faible</span>
-                                            {% else %}
-                                                <span class="badge status success">Normal</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% else %}
-                                    <tr>
-                                        <td colspan="7" class="empty">Aucun article en stock</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <div class="card inventory-card">
+            <div class="card-header">
+                <h3 class="card-title">Inventaire des lots</h3>
             </div>
-
-            <!-- ⚡ Actions rapides -->
-            <div class="card actions-card">
-                <div class="card-header">
-                    <h3 class="card-title">⚡ Actions rapides</h3>
-                </div>
-                <div class="card-content">
-                    <div class="actions-list">
-                        <button class="action-btn green">
-                            <span class="btn-icon">➕</span>
-                            Ajouter un article
-                        </button>
-                        <button class="action-btn blue">
-                            <span class="btn-icon">⬆</span>
-                            Entrée de stock
-                        </button>
-                        <button class="action-btn red">
-                            <span class="btn-icon">⬇</span>
-                            Sortie de stock
-                        </button>
-                        <button class="action-btn gray">
-                            <span class="btn-icon">📤</span>
-                            Exporter inventaire
-                        </button>
-                    </div>
+            <div class="card-content">
+                <div class="table-wrapper">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Article</th>
+                                <th>Catégorie</th>
+                                <th class="text-right">Stock</th>
+                                <th class="text-right">Seuil</th>
+                                <th class="text-right">Valeur estimée</th>
+                                <th>Unité</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in stock_items %}
+                                <tr>
+                                    <td class="name">{{ item.getNom() }}</td>
+                                    <td><span class="badge category">{{ item.getCategorie()|capitalize }}</span></td>
+                                    <td class="text-right">{{ item.getQuantite() }}</td>
+                                    <td class="text-right">{{ item.getSeuil() }}</td>
+                                    <td class="text-right value">
+                                        €{{ (item.getQuantite() * 10)|number_format(0, ',', ' ') }}
+                                    </td>
+                                    <td><span class="badge unit">{{ item.getUnite() }}</span></td>
+                                    <td>
+                                        {% if item.getQuantite() <= item.getSeuil() * 0.5 %}
+                                            <span class="badge status danger">Critique</span>
+                                        {% elseif item.getQuantite() <= item.getSeuil() %}
+                                            <span class="badge status warning">Faible</span>
+                                        {% else %}
+                                            <span class="badge status success">Normal</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" class="empty">Aucun article en stock</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ⚙️ Mouvements -->
+    <!-- Mouvements -->
     <section id="mouvements" class="tab-section">
         {% include 'stocks/_mouvements.html.twig' %}
     </section>
 
 
-    <!-- 🕓 Historique -->
+    <!-- Historique -->
     <section id="historique" class="tab-section">
         {% include 'stocks/_historique.html.twig' %}
     </section>
 
-    <!-- ➕ Ajouter -->
+    <!-- Ajouter -->
     <section id="ajouter" class="tab-section">
         {% include 'stocks/_ajouter.html.twig' %}
     </section>
@@ -182,37 +153,6 @@ document.querySelectorAll('.tab-btn').forEach(button => {
         const target = button.dataset.tab;
         document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
         document.getElementById(target).classList.add('active');
-    });
-});
-
-// === JS pour les actions rapides ===
-document.addEventListener('DOMContentLoaded', function() {
-    // Bouton "Ajouter un article" - Redirige vers l'onglet Ajouter
-    document.querySelector('.action-btn.green').addEventListener('click', function() {
-        document.querySelector('.tab-btn[data-tab="ajouter"]').click();
-    });
-
-    // Bouton "Entrée de stock" - Redirige vers l'onglet Ajouter avec type "entrée"
-    document.querySelector('.action-btn.blue').addEventListener('click', function() {
-        document.querySelector('.tab-btn[data-tab="ajouter"]').click();
-        setTimeout(() => {
-            const typeSelect = document.getElementById('type');
-            if (typeSelect) typeSelect.value = 'entree';
-        }, 100);
-    });
-
-    // Bouton "Sortie de stock" - Redirige vers l'onglet Ajouter avec type "sortie"
-    document.querySelector('.action-btn.red').addEventListener('click', function() {
-        document.querySelector('.tab-btn[data-tab="ajouter"]').click();
-        setTimeout(() => {
-            const typeSelect = document.getElementById('type');
-            if (typeSelect) typeSelect.value = 'sortie';
-        }, 100);
-    });
-
-    // Bouton "Exporter inventaire" - Redirige vers l'onglet Historique
-    document.querySelector('.action-btn.gray').addEventListener('click', function() {
-        document.querySelector('.tab-btn[data-tab="historique"]').click();
     });
 });
 </script>
