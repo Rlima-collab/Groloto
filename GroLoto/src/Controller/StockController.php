@@ -168,4 +168,32 @@ class StockController extends AbstractController
         return $this->redirectToRoute('stocks');
     }
 
+    #[Route('/stocks/export-inventaire', name: 'stocks_export_inventaire')]
+    public function exportInventaire(EntityManagerInterface $em): Response
+    {
+        $stockItems = $em->getRepository(Stock::class)->findAll();
+        
+        // Créer le contenu CSV
+        $csv = "Article,Catégorie,Stock,Seuil,Valeur Unitaire,Unité\n";
+        
+        foreach ($stockItems as $item) {
+            $csv .= sprintf(
+                '"%s","%s",%d,%d,%.2f,"%s"' . "\n",
+                str_replace('"', '""', $item->getNom()),
+                $item->getCategorie(),
+                $item->getQuantite(),
+                $item->getSeuil(),
+                $item->getValeurUnitaire(),
+                $item->getUnite()
+            );
+        }
+        
+        // Retourner le CSV en téléchargement
+        $response = new Response($csv);
+        $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="inventaire_stock_' . date('Y-m-d') . '.csv"');
+        
+        return $response;
+    }
+
 }

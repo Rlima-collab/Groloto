@@ -1,0 +1,285 @@
+/* Styles spécifiques pour la page événements utilisant le design dashboard */
+
+/* Extension du calendar pour le style dashboard */
+.calendar-card {
+    grid-column: 1 / -1;
+    margin-bottom: 2rem;
+}
+
+.calendar-card .card-content {
+    padding: 1.5rem;
+}
+
+#calendar {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 600px;
+}
+
+/* Style du calendrier FullCalendar avec les couleurs dashboard */
+.fc-toolbar-title {
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
+    font-size: 1.5rem !important;
+}
+
+.fc-button-primary {
+    background: #fbbf24 !important;
+    border-color: #fbbf24 !important;
+    color: #1a1a1a !important;
+    font-weight: 500 !important;
+}
+
+.fc-button-primary:hover {
+    background: #f59e0b !important;
+    border-color: #f59e0b !important;
+}
+
+.fc-button-primary:not(:disabled):active {
+    background: #d97706 !important;
+    border-color: #d97706 !important;
+}
+
+.fc-event {
+    border: none !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+}
+
+.fc-event.evenement-event {
+    background: #10b981 !important;
+    color: white !important;
+}
+
+.fc-event.creneau-event {
+    background: #3b82f6 !important;
+    color: white !important;
+}
+
+.fc-event:hover {
+    opacity: 0.85 !important;
+    transform: scale(1.02) !important;
+    transition: all 0.2s ease !important;
+}
+
+.fc-daygrid-day:hover {
+    background-color: #fef3c7 !important;
+}
+
+.fc-day-today {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+}
+
+/* Styles pour les listes d'événements */
+.events-list, .history-list {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.events-list::-webkit-scrollbar, .history-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.events-list::-webkit-scrollbar-track, .history-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 2px;
+}
+
+.events-list::-webkit-scrollbar-thumb, .history-list::-webkit-scrollbar-thumb {
+    background: #fbbf24;
+    border-radius: 2px;
+}
+
+.event-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.event-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.event-item.yellow-accent {
+    border-left: 4px solid #fbbf24;
+}
+
+.event-item.green-accent {
+    border-left: 4px solid #10b981;
+}
+
+.event-item.blue-accent {
+    border-left: 4px solid #3b82f6;
+}
+
+.event-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 1rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: #f8fafc;
+    min-width: 60px;
+}
+
+.event-month {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+.event-day {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.event-details {
+    flex: 1;
+}
+
+.event-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 0.25rem 0;
+}
+
+.event-time {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Styles pour l'historique */
+.history-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.history-item.yellow-accent {
+    border-left: 4px solid #fbbf24;
+}
+
+.history-item.green-accent {
+    border-left: 4px solid #10b981;
+}
+
+.history-item.blue-accent {
+    border-left: 4px solid #3b82f6;
+}
+
+.history-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 1.25rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: #f8fafc;
+    min-width: 70px;
+}
+
+.history-day {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1;
+}
+
+.history-month {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+}
+
+.history-details {
+    flex: 1;
+}
+
+.history-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 0.5rem 0;
+}
+
+.history-description {
+    font-size: 0.875rem;
+    color: #4b5563;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.5;
+}
+
+.history-meta {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin: 0;
+    font-style: italic;
+}
+
+/* Container pour toute la largeur */
+.full-width-container {
+    grid-column: 1 / -1;
+    margin-top: 2rem;
+}
+
+.history-card {
+    width: 100%;
+}
+
+/* Ajustements pour le layout 2 colonnes */
+.events-list, .history-list {
+    max-height: 400px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .calendar-card {
+        grid-column: 1 / -1;
+    }
+    
+    .event-item, .history-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .event-date, .history-date {
+        margin-right: 0;
+        margin-bottom: 0.75rem;
+    }
+    
+    .events-list, .history-list {
+        max-height: 300px;
+    }
+    
+    /* Faire que les cartes prennent toute la largeur sur mobile */
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

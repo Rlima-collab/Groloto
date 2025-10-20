@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="{{ asset('css/header.css') }}">
+
 <header class="site-header">
     <div class="container">
         <div class="logo">
@@ -6,13 +7,9 @@
                 <img src="{{ asset('images/logo_gro.png') }}" alt="Groloto Logo">
             </a>
         </div>
-        <button class="burger-menu" aria-label="Toggle menu" onclick="toggleBurgerMenu()">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
         <nav class="nav-menu">
             <a href="/">Tableau de bord</a>
+            <a href="{{ path('app_evenements') }}">Événements</a>
             <a href="{{ path('benevoles') }}">Bénévoles</a>
             <a href="{{ path('mecenes') }}">Mécènes & Lots</a>
             <a class="nav-link" href="{{ path('stocks') }}">Stocks</a>
@@ -38,7 +35,10 @@
 function toggleSettingsMenu(event) {
     event.preventDefault();
     event.stopPropagation();
+    
     const menu = document.getElementById('settingsMenu');
+    
+    // Toggle la visibilité du menu
     if (menu.style.display === 'block') {
         menu.style.display = 'none';
     } else {
@@ -46,62 +46,13 @@ function toggleSettingsMenu(event) {
     }
 }
 
-function toggleBurgerMenu() {
-    const nav = document.querySelector('.nav-menu');
-    const burger = document.querySelector('.burger-menu');
-    nav.classList.toggle('active');
-    burger.classList.toggle('active');
-}
-
+// Fermer le menu si on clique ailleurs
 document.addEventListener('click', function(event) {
     const menu = document.getElementById('settingsMenu');
     const settingsDropdown = document.querySelector('.settings-dropdown');
-    const nav = document.querySelector('.nav-menu');
-    const burger = document.querySelector('.burger-menu');
+    
     if (menu && settingsDropdown && !settingsDropdown.contains(event.target)) {
         menu.style.display = 'none';
     }
-    if (nav && burger && !nav.contains(event.target) && !burger.contains(event.target) && nav.classList.contains('active')) {
-        nav.classList.remove('active');
-        burger.classList.remove('active');
-    }
 });
-
-let lastScrollTop = 0;
-let scrollTimeout;
-
-function handleScroll() {
-    if (window.innerWidth > 768) return; // Skip for desktop
-
-    const header = document.querySelector('.site-header');
-    const body = document.body;
-    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-
-    if (currentScroll <= 0) {
-        // At the top of the page
-        header.classList.remove('hidden');
-        body.classList.remove('header-hidden');
-    } else if (currentScroll > lastScrollTop) {
-        // Scrolling down
-        header.classList.add('hidden');
-        body.classList.add('header-hidden');
-    } else {
-        // Scrolling up
-        header.classList.remove('hidden');
-        body.classList.remove('header-hidden');
-    }
-
-    // Clear any existing timeout
-    clearTimeout(scrollTimeout);
-
-    // Set a timeout to show header after 3 seconds of no scrolling
-    scrollTimeout = setTimeout(() => {
-        header.classList.remove('hidden');
-        body.classList.remove('header-hidden');
-    }, 3000);
-
-    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
-}
-
-window.addEventListener('scroll', handleScroll);
 </script>
