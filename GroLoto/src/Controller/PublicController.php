@@ -31,7 +31,7 @@ class PublicController extends AbstractController
         // Données pour les analytics
         $analyticsData = $this->getAnalyticsData($utilisateurRepository, $roleRepository);
         
-        return $this->render('public/index.html.twig', [
+        return $this->render('public/public.html.twig', [
             'total_inscrits' => $totalInscrits,
             'revenus' => $revenus,
             'nouveaux' => $nouveauxUtilisateurs,

@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contact - Groloto{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/contact.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+
+{% block body %}
+<div class="contact-container">
+    <header class="contact-header text-center mb-5">
+        <h1>Contactez-nous</h1>
+        <p class="lead">Une question ? Une suggestion ? On est là pour vous !</p>
+    </header>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <div class="contact-card p-4 p-md-5 shadow-lg">
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        {{ form_label(form.nom) }}
+                        {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Jean Dupont'}}) }}
+                        {{ form_errors(form.nom) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.email) }}
+                        {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'jean@example.com'}}) }}
+                        {{ form_errors(form.email) }}
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    {{ form_label(form.sujet) }}
+                    {{ form_widget(form.sujet, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Demande d\'information'}}) }}
+                    {{ form_errors(form.sujet) }}
+                </div>
+
+                <div class="mt-3">
+                    {{ form_label(form.message) }}
+                    {{ form_widget(form.message, {'attr': {'class': 'form-control', 'rows': 5, 'placeholder': 'Écrivez votre message ici...'}}) }}
+                    {{ form_errors(form.message) }}
+                </div>
+
+                <div class="text-center mt-4">
+                    {{ form_widget(form.envoyer) }}
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
