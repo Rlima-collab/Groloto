@@ -7,7 +7,12 @@
                 <img src="{{ asset('images/logo_gro.png') }}" alt="Groloto Logo">
             </a>
         </div>
-        <nav class="nav-menu">
+        <button class="burger-menu" id="burgerMenu" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav class="nav-menu" id="navMenu">
             <a href="/">Tableau de bord</a>
             <a href="{{ path('app_evenements') }}">Événements</a>
             {% if app.user %}
@@ -25,6 +30,7 @@
             {% if app.user %}
                 <div class="settings-dropdown">
                     <a href="#" onclick="toggleSettingsMenu(event)">
+                        <span class="settings-text">Paramètres</span>
                         <img src="{{ asset('images/settings.png') }}" alt="Paramètres" class="settings-icon">
                     </a>
                     <div class="settings-menu" id="settingsMenu">
@@ -48,7 +54,6 @@ function toggleSettingsMenu(event) {
     
     const menu = document.getElementById('settingsMenu');
     
-    // Toggle la visibilité du menu
     if (menu.style.display === 'block') {
         menu.style.display = 'none';
     } else {
@@ -56,7 +61,6 @@ function toggleSettingsMenu(event) {
     }
 }
 
-// Fermer le menu si on clique ailleurs
 document.addEventListener('click', function(event) {
     const menu = document.getElementById('settingsMenu');
     const settingsDropdown = document.querySelector('.settings-dropdown');
@@ -64,5 +68,30 @@ document.addEventListener('click', function(event) {
     if (menu && settingsDropdown && !settingsDropdown.contains(event.target)) {
         menu.style.display = 'none';
     }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const burgerMenu = document.getElementById('burgerMenu');
+    const navMenu = document.getElementById('navMenu');
+
+    burgerMenu.addEventListener('click', function(event) {
+        event.stopPropagation();
+        burgerMenu.classList.toggle('active');
+        navMenu.classList.toggle('active');
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!navMenu.contains(event.target) && !burgerMenu.contains(event.target)) {
+            navMenu.classList.remove('active');
+            burgerMenu.classList.remove('active');
+        }
+    });
+
+    navMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function() {
+            navMenu.classList.remove('active');
+            burgerMenu.classList.remove('active');
+        });
+    });
 });
 </script>
