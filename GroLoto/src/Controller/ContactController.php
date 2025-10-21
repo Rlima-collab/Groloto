@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class ContactController extends AbstractController
 {
@@ -21,15 +22,20 @@ class ContactController extends AbstractController
     public function index(Request $request, MailerInterface $mailer): Response
     {
         $contactDto = new ContactDto();
+
+        $user = $this->getUser();
+        if ($user instanceof UserInterface) {
+            $contactDto->setNom($user->getNom() ?? $user->getUsername()); 
+            $contactDto->setEmail($user->getEmail());
+        }
+
         $form = $this->createForm(ContactForm::class, $contactDto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $email = (new Email())
-                    // Utilise une adresse fixe autorisée par Mailtrap
                     ->from('contact@groloto.com')
-                    // Mais garde le reply-to pour répondre à l'utilisateur
                     ->replyTo($contactDto->getEmail())
                     ->to($this->appContactEmail)
                     ->subject($contactDto->getSujet() ?? 'Message de contact - Groloto')
@@ -42,7 +48,6 @@ class ContactController extends AbstractController
 
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.');
-                // Pour debug en dev
                 if ($this->getParameter('kernel.environment') === 'dev') {
                     $this->addFlash('debug', 'Erreur: ' . $e->getMessage());
                 }

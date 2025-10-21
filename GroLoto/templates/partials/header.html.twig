@@ -18,10 +18,14 @@
             <a class="nav-link" href="{{ path('app_contact') }}">Contact</a>
             {% if app.user %}
                 <div class="settings-dropdown">
-                    <a href="#" onclick="toggleSettingsMenu(event)"><span class="settings">⚙</span></a>
+                    <a href="#" onclick="toggleSettingsMenu(event)">
+                        <img src="{{ asset('images/settings.png') }}" alt="Paramètres" class="settings-icon">
+                    </a>
                     <div class="settings-menu" id="settingsMenu">
                         <a href="{{ path('app_profile') }}">Mon profil</a>
-                        <a href="{{ path('app_logout') }}">Déconnexion</a>
+                        <a href="{{ path('app_logout') }}">
+                            Déconnexion <img src="{{ asset('images/logout.png') }}" alt="Déconnexion" class="logout-icon">
+                        </a>
                     </div>
                 </div>
             {% else %}

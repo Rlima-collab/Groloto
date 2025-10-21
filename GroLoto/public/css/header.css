@@ -132,21 +132,7 @@
     }
 }
 
-.settings-menu::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    right: 20px;
-    width: 16px;
-    height: 16px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-bottom: none;
-    border-right: none;
-    transform: rotate(45deg);
-    z-index: -1;
-}
-
+/* Style des liens dans le menu */
 .settings-menu a {
     display: flex;
     align-items: center;
@@ -155,91 +141,85 @@
     color: #2c3e50;
     font-size: 15px;
     font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 8px;
     margin: 2px 8px;
-    position: relative;
-    overflow: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
-.settings-menu a::before {
+/* Petit triangle en haut à droite du menu */
+.settings-menu::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(135deg, #006909, #00a80f);
-    transform: scaleY(0);
-    transition: transform 0.3s ease;
-    border-radius: 0 4px 4px 0;
+    top: -6px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    background-color: #fff;
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    transform: rotate(45deg);
+    z-index: 10;
 }
 
-.settings-menu a:hover::before {
-    transform: scaleY(1);
-}
-
+/* Hover simple sur les liens */
 .settings-menu a:hover {
-    background: linear-gradient(135deg, rgba(0, 105, 9, 0.08), rgba(0, 168, 15, 0.05));
+    background-color: #f0f0f0;
     color: #006909;
-    transform: translateX(5px);
-    box-shadow: 0 4px 12px rgba(0, 105, 9, 0.15);
+    box-shadow: none;
 }
 
-.settings-menu a:first-child::after {
-    content: '👤';
-    margin-left: auto;
-    font-size: 16px;
-}
-
-.settings-menu a:last-child::after {
-    content: '📝';
-    margin-left: auto;
-    font-size: 16px;
-}
-
+/* Séparation entre les liens */
 .settings-menu a:not(:last-child) {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     margin-bottom: 4px;
     padding-bottom: 16px;
 }
 
-.nav-menu a.btn-login {
-    position: relative;
+/* Boutons connexion / déconnexion */
+.nav-menu a.btn-login,
+.nav-menu a.btn-outline-danger {
     padding: 8px 18px;
     border-radius: 25px;
-    background: linear-gradient(90deg, #0a1419 0%, #1f2b38 50%, #0a1419 100%);
-    color: #fff;
-    font-weight: 600;
-    font-size: 14px;
     text-decoration: none;
-    overflow: hidden;
-    display: inline-block;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
-.nav-menu a.btn-login::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -75%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
-    transform: skewX(-20deg);
-    transition: none;
+.nav-menu a.btn-login:hover,
+.nav-menu a.btn-outline-danger:hover {
+    background-color: #006909;
+    color: #fff;
+    transform: none;
+    box-shadow: none;
 }
 
-.nav-menu a.btn-login:hover::before {
-    left: 100%;
-    transition: left 1s ease;
+/* Icône Déconnexion à droite du texte */
+.settings-menu a img.logout-icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    vertical-align: middle; 
 }
 
-.nav-menu a.btn-login:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+/* Icône Settings dans le bouton principal */
+.settings-dropdown a img.settings-icon {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    cursor: pointer;
+    display: block;
+    transition: transform 0.4s ease; /* transition pour l'effet */
+    position: relative;
+    top: 5px; /* descend légèrement le bouton */
 }
+
+
+/* Hover : petite rotation */
+.settings-dropdown a:hover img.settings-icon {
+    transform: rotate(360deg); /* rotation complète */
+}
+
+
+
 
 @media (max-width: 768px) {
     body {
@@ -313,7 +293,7 @@
         border: none;
         margin-top: 10px;
         padding: 10px;
-        text-align: center; /* Center text in settings menu */
+        text-align: center; 
     }
 
     .settings-menu::before {
@@ -323,12 +303,12 @@
     .settings-menu a {
         margin: 0;
         padding: 10px 15px;
-        justify-content: center; /* Center settings menu items */
+        justify-content: center;
     }
 }
 
 @media (min-width: 769px) {
     body {
-        padding-top: 61px; /* Height of header (35px logo + 10px padding-top + 10px padding-bottom + 1px border) */
+        padding-top: 61px; 
     }
 }
