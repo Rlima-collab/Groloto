@@ -47,7 +47,8 @@ class MeceneRepository extends ServiceEntityRepository
     {
         $since = new \DateTimeImmutable(sprintf('-%d days', $days));
         return $this->createQueryBuilder('m')
-            ->andWhere('m.createdAt >= :since')
+            ->leftJoin('m.utilisateur', 'u')
+            ->andWhere('u.date_creation >= :since')
             ->setParameter('since', $since)
             ->getQuery()
             ->getResult();

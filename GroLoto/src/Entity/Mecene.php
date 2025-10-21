@@ -14,7 +14,7 @@ class Mecene
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'mecenes')]
-    #[ORM\JoinColumn(name: "id_utilisateur", referencedColumnName: "id", nullable: true)]
+    #[ORM\JoinColumn(name: "utilisateur_id", referencedColumnName: "id", nullable: true)]
     private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column(type: "string", length: 255)]
