@@ -7,7 +7,9 @@ use App\Repository\CreneauRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('IS_AUTHENTICATED_FULLY')]
 class BenevoleController extends AbstractController
 {
     #[Route('/benevoles', name: 'benevoles')]
@@ -43,7 +45,7 @@ class BenevoleController extends AbstractController
                     'evenement' => $creneau->getEvenement() ? $creneau->getEvenement()->getNom() : null,
                     'poste_requis' => $creneau->getPosteRequis(),
                     'max_personnes' => $creneau->getMaxPersonnes(),
-                    'notes' => $creneau->getNotes()
+                    'remarques' => $creneau->getRemarques()
                 ]
             ];
         }
