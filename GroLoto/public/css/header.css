@@ -77,7 +77,6 @@
     font-size: 20px;
     cursor: pointer;
     position: relative;
-    top: -3px;
     font-weight: bold;
     color: #6c757d;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -132,7 +131,6 @@
     }
 }
 
-/* Style des liens dans le menu */
 .settings-menu a {
     display: flex;
     align-items: center;
@@ -146,7 +144,6 @@
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Petit triangle en haut à droite du menu */
 .settings-menu::before {
     content: '';
     position: absolute;
@@ -161,14 +158,12 @@
     z-index: 10;
 }
 
-/* Hover simple sur les liens */
 .settings-menu a:hover {
     background-color: #f0f0f0;
     color: #006909;
     box-shadow: none;
 }
 
-/* Séparation entre les liens */
 .settings-menu a:not(:last-child) {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     margin-bottom: 4px;
@@ -212,7 +207,6 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Boutons connexion / déconnexion */
 .nav-menu a.btn-outline-danger {
     padding: 8px 18px;
     border-radius: 25px;
@@ -227,38 +221,31 @@
     box-shadow: none;
 }
 
-/* Icône Déconnexion à droite du texte */
 .settings-menu a img.logout-icon {
     width: 16px;
     height: 16px;
     margin-left: 8px;
-    vertical-align: middle; 
+    vertical-align: middle;
 }
 
-/* Icône Settings dans le bouton principal */
 .settings-dropdown a img.settings-icon {
     width: 24px;
     height: 24px;
     vertical-align: middle;
     cursor: pointer;
     display: block;
-    transition: transform 0.4s ease; /* transition pour l'effet */
+    transition: transform 0.4s ease;
     position: relative;
-    top: 5px; /* descend légèrement le bouton */
+    top: 5px;
 }
 
-
-/* Hover : petite rotation */
 .settings-dropdown a:hover img.settings-icon {
-    transform: rotate(360deg); /* rotation complète */
+    transform: rotate(360deg);
 }
-
-
-
 
 @media (max-width: 768px) {
     body {
-        padding-top: 61px; /* Height of header (35px logo + 10px padding-top + 10px padding-bottom + 1px border) */
+        padding-top: 61px;
     }
 
     body.header-hidden {
@@ -278,6 +265,7 @@
     }
 
     .nav-menu {
+        display: none;
         position: fixed;
         top: 0;
         right: -100%;
@@ -285,8 +273,8 @@
         width: 250px;
         background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
         flex-direction: column;
-        align-items: center; /* Center items horizontally */
-        justify-content: flex-start; /* Align items from top */
+        align-items: center;
+        justify-content: flex-start;
         padding: 80px 20px 20px;
         box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
         transition: right 0.3s ease-in-out;
@@ -294,6 +282,7 @@
     }
 
     .nav-menu.active {
+        display: flex;
         right: 0;
     }
 
@@ -302,8 +291,8 @@
         padding: 15px 0;
         width: 100%;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        text-align: center; /* Center text */
-        justify-content: center; /* Center flex content */
+        text-align: center;
+        justify-content: center;
     }
 
     .nav-menu a.btn-login {
@@ -311,13 +300,13 @@
         margin-top: 20px;
         padding: 10px 20px;
         display: inline-flex;
-        justify-content: center; /* Center login button */
+        justify-content: center;
     }
 
     .settings-dropdown {
         width: 100%;
         display: flex;
-        justify-content: center; /* Center settings dropdown */
+        justify-content: center;
     }
 
     .settings-menu {
@@ -328,7 +317,7 @@
         border: none;
         margin-top: 10px;
         padding: 10px;
-        text-align: center; 
+        text-align: center;
     }
 
     .settings-menu::before {
@@ -344,7 +333,7 @@
 
 @media (min-width: 769px) {
     body {
-        padding-top: 61px; 
+        padding-top: 61px;
     }
 }
 
