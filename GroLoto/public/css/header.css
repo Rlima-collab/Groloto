@@ -175,8 +175,44 @@
     padding-bottom: 16px;
 }
 
+.nav-menu a.btn-login {
+    position: relative;
+    padding: 8px 18px;
+    border-radius: 25px;
+    background: linear-gradient(90deg, #0a1419 0%, #1f2b38 50%, #0a1419 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    overflow: hidden;
+    display: inline-block;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nav-menu a.btn-login::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+    transform: skewX(-20deg);
+    transition: none;
+}
+
+.nav-menu a.btn-login:hover::before {
+    left: 100%;
+    transition: left 1s ease;
+}
+
+.nav-menu a.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
 /* Boutons connexion / déconnexion */
-.nav-menu a.btn-login,
 .nav-menu a.btn-outline-danger {
     padding: 8px 18px;
     border-radius: 25px;
@@ -184,7 +220,6 @@
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-.nav-menu a.btn-login:hover,
 .nav-menu a.btn-outline-danger:hover {
     background-color: #006909;
     color: #fff;
