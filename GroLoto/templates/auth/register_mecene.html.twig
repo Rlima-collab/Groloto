@@ -2,6 +2,12 @@
 
 {% block title %}Inscription Mécène{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/register.css') }}">
+{% endblock %}
 
 {% block body %}
 <div class="registration-form-container">

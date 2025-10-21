@@ -1,11 +1,28 @@
 {% extends 'base.html.twig' %}
+
 {% block title %}Gestion des Mécènes{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mecenes.css') }}">
+{% endblock %}
+
 {% block body %}
-<div class="mecenes-page">
-    <div class="page-header">
-        <h1 class="page-title">Gestion des Mécènes</h1>
-        <p class="page-description">Inscriptions, lots et conventions</p>
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Mécènes</h1>
+        <p class="hero-description">Inscriptions, lots et conventions pour vos événements caritatifs.</p>
+        <a href="#liste-mecenes" class="hero-btn yellow">Voir les mécènes</a>
     </div>
+</div>
+
+<div class="page-header">
+    <h1 class="page-title">Mécènes & Partenaires</h1>
+</div>
+
+<div class="mecenes-page">
     <!-- Key Metrics Cards -->
     <div class="metrics-grid">
         <div class="card metric-card">
@@ -42,7 +59,7 @@
                 <span class="tab-icon">👥</span>
                 <span class="tab-text">Liste des mécènes</span>
             </a>
-            <a href="#" class="tab">
+            <a href="{{ path('stocks') }}#inventaire" class="tab">
                 <span class="tab-icon">🎁</span>
                 <span class="tab-text">Lots</span>
             </a>
@@ -52,7 +69,7 @@
             </a>
         </div>
         <!-- Liste des mécènes -->
-        <div class="main-content">
+        <div class="main-content" id="liste-mecenes">
             <div class="card main-card">
                 <div class="card-header">
                     <h2 class="card-title">Liste des Mécènes</h2>

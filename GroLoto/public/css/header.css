@@ -4,7 +4,7 @@
     top: 0;
     background: white;
     border-bottom: 1px solid #eee;
-    padding: 10px 20px;
+    padding: 15px 20px;
     position: fixed;
     z-index: 1000;
 }
@@ -18,7 +18,7 @@
 }
 
 .site-header .logo img {
-    height: 35px;
+    height: 40px;
     margin-left: 10px;
 }
 
@@ -245,7 +245,7 @@
 
 @media (max-width: 768px) {
     body {
-        padding-top: 61px;
+        padding-top: 71px;
     }
 
     body.header-hidden {
@@ -356,7 +356,8 @@
 
 @media (min-width: 769px) {
     body {
-        padding-top: 61px;
+        padding-top: 71px; /* Height of header (40px logo + 15px padding-top + 15px padding-bottom + 1px border) */
+
     }
 
     .settings-text {
