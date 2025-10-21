@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Modifier mon profil</h4>
+                </div>
+                <div class="card-body">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+
+                    {{ form_start(form) }}
+                    
+                    <div class="alert alert-info mb-4">
+                        <strong>Note :</strong> Votre rôle ({{ user.role.nom|capitalize }}) ne peut pas être modifié. 
+                        Pour toute question, contactez un administrateur.
+                    </div>
+
+                    <h5 class="mb-3">Informations personnelles</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.prenom) }}
+                                {{ form_widget(form.prenom) }}
+                                {{ form_errors(form.prenom) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.nom) }}
+                                {{ form_widget(form.nom) }}
+                                {{ form_errors(form.nom) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.email) }}
+                        {{ form_widget(form.email) }}
+                        {{ form_errors(form.email) }}
+                        <small class="form-text text-muted">
+                            Cette adresse email sera utilisée pour vous connecter.
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.telephone) }}
+                        {{ form_widget(form.telephone) }}
+                        {{ form_errors(form.telephone) }}
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3">Sécurité</h5>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Sécurité :</strong> Pour modifier votre profil, vous devez entrer votre mot de passe actuel.
+                        Si vous souhaitez changer de mot de passe, remplissez les champs ci-dessous.
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.currentPassword) }}
+                        {{ form_widget(form.currentPassword) }}
+                        {{ form_errors(form.currentPassword) }}
+                        <small class="form-text text-muted">
+                            Requis pour valider les modifications.
+                        </small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.newPassword) }}
+                                {{ form_widget(form.newPassword) }}
+                                {{ form_errors(form.newPassword) }}
+                                <small class="form-text text-muted">
+                                    Au moins 6 caractères. Laissez vide pour conserver l'actuel.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.confirmPassword) }}
+                                {{ form_widget(form.confirmPassword) }}
+                                {{ form_errors(form.confirmPassword) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('app_profile') }}" class="btn btn-secondary">
+                            Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Enregistrer les modifications
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            <!-- Informations supplémentaires -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">Informations du compte</h6>
+                    <p class="card-text text-muted mb-1">
+                        <strong>Membre depuis :</strong> {{ user.dateCreation ? user.dateCreation|date('d/m/Y à H:i') : 'Non renseigné' }}
+                    </p>
+                    <p class="card-text text-muted mb-0">
+                        <strong>Dernière modification :</strong> {{ user.dateModification ? user.dateModification|date('d/m/Y à H:i') : 'Jamais' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

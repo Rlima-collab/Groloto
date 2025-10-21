@@ -77,7 +77,6 @@
     font-size: 20px;
     cursor: pointer;
     position: relative;
-    top: -3px;
     font-weight: bold;
     color: #6c757d;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -132,21 +131,6 @@
     }
 }
 
-.settings-menu::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    right: 20px;
-    width: 16px;
-    height: 16px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-bottom: none;
-    border-right: none;
-    transform: rotate(45deg);
-    z-index: -1;
-}
-
 .settings-menu a {
     display: flex;
     align-items: center;
@@ -155,47 +139,29 @@
     color: #2c3e50;
     font-size: 15px;
     font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 8px;
     margin: 2px 8px;
-    position: relative;
-    overflow: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
-.settings-menu a::before {
+.settings-menu::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(135deg, #006909, #00a80f);
-    transform: scaleY(0);
-    transition: transform 0.3s ease;
-    border-radius: 0 4px 4px 0;
-}
-
-.settings-menu a:hover::before {
-    transform: scaleY(1);
+    top: -6px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    background-color: #fff;
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    transform: rotate(45deg);
+    z-index: 10;
 }
 
 .settings-menu a:hover {
-    background: linear-gradient(135deg, rgba(0, 105, 9, 0.08), rgba(0, 168, 15, 0.05));
+    background-color: #f0f0f0;
     color: #006909;
-    transform: translateX(5px);
-    box-shadow: 0 4px 12px rgba(0, 105, 9, 0.15);
-}
-
-.settings-menu a:first-child::after {
-    content: '👤';
-    margin-left: auto;
-    font-size: 16px;
-}
-
-.settings-menu a:last-child::after {
-    content: '📝';
-    margin-left: auto;
-    font-size: 16px;
+    box-shadow: none;
 }
 
 .settings-menu a:not(:last-child) {
@@ -241,9 +207,45 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
+.nav-menu a.btn-outline-danger {
+    padding: 8px 18px;
+    border-radius: 25px;
+    text-decoration: none;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.nav-menu a.btn-outline-danger:hover {
+    background-color: #006909;
+    color: #fff;
+    transform: none;
+    box-shadow: none;
+}
+
+.settings-menu a img.logout-icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.settings-dropdown a img.settings-icon {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    cursor: pointer;
+    display: block;
+    transition: transform 0.4s ease;
+    position: relative;
+    top: 5px;
+}
+
+.settings-dropdown a:hover img.settings-icon {
+    transform: rotate(360deg);
+}
+
 @media (max-width: 768px) {
     body {
-        padding-top: 71px; /* Height of header (40px logo + 15px padding-top + 15px padding-bottom + 1px border) */
+        padding-top: 71px;
     }
 
     body.header-hidden {
@@ -263,46 +265,71 @@
     }
 
     .nav-menu {
+        display: none;
         position: fixed;
         top: 0;
-        right: -100%;
+        right: 0;
         height: 100vh;
         width: 250px;
         background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
         flex-direction: column;
-        align-items: center; /* Center items horizontally */
-        justify-content: flex-start; /* Align items from top */
+        align-items: center;
+        justify-content: flex-start;
         padding: 80px 20px 20px;
         box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
-        transition: right 0.3s ease-in-out;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        opacity: 0;
         z-index: 999;
     }
 
     .nav-menu.active {
-        right: 0;
+        display: flex;
+        transform: translateX(0);
+        opacity: 1;
     }
 
     .nav-menu a {
         font-size: 16px;
-        padding: 15px 0;
+        padding: 12px 0;
+        margin: 4px 0;
         width: 100%;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        text-align: center; /* Center text */
-        justify-content: center; /* Center flex content */
+        text-align: center;
+        justify-content: center;
+    }
+
+    .nav-menu a.nav-link {
+        padding: 12px 0;
+        margin: 4px 0;
     }
 
     .nav-menu a.btn-login {
         width: auto;
-        margin-top: 20px;
-        padding: 10px 20px;
+        margin: 4px 0;
+        padding: 8px 20px;
         display: inline-flex;
-        justify-content: center; /* Center login button */
+        justify-content: center;
     }
 
     .settings-dropdown {
         width: 100%;
         display: flex;
-        justify-content: center; /* Center settings dropdown */
+        justify-content: center;
+        margin: 4px 0;
+    }
+
+    .settings-dropdown a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .settings-text {
+        font-size: 16px;
+        color: #444;
+        font-weight: 500;
+        margin-right: 8px;
     }
 
     .settings-menu {
@@ -311,9 +338,9 @@
         background: rgba(255, 255, 255, 0.9);
         box-shadow: none;
         border: none;
-        margin-top: 10px;
-        padding: 10px;
-        text-align: center; /* Center text in settings menu */
+        margin-top: 4px;
+        padding: 8px;
+        text-align: center;
     }
 
     .settings-menu::before {
@@ -322,13 +349,27 @@
 
     .settings-menu a {
         margin: 0;
-        padding: 10px 15px;
-        justify-content: center; /* Center settings menu items */
+        padding: 8px 15px;
+        justify-content: center;
     }
 }
 
 @media (min-width: 769px) {
     body {
         padding-top: 71px; /* Height of header (40px logo + 15px padding-top + 15px padding-bottom + 1px border) */
+
     }
+
+    .settings-text {
+        display: none;
+    }
+
+    .settings-dropdown a img.settings-icon {
+        top: 2px;
+    }
+    
+}
+
+.nav-link:not(.btn-login) {
+    padding: 0 !important;
 }

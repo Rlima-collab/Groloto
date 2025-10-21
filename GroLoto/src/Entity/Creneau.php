@@ -32,8 +32,8 @@ class Creneau
     #[ORM\Column(type: "integer")]
     private int $max_personnes = 1;
 
-    #[ORM\Column(type: "text", nullable: true)]
-    private ?string $notes = null;
+    #[ORM\Column(name: "remarque", type: "text", nullable: true)]
+    private ?string $remarques = null;
 
     #[ORM\Column(type: "datetime", nullable: true)]
     private ?\DateTimeInterface $date_creation = null;
@@ -111,14 +111,14 @@ class Creneau
         return $this;
     }
 
-    public function getNotes(): ?string
+    public function getRemarques(): ?string
     {
-        return $this->notes;
+        return $this->remarques;
     }
 
-    public function setNotes(?string $notes): self
+    public function setRemarques(?string $remarques): self
     {
-        $this->notes = $notes;
+        $this->remarques = $remarques;
         return $this;
     }
 
