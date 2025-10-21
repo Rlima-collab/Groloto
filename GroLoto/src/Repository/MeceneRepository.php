@@ -38,18 +38,4 @@ class MeceneRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
-
-    /**
-     * Trouve les mécènes récemment enregistrés (ex: derniers 30 jours)
-     * @return Mecene[]
-     */
-    public function findRecentlyRegistered(int $days = 30): array
-    {
-        $since = new \DateTimeImmutable(sprintf('-%d days', $days));
-        return $this->createQueryBuilder('m')
-            ->andWhere('m.createdAt >= :since')
-            ->setParameter('since', $since)
-            ->getQuery()
-            ->getResult();
-    }
 }
