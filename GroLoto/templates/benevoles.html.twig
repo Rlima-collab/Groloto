@@ -4,6 +4,8 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 {% endblock %}
 
@@ -12,11 +14,20 @@
 {% endblock %}
 
 {% block body %}
-<div class="benevoles-page">
-<div class="page-header">
-    <h1 class="page-title">Gestion des Bénévoles</h1>
-    <p class="page-description">Inscriptions, disponibilités et planning</p>
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Bénévoles</h1>
+        <p class="hero-description">Inscriptions, disponibilités et planning pour vos événements caritatifs.</p>
+        <a href="#liste-benevoles" class="hero-btn yellow">Voir les bénévoles</a>
+    </div>
 </div>
+
+<div class="page-header">
+    <h1 class="page-title">Bénévoles & Planning</h1>
+</div>
+
+<div class="benevoles-page">
 
 <!-- Key Metrics Cards -->
 <div class="metrics-grid">
@@ -66,7 +77,7 @@
     
     <!-- Liste des bénévoles -->
     <div id="content-benevoles" class="tab-content main-content">
-        <div class="card main-card">
+        <div class="card main-card" id="liste-benevoles">
             <div class="card-header">
                 <h2 class="card-title">Liste des Bénévoles</h2>
                 <p class="card-description">Gestion des bénévoles inscrits</p>
