@@ -69,7 +69,7 @@ class EvenementController extends AbstractController
                     'evenement' => $creneau->getEvenement() ? $creneau->getEvenement()->getNom() : null,
                     'poste_requis' => $creneau->getPosteRequis(),
                     'max_personnes' => $creneau->getMaxPersonnes(),
-                    'notes' => $creneau->getNotes(),
+                    'remarques' => $creneau->getRemarques(),
                     'titre' => $creneau->getTitre()
                 ]
             ];
