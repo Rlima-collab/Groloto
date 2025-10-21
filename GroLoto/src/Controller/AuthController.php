@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Utilisateur;
 use App\Entity\Role;
 use App\Repository\RoleRepository;
+use App\Form\ProfileType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -217,6 +218,92 @@ class AuthController extends AbstractController
         $user = $this->getUser();
         
         return $this->render('auth/profile.html.twig', [
+            'user' => $user,
+        ]);
+    }
+
+    #[Route('/profile/edit', name: 'app_profile_edit')]
+    public function editProfile(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher
+    ): Response {
+        // Vérifier que l'utilisateur est connecté
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+        
+        $form = $this->createForm(ProfileType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Récupérer les données du formulaire
+            $currentPassword = $form->get('currentPassword')->getData();
+            $newPassword = $form->get('newPassword')->getData();
+            $confirmPassword = $form->get('confirmPassword')->getData();
+
+            // Vérifier le mot de passe actuel
+            if (!$passwordHasher->isPasswordValid($user, $currentPassword)) {
+                $this->addFlash('error', 'Le mot de passe actuel est incorrect.');
+                return $this->render('auth/profile_edit.html.twig', [
+                    'form' => $form->createView(),
+                    'user' => $user,
+                ]);
+            }
+
+            // Si un nouveau mot de passe est fourni, le valider et le mettre à jour
+            if (!empty($newPassword)) {
+                if ($newPassword !== $confirmPassword) {
+                    $this->addFlash('error', 'Les nouveaux mots de passe ne correspondent pas.');
+                    return $this->render('auth/profile_edit.html.twig', [
+                        'form' => $form->createView(),
+                        'user' => $user,
+                    ]);
+                }
+
+                if (strlen($newPassword) < 6) {
+                    $this->addFlash('error', 'Le nouveau mot de passe doit contenir au moins 6 caractères.');
+                    return $this->render('auth/profile_edit.html.twig', [
+                        'form' => $form->createView(),
+                        'user' => $user,
+                    ]);
+                }
+
+                // Hasher et enregistrer le nouveau mot de passe
+                $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+                $user->setMotDePasse($hashedPassword);
+            }
+
+            // Vérifier si l'email a changé et s'il n'est pas déjà utilisé
+            $originalEmail = $entityManager->getUnitOfWork()->getOriginalEntityData($user)['email'] ?? null;
+            if ($user->getEmail() !== $originalEmail) {
+                $existingUser = $entityManager->getRepository(Utilisateur::class)
+                    ->findOneBy(['email' => $user->getEmail()]);
+                
+                if ($existingUser && $existingUser->getId() !== $user->getId()) {
+                    $this->addFlash('error', 'Cette adresse email est déjà utilisée par un autre compte.');
+                    return $this->render('auth/profile_edit.html.twig', [
+                        'form' => $form->createView(),
+                        'user' => $user,
+                    ]);
+                }
+            }
+
+            // Mettre à jour la date de modification
+            $user->setDateModification(new \DateTime());
+
+            try {
+                $entityManager->flush();
+                $this->addFlash('success', 'Votre profil a été mis à jour avec succès !');
+                return $this->redirectToRoute('app_profile');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors de la mise à jour de votre profil.');
+            }
+        }
+
+        return $this->render('auth/profile_edit.html.twig', [
+            'form' => $form->createView(),
             'user' => $user,
         ]);
     }
