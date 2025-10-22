@@ -4,9 +4,13 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
     <link rel="stylesheet" href="{{ asset('css/register.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/register.js') }}" defer></script>
 {% endblock %}
 
 {% block body %}
@@ -20,7 +24,7 @@
                 <div class="registration-alert alert-success">{{ message }}</div>
             {% endfor %}
 
-            {% if errors %}
+            {% if errors is defined and errors %}
                 <div class="registration-alert alert-danger">
                     <ul>
                         {% for error in errors %}
@@ -30,64 +34,71 @@
                 </div>
             {% endif %}
 
-            <form method="post">
+            <form method="post" novalidate id="registerForm">
                 <div class="registration-row">
                     <div class="registration-col">
                         <div class="registration-form-group">
                             <label for="prenom" class="registration-form-label">Prénom *</label>
-                            <input type="text" name="prenom" id="prenom" class="registration-form-control mecene-focus" required>
+                            <input type="text" name="prenom" id="prenom" class="registration-form-control mecene-focus" required value="{{ app.request.request.get('prenom') }}">
                         </div>
                     </div>
                     <div class="registration-col">
                         <div class="registration-form-group">
                             <label for="nom" class="registration-form-label">Nom *</label>
-                            <input type="text" name="nom" id="nom" class="registration-form-control mecene-focus" required>
+                            <input type="text" name="nom" id="nom" class="registration-form-control mecene-focus" required value="{{ app.request.request.get('nom') }}">
                         </div>
                     </div>
                 </div>
 
                 <div class="registration-form-group">
                     <label for="email" class="registration-form-label">Email *</label>
-                    <input type="email" name="email" id="email" class="registration-form-control mecene-focus" required>
+                    <input type="email" name="email" id="email" class="registration-form-control mecene-focus" required value="{{ app.request.request.get('email') }}">
                 </div>
 
                 <div class="registration-form-group">
                     <label for="telephone" class="registration-form-label">Téléphone *</label>
-                    <input type="tel" name="telephone" id="telephone" class="registration-form-control mecene-focus" required>
+                    <input type="tel" name="telephone" id="telephone" class="registration-form-control mecene-focus" required placeholder="06 12 34 56 78" value="{{ app.request.request.get('telephone') }}">
                 </div>
 
                 <div class="registration-form-group">
                     <label for="organisation" class="registration-form-label">Organisation *</label>
-                    <input type="text" name="organisation" id="organisation" class="registration-form-control mecene-focus" required>
+                    <input type="text" name="organisation" id="organisation" class="registration-form-control mecene-focus" required value="{{ app.request.request.get('organisation') }}">
                 </div>
 
                 <div class="registration-form-group">
                     <label for="siret" class="registration-form-label">Numéro SIRET *</label>
-                    <input type="text" name="siret" id="siret" 
-                        class="registration-form-control mecene-focus" 
-                        required 
-                        pattern="^[0-9]{14}$"
-                        title="Le numéro SIRET doit contenir exactement 14 chiffres">
+                    <div class="siret-container" id="siret-container">
+                        <input type="text" name="siret" id="siret" 
+                            class="registration-form-control mecene-focus siret-input-hidden" 
+                            required 
+                            maxlength="14"
+                            value="{{ app.request.request.get('siret') }}"
+                            autocomplete="off">
+                        <div class="siret-inputs" id="siret-inputs"></div>
+                    </div>
                     <small class="registration-form-text">14 chiffres obligatoires</small>
                 </div>
 
                 <div class="registration-row">
                     <div class="registration-col">
-                        <div class="registration-form-group">
+                        <div class="registration-form-group" id="password-group">
                             <label for="password" class="registration-form-label">Mot de passe *</label>
-                            <input type="password" name="password" id="password" class="registration-form-control mecene-focus" required minlength="6">
+                            <input type="password" name="password" id="password" class="registration-form-control mecene-focus" required minlength="6" autocomplete="new-password">
                             <small class="registration-form-text">Au moins 6 caractères</small>
                         </div>
                     </div>
                     <div class="registration-col">
                         <div class="registration-form-group">
                             <label for="confirm_password" class="registration-form-label">Confirmer le mot de passe *</label>
-                            <input type="password" name="confirm_password" id="confirm_password" class="registration-form-control mecene-focus" required>
+                            <input type="password" name="confirm_password" id="confirm_password" class="registration-form-control mecene-focus" required autocomplete="new-password">
                         </div>
                     </div>
                 </div>
 
-                <button class="registration-submit-btn mecene" type="submit">S'inscrire comme Mécène</button>
+                <button class="registration-submit-btn mecene" type="submit">
+                    <span class="btn-text">S'inscrire comme Mécène</span>
+                    <span class="btn-loader" style="display: none;">⏳</span>
+                </button>
             </form>
 
             <div class="registration-login-link">
