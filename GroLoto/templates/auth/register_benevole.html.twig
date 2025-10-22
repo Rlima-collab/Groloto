@@ -4,9 +4,42 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
     <link rel="stylesheet" href="{{ asset('css/register.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    
+    {# DEBUG ULTIME #}
+    <script>
+        console.log('=== 🚨 ULTIMATE DEBUG ===');
+        console.log('📦 Template Twig chargé');
+        console.log('🔗 Asset path:', '{{ asset('js/register.js') }}');
+        console.log('🕒 Timestamp:', new Date().toISOString());
+        
+        // Test immédiat de l'URL
+        const jsUrl = '{{ asset('js/register.js') }}';
+        console.log('🧪 URL test:', jsUrl);
+        
+        // Créer un script dynamiquement pour forcer le chargement
+        const script = document.createElement('script');
+        script.src = jsUrl + '?v=' + Date.now();
+        script.onload = function() {
+            console.log('✅ register.js chargé DYNAMIQUEMENT');
+        };
+        script.onerror = function() {
+            console.error('❌ ERREUR chargement register.js');
+            // Charger une version de secours
+            loadFallbackJS();
+        };
+        document.head.appendChild(script);
+        
+        function loadFallbackJS() {
+            console.log('🔄 Chargement version de secours...');
+            // Ici on mettrait le JS en secours si besoin
+        }
+    </script>
 {% endblock %}
 
 {% block body %}
@@ -20,7 +53,7 @@
                 <div class="registration-alert alert-success">{{ message }}</div>
             {% endfor %}
 
-            {% if errors %}
+            {% if errors is defined and errors %}
                 <div class="registration-alert alert-danger">
                     <ul>
                         {% for error in errors %}
@@ -30,54 +63,57 @@
                 </div>
             {% endif %}
 
-            <form method="post">
+            <form method="post" novalidate id="registerForm">
                 <div class="registration-row">
                     <div class="registration-col">
                         <div class="registration-form-group">
                             <label for="prenom" class="registration-form-label">Prénom *</label>
-                            <input type="text" name="prenom" id="prenom" class="registration-form-control benevole-focus" required>
+                            <input type="text" name="prenom" id="prenom" class="registration-form-control benevole-focus" required value="{{ app.request.request.get('prenom') }}">
                         </div>
                     </div>
                     <div class="registration-col">
                         <div class="registration-form-group">
                             <label for="nom" class="registration-form-label">Nom *</label>
-                            <input type="text" name="nom" id="nom" class="registration-form-control benevole-focus" required>
+                            <input type="text" name="nom" id="nom" class="registration-form-control benevole-focus" required value="{{ app.request.request.get('nom') }}">
                         </div>
                     </div>
                 </div>
 
                 <div class="registration-form-group">
                     <label for="email" class="registration-form-label">Email *</label>
-                    <input type="email" name="email" id="email" class="registration-form-control benevole-focus" required>
+                    <input type="email" name="email" id="email" class="registration-form-control benevole-focus" required value="{{ app.request.request.get('email') }}">
                 </div>
 
                 <div class="registration-form-group">
                     <label for="telephone" class="registration-form-label">Téléphone *</label>
-                    <input type="tel" name="telephone" id="telephone" class="registration-form-control benevole-focus" required>
+                    <input type="tel" name="telephone" id="telephone" class="registration-form-control benevole-focus" required placeholder="06 12 34 56 78" value="{{ app.request.request.get('telephone') }}">
                 </div>
 
                 <div class="registration-row">
                     <div class="registration-col">
-                        <div class="registration-form-group">
+                        <div class="registration-form-group" id="password-group">
                             <label for="password" class="registration-form-label">Mot de passe *</label>
-                            <input type="password" name="password" id="password" class="registration-form-control benevole-focus" required minlength="6">
+                            <input type="password" name="password" id="password" class="registration-form-control benevole-focus" required minlength="6" autocomplete="new-password">
                             <small class="registration-form-text">Au moins 6 caractères</small>
                         </div>
                     </div>
                     <div class="registration-col">
                         <div class="registration-form-group">
                             <label for="confirm_password" class="registration-form-label">Confirmer le mot de passe *</label>
-                            <input type="password" name="confirm_password" id="confirm_password" class="registration-form-control benevole-focus" required>
+                            <input type="password" name="confirm_password" id="confirm_password" class="registration-form-control benevole-focus" required autocomplete="new-password">
                         </div>
                     </div>
                 </div>
 
                 <div class="registration-form-group">
                     <label for="remarque" class="registration-form-label">Remarque (facultatif)</label>
-                    <textarea name="remarque" id="remarque" class="registration-form-control benevole-focus" rows="3"></textarea>
+                    <textarea name="remarque" id="remarque" class="registration-form-control benevole-focus" rows="3" maxlength="500">{{ app.request.request.get('remarque') }}</textarea>
                 </div>
 
-                <button class="registration-submit-btn benevole" type="submit">S'inscrire comme Bénévole</button>
+                <button class="registration-submit-btn benevole" type="submit">
+                    <span class="btn-text">S'inscrire comme Bénévole</span>
+                    <span class="btn-loader" style="display: none;">⏳</span>
+                </button>
             </form>
 
             <div class="registration-login-link">
