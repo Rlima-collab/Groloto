@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class AuthController extends AbstractController
@@ -56,7 +58,8 @@ class AuthController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
-        RoleRepository $roleRepository
+        RoleRepository $roleRepository,
+        TokenStorageInterface $tokenStorage
     ): Response {
         $errors = [];
 
@@ -111,7 +114,12 @@ class AuthController extends AbstractController
                             $entityManager->flush();
 
                             $this->addFlash('success', 'Compte bénévole créé avec succès !');
-                            return $this->redirectToRoute('app_login');
+                            
+                            // Connecter automatiquement l'utilisateur
+                            $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+                            $tokenStorage->setToken($token);
+                            
+                            return $this->redirectToRoute('dashboard');
                         } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
                             $errors[] = "Cet email est déjà utilisé, merci d'en choisir un autre.";
                         }
@@ -132,7 +140,8 @@ class AuthController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
-        RoleRepository $roleRepository
+        RoleRepository $roleRepository,
+        TokenStorageInterface $tokenStorage
     ): Response {
         $errors = [];
 
@@ -194,7 +203,12 @@ class AuthController extends AbstractController
                             $entityManager->flush();
 
                             $this->addFlash('success', 'Compte mécène créé avec succès !');
-                            return $this->redirectToRoute('app_login');
+                            
+                            // Connecter automatiquement l'utilisateur
+                            $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+                            $tokenStorage->setToken($token);
+                            
+                            return $this->redirectToRoute('dashboard');
                         } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
                             $errors[] = "Cet email est déjà utilisé, merci d'en choisir un autre.";
                         }
