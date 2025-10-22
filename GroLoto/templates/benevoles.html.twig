@@ -4,9 +4,8 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <link href="{{ asset('css/fullcalendar-fix.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block javascripts %}
@@ -213,8 +212,9 @@ function loadFullCalendarScript() {
         }
         
         const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js';
-        console.log('Chargement de FullCalendar depuis CDN:', script.src);
+    // Charger FullCalendar depuis un fichier local
+    script.src = '{{ asset('js/fullcalendar/index.global.min.js') }}';
+    console.log('Chargement de FullCalendar depuis asset local:', script.src);
         
         script.onload = function() {
             console.log('Script FullCalendar chargé');
