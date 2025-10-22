@@ -66,12 +66,16 @@
         <button class="btn btn-participants active" onclick="showSection('participants')">
             👥 Participants
         </button>
+        {% if is_granted('ROLE_ADMIN') %}
         <button class="btn btn-analytics" onclick="showSection('analytics')">
             📊 Analytics
         </button>
+        {% endif %}
+        {% if is_granted('ROLE_ADMIN') %}
         <button class="btn btn-import" onclick="showSection('import')">
             📋 Import
         </button>
+        {% endif %}
     </div>
 
     <!-- Section Participants -->
@@ -129,13 +133,16 @@
         </div>
 
         <div class="table-actions">
+            {% if is_granted('ROLE_ADMIN') %}
             <button class="btn btn-export">📤 Exporter CSV</button>
+            {% endif %}
             <button class="btn btn-filter">🔍 Filtrer</button>
             <button class="btn btn-refresh">🔄 Actualiser</button>
         </div>
     </div>
 
     <!-- Section Analytics -->
+    {% if is_granted('ROLE_ADMIN') %}
     <div id="analytics" class="analytics-section" style="display: none;">
         <div class="section-header">
             <h2>Analytics & Statistiques</h2>
@@ -192,8 +199,10 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Section Import -->
+    {% if is_granted('ROLE_ADMIN') %}
     <div id="import-section" class="import-section" style="display: none;">
         <div class="import-header">
             <h2>Import de Données</h2>
@@ -253,6 +262,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
