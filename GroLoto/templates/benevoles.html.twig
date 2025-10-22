@@ -117,11 +117,16 @@
                                 </div>
                                 {% endif %}
                                 
-                                {% if not is_granted('ROLE_MECENE') %}
+                                {% if is_granted('ROLE_ADMIN') %}
                                 <div class="benevole-actions">
-                                    <a href="#" class="btn btn-small btn-primary">Modifier</a>
+                                    <a href="{{ path('benevole_edit', {'id': benevole.id}) }}" class="btn btn-small btn-primary">Modifier</a>
                                     <a href="#" class="btn btn-small btn-secondary">Planning</a>
-                                    <a href="#" class="btn btn-small btn-danger">🗑️</a>
+                                    <button type="button" 
+                                            class="btn btn-small btn-danger" 
+                                            data-benevole-id="{{ benevole.id }}"
+                                            data-benevole-nom="{{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}"
+                                            data-csrf-token="{{ csrf_token('delete_benevole_' ~ benevole.id) }}"
+                                            onclick="confirmDelete(this)">🗑️</button>
                                 </div>
                                 {% endif %}
                             </div>
@@ -132,7 +137,7 @@
                         <div class="empty-icon">👥</div>
                         <h3>Aucun bénévole trouvé</h3>
                         <p>Commencez par ajouter des bénévoles à votre base de données.</p>
-                        {% if not is_granted('ROLE_MECENE') %}
+                        {% if is_granted('ROLE_ADMIN') %}
                         <a href="#" class="btn btn-primary">Ajouter un bénévole</a>
                         {% endif %}
                     </div>
@@ -385,5 +390,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Activer l'onglet bénévoles par défaut
     document.getElementById('tab-benevoles').classList.add('selected');
 });
+
+// Fonction de confirmation de suppression
+function confirmDelete(button) {
+    const benevoleId = button.getAttribute('data-benevole-id');
+    const benevoleNom = button.getAttribute('data-benevole-nom');
+    const csrfToken = button.getAttribute('data-csrf-token');
+    
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le bénévole "${benevoleNom}" ?\n\nCette action est irréversible et supprimera toutes les données associées.`)) {
+        // Créer un formulaire pour la suppression
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/benevoles/${benevoleId}/delete`;
+        
+        // Ajouter le token CSRF
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+        
+        // Ajouter le formulaire au body et le soumettre
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
 </script>
 {% endblock %}

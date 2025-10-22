@@ -80,9 +80,11 @@
     <button class="tab-btn" data-tab="historique">
         <span class="icon"></span> Historique
     </button>
+    {% if is_granted('ROLE_ADMIN') %}
     <button class="tab-btn" data-tab="ajouter">
         <span class="icon"></span> Ajouter
     </button>
+    {% endif %}
 </div>
 
 <!-- 🔹 Contenu des sections -->
@@ -153,9 +155,11 @@
     </section>
 
     <!-- Ajouter -->
+    {% if is_granted('ROLE_ADMIN') %}
     <section id="ajouter" class="tab-section">
         {% include 'stocks/_ajouter.html.twig' %}
     </section>
+    {% endif %}
 </div>
 
 <!-- === JS pour navigation entre sections === -->
