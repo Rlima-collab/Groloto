@@ -106,12 +106,19 @@
                                             <span class="info-text">Inscrit le {{ mecene.utilisateur.dateCreation|date('d/m/Y') }}</span>
                                         </div>
                                     </div>
+                                    {% if is_granted('ROLE_ADMIN') %}
                                     <div class="mecene-actions">
-                                        <a href="#" class="btn btn-small btn-primary">Modifier</a>
+                                        <a href="{{ path('mecene_edit', {'id': mecene.id}) }}" class="btn btn-small btn-primary">Modifier</a>
                                         <a href="#" class="btn btn-small btn-secondary">Lots</a>
                                         <a href="#" class="btn btn-small btn-secondary">Conventions</a>
-                                        <a href="#" class="btn btn-small btn-danger">🗑️</a>
+                                        <button type="button" 
+                                                class="btn btn-small btn-danger" 
+                                                data-mecene-id="{{ mecene.id }}"
+                                                data-mecene-nom="{{ mecene.organisation }}"
+                                                data-csrf-token="{{ csrf_token('delete_mecene_' ~ mecene.id) }}"
+                                                onclick="confirmDeleteMecene(this)">🗑️</button>
                                     </div>
+                                    {% endif %}
                                 </div>
                             {% endfor %}
                         </div>
@@ -120,12 +127,41 @@
                             <div class="empty-icon">👥</div>
                             <h3>Aucun mécène trouvé</h3>
                             <p>Commencez par ajouter des mécènes à votre base de données.</p>
+                            {% if is_granted('ROLE_ADMIN') %}
                             <a href="#" class="btn btn-primary">Ajouter un mécène</a>
+                            {% endif %}
                         </div>
                     {% endif %}
                 </div>
             </div>
-        </div>
+                </div>
     </div>
 </div>
+
+<script>
+// Fonction de confirmation de suppression
+function confirmDeleteMecene(button) {
+    const meceneId = button.getAttribute('data-mecene-id');
+    const meceneNom = button.getAttribute('data-mecene-nom');
+    const csrfToken = button.getAttribute('data-csrf-token');
+    
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le mécène "${meceneNom}" ?\n\nCette action est irréversible et supprimera toutes les données associées.`)) {
+        // Créer un formulaire pour la suppression
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/mecenes/${meceneId}/delete`;
+        
+        // Ajouter le token CSRF
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+        
+        // Ajouter le formulaire au body et le soumettre
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 {% endblock %}
