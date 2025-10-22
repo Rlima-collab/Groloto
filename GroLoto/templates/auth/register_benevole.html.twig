@@ -11,35 +11,8 @@
 {% block javascripts %}
     {{ parent() }}
     
-    {# DEBUG ULTIME #}
-    <script>
-        console.log('=== 🚨 ULTIMATE DEBUG ===');
-        console.log('📦 Template Twig chargé');
-        console.log('🔗 Asset path:', '{{ asset('js/register.js') }}');
-        console.log('🕒 Timestamp:', new Date().toISOString());
-        
-        // Test immédiat de l'URL
-        const jsUrl = '{{ asset('js/register.js') }}';
-        console.log('🧪 URL test:', jsUrl);
-        
-        // Créer un script dynamiquement pour forcer le chargement
-        const script = document.createElement('script');
-        script.src = jsUrl + '?v=' + Date.now();
-        script.onload = function() {
-            console.log('✅ register.js chargé DYNAMIQUEMENT');
-        };
-        script.onerror = function() {
-            console.error('❌ ERREUR chargement register.js');
-            // Charger une version de secours
-            loadFallbackJS();
-        };
-        document.head.appendChild(script);
-        
-        function loadFallbackJS() {
-            console.log('🔄 Chargement version de secours...');
-            // Ici on mettrait le JS en secours si besoin
-        }
-    </script>
+    {# Inclusion statique du script register.js (chargement différé) #}
+    <script src="{{ asset('js/register.js') }}" defer></script>
 {% endblock %}
 
 {% block body %}
