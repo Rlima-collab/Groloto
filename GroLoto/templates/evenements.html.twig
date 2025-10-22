@@ -5,7 +5,7 @@
 {% block stylesheets %}
     {{ parent() }}
     <link href="{{ asset('css/evenements.css') }}" rel="stylesheet">
-    {# FullCalendar CSS local pour éviter les erreurs MIME du CDN #}
+    <link href="{{ asset('css/modele.css') }}" rel="stylesheet">
     <link href="{{ asset('css/fullcalendar-fix.css') }}" rel="stylesheet">
 {% endblock %}
 
