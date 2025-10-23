@@ -205,11 +205,11 @@ INSERT INTO ROLE (nom, description) VALUES
   ('benevole', 'Bénévole participant aux événements'),
   ('mecene', 'Partenaire/mécène offrant des lots ou financements');
 
-INSERT INTO UTILISATEUR (id_role, email, prenom, nom, telephone)
+INSERT INTO UTILISATEUR (id_role, email, prenom, nom, telephone, mot_de_passe, date_creation)
 VALUES
-  (1, 'admin@groloto.local', 'Admin', 'User', '0600000000'),
-  (2, 'benevole1@groloto.local', 'Alice', 'Durand', '0612345678'),
-  (3, 'mecene1@groloto.local', 'Jean', 'Martin', '0712345678');
+  (1, 'admin@groloto.local', 'Admin', 'User', '0600000000', '$2y$13$rPw4LiI3Pt91wm8QUAE20OGJ3Cl/wPS35ix1h5C1ZtpL06bPOqby2', datetime('now')),
+  (2, 'benevole1@groloto.local', 'Alice', 'Durand', '0612345678', NULL, datetime('now')),
+  (3, 'mecene1@groloto.local', 'Jean', 'Martin', '0712345678', NULL, datetime('now'));
 
 INSERT INTO BENEVOLE (id_utilisateur, remarque, actif)
 VALUES

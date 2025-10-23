@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="{{ asset('css/header.css') }}">
+
 <header class="site-header">
     <div class="container">
         <div class="logo">
@@ -16,14 +18,16 @@
             {% if app.user %}
                 <a href="{{ path('benevoles') }}">Bénévoles</a>
             {% endif %}
-            {% if is_granted('ROLE_MECENE') %}
+            {% if is_granted('ROLE_MECENE') or is_granted('ROLE_ADMIN') %}
                 <a href="{{ path('mecenes') }}">Mécènes & Lots</a>
             {% endif %}
             {% if app.user %}
                 <a class="nav-link" href="{{ path('stocks') }}">Stocks</a>
             {% endif %}
             <a href="#">Communication</a>
-            <a class="nav-link" href="{{ path('public_index') }}">Public</a>
+            {% if app.user %}
+                <a class="nav-link" href="{{ path('public_index') }}">Public</a>
+            {% endif %}
             <a class="nav-link" href="{{ path('app_contact') }}">Contact</a>
             {% if app.user %}
                 <div class="settings-dropdown">
