@@ -17,8 +17,28 @@ use Dompdf\Options;
 class StockController extends AbstractController
 {
     #[Route('/stocks', name: 'stocks')]
-    public function index(EntityManagerInterface $em): Response
+    public function index(Request $request, EntityManagerInterface $em): Response
     {
+        // Filtrage par mécène si paramètre présent
+        $meceneId = $request->query->get('mecene');
+        $meceneFiltre = null;
+        $lotsItems = [];
+        $inscriptionsItems = [];
+        
+        if ($meceneId) {
+            $meceneFiltre = $em->getRepository(\App\Entity\Mecene::class)->find($meceneId);
+            if ($meceneFiltre) {
+                // Récupérer les lots du mécène
+                $lotsItems = $em->getRepository(\App\Entity\Lot::class)->findBy(['mecene' => $meceneFiltre]);
+                
+                // Récupérer les inscriptions (dons) du mécène
+                $inscriptionsItems = $em->getRepository(\App\Entity\InscriptionMecene::class)->findBy(
+                    ['mecene' => $meceneFiltre],
+                    ['date_inscription' => 'DESC']
+                );
+            }
+        }
+        
         // --- Inventaire ---
         $stockItems = $em->getRepository(Stock::class)->findAll();
         $total_items = array_sum(array_map(fn($i) => $i->getQuantite(), $stockItems));
@@ -61,7 +81,10 @@ class StockController extends AbstractController
             'stock_value' => $stock_value,
             'low_stock_count' => $low_stock_count,
             'categories_count' => $categories_count,
-            'historique_par_annee' => $historique_par_annee
+            'historique_par_annee' => $historique_par_annee,
+            'mecene_filtre' => $meceneFiltre,
+            'lots_items' => $lotsItems,
+            'inscriptions_items' => $inscriptionsItems
         ]);
     }
 

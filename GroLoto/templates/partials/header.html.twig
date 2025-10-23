@@ -21,6 +21,12 @@
             {% if is_granted('ROLE_MECENE') or is_granted('ROLE_ADMIN') %}
                 <a href="{{ path('mecenes') }}">Mécènes & Lots</a>
             {% endif %}
+            {% if is_granted('ROLE_MECENE') and not is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('mecene_mes_inscriptions') }}">Mes Inscriptions</a>
+            {% endif %}
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('admin_inscriptions') }}">Gestion Inscriptions</a>
+            {% endif %}
             {% if app.user %}
                 <a class="nav-link" href="{{ path('stocks') }}">Stocks</a>
             {% endif %}

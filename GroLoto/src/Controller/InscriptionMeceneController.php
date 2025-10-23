@@ -1,0 +1,74 @@
+<?php
+namespace App\Controller;
+
+use App\Entity\InscriptionMecene;
+use App\Entity\Mecene;
+use App\Form\InscriptionMeceneType;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+#[IsGranted('ROLE_MECENE')]
+class InscriptionMeceneController extends AbstractController
+{
+    #[Route('/mecene/inscription', name: 'mecene_inscription')]
+    public function inscription(Request $request, EntityManagerInterface $em): Response
+    {
+        // Récupérer le mécène connecté
+        $utilisateur = $this->getUser();
+        $mecene = $em->getRepository(Mecene::class)->findOneBy(['utilisateur' => $utilisateur]);
+        
+        if (!$mecene) {
+            $this->addFlash('error', 'Aucun profil mécène trouvé pour cet utilisateur.');
+            return $this->redirectToRoute('app_evenements');
+        }
+
+        $inscription = new InscriptionMecene();
+        $inscription->setMecene($mecene);
+
+        $form = $this->createForm(InscriptionMeceneType::class, $inscription);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $em->persist($inscription);
+                $em->flush();
+
+                $this->addFlash('success', 'Votre demande d\'inscription a été envoyée avec succès ! Un administrateur va la traiter prochainement.');
+                return $this->redirectToRoute('mecene_mes_inscriptions');
+            } else {
+                $this->addFlash('error', 'Le formulaire contient des erreurs. Veuillez vérifier les champs.');
+            }
+        }
+
+        return $this->render('inscription_mecene/form.html.twig', [
+            'form' => $form->createView(),
+            'mecene' => $mecene
+        ]);
+    }
+
+    #[Route('/mecene/mes-inscriptions', name: 'mecene_mes_inscriptions')]
+    public function mesInscriptions(EntityManagerInterface $em): Response
+    {
+        $utilisateur = $this->getUser();
+        $mecene = $em->getRepository(Mecene::class)->findOneBy(['utilisateur' => $utilisateur]);
+        
+        if (!$mecene) {
+            $this->addFlash('error', 'Aucun profil mécène trouvé pour cet utilisateur.');
+            return $this->redirectToRoute('app_evenements');
+        }
+
+        $inscriptions = $em->getRepository(InscriptionMecene::class)->findBy(
+            ['mecene' => $mecene],
+            ['date_inscription' => 'DESC']
+        );
+
+        return $this->render('inscription_mecene/mes_inscriptions.html.twig', [
+            'inscriptions' => $inscriptions,
+            'mecene' => $mecene
+        ]);
+    }
+}

@@ -15,7 +15,11 @@
     <div class="hero-content">
         <h1 class="hero-title">Gestion des Événements</h1>
         <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité.</p>
-        <a href="{% if isAdmin %}{{ path('app_evenements_create') }}{% else %}#calendar{% endif %}" class="hero-btn yellow">{% if isAdmin %}Créer un événement{% else %}Voir le planning{% endif %}</a>
+        {% if is_granted('ROLE_MECENE') and not is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('mecene_inscription') }}" class="hero-btn yellow">S'inscrire à un événement</a>
+        {% else %}
+            <a href="{% if isAdmin %}{{ path('app_evenements_create') }}{% else %}#calendar{% endif %}" class="hero-btn yellow">{% if isAdmin %}Créer un événement{% else %}Voir le planning{% endif %}</a>
+        {% endif %}
     </div>
 </div>
 

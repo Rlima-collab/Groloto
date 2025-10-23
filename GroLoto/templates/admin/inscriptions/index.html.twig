@@ -1,0 +1,633 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Inscriptions Mécènes{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Inscriptions</h1>
+        <p class="hero-description">Validez ou refusez les demandes d'inscription des mécènes aux événements.</p>
+    </div>
+</div>
+
+<div class="page-header">
+    <h1 class="page-title">🔍 Demandes d'Inscription Mécènes</h1>
+</div>
+
+<!-- Messages flash -->
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success" style="max-width: 1400px; margin: 0 auto 1.5rem; padding: 1rem; background: #dcfce7; border-left: 4px solid #16a34a; border-radius: 8px; color: #15803d;">
+        <strong>✓ Succès :</strong> {{ message }}
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger" style="max-width: 1400px; margin: 0 auto 1.5rem; padding: 1rem; background: #fee2e2; border-left: 4px solid #dc2626; border-radius: 8px; color: #991b1b;">
+        <strong>❌ Erreur :</strong> {{ message }}
+    </div>
+{% endfor %}
+
+<!-- Statistiques -->
+<div class="metrics-grid" style="max-width: 1400px; margin: 0 auto 2rem; padding: 0 2rem;">
+    <div class="card metric-card">
+        <div class="card-header">
+            <span class="metric-title">Total demandes</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ stats.total }}</div>
+            <p class="metric-change positive">Toutes les demandes</p>
+        </div>
+    </div>
+    <div class="card metric-card yellow-border">
+        <div class="card-header">
+            <span class="metric-title">En attente</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ stats.en_attente }}</div>
+            <p class="metric-change warning">À traiter</p>
+        </div>
+    </div>
+    <div class="card metric-card green-border">
+        <div class="card-header">
+            <span class="metric-title">Acceptées</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ stats.acceptees }}</div>
+            <p class="metric-change positive">Validées</p>
+        </div>
+    </div>
+    <div class="card metric-card red-border">
+        <div class="card-header">
+            <span class="metric-title">Refusées</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ stats.refusees }}</div>
+            <p class="metric-change danger">Rejetées</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div style="max-width: 1400px; margin: 0 auto 2rem; padding: 0 2rem;">
+    <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterInscriptions('all')">
+            Toutes ({{ stats.total }})
+        </button>
+        <button class="filter-tab" onclick="filterInscriptions('en_attente')">
+            En attente ({{ stats.en_attente }})
+        </button>
+        <button class="filter-tab" onclick="filterInscriptions('accepte')">
+            Acceptées ({{ stats.acceptees }})
+        </button>
+        <button class="filter-tab" onclick="filterInscriptions('refuse')">
+            Refusées ({{ stats.refusees }})
+        </button>
+    </div>
+</div>
+
+<!-- Liste des inscriptions -->
+<div style="max-width: 1400px; margin: 0 auto; padding: 0 2rem 2rem;">
+    {% if inscriptions|length > 0 %}
+        <div class="inscriptions-list">
+            {% for inscription in inscriptions %}
+                <div class="card inscription-item" data-statut="{{ inscription.statut }}">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: start; gap: 1rem; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 300px;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                <h3 class="card-title" style="margin: 0;">🏢 {{ inscription.mecene.organisation }}</h3>
+                                <span class="badge status-badge 
+                                    {% if inscription.statut == 'accepte' %}status-success
+                                    {% elseif inscription.statut == 'refuse' %}status-danger
+                                    {% else %}status-warning{% endif %}">
+                                    {% if inscription.statut == 'accepte' %}✓ Acceptée
+                                    {% elseif inscription.statut == 'refuse' %}✗ Refusée
+                                    {% else %}⏳ En attente{% endif %}
+                                </span>
+                            </div>
+                            <p class="card-description" style="margin: 0;">
+                                👤 {{ inscription.mecene.utilisateur.prenom }} {{ inscription.mecene.utilisateur.nom }}
+                                <span style="margin: 0 0.5rem;">•</span>
+                                📧 {{ inscription.mecene.utilisateur.email }}
+                            </p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="event-info">
+                                <strong style="color: #374151; font-size: 1rem;">{{ inscription.evenement.nom }}</strong>
+                                <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">
+                                    📅 {{ inscription.evenement.dateDebut|date('d/m/Y') }}
+                                    {% if inscription.evenement.lieu %}
+                                        <br>📍 {{ inscription.evenement.lieu }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="inscription-grid">
+                            {% if inscription.nomDon %}
+                            <div class="info-section highlight-section">
+                                <label class="info-label">📦 Article pour le stock</label>
+                                <p class="info-value" style="font-weight: 600; font-size: 1.1rem; color: #006909;">{{ inscription.nomDon }}</p>
+                                {% if inscription.categorie %}
+                                    <span class="category-badge category-{{ inscription.categorie }}">
+                                        {% if inscription.categorie == 'bar' %}🍺 Bar
+                                        {% elseif inscription.categorie == 'resto' %}🍽️ Resto
+                                        {% elseif inscription.categorie == 'deco' %}🎨 Déco
+                                        {% else %}📋 Autre{% endif %}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="info-section">
+                                <label class="info-label">📊 Quantité</label>
+                                <p class="info-value">
+                                    <strong style="font-size: 1.25rem; color: #059669;">{{ inscription.quantite }}</strong>
+                                </p>
+                            </div>
+
+                            {% if inscription.valeurUnitaire %}
+                            <div class="info-section">
+                                <label class="info-label">💵 Valeur unitaire</label>
+                                <p class="info-value amount">{{ inscription.valeurUnitaire|number_format(2, ',', ' ') }} €</p>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+
+                            <div class="info-section">
+                                <label class="info-label">�💝 Description du don</label>
+                                <p class="info-value">{{ inscription.descriptionDon }}</p>
+                            </div>
+
+                            {% if inscription.montantEstime %}
+                            <div class="info-section">
+                                <label class="info-label">💰 Valeur totale estimée</label>
+                                <p class="info-value amount">{{ inscription.montantEstime|number_format(2, ',', ' ') }} €</p>
+                            </div>
+                            {% endif %}
+
+                            {% if inscription.remarques %}
+                            <div class="info-section">
+                                <label class="info-label">📝 Remarques</label>
+                                <p class="info-value">{{ inscription.remarques }}</p>
+                            </div>
+                            {% endif %}
+
+                            <div class="info-section">
+                                <label class="info-label">📆 Date de soumission</label>
+                                <p class="info-value">{{ inscription.dateInscription|date('d/m/Y à H:i') }}</p>
+                            </div>
+                        </div>
+
+                        {% if inscription.statut == 'en_attente' %}
+                        <div class="action-buttons" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                            <form method="post" action="{{ path('admin_inscription_accepter', {'id': inscription.id}) }}" style="display: inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('accepter_inscription_' ~ inscription.id) }}">
+                                <button type="submit" class="btn btn-success">
+                                    <span>✓</span> Accepter
+                                </button>
+                            </form>
+                            
+                            <button type="button" class="btn btn-danger" onclick="confirmRefuser({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('refuser_inscription_' ~ inscription.id) }}')">
+                                <span>✗</span> Refuser
+                            </button>
+                            
+                            <button type="button" class="btn btn-secondary" onclick="confirmSupprimer({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('delete_inscription_' ~ inscription.id) }}')">
+                                <span>🗑️</span> Supprimer
+                            </button>
+                        </div>
+                        {% else %}
+                        <div class="action-buttons" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                            <button type="button" class="btn btn-secondary" onclick="confirmSupprimer({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('delete_inscription_' ~ inscription.id) }}')">
+                                <span>🗑️</span> Supprimer
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-content" style="text-align: center; padding: 3rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">📋</div>
+                <h3 style="color: #374151; margin-bottom: 0.5rem;">Aucune inscription</h3>
+                <p style="color: #6b7280; margin: 0;">Il n'y a pas encore de demandes d'inscription.</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal pour la remarque de refus -->
+<div id="modalRefus" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="closeModalRefus()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Refuser l'inscription</h3>
+            <button type="button" class="modal-close" onclick="closeModalRefus()">✕</button>
+        </div>
+        <form id="formRefus" method="post" action="">
+            <div class="modal-body">
+                <p class="modal-description">Vous êtes sur le point de refuser l'inscription de <strong id="orgaRefus"></strong>.</p>
+                <p class="modal-description">Vous pouvez optionnellement ajouter une remarque qui sera visible par le mécène :</p>
+                
+                <input type="hidden" name="_token" id="tokenRefus" value="">
+                <div class="form-group">
+                    <label for="remarque_refus" class="form-label">Raison du refus (optionnel)</label>
+                    <textarea name="remarque_refus" id="remarque_refus" class="form-control" rows="4" placeholder="Ex: Le don ne correspond pas aux besoins de l'événement..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModalRefus()">Annuler</button>
+                <button type="submit" class="btn btn-danger">Confirmer le refus</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filter-tab {
+    padding: 0.625rem 1.25rem;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #6b7280;
+}
+
+.filter-tab:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.filter-tab.active {
+    background: #006909;
+    color: white;
+    border-color: #006909;
+}
+
+.inscriptions-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.inscription-item {
+    transition: all 0.2s;
+}
+
+.inscription-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.status-success {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.category-bar {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.category-resto {
+    background: #fed7aa;
+    color: #c2410c;
+}
+
+.category-deco {
+    background: #fce7f3;
+    color: #9f1239;
+}
+
+.category-autre {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.highlight-section {
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important;
+    border: 2px solid #16a34a;
+}
+
+.inscription-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+}
+
+.info-section {
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 6px;
+}
+
+.info-label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.info-value {
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.info-value.amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #059669;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: white;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #15803d, #166534);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    margin: 5% auto;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 2px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-description {
+    color: #6b7280;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.modal-description strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.modal-footer {
+    padding: 1.5rem;
+    border-top: 2px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+</style>
+
+<script>
+function filterInscriptions(statut) {
+    const items = document.querySelectorAll('.inscription-item');
+    const tabs = document.querySelectorAll('.filter-tab');
+    
+    // Update active tab
+    tabs.forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Filter items
+    items.forEach(item => {
+        if (statut === 'all' || item.dataset.statut === statut) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function confirmRefuser(id, organisation, token) {
+    // Ouvrir le modal
+    const modal = document.getElementById('modalRefus');
+    const form = document.getElementById('formRefus');
+    const orgaElement = document.getElementById('orgaRefus');
+    const tokenInput = document.getElementById('tokenRefus');
+    const remarqueTextarea = document.getElementById('remarque_refus');
+    
+    // Configurer le modal
+    form.action = `/admin/inscriptions/${id}/refuser`;
+    orgaElement.textContent = organisation;
+    tokenInput.value = token;
+    remarqueTextarea.value = '';
+    
+    // Afficher le modal
+    modal.style.display = 'block';
+}
+
+function closeModalRefus() {
+    const modal = document.getElementById('modalRefus');
+    modal.style.display = 'none';
+}
+
+function confirmSupprimer(id, organisation, token) {
+    if (confirm(`⚠️ ATTENTION ⚠️\n\nÊtes-vous sûr de vouloir ANNULER l'inscription de "${organisation}" ?\n\nSi l'inscription était acceptée, elle sera passée en statut "Refusée" et le stock associé sera supprimé.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/inscriptions/${id}/supprimer`;
+        
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '_token';
+        tokenInput.value = token;
+        form.appendChild(tokenInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

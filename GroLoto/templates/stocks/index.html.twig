@@ -20,6 +20,11 @@
 
 <div class="page-header">
     <h1 class="page-title">Inventaire & Stocks</h1>
+    {% if mecene_filtre %}
+        <p class="page-description">Filtré par mécène : <strong>{{ mecene_filtre.organisation }}</strong> - 
+        <a href="{{ path('stocks') }}" class="btn btn-small btn-secondary">Voir tous les lots</a>
+        </p>
+    {% endif %}
 </div>
 
 <!-- Cartes de résumé -->
@@ -90,8 +95,122 @@
 <!-- 🔹 Contenu des sections -->
 <div class="tabs-content">
 
+    <!-- Lots du mécène (si filtre actif) -->
+    {% if mecene_filtre %}
+    <section id="lots-mecene" class="tab-section active">
+        <!-- Lots -->
+        <div class="card inventory-card">
+            <div class="card-header">
+                <h3 class="card-title">🎁 Lots fournis par {{ mecene_filtre.organisation }}</h3>
+                <p class="card-description">Liste des lots donnés par ce mécène</p>
+            </div>
+            <div class="card-content">
+                {% if lots_items|length > 0 %}
+                <div class="table-wrapper">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Titre</th>
+                                <th>Description</th>
+                                <th class="text-right">Quantité</th>
+                                <th class="text-right">Valeur estimée</th>
+                                <th>Date création</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lot in lots_items %}
+                                <tr>
+                                    <td class="name">{{ lot.titre }}</td>
+                                    <td>{{ lot.description|default('—') }}</td>
+                                    <td class="text-right">{{ lot.quantite }}</td>
+                                    <td class="text-right value">€{{ lot.valeurEstimee|number_format(2, ',', ' ') }}</td>
+                                    <td>{{ lot.dateCreation ? lot.dateCreation|date('d/m/Y') : '—' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                    <div class="empty-state">
+                        <p>Aucun lot fourni par ce mécène pour le moment.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Dons (Inscriptions) -->
+        <div class="card inventory-card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <h3 class="card-title">📦 Dons aux événements par {{ mecene_filtre.organisation }}</h3>
+                <p class="card-description">Liste des dons proposés ou acceptés pour les événements</p>
+            </div>
+            <div class="card-content">
+                {% if inscriptions_items|length > 0 %}
+                <div class="table-wrapper">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Nom du don</th>
+                                <th>Événement</th>
+                                <th>Catégorie</th>
+                                <th class="text-right">Quantité</th>
+                                <th class="text-right">Valeur unitaire</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for inscription in inscriptions_items %}
+                                <tr>
+                                    <td class="name">{{ inscription.nomDon|default('—') }}</td>
+                                    <td>{{ inscription.evenement.nom }}</td>
+                                    <td>
+                                        {% if inscription.categorie %}
+                                            <span class="badge category">
+                                                {% if inscription.categorie == 'bar' %}🍺 Bar
+                                                {% elseif inscription.categorie == 'resto' %}🍽️ Resto
+                                                {% elseif inscription.categorie == 'deco' %}🎨 Déco
+                                                {% else %}📋 Autre{% endif %}
+                                            </span>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-right">{{ inscription.quantite|default('—') }}</td>
+                                    <td class="text-right value">
+                                        {% if inscription.valeurUnitaire %}
+                                            €{{ inscription.valeurUnitaire|number_format(2, ',', ' ') }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ inscription.dateInscription|date('d/m/Y') }}</td>
+                                    <td>
+                                        {% if inscription.statut == 'accepte' %}
+                                            <span class="badge status success">✓ Accepté</span>
+                                        {% elseif inscription.statut == 'refuse' %}
+                                            <span class="badge status danger">✗ Refusé</span>
+                                        {% else %}
+                                            <span class="badge status warning">⏳ En attente</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                    <div class="empty-state">
+                        <p>Aucun don proposé pour les événements par ce mécène.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
     <!-- Inventaire -->
-    <section id="inventaire" class="tab-section active">
+    <section id="inventaire" class="tab-section {% if not mecene_filtre %}active{% endif %}">
         <div class="card inventory-card">
             <div class="card-header">
                 <h3 class="card-title">Inventaire des lots</h3>
