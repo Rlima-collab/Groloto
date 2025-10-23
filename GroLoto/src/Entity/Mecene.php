@@ -3,9 +3,10 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Utilisateur;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'MECENE')]
+#[ORM\Table(name: 'mecene')]
 class Mecene
 {
     #[ORM\Id]
@@ -13,15 +14,15 @@ class Mecene
     #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[ORM\OneToOne(targetEntity: Utilisateur::class)]
-    #[ORM\JoinColumn(name: "id_utilisateur", referencedColumnName: "id", nullable: true)]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'mecenes')]
+    #[ORM\JoinColumn(name: 'id_utilisateur', referencedColumnName: 'id', nullable: true)]
     private ?Utilisateur $utilisateur = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    private string $organisation;
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $organisation = null;
 
-    #[ORM\Column(type: 'string', length: 50)]
-    private string $siret;
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    private ?string $siret = null;
 
     public function getId(): ?int
     {

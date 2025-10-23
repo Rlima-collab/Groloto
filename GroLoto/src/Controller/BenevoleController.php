@@ -49,7 +49,7 @@ class BenevoleController extends AbstractController
                     'evenement' => $creneau->getEvenement() ? $creneau->getEvenement()->getNom() : null,
                     'poste_requis' => $creneau->getPosteRequis(),
                     'max_personnes' => $creneau->getMaxPersonnes(),
-                    'remarques' => $creneau->getRemarques()
+                    'remarques' => $creneau->getRemarque()
                 ]
             ];
         }
