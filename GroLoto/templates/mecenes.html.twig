@@ -109,7 +109,7 @@
                                     {% if is_granted('ROLE_ADMIN') %}
                                     <div class="mecene-actions">
                                         <a href="{{ path('mecene_edit', {'id': mecene.id}) }}" class="btn btn-small btn-primary">Modifier</a>
-                                        <a href="#" class="btn btn-small btn-secondary">Lots</a>
+                                        <a href="{{ path('stocks', {'mecene': mecene.id}) }}" class="btn btn-small btn-secondary">Lots</a>
                                         <a href="#" class="btn btn-small btn-secondary">Conventions</a>
                                         <button type="button" 
                                                 class="btn btn-small btn-danger" 
