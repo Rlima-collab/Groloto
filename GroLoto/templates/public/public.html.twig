@@ -62,21 +62,19 @@
     </div>
 
     <!-- Partie 2: Navigation entre sections -->
+    {% if is_granted('ROLE_ADMIN') %}
     <div class="action-buttons">
         <button class="btn btn-participants active" onclick="showSection('participants')">
-            👥 Participants
+            Participants
         </button>
-        {% if is_granted('ROLE_ADMIN') %}
         <button class="btn btn-analytics" onclick="showSection('analytics')">
-            📊 Analytics
+            Analytics
         </button>
-        {% endif %}
-        {% if is_granted('ROLE_ADMIN') %}
         <button class="btn btn-import" onclick="showSection('import')">
-            📋 Import
+            Import
         </button>
-        {% endif %}
     </div>
+    {% endif %}
 
     <!-- Section Participants -->
     <div id="participants-section" class="participants-section">
