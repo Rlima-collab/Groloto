@@ -89,6 +89,22 @@ class TacheRepository extends ServiceEntityRepository
     }
 
     /**
+     * Trouve les tâches réalisées (fin < now) assignées à un bénévole
+     */
+    public function findTachesRealiseesForBenevole(int $benevoleId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->innerJoin('App\\Entity\\AffectationTache', 'a', 'WITH', 'a.tache = t')
+            ->andWhere('IDENTITY(a.benevole) = :benevoleId')
+            ->andWhere('t.fin < :now')
+            ->setParameter('benevoleId', $benevoleId)
+            ->setParameter('now', new \DateTime())
+            ->orderBy('t.fin', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Trouve les tâches par poste requis
      */
     public function findByPosteRequis(string $poste): array

@@ -89,12 +89,28 @@ class BenevoleController extends AbstractController
             ];
         }
 
+        // Récupérer les tâches réalisées si l'utilisateur est un bénévole
+        $tachesRealiseesData = [];
+        if ($benevoleForUser) {
+            $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevoleForUser->getId());
+            foreach ($tachesRealisees as $tr) {
+                $tachesRealiseesData[] = [
+                    'id' => $tr->getId(),
+                    'titre' => $tr->getTitre(),
+                    'debut' => $tr->getDebut(),
+                    'fin' => $tr->getFin(),
+                    'poste_requis' => $tr->getPosteRequis(),
+                ];
+            }
+        }
+
         return $this->render('benevoles.html.twig', [
             'benevoles' => $benevoles,
             'metriques' => $metriques,
             'taches' => $taches,
             // fournir des tableaux simples pour le template
-            'taches_proches' => $tachesProchesData
+            'taches_proches' => $tachesProchesData,
+            'taches_realisees' => $tachesRealiseesData
         ]);
     }
 

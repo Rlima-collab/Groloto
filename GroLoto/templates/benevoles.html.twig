@@ -192,6 +192,30 @@
                                 {% endif %}
                             </div>
                         </div>
+                        <div class="card" style="margin-top: 10px;">
+                            <div class="card-header">
+                                <h5 class="card-title">Tâches réalisées</h5>
+                            </div>
+                            <div class="card-content">
+                                {% if taches_realisees is defined and taches_realisees is not empty %}
+                                    {% for tache in taches_realisees %}
+                                        <div class="card" style="margin-bottom: 10px; padding: 10px; border: 1px solid #e0e0e0; background:#fafafa;">
+                                            <h6>{{ tache.titre }}</h6>
+                                            <p style="font-size: 0.85em; margin: 5px 0; color:#666;">
+                                                ✅ Du {{ tache.debut|date('d/m/Y H:i') }} au {{ tache.fin|date('d/m/Y H:i') }}
+                                                {% if tache.poste_requis %}
+                                                    <br>💼 {{ tache.poste_requis }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div style="text-align: center; padding: 12px; color: #666;">
+                                        ✅ Aucune tâche réalisée pour le moment.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
