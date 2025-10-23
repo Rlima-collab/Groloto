@@ -29,7 +29,6 @@
 
 <div class="benevoles-page">
 
-<!-- Key Metrics Cards -->
 <div class="metrics-grid">
     <div class="card metric-card">
         <div class="card-header">
@@ -75,7 +74,6 @@
         </a>
     </div>
     
-    <!-- Liste des bénévoles -->
     <div id="content-benevoles" class="tab-content main-content">
         <div class="card main-card" id="liste-benevoles">
             <div class="card-header">
@@ -146,11 +144,10 @@
         </div>
     </div>
     
-    <!-- Planning des créneaux -->
     <div id="content-planning" class="tab-content main-content" style="display: none;">
         <div class="card main-card">
             <div class="card-header">
-                <h2 class="card-title">Planning des Créneaux</h2>
+                <h2 class="card-title">Planning des Tâches</h2>
                 <p class="card-description">Planification pour les vendredis, samedis et dimanches</p>
             </div>
             <div class="card-content">
@@ -158,7 +155,7 @@
                     <div style="flex: 2;">
                         <div class="card">
                             <div class="card-header">
-                                <h5 class="card-title">Calendrier des créneaux (Week-end seulement)</h5>
+                                <h5 class="card-title">Calendrier des tâches (Week-end seulement)</h5>
                             </div>
                             <div class="card-content">
                                 <div style="margin-bottom: 1em;">
@@ -173,24 +170,24 @@
                     <div style="flex: 1;">
                         <div class="card">
                             <div class="card-header">
-                                <h5 class="card-title">Créneaux à venir</h5>
+                                <h5 class="card-title">Tâches à venir</h5>
                             </div>
                             <div class="card-content">
-                                {% if creneaux_proches is defined and creneaux_proches is not empty %}
-                                    {% for creneau in creneaux_proches %}
+                                {% if taches_proches is defined and taches_proches is not empty %}
+                                    {% for tache in taches_proches %}
                                         <div class="card" style="margin-bottom: 10px; padding: 10px; border: 1px solid #ddd;">
-                                            <h6>{{ creneau.titre }}</h6>
+                                            <h6>{{ tache.titre }}</h6>
                                             <p style="font-size: 0.9em; margin: 5px 0;">
-                                                📅 {{ creneau.debut|date('d/m/Y H:i') }}
-                                                {% if creneau.posteRequis %}
-                                                    <br>💼 {{ creneau.posteRequis }}
+                                                📅 {{ tache.debut|date('d/m/Y H:i') }}
+                                                {% if tache.poste_requis %}
+                                                    <br>💼 {{ tache.poste_requis }}
                                                 {% endif %}
                                             </p>
                                         </div>
                                     {% endfor %}
                                 {% else %}
                                     <div style="text-align: center; padding: 20px; color: #666;">
-                                        ℹ️ Aucun créneau planifié.
+                                        ℹ️ Aucune tâche planifiée.
                                     </div>
                                 {% endif %}
                             </div>
@@ -204,13 +201,10 @@
 </div>
 
 <script>
-// Variable globale pour le calendrier
 window.calendarInstance = null;
 
-// Fonction de chargement de FullCalendar
 function loadFullCalendarScript() {
     return new Promise((resolve, reject) => {
-        // Vérifier si FullCalendar est déjà chargé
         if (typeof FullCalendar !== 'undefined') {
             console.log('FullCalendar déjà disponible');
             resolve();
@@ -224,19 +218,9 @@ function loadFullCalendarScript() {
         
         script.onload = function() {
             console.log('Script FullCalendar chargé');
-            // Attendre un peu que la variable soit disponible
             setTimeout(() => {
-                console.log('Vérification de la disponibilité de FullCalendar...');
-                console.log('window.FullCalendar:', typeof window.FullCalendar);
-                console.log('FullCalendar:', typeof FullCalendar);
-                console.log('Objets disponibles dans window:', Object.keys(window).filter(key => key.toLowerCase().includes('calendar')));
-                
                 if (typeof FullCalendar !== 'undefined') {
                     console.log('FullCalendar disponible !');
-                    resolve();
-                } else if (typeof window.FullCalendar !== 'undefined') {
-                    console.log('FullCalendar disponible via window.FullCalendar');
-                    window.FullCalendar = window.FullCalendar;
                     resolve();
                 } else {
                     console.error('FullCalendar non trouvé après chargement');
@@ -254,7 +238,6 @@ function loadFullCalendarScript() {
     });
 }
 
-// Fonction pour initialiser le calendrier
 function initializeCalendar(viewType = 'dayGridMonth') {
     console.log('Tentative d\'initialisation du calendrier...');
     const calendarEl = document.getElementById('calendar');
@@ -272,18 +255,17 @@ function initializeCalendar(viewType = 'dayGridMonth') {
         });
         return;
     }
-    // Détruire l'instance existante si elle existe
     if (window.calendarInstance) {
         window.calendarInstance.destroy();
         window.calendarInstance = null;
     }
-    const events = {{ creneaux|json_encode|raw }};
+    const events = {{ taches|json_encode|raw }};
     try {
         window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
             initialView: viewType,
             locale: 'fr',
             height: 'auto',
-            hiddenDays: [1, 2, 3, 4], // Masquer lundi(1), mardi(2), mercredi(3), jeudi(4) - garder vendredi(5), samedi(6), dimanche(0)
+            hiddenDays: [1, 2, 3, 4],
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
@@ -305,7 +287,7 @@ function initializeCalendar(viewType = 'dayGridMonth') {
                 if (props.evenement) details += 'Événement: ' + props.evenement + '\n';
                 if (props.poste_requis) details += 'Poste: ' + props.poste_requis + '\n';
                 if (props.max_personnes) details += 'Max personnes: ' + props.max_personnes + '\n';
-                if (props.notes) details += 'Notes: ' + props.notes + '\n';
+                if (props.remarques) details += 'Remarques: ' + props.remarques + '\n';
                 alert(details);
             },
             eventDisplay: 'block',
@@ -313,7 +295,7 @@ function initializeCalendar(viewType = 'dayGridMonth') {
             slotMinTime: '07:00:00',
             slotMaxTime: '22:00:00',
             allDaySlot: false,
-            firstDay: 1 // Commencer la semaine le lundi
+            firstDay: 1
         });
         window.calendarInstance.render();
     } catch (error) {
@@ -321,19 +303,16 @@ function initializeCalendar(viewType = 'dayGridMonth') {
     }
 }
 
-// Fonction pour changer la vue du calendrier
 function changeCalendarView(viewType) {
     if (window.calendarInstance) {
         window.calendarInstance.changeView(viewType);
     } else {
         initializeCalendar(viewType);
     }
-    // Mettre à jour le style des boutons
     document.getElementById('btn-month').classList.toggle('active', viewType === 'dayGridMonth');
     document.getElementById('btn-week').classList.toggle('active', viewType === 'timeGridWeek');
 }
 
-// Fonction de chargement alternatif
 function loadFullCalendarAlternative() {
     console.log('Tentative de chargement alternatif de FullCalendar...');
     const calendarEl = document.getElementById('calendar');
@@ -348,17 +327,14 @@ function loadFullCalendarAlternative() {
 function showTab(tabName) {
     console.log('Changing to tab:', tabName);
     
-    // Masquer tous les contenus
     document.querySelectorAll('.tab-content').forEach(content => {
         content.style.display = 'none';
     });
     
-    // Désactiver tous les onglets
     document.querySelectorAll('.tab').forEach(tab => {
         tab.classList.remove('selected');
     });
     
-    // Afficher le contenu sélectionné
     const contentEl = document.getElementById('content-' + tabName);
     if (contentEl) {
         contentEl.style.display = 'block';
@@ -367,51 +343,40 @@ function showTab(tabName) {
         console.error('Contenu non trouvé pour:', tabName);
     }
     
-    // Activer l'onglet sélectionné
     const tabEl = document.getElementById('tab-' + tabName);
     if (tabEl) {
         tabEl.classList.add('selected');
     }
     
-    // Initialiser le calendrier si c'est l'onglet planning
     if (tabName === 'planning') {
         console.log('Onglet planning activé, initialisation du calendrier...');
-        
-        // Attendre un délai pour que l'élément soit visible
         setTimeout(() => {
             initializeCalendar();
         }, 200);
     }
 }
 
-// Initialiser avec l'onglet bénévoles actif
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Content Loaded');
-    
-    // Activer l'onglet bénévoles par défaut
     document.getElementById('tab-benevoles').classList.add('selected');
 });
 
-// Fonction de confirmation de suppression
 function confirmDelete(button) {
     const benevoleId = button.getAttribute('data-benevole-id');
     const benevoleNom = button.getAttribute('data-benevole-nom');
     const csrfToken = button.getAttribute('data-csrf-token');
     
     if (confirm(`Êtes-vous sûr de vouloir supprimer le bénévole "${benevoleNom}" ?\n\nCette action est irréversible et supprimera toutes les données associées.`)) {
-        // Créer un formulaire pour la suppression
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/benevoles/${benevoleId}/delete`;
         
-        // Ajouter le token CSRF
         const csrfInput = document.createElement('input');
         csrfInput.type = 'hidden';
         csrfInput.name = '_token';
         csrfInput.value = csrfToken;
         form.appendChild(csrfInput);
         
-        // Ajouter le formulaire au body et le soumettre
         document.body.appendChild(form);
         form.submit();
     }

@@ -1,10 +1,7 @@
 <?php
-// src/Entity/Utilisateur.php
 namespace App\Entity;
 
 use App\Repository\UtilisateurRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -48,147 +45,53 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private ?\DateTimeInterface $date_modification = null;
 
-    #[ORM\OneToMany(targetEntity: Mecene::class, mappedBy: 'utilisateur')]
-    private Collection $mecenes;
-
     public function __construct()
     {
         $this->date_creation = new \DateTime();
         $this->date_modification = new \DateTime();
-        $this->mecenes = new ArrayCollection();
     }
 
-    // === Getters & Setters ===
+    // Getters & Setters (TOUT GARDÉ)
+    public function getId(): ?int { return $this->id; }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    public function getRole(): ?Role { return $this->role; }
+    public function setRole(Role $role): self 
+    { $this->role = $role; return $this; }
 
-    public function getRole(): ?Role
-    {
-        return $this->role;
-    }
+    public function getEmail(): ?string { return $this->email; }
+    public function setEmail(string $email): self 
+    { $this->email = $email; return $this; }
 
-    public function setRole(Role $role): self
-    {
-        $this->role = $role;
-        return $this;
-    }
+    public function getMotDePasse(): ?string { return $this->mot_de_passe; }
+    public function setMotDePasse(?string $mot_de_passe): self 
+    { $this->mot_de_passe = $mot_de_passe; return $this; }
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
+    public function getPrenom(): ?string { return $this->prenom; }
+    public function setPrenom(?string $prenom): self 
+    { $this->prenom = $prenom; return $this; }
 
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-        return $this;
-    }
+    public function getNom(): ?string { return $this->nom; }
+    public function setNom(?string $nom): self 
+    { $this->nom = $nom; return $this; }
 
-    public function getMotDePasse(): ?string
-    {
-        return $this->mot_de_passe;
-    }
+    public function getTelephone(): ?string { return $this->telephone; }
+    public function setTelephone(?string $telephone): self 
+    { $this->telephone = $telephone; return $this; }
 
-    public function setMotDePasse(?string $mot_de_passe): self
-    {
-        $this->mot_de_passe = $mot_de_passe;
-        return $this;
-    }
+    public function getDateCreation(): ?\DateTimeInterface { return $this->date_creation; }
+    public function setDateCreation(\DateTimeInterface $date_creation): self 
+    { $this->date_creation = $date_creation; return $this; }
 
-    public function getPrenom(): ?string
-    {
-        return $this->prenom;
-    }
+    public function getDateModification(): ?\DateTimeInterface { return $this->date_modification; }
+    public function setDateModification(\DateTimeInterface $date_modification): self 
+    { $this->date_modification = $date_modification; return $this; }
 
-    public function setPrenom(?string $prenom): self
-    {
-        $this->prenom = $prenom;
-        return $this;
-    }
-
-    public function getNom(): ?string
-    {
-        return $this->nom;
-    }
-
-    public function setNom(?string $nom): self
-    {
-        $this->nom = $nom;
-        return $this;
-    }
-
-    public function getTelephone(): ?string
-    {
-        return $this->telephone;
-    }
-
-    public function setTelephone(?string $telephone): self
-    {
-        $this->telephone = $telephone;
-        return $this;
-    }
-
-    public function getDateCreation(): ?\DateTimeInterface
-    {
-        return $this->date_creation;
-    }
-
-    public function setDateCreation(\DateTimeInterface $date_creation): self
-    {
-        $this->date_creation = $date_creation;
-        return $this;
-    }
-
-    public function getDateModification(): ?\DateTimeInterface
-    {
-        return $this->date_modification;
-    }
-
-    public function setDateModification(\DateTimeInterface $date_modification): self
-    {
-        $this->date_modification = $date_modification;
-        return $this;
-    }
-
-    /** @return Collection<int, Mecene> */
-    public function getMecenes(): Collection
-    {
-        return $this->mecenes;
-    }
-
-    public function addMecene(Mecene $mecene): self
-    {
-        if (!$this->mecenes->contains($mecene)) {
-            $this->mecenes[] = $mecene;
-            $mecene->setUtilisateur($this);
-        }
-        return $this;
-    }
-
-    public function removeMecene(Mecene $mecene): self
-    {
-        if ($this->mecenes->removeElement($mecene)) {
-            if ($mecene->getUtilisateur() === $this) {
-                $mecene->setUtilisateur(null);
-            }
-        }
-        return $this;
-    }
-
-    // === Implémentation UserInterface ===
-
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
+    // UserInterface
+    public function getUserIdentifier(): string { return (string) $this->email; }
 
     public function getRoles(): array
     {
         $roles = ['ROLE_USER'];
-
         if ($this->role) {
             $nom = $this->role->getNom();
             $roles[] = match ($nom) {
@@ -198,22 +101,10 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
                 default => 'ROLE_USER',
             };
         }
-
         return array_unique($roles);
     }
 
-    public function getPassword(): ?string
-    {
-        return $this->mot_de_passe;
-    }
-
-    public function eraseCredentials(): void
-    {
-        // Rien à effacer ici (pas de données temporaires sensibles)
-    }
-
-    public function getSalt(): ?string
-    {
-        return null;
-    }
+    public function getPassword(): ?string { return $this->mot_de_passe; }
+    public function eraseCredentials(): void {}
+    public function getSalt(): ?string { return null; }
 }

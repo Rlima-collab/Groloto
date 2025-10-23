@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Benevole;
 use App\Form\BenevoleEditType;
 use App\Repository\BenevoleRepository;
-use App\Repository\CreneauRepository;
+use App\Repository\TacheRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,51 +17,46 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class BenevoleController extends AbstractController
 {
     #[Route('/benevoles', name: 'benevoles')]
-    public function index(BenevoleRepository $benevoleRepository, CreneauRepository $creneauRepository): Response
+    public function index(BenevoleRepository $benevoleRepository, TacheRepository $tacheRepository): Response
     {
-        // Récupération des bénévoles depuis la base de données
         $benevoles = $benevoleRepository->findActiveWithUser();
         $totalBenevoles = $benevoleRepository->countActive();
         $nouveauxBenevoles = count($benevoleRepository->findRecentlyRegistered());
 
-        // Données pour les métriques
         $metriques = [
             'total' => $totalBenevoles,
             'nouveaux' => $nouveauxBenevoles,
-            'actifs' => $totalBenevoles, // Pour l'instant, tous les bénévoles récupérés sont actifs
-            'disponibles' => $totalBenevoles // Placeholder pour le moment
+            'actifs' => $totalBenevoles,
+            'disponibles' => $totalBenevoles
         ];
 
-        // Récupération des créneaux pour le planning (seulement vendredis, samedis, dimanches)
-        $creneauxBruts = $creneauRepository->findWeekendSlots();
+        $tachesBrutes = $tacheRepository->findTachesFutures();
         
-        // Formatage des créneaux pour FullCalendar
-        $creneaux = [];
-        foreach ($creneauxBruts as $creneau) {
-            $creneaux[] = [
-                'id' => $creneau->getId(),
-                'title' => $creneau->getTitre(),
-                'start' => $creneau->getDebut()->format('Y-m-d\TH:i:s'),
-                'end' => $creneau->getFin()->format('Y-m-d\TH:i:s'),
+        $taches = [];
+        foreach ($tachesBrutes as $tache) {
+            $taches[] = [
+                'id' => $tache->getId(),
+                'title' => $tache->getTitre(),
+                'start' => $tache->getDebut()->format('Y-m-d\TH:i:s'),
+                'end' => $tache->getFin()->format('Y-m-d\TH:i:s'),
                 'backgroundColor' => '#3b82f6',
                 'borderColor' => '#2563eb',
                 'extendedProps' => [
-                    'evenement' => $creneau->getEvenement() ? $creneau->getEvenement()->getNom() : null,
-                    'poste_requis' => $creneau->getPosteRequis(),
-                    'max_personnes' => $creneau->getMaxPersonnes(),
-                    'remarques' => $creneau->getRemarque()
+                    'evenement' => $tache->getEvenement() ? $tache->getEvenement()->getNom() : null,
+                    'poste_requis' => $tache->getPosteRequis(),
+                    'max_personnes' => $tache->getMaxPersonnes(),
+                    'remarques' => $tache->getRemarque()
                 ]
             ];
         }
 
-        // Créneaux proches pour la sidebar
-        $creneauxProches = $creneauRepository->findUpcomingWeekendSlots(5);
+        $tachesProches = $tacheRepository->findTachesFutures();
 
         return $this->render('benevoles.html.twig', [
             'benevoles' => $benevoles,
             'metriques' => $metriques,
-            'creneaux' => $creneaux,
-            'creneaux_proches' => $creneauxProches
+            'taches' => $taches,
+            'taches_proches' => $tachesProches
         ]);
     }
 
@@ -84,7 +79,6 @@ class BenevoleController extends AbstractController
 
         $form = $this->createForm(BenevoleEditType::class, $benevole);
         
-        // Pré-remplir les champs de l'utilisateur
         $form->get('prenom')->setData($utilisateur->getPrenom());
         $form->get('nom')->setData($utilisateur->getNom());
         $form->get('email')->setData($utilisateur->getEmail());
@@ -93,7 +87,6 @@ class BenevoleController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Mettre à jour les données de l'utilisateur
             $utilisateur->setPrenom($form->get('prenom')->getData());
             $utilisateur->setNom($form->get('nom')->getData());
             $utilisateur->setEmail($form->get('email')->getData());
@@ -131,7 +124,6 @@ class BenevoleController extends AbstractController
             return $this->redirectToRoute('benevoles');
         }
 
-        // Vérification du token CSRF
         $token = $request->request->get('_token');
         if (!$this->isCsrfTokenValid('delete_benevole_' . $id, $token)) {
             $this->addFlash('error', 'Token de sécurité invalide.');
@@ -142,7 +134,6 @@ class BenevoleController extends AbstractController
             $utilisateur = $benevole->getUtilisateur();
             $nomComplet = $utilisateur->getPrenom() . ' ' . $utilisateur->getNom();
             
-            // Supprimer le bénévole (et l'utilisateur en cascade si configuré)
             $entityManager->remove($benevole);
             $entityManager->flush();
             
