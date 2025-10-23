@@ -2,12 +2,27 @@
 
 {% block title %}Interface Public & Analytics{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/public.css') }}">
+{% endblock %}
+
 {% block body %}
-<div class="public-container">
-    <div class="public-header">
-        <h1>Interface Public & Analytics</h1>
-        <p class="subtitle">Gestion des participants et analyses de fréquentation</p>
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Interface Public & Analytics</h1>
+        <p class="hero-description">Gestion des participants et analyses de fréquentation pour vos événements.</p>
+        <a href="#analytics" class="hero-btn yellow smooth-scroll">Voir les analytics</a>
     </div>
+</div>
+
+<div class="page-header">
+    <h1 class="page-title">Analytics & Participants</h1>
+</div>
+
+<div class="public-container">
 
     <!-- Partie 1: Métriques principales -->
     <div class="metrics-section">
@@ -51,12 +66,16 @@
         <button class="btn btn-participants active" onclick="showSection('participants')">
             👥 Participants
         </button>
+        {% if is_granted('ROLE_ADMIN') %}
         <button class="btn btn-analytics" onclick="showSection('analytics')">
             📊 Analytics
         </button>
+        {% endif %}
+        {% if is_granted('ROLE_ADMIN') %}
         <button class="btn btn-import" onclick="showSection('import')">
             📋 Import
         </button>
+        {% endif %}
     </div>
 
     <!-- Section Participants -->
@@ -114,14 +133,17 @@
         </div>
 
         <div class="table-actions">
+            {% if is_granted('ROLE_ADMIN') %}
             <button class="btn btn-export">📤 Exporter CSV</button>
+            {% endif %}
             <button class="btn btn-filter">🔍 Filtrer</button>
             <button class="btn btn-refresh">🔄 Actualiser</button>
         </div>
     </div>
 
     <!-- Section Analytics -->
-    <div id="analytics-section" class="analytics-section" style="display: none;">
+    {% if is_granted('ROLE_ADMIN') %}
+    <div id="analytics" class="analytics-section" style="display: none;">
         <div class="section-header">
             <h2>Analytics & Statistiques</h2>
             <p>Analyses détaillées de la fréquentation et des tendances</p>
@@ -177,8 +199,10 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Section Import -->
+    {% if is_granted('ROLE_ADMIN') %}
     <div id="import-section" class="import-section" style="display: none;">
         <div class="import-header">
             <h2>Import de Données</h2>
@@ -238,6 +262,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -245,7 +270,7 @@
 // Gestion des onglets
 function showSection(sectionName) {
     // Masquer toutes les sections
-    document.querySelectorAll('.participants-section, .analytics-section, .import-section').forEach(section => {
+    document.querySelectorAll('.participants-section, #analytics, .import-section').forEach(section => {
         section.style.display = 'none';
     });
     
@@ -255,9 +280,10 @@ function showSection(sectionName) {
     });
     
     // Afficher la section demandée
-    const targetSection = document.getElementById(sectionName + '-section');
+    const targetSection = document.getElementById(sectionName === 'analytics' ? 'analytics' : sectionName + '-section');
     if (targetSection) {
         targetSection.style.display = 'block';
+        // Ne plus faire de défilement automatique ici
     }
     
     // Activer le bouton correspondant
@@ -271,6 +297,35 @@ function showSection(sectionName) {
         setTimeout(initCharts, 100);
     }
 }
+
+// Défilement fluide pour les liens d'ancrage (boutons héros uniquement)
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.smooth-scroll').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                // Si la section analytics est cachée, l'afficher d'abord puis faire défiler
+                if (targetId === '#analytics') {
+                    showSection('analytics');
+                    // Défilement vers la section analytics après l'affichage
+                    setTimeout(() => {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 100);
+                } else {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+    });
+});
 
 // Initialisation des graphiques
 function initCharts() {

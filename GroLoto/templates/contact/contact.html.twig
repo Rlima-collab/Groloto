@@ -4,16 +4,21 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('css/contact.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 {% endblock %}
 
 {% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Contactez-nous</h1>
+        <p class="hero-description">Une question ? Une suggestion ? Nous sommes là pour vous aider !</p>
+        <a href="#contact" class="hero-btn yellow">Nous contacter</a>
+    </div>
+</div>
 <div class="contact-container">
-    <header class="contact-header text-center mb-5">
-        <h1>Contactez-nous</h1>
-        <p class="lead">Une question ? Une suggestion ? On est là pour vous !</p>
-    </header>
 
     {% for message in app.flashes('success') %}
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -24,7 +29,7 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-8 col-xl-7">
-            <div class="contact-card p-4 p-md-5 shadow-lg">
+            <div id="contact" class="contact-card p-4 p-md-5 shadow-lg">
                 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
 
                 <div class="row g-3">

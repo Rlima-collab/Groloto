@@ -2,10 +2,24 @@
 
 {% block title %}Gestion des Stocks{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks.css') }}">
+{% endblock %}
+
 {% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Stocks</h1>
+        <p class="hero-description">Suivi des lots, entrées/sorties et alertes pour vos événements.</p>
+        <a href="#inventaire" class="hero-btn yellow smooth-scroll">Voir les stocks</a>
+    </div>
+</div>
+
 <div class="page-header">
-    <h1 class="page-title">Gestion des Stocks</h1>
-    <p class="page-description">Suivi des lots, entrées/sorties et alertes</p>
+    <h1 class="page-title">Inventaire & Stocks</h1>
 </div>
 
 <!-- Cartes de résumé -->
@@ -66,9 +80,11 @@
     <button class="tab-btn" data-tab="historique">
         <span class="icon"></span> Historique
     </button>
+    {% if is_granted('ROLE_ADMIN') %}
     <button class="tab-btn" data-tab="ajouter">
         <span class="icon"></span> Ajouter
     </button>
+    {% endif %}
 </div>
 
 <!-- 🔹 Contenu des sections -->
@@ -139,9 +155,11 @@
     </section>
 
     <!-- Ajouter -->
+    {% if is_granted('ROLE_ADMIN') %}
     <section id="ajouter" class="tab-section">
         {% include 'stocks/_ajouter.html.twig' %}
     </section>
+    {% endif %}
 </div>
 
 <!-- === JS pour navigation entre sections === -->
@@ -154,6 +172,41 @@ document.querySelectorAll('.tab-btn').forEach(button => {
         document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
         document.getElementById(target).classList.add('active');
     });
+});
+
+// Défilement fluide pour les liens d'ancrage
+document.querySelectorAll('.smooth-scroll').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+            targetElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Gérer le défilement automatique vers l'ancrage au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    const hash = window.location.hash;
+    if (hash === '#inventaire') {
+        // Activer l'onglet inventaire
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector('[data-tab="inventaire"]').classList.add('active');
+        document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById('inventaire').classList.add('active');
+        
+        // Défiler vers la section inventaire
+        setTimeout(() => {
+            document.getElementById('inventaire').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }, 100);
+    }
 });
 </script>
 

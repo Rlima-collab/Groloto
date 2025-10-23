@@ -4,16 +4,20 @@ namespace App\Controller;
 
 use App\Entity\Evenement;
 use App\Repository\EvenementRepository;
-use App\Repository\CreneauRepository;
+use App\Repository\TacheRepository;
+use App\Form\EvenementType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\ORM\EntityManagerInterface;
 
 class EvenementController extends AbstractController
 {
     #[Route('/evenements', name: 'app_evenements')]
-    public function index(EvenementRepository $evenementRepo, CreneauRepository $creneauRepo): Response
+    public function index(EvenementRepository $evenementRepo, TacheRepository $tacheRepo): Response
     {
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
         $now = new \DateTime();
         
         // Récupérer tous les événements
@@ -50,27 +54,27 @@ class EvenementController extends AbstractController
             return $a->getDateDebut() <=> $b->getDateDebut(); // Plus proches en premier
         });
         
-        // Récupérer tous les créneaux pour le calendrier
-        $creneaux = $creneauRepo->findAll();
+        // Récupérer tous les tâches pour le calendrier
+        $taches = $tacheRepo->findAll();
         $calendrierData = [];
         
-        // Ajouter les créneaux au calendrier
-        foreach ($creneaux as $creneau) {
+        // Ajouter les tâches au calendrier
+        foreach ($taches as $tache) {
             $calendrierData[] = [
-                'id' => 'creneau_' . $creneau->getId(),
-                'title' => $creneau->getTitre() ?: ($creneau->getEvenement() ? $creneau->getEvenement()->getNom() : 'Créneau'),
-                'start' => $creneau->getDebut()->format('Y-m-d\TH:i:s'),
-                'end' => $creneau->getFin()->format('Y-m-d\TH:i:s'),
+                'id' => 'tache_' . $tache->getId(),
+                'title' => $tache->getTitre() ?: ($tache->getEvenement() ? $tache->getEvenement()->getNom() : 'Tâche'),
+                'start' => $tache->getDebut()->format('Y-m-d\TH:i:s'),
+                'end' => $tache->getFin()->format('Y-m-d\TH:i:s'),
                 'backgroundColor' => '#3b82f6',
                 'borderColor' => '#3b82f6',
-                'className' => 'creneau-event',
+                'className' => 'tache-event',
                 'extendedProps' => [
-                    'type' => 'creneau',
-                    'evenement' => $creneau->getEvenement() ? $creneau->getEvenement()->getNom() : null,
-                    'poste_requis' => $creneau->getPosteRequis(),
-                    'max_personnes' => $creneau->getMaxPersonnes(),
-                    'remarques' => $creneau->getRemarques(),
-                    'titre' => $creneau->getTitre()
+                    'type' => 'tache',
+                    'evenement' => $tache->getEvenement() ? $tache->getEvenement()->getNom() : null,
+                    'poste_requis' => $tache->getPosteRequis(),
+                    'max_personnes' => $tache->getMaxPersonnes(),
+                    'remarques' => $tache->getRemarque(),
+                    'titre' => $tache->getTitre()
                 ]
             ];
         }
@@ -117,28 +121,74 @@ class EvenementController extends AbstractController
             'total' => count($evenements),
             'futurs' => count($evenementsFuturs),
             'passes' => count($evenementsPasses),
-            'creneaux_total' => count($creneaux)
+            'taches_total' => count($taches)
         ];
         
         return $this->render('evenements.html.twig', [
             'evenements_passes' => $evenementsPasses,
             'evenements_futurs' => $evenementsFuturs,
             'evenements_ce_mois' => count($evenementsCeMois),
-            'creneaux' => json_encode($calendrierData),
+            'taches' => json_encode($calendrierData),
             'metriques' => $metriques,
             'tous_evenements' => $evenements,
-            'total_evenements' => count($evenements)
+            'total_evenements' => count($evenements),
+            'isAdmin' => $isAdmin,
+        ]);
+    }
+
+    #[Route('/evenements/create', name: 'app_evenements_create')]
+    public function create(Request $request, EntityManagerInterface $em): Response
+    {
+        $evenement = new Evenement();
+        $form = $this->createForm(EvenementType::class, $evenement);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $dateVendredi = $form->get('dateVendredi')->getData();
+            $includeJM2 = $form->get('includeJM2')->getData();
+            $includeJM1 = $form->get('includeJM1')->getData();
+            $includeJP1 = $form->get('includeJP1')->getData();
+
+            $dateDebut = clone $dateVendredi;
+            $dateFin = clone $dateVendredi;
+            $dateFin->modify('+2 days'); // Dimanche
+
+            $offsetBefore = 0;
+            if ($includeJM2) {
+                $offsetBefore = 2;
+            } elseif ($includeJM1) {
+                $offsetBefore = 1;
+            }
+            if ($offsetBefore > 0) {
+                $dateDebut->modify('-' . $offsetBefore . ' days');
+            }
+
+            if ($includeJP1) {
+                $dateFin->modify('+1 day');
+            }
+
+            $evenement->setDateDebut($dateDebut);
+            $evenement->setDateFin($dateFin);
+
+            $em->persist($evenement);
+            $em->flush();
+
+            return $this->redirectToRoute('app_evenements');
+        }
+
+        return $this->render('evenement/create.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
     
-    private function getColorByStatus($creneau): string
+    private function getColorByStatus($tache): string
     {
-        if (!$creneau->getEvenement()) {
-            return '#6c757d'; // Gris pour les créneaux sans événement
+        if (!$tache->getEvenement()) {
+            return '#6c757d'; // Gris pour les tâches sans événement
         }
         
         $now = new \DateTime();
-        $eventEnd = $creneau->getEvenement()->getDateFin();
+        $eventEnd = $tache->getEvenement()->getDateFin();
         
         if ($eventEnd < $now) {
             return '#28a745'; // Vert pour les événements passés

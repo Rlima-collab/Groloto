@@ -15,7 +15,7 @@
     <div class="hero-content">
         <h1 class="hero-title">Gestion des Événements</h1>
         <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité.</p>
-        <a href="#calendar" class="hero-btn yellow">Voir le planning</a>
+        <a href="{% if isAdmin %}{{ path('app_evenements_create') }}{% else %}#calendar{% endif %}" class="hero-btn yellow">{% if isAdmin %}Créer un événement{% else %}Voir le planning{% endif %}</a>
     </div>
 </div>
 
@@ -229,7 +229,7 @@ window.initializeCalendar = function(viewType = 'dayGridMonth') {
         window.calendarInstance = null;
     }
     
-    const events = {{ creneaux|raw }};
+    const events = {{ taches|raw }};
     console.log('📊 Données événements chargées:', events);
     console.log('📈 Nombre d\'éléments:', events.length);
     
@@ -264,7 +264,7 @@ window.initializeCalendar = function(viewType = 'dayGridMonth') {
                 if (props.type === 'evenement') {
                     if (props.description) details += 'Description: ' + props.description + '\n';
                     if (props.lieu) details += 'Lieu: ' + props.lieu + '\n';
-                } else if (props.type === 'creneau') {
+                } else if (props.type === 'tache') {
                     if (props.evenement) details += 'Événement: ' + props.evenement + '\n';
                     if (props.poste_requis) details += 'Poste: ' + props.poste_requis + '\n';
                     if (props.max_personnes) details += 'Max personnes: ' + props.max_personnes + '\n';

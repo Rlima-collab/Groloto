@@ -2,8 +2,8 @@ DROP TABLE IF EXISTS HISTORIQUE_EVENEMENT;
 DROP TABLE IF EXISTS PARAMETRE;
 DROP TABLE IF EXISTS HELLOASSO;
 DROP TABLE IF EXISTS COMMUNICATION;
-DROP TABLE IF EXISTS AFFECTATION_CRENEAU;
-DROP TABLE IF EXISTS CRENEAU;
+DROP TABLE IF EXISTS AFFECTATION_TACHE;
+DROP TABLE IF EXISTS TACHE;
 DROP TABLE IF EXISTS DISPONIBILITE_BENEVOLE;
 DROP TABLE IF EXISTS HISTORIQUE_STOCK;
 DROP TABLE IF EXISTS STOCK;
@@ -123,7 +123,7 @@ CREATE TABLE DISPONIBILITE_BENEVOLE (
   FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
 );
 
-CREATE TABLE CRENEAU (
+CREATE TABLE TACHE (
   id INTEGER PRIMARY KEY,
   id_evenement INTEGER NOT NULL,
   titre TEXT NOT NULL,
@@ -137,16 +137,16 @@ CREATE TABLE CRENEAU (
   FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
 );
 
-CREATE TABLE AFFECTATION_CRENEAU (
+CREATE TABLE AFFECTATION_TACHE (
   id INTEGER PRIMARY KEY,
-  id_creneau INTEGER NOT NULL,
+  id_tache INTEGER NOT NULL,
   id_benevole INTEGER NOT NULL,
   id_utilisateur INTEGER,
   date_affectation DATETIME DEFAULT CURRENT_TIMESTAMP,
   statut TEXT DEFAULT 'assigne',
   remarque TEXT,
   CONSTRAINT check_statut CHECK (statut IN ('assigne', 'confirme', 'annule')),
-  FOREIGN KEY (id_creneau) REFERENCES CRENEAU(id),
+  FOREIGN KEY (id_tache) REFERENCES TACHE(id),
   FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
   FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
@@ -205,11 +205,11 @@ INSERT INTO ROLE (nom, description) VALUES
   ('benevole', 'Bénévole participant aux événements'),
   ('mecene', 'Partenaire/mécène offrant des lots ou financements');
 
-INSERT INTO UTILISATEUR (id_role, email, prenom, nom, telephone)
+INSERT INTO UTILISATEUR (id_role, email, prenom, nom, telephone, mot_de_passe, date_creation)
 VALUES
-  (1, 'admin@groloto.local', 'Admin', 'User', '0600000000'),
-  (2, 'benevole1@groloto.local', 'Alice', 'Durand', '0612345678'),
-  (3, 'mecene1@groloto.local', 'Jean', 'Martin', '0712345678');
+  (1, 'admin@groloto.local', 'Admin', 'User', '0600000000', '$2y$13$rPw4LiI3Pt91wm8QUAE20OGJ3Cl/wPS35ix1h5C1ZtpL06bPOqby2', datetime('now')),
+  (2, 'benevole1@groloto.local', 'Alice', 'Durand', '0612345678', NULL, datetime('now')),
+  (3, 'mecene1@groloto.local', 'Jean', 'Martin', '0712345678', NULL, datetime('now'));
 
 INSERT INTO BENEVOLE (id_utilisateur, remarque, actif)
 VALUES
@@ -263,12 +263,12 @@ INSERT INTO CONVENTION (id_mecene, nom_modele, url_pdf, date_signature, methode_
 VALUES
   (1, 'Modele partenariat standard', '/docs/conventions/convention1.pdf', '2024-10-01', 'electronique');
 
-INSERT INTO CRENEAU (id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque)
+INSERT INTO TACHE (id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque)
 VALUES
   (6, 'Accueil participants', 'accueil', '2024-11-15 18:00:00', '2024-11-15 19:00:00', 3, 'Accueil et orientation des participants'),
   (6, 'Service bar', 'bar', '2024-11-15 19:00:00', '2024-11-15 22:00:00', 2, 'Préparer et servir les boissons');
 
-INSERT INTO AFFECTATION_CRENEAU (id_creneau, id_benevole, id_utilisateur, statut, remarque)
+INSERT INTO AFFECTATION_TACHE (id_tache, id_benevole, id_utilisateur, statut, remarque)
 VALUES
   (1, 1, 2, 'confirme', 'Alice affectée à l''accueil');
 

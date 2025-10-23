@@ -8,8 +8,9 @@
     margin: -20px;
     background: linear-gradient(145deg, #f9f9f9, #f0f0f0, #f1f1f1);
     color: #fff;
-    padding: 5rem 3rem;
-    margin-bottom: 2rem;
+    padding: 2rem 3rem 4rem 3rem; /* Réduction encore plus importante */
+    padding-top: calc(2rem + 71px); /* Compensation pour le header fixe de taille ajustée */
+    margin-bottom: 0.5rem; /* Réduction de l'espace avec le contenu suivant */
     text-align: center;
     transition: all 0.3s ease-in-out;
     position: relative;
@@ -117,7 +118,8 @@
 }
 
 .page-header {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem; /* Réduction de l'espace sous le page-header */
+    margin-top: 0; /* Suppression de l'espace au-dessus */
 }
 
 .page-title {
