@@ -223,12 +223,14 @@ INSERT INTO ROLE (nom, description) VALUES
 INSERT INTO UTILISATEUR (id_role, email, prenom, nom, telephone, mot_de_passe, date_creation)
 VALUES
   (1, 'admin@groloto.local', 'Admin', 'User', '0600000000', '$2y$13$rPw4LiI3Pt91wm8QUAE20OGJ3Cl/wPS35ix1h5C1ZtpL06bPOqby2', datetime('now')),
-  (2, 'benevole1@groloto.local', 'Alice', 'Durand', '0612345678', NULL, datetime('now')),
-  (3, 'mecene1@groloto.local', 'Jean', 'Martin', '0712345678', NULL, datetime('now'));
+  (2, 'benevole1@groloto.local', 'Alice', 'Durand', '0612345678', '$2y$13$rPw4LiI3Pt91wm8QUAE20OGJ3Cl/wPS35ix1h5C1ZtpL06bPOqby2', datetime('now')),
+  (3, 'mecene1@groloto.local', 'Jean', 'Martin', '0712345678', '$2y$13$rPw4LiI3Pt91wm8QUAE20OGJ3Cl/wPS35ix1h5C1ZtpL06bPOqby2', datetime('now')),
+  (2, 'benevole2@groloto.local', 'Bob', 'Lefevre', '0623456789', '$2y$13$rPw4LiI3Pt91wm8QUAE20OGJ3Cl/wPS35ix1h5C1ZtpL06bPOqby2', datetime('now'));
 
 INSERT INTO BENEVOLE (id_utilisateur, remarque, actif)
 VALUES
-  (2, 'Disponible surtout les week-ends', 1);
+  (2, 'Disponible surtout les week-ends', 1),
+  (4, 'Disponible en semaine', 1);
 
 INSERT INTO MECENE (id_utilisateur, organisation, siret)
 VALUES
@@ -281,11 +283,15 @@ VALUES
 INSERT INTO TACHE (id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque)
 VALUES
   (6, 'Accueil participants', 'accueil', '2024-11-15 18:00:00', '2024-11-15 19:00:00', 3, 'Accueil et orientation des participants'),
-  (6, 'Service bar', 'bar', '2024-11-15 19:00:00', '2024-11-15 22:00:00', 2, 'Préparer et servir les boissons');
+  (6, 'Service bar', 'bar', '2024-11-15 19:00:00', '2024-11-15 22:00:00', 2, 'Préparer et servir les boissons'),
+  (5, 'Montage scène', 'technique', '2025-11-14 09:00:00', '2025-11-14 12:00:00', 4, 'Montage de la scène et sonorisation'),
+  (5, 'Accueil billetterie', 'accueil', '2025-11-15 17:00:00', '2025-11-15 19:00:00', 3, 'Accueil du public et vérification des billets');
 
 INSERT INTO AFFECTATION_TACHE (id_tache, id_benevole, id_utilisateur, statut, remarque)
 VALUES
-  (1, 1, 2, 'confirme', 'Alice affectée à l''accueil');
+  (1, 1, 2, 'confirme', 'Alice affectée à l''accueil'),
+  (3, 1, 1, 'confirme', 'Affecté à la mise en place de la scène (benevole1)'),
+  (4, 2, 1, 'assigne', 'Affecté à l''accueil billetterie (benevole2)');
 
 INSERT INTO DISPONIBILITE_BENEVOLE (id_benevole, id_evenement, debut, fin, remarque)
 VALUES

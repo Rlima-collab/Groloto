@@ -56,6 +56,39 @@ class TacheRepository extends ServiceEntityRepository
     }
 
     /**
+     * Trouve les tâches futures assignées à un bénévole (via AFFECTATION_TACHE)
+     * @param int $benevoleId
+     * @return array
+     */
+    public function findTachesFuturesForBenevole(int $benevoleId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->innerJoin('App\\Entity\\AffectationTache', 'a', 'WITH', 'a.tache = t')
+            // comparer l'ID de la relation car le paramètre fourni est un entier
+            ->andWhere('IDENTITY(a.benevole) = :benevoleId')
+            ->andWhere('t.debut > :now')
+            ->setParameter('benevoleId', $benevoleId)
+            ->setParameter('now', new \DateTime())
+            ->orderBy('t.debut', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Trouve toutes les tâches assignées à un bénévole (sans filtre de date)
+     */
+    public function findTachesForBenevole(int $benevoleId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->innerJoin('App\\Entity\\AffectationTache', 'a', 'WITH', 'a.tache = t')
+            ->andWhere('IDENTITY(a.benevole) = :benevoleId')
+            ->setParameter('benevoleId', $benevoleId)
+            ->orderBy('t.debut', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Trouve les tâches par poste requis
      */
     public function findByPosteRequis(string $poste): array

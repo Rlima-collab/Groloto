@@ -265,7 +265,8 @@ function initializeCalendar(viewType = 'dayGridMonth') {
             initialView: viewType,
             locale: 'fr',
             height: 'auto',
-            hiddenDays: [1, 2, 3, 4],
+            // afficher les 7 jours de la semaine (ne plus limiter à ven/sam/dim)
+            hiddenDays: [],
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',

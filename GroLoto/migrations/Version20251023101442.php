@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20251023091311 extends AbstractMigration
+final class Version20251023101442 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,6 +20,8 @@ final class Version20251023091311 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql('CREATE TABLE CRENEAU (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_evenement INTEGER NOT NULL, titre VARCHAR(255) NOT NULL, poste_requis VARCHAR(255) DEFAULT NULL, debut DATETIME NOT NULL, fin DATETIME NOT NULL, max_personnes INTEGER NOT NULL, remarque CLOB DEFAULT NULL, date_creation DATETIME DEFAULT NULL, CONSTRAINT FK_C62375458B13D439 FOREIGN KEY (id_evenement) REFERENCES EVENEMENT (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE INDEX IDX_C62375458B13D439 ON CRENEAU (id_evenement)');
         $this->addSql('CREATE TABLE messenger_messages (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, body CLOB NOT NULL, headers CLOB NOT NULL, queue_name VARCHAR(190) NOT NULL, created_at DATETIME NOT NULL --(DC2Type:datetime_immutable)
         , available_at DATETIME NOT NULL --(DC2Type:datetime_immutable)
         , delivered_at DATETIME DEFAULT NULL --(DC2Type:datetime_immutable)
@@ -86,6 +88,13 @@ final class Version20251023091311 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_76C8B6FBA5B31750 ON HISTORIQUE_STOCK (id_stock)');
         $this->addSql('CREATE INDEX IDX_76C8B6FB8B13D439 ON HISTORIQUE_STOCK (id_evenement)');
         $this->addSql('CREATE INDEX IDX_76C8B6FB50EAE44 ON HISTORIQUE_STOCK (id_utilisateur)');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__INSCRIPTION_MECENE AS SELECT id, id_mecene, id_evenement, description_don, montant_estime, statut, date_inscription, remarques FROM INSCRIPTION_MECENE');
+        $this->addSql('DROP TABLE INSCRIPTION_MECENE');
+        $this->addSql('CREATE TABLE INSCRIPTION_MECENE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_mecene INTEGER NOT NULL, id_evenement INTEGER NOT NULL, description_don CLOB DEFAULT NULL, montant_estime DOUBLE PRECISION DEFAULT NULL, statut VARCHAR(50) NOT NULL, date_inscription DATETIME NOT NULL, remarques CLOB DEFAULT NULL, nom_don VARCHAR(255) DEFAULT NULL, categorie VARCHAR(50) DEFAULT NULL, quantite INTEGER DEFAULT NULL, valeur_unitaire DOUBLE PRECISION DEFAULT NULL, remarque_refus CLOB DEFAULT NULL, FOREIGN KEY (id_mecene) REFERENCES MECENE (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE, FOREIGN KEY (id_evenement) REFERENCES EVENEMENT (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('INSERT INTO INSCRIPTION_MECENE (id, id_mecene, id_evenement, description_don, montant_estime, statut, date_inscription, remarques) SELECT id, id_mecene, id_evenement, description_don, montant_estime, statut, date_inscription, remarques FROM __temp__INSCRIPTION_MECENE');
+        $this->addSql('DROP TABLE __temp__INSCRIPTION_MECENE');
+        $this->addSql('CREATE INDEX IDX_35E63F33D364722F ON INSCRIPTION_MECENE (id_mecene)');
+        $this->addSql('CREATE INDEX IDX_35E63F338B13D439 ON INSCRIPTION_MECENE (id_evenement)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__LOT AS SELECT id, id_mecene, titre, description, quantite, valeur_estimee, date_creation FROM LOT');
         $this->addSql('DROP TABLE LOT');
         $this->addSql('CREATE TABLE LOT (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_mecene INTEGER DEFAULT NULL, titre VARCHAR(255) NOT NULL, description CLOB DEFAULT NULL, quantite INTEGER NOT NULL, valeur_estimee DOUBLE PRECISION NOT NULL, date_creation DATETIME DEFAULT NULL, FOREIGN KEY (id_mecene) REFERENCES MECENE (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
@@ -94,7 +103,7 @@ final class Version20251023091311 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_9D266B91D364722F ON LOT (id_mecene)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__MECENE AS SELECT id, id_utilisateur, organisation, siret FROM MECENE');
         $this->addSql('DROP TABLE MECENE');
-        $this->addSql('CREATE TABLE MECENE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_utilisateur INTEGER DEFAULT NULL, organisation VARCHAR(255) NOT NULL, siret VARCHAR(50) NOT NULL, FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE TABLE MECENE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_utilisateur INTEGER DEFAULT NULL, organisation VARCHAR(255) DEFAULT NULL, siret VARCHAR(50) DEFAULT NULL, FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('INSERT INTO MECENE (id, id_utilisateur, organisation, siret) SELECT id, id_utilisateur, organisation, siret FROM __temp__MECENE');
         $this->addSql('DROP TABLE __temp__MECENE');
         $this->addSql('CREATE INDEX IDX_5AB004450EAE44 ON MECENE (id_utilisateur)');
@@ -133,6 +142,7 @@ final class Version20251023091311 extends AbstractMigration
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
+        $this->addSql('DROP TABLE CRENEAU');
         $this->addSql('DROP TABLE messenger_messages');
         $this->addSql('CREATE TEMPORARY TABLE __temp__AFFECTATION_TACHE AS SELECT id, id_tache, id_benevole, id_utilisateur, date_affectation, statut, remarque FROM AFFECTATION_TACHE');
         $this->addSql('DROP TABLE AFFECTATION_TACHE');
@@ -193,6 +203,13 @@ final class Version20251023091311 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_76C8B6FBA5B31750 ON HISTORIQUE_STOCK (id_stock)');
         $this->addSql('CREATE INDEX IDX_76C8B6FB8B13D439 ON HISTORIQUE_STOCK (id_evenement)');
         $this->addSql('CREATE INDEX IDX_76C8B6FB50EAE44 ON HISTORIQUE_STOCK (id_utilisateur)');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__INSCRIPTION_MECENE AS SELECT id, id_mecene, id_evenement, description_don, montant_estime, statut, date_inscription, remarques FROM INSCRIPTION_MECENE');
+        $this->addSql('DROP TABLE INSCRIPTION_MECENE');
+        $this->addSql('CREATE TABLE INSCRIPTION_MECENE (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_mecene INTEGER NOT NULL, id_evenement INTEGER NOT NULL, description_don CLOB NOT NULL, montant_estime DOUBLE PRECISION DEFAULT NULL, statut CLOB DEFAULT \'en_attente\', date_inscription DATETIME DEFAULT CURRENT_TIMESTAMP, remarques CLOB DEFAULT NULL, CONSTRAINT FK_35E63F33D364722F FOREIGN KEY (id_mecene) REFERENCES MECENE (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_35E63F338B13D439 FOREIGN KEY (id_evenement) REFERENCES EVENEMENT (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('INSERT INTO INSCRIPTION_MECENE (id, id_mecene, id_evenement, description_don, montant_estime, statut, date_inscription, remarques) SELECT id, id_mecene, id_evenement, description_don, montant_estime, statut, date_inscription, remarques FROM __temp__INSCRIPTION_MECENE');
+        $this->addSql('DROP TABLE __temp__INSCRIPTION_MECENE');
+        $this->addSql('CREATE INDEX IDX_35E63F33D364722F ON INSCRIPTION_MECENE (id_mecene)');
+        $this->addSql('CREATE INDEX IDX_35E63F338B13D439 ON INSCRIPTION_MECENE (id_evenement)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__LOT AS SELECT id, id_mecene, titre, description, quantite, valeur_estimee, date_creation FROM LOT');
         $this->addSql('DROP TABLE LOT');
         $this->addSql('CREATE TABLE LOT (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_mecene INTEGER DEFAULT NULL, titre CLOB NOT NULL, description CLOB DEFAULT NULL, quantite INTEGER DEFAULT 1, valeur_estimee DOUBLE PRECISION DEFAULT \'0.0\', date_creation DATETIME DEFAULT CURRENT_TIMESTAMP, CONSTRAINT FK_9D266B91D364722F FOREIGN KEY (id_mecene) REFERENCES MECENE (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
