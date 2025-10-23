@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un Événement{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Créer un nouvel événement</h1>
+    {{ form_start(form) }}
+    {{ form_widget(form.nom) }}
+    {{ form_widget(form.description) }}
+    {{ form_widget(form.lieu) }}
+    {{ form_widget(form.dateVendredi) }}
+    {{ form_widget(form.includeJM2) }}
+    {{ form_widget(form.includeJM1) }}
+    {{ form_widget(form.includeJP1) }}
+
+    <h2>Tâches</h2>
+    <ul id="taches-collection" data-index="{{ form.taches|length > 0 ? form.taches|last.vars.name + 1 : 0 }}" data-prototype="{{ form_widget(form.taches.vars.prototype)|e('html_attr') }}">
+        {% for tache in form.taches %}
+            <li>{{ form_row(tache) }}</li>
+        {% endfor %}
+    </ul>
+    <button type="button" class="btn btn-secondary add-tache">Ajouter une tâche</button>
+
+    <button type="submit" class="btn btn-primary">Créer</button>
+    {{ form_end(form) }}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const collectionHolder = document.getElementById('taches-collection');
+        const addButton = document.querySelector('.add-tache');
+
+        addButton.addEventListener('click', function(e) {
+            const index = collectionHolder.dataset.index;
+            const newForm = collectionHolder.dataset.prototype.replace(/__name__/g, index);
+            const newFormLi = document.createElement('li');
+            newFormLi.innerHTML = newForm;
+            collectionHolder.appendChild(newFormLi);
+            collectionHolder.dataset.index = parseInt(index) + 1;
+        });
+    });
+</script>
+{% endblock %}

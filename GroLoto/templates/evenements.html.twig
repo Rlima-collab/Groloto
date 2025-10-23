@@ -15,7 +15,7 @@
     <div class="hero-content">
         <h1 class="hero-title">Gestion des Événements</h1>
         <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité.</p>
-        <a href="#calendar" class="hero-btn yellow">Voir le planning</a>
+        <a href="{% if isAdmin %}{{ path('app_evenements_create') }}{% else %}#calendar{% endif %}" class="hero-btn yellow">{% if isAdmin %}Créer un événement{% else %}Voir le planning{% endif %}</a>
     </div>
 </div>
 
@@ -155,228 +155,191 @@
     
     
     <script>
-    // Utiliser un namespace global pour éviter les conflits Turbo
-    window.GroLotoCalendar = window.GroLotoCalendar || {
-        instance: null,
-        initialized: false,
+// Variables globales
+window.calendarInstance = null;
+
+// Fonction de chargement de FullCalendar
+window.loadFullCalendarScript = function() {
+    return new Promise((resolve, reject) => {
+        // Vérifier si FullCalendar est déjà chargé
+        if (typeof FullCalendar !== 'undefined') {
+            console.log('FullCalendar déjà disponible');
+            resolve();
+            return;
+        }
         
-        // Fonction de chargement de FullCalendar
-        loadScript: function() {
-            return new Promise((resolve, reject) => {
-                // Vérifier si FullCalendar est déjà chargé
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js';
+        console.log('Chargement de FullCalendar depuis CDN:', script.src);
+        
+        script.onload = function() {
+            console.log('Script FullCalendar chargé');
+            // Attendre un peu que la variable soit disponible
+            setTimeout(() => {
+                console.log('Vérification de la disponibilité de FullCalendar...');
+                console.log('window.FullCalendar:', typeof window.FullCalendar);
+                console.log('FullCalendar:', typeof FullCalendar);
+                
                 if (typeof FullCalendar !== 'undefined') {
-                    console.log('FullCalendar déjà disponible');
+                    console.log('FullCalendar disponible !');
                     resolve();
-                    return;
+                } else if (typeof window.FullCalendar !== 'undefined') {
+                    console.log('FullCalendar disponible via window.FullCalendar');
+                    window.FullCalendar = window.FullCalendar;
+                    resolve();
+                } else {
+                    console.error('FullCalendar non trouvé après chargement');
+                    reject(new Error('FullCalendar non disponible après chargement'));
                 }
-                
-                // Vérifier si le script n'est pas déjà en cours de chargement
-                if (document.querySelector('script[src*="fullcalendar"]')) {
-                    console.log('Script FullCalendar déjà en cours de chargement');
-                    // Attendre que le script soit chargé
-                    let attempts = 0;
-                    const checkInterval = setInterval(() => {
-                        attempts++;
-                        if (typeof FullCalendar !== 'undefined') {
-                            clearInterval(checkInterval);
-                            console.log('FullCalendar maintenant disponible');
-                            resolve();
-                        } else if (attempts > 20) {
-                            clearInterval(checkInterval);
-                            reject(new Error('Timeout en attendant FullCalendar'));
-                        }
-                    }, 250);
-                    return;
-                }
-                
-                const script = document.createElement('script');
-                // Charger FullCalendar depuis un fichier local (évite CDN/MIME issues)
-                script.src = '{{ asset('js/fullcalendar/index.global.min.js') }}';
-                console.log('Chargement de FullCalendar depuis asset local:', script.src);
-                
-                script.onload = function() {
-                    console.log('Script FullCalendar chargé');
-                    // Attendre un peu que la variable soit disponible
-                    setTimeout(() => {
-                        console.log('Vérification de la disponibilité de FullCalendar...');
-                        console.log('window.FullCalendar:', typeof window.FullCalendar);
-                        console.log('FullCalendar:', typeof FullCalendar);
-                        
-                        if (typeof FullCalendar !== 'undefined') {
-                            console.log('FullCalendar disponible !');
-                            resolve();
-                        } else if (typeof window.FullCalendar !== 'undefined') {
-                            console.log('FullCalendar disponible via window.FullCalendar');
-                            window.FullCalendar = window.FullCalendar;
-                            resolve();
-                        } else {
-                            console.error('FullCalendar non trouvé après chargement');
-                            reject(new Error('FullCalendar non disponible après chargement'));
-                        }
-                    }, 100);
-                };
-                
-                script.onerror = function(error) {
-                    console.error('Échec du chargement de FullCalendar:', error);
-                    reject(new Error('Impossible de charger FullCalendar'));
-                };
-                
-                document.head.appendChild(script);
-            });
-        },
+            }, 100);
+        };
         
-        // Fonction pour initialiser le calendrier
-        init: function() {
-            const calendarEl = document.getElementById('calendar');
-            if (!calendarEl) {
-                console.error('Élément calendar non trouvé');
-                return;
-            }
-            
-            // Détruire l'instance précédente si elle existe
-            if (this.instance) {
-                try {
-                    this.instance.destroy();
-                } catch(e) {
-                    console.log('Erreur lors de la destruction du calendrier précédent:', e);
-                }
-            }
-            
-            const eventsData = window.calendarEvents || [];
-            console.log('Initialisation du calendrier avec', eventsData.length, 'événements');
-            
-            // Afficher un message de chargement
-            calendarEl.innerHTML = '';
-            
-            this.instance = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'fr',
-                height: 'auto',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: '' // On retire les boutons par défaut car on utilise nos boutons personnalisés
-                },
-                buttonText: {
-                    today: 'Aujourd\'hui'
-                },
-                // Week-end uniquement : vendredi, samedi, dimanche
-                hiddenDays: [1, 2, 3, 4],
-                weekends: true,
-                firstDay: 5,
-                events: eventsData,
-                eventClick: function(info) {
-                    const event = info.event;
-                    let details = `📅 ${event.title}\\n`;
-                    details += `📍 ${event.start.toLocaleDateString('fr-FR')}\\n`;
-                    if (event.end) {
-                        details += `⏰ Fin: ${event.end.toLocaleDateString('fr-FR')}\\n`;
-                    }
-                    if (event.extendedProps.description) {
-                        details += `📝 ${event.extendedProps.description}\\n`;
-                    }
-                    if (event.extendedProps.lieu) {
-                        details += `🏢 ${event.extendedProps.lieu}`;
-                    }
-                    alert(details);
-                },
-                eventDidMount: function(info) {
-                    info.el.style.borderRadius = '4px';
-                    info.el.style.border = 'none';
-                }
-            });
-            
-            this.instance.render();
-            console.log('Calendrier rendu avec succès');
-            
-            // Connecter les boutons personnalisés aux fonctions FullCalendar
-            this.setupButtons();
-        },
+        script.onerror = function(error) {
+            console.error('Échec du chargement de FullCalendar:', error);
+            reject(new Error('Impossible de charger FullCalendar'));
+        };
         
-        // Fonction pour configurer les boutons
-        setupButtons: function() {
-            const btnMonth = document.getElementById('btn-month');
-            const btnWeek = document.getElementById('btn-week');
-            
-            if (btnMonth) {
-                btnMonth.onclick = () => {
-                    if (this.instance) {
-                        this.instance.changeView('dayGridMonth');
-                        btnMonth.classList.add('active');
-                        if (btnWeek) btnWeek.classList.remove('active');
-                    }
-                };
-            }
-            
-            if (btnWeek) {
-                btnWeek.onclick = () => {
-                    if (this.instance) {
-                        this.instance.changeView('timeGridWeek');
-                        btnWeek.classList.add('active');
-                        if (btnMonth) btnMonth.classList.remove('active');
-                    }
-                };
-            }
-        },
+        document.head.appendChild(script);
+    });
+};
+
+// Fonction pour initialiser le calendrier
+window.initializeCalendar = function(viewType = 'dayGridMonth') {
+    console.log('Tentative d\'initialisation du calendrier...');
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) {
+        console.error('Element #calendar non trouvé dans le DOM');
+        return;
+    }
+    
+    if (typeof FullCalendar === 'undefined') {
+        window.loadFullCalendarScript().then(() => {
+            setTimeout(() => {
+                window.initializeCalendar(viewType);
+            }, 100);
+        }).catch(error => {
+            window.loadFullCalendarAlternative();
+        });
+        return;
+    }
+    
+    // Détruire l'instance existante si elle existe
+    if (window.calendarInstance) {
+        window.calendarInstance.destroy();
+        window.calendarInstance = null;
+    }
+    
+    const events = {{ taches|raw }};
+    console.log('📊 Données événements chargées:', events);
+    console.log('📈 Nombre d\'éléments:', events.length);
+    
+    try {
+        window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
+            initialView: viewType,
+            locale: 'fr',
+            height: 'auto',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+            },
+            buttonText: {
+                today: 'Aujourd\'hui',
+                month: 'Mois',
+                week: 'Semaine',
+                day: 'Jour',
+            },
+            // Afficher seulement vendredi, samedi et dimanche
+            hiddenDays: [1, 2, 3, 4], // Cacher lundi (1), mardi (2), mercredi (3), jeudi (4)
+            weekends: true, // S'assurer que les weekends sont affichés
+            firstDay: 5, // Commencer la semaine par vendredi (5)
+            events: events,
+            eventClick: function(info) {
+                const event = info.event;
+                const props = event.extendedProps;
+                let details = 'Titre: ' + event.title + '\n';
+                details += 'Début: ' + event.start.toLocaleString() + '\n';
+                if (event.end) details += 'Fin: ' + event.end.toLocaleString() + '\n';
+                
+                if (props.type === 'evenement') {
+                    if (props.description) details += 'Description: ' + props.description + '\n';
+                    if (props.lieu) details += 'Lieu: ' + props.lieu + '\n';
+                } else if (props.type === 'tache') {
+                    if (props.evenement) details += 'Événement: ' + props.evenement + '\n';
+                    if (props.poste_requis) details += 'Poste: ' + props.poste_requis + '\n';
+                    if (props.max_personnes) details += 'Max personnes: ' + props.max_personnes + '\n';
+                    if (props.notes) details += 'Notes: ' + props.notes + '\n';
+                }
+                
+                alert(details);
+            },
+            eventDisplay: 'block',
+            nowIndicator: true,
+            slotMinTime: '07:00:00',
+            slotMaxTime: '22:00:00',
+            allDaySlot: false,
+            firstDay: 1 // Commencer la semaine le lundi
+        });
         
-        // Fonction principale d'initialisation
-        start: function() {
-            if (this.initialized) {
-                console.log('Calendrier déjà initialisé, réinitialisation...');
-                this.init();
-                return;
-            }
-            
-            console.log('DOM chargé, démarrage de l\'initialisation du calendrier');
-            this.initialized = true;
-            
-            this.loadScript()
-                .then(() => {
-                    console.log('FullCalendar chargé avec succès, initialisation du calendrier...');
-                    this.init();
-                })
-                .catch((error) => {
-                    console.error('Erreur lors du chargement de FullCalendar:', error);
-                    this.initialized = false;
-                    const calendarEl = document.getElementById('calendar');
-                    if (calendarEl) {
-                        calendarEl.innerHTML = `
-                            <div style="padding:20px;text-align:center;border:2px solid #dc3545;border-radius:8px;background:#f8d7da;color:#721c24;">
-                                <h5>❌ Erreur de chargement</h5>
-                                <p>Impossible de charger FullCalendar: ${error.message}</p>
-                                <button onclick="location.reload()" style="margin-top:10px;padding:5px 10px;background:#dc3545;color:white;border:none;border-radius:4px;cursor:pointer;">
-                                    Recharger la page
-                                </button>
-                            </div>
-                        `;
-                    }
-                });
-        }
-    };
+        window.calendarInstance.render();
+        console.log('✅ Calendrier rendu avec succès !');
+    } catch (error) {
+        console.error('💥 Erreur lors de la création du calendrier:', error);
+        window.loadFullCalendarAlternative();
+    }
+};
 
-    // Initialisation compatible avec Turbo
-    document.addEventListener('DOMContentLoaded', function() {
-        window.GroLotoCalendar.start();
-    });
+// Fonction pour changer la vue du calendrier
+window.changeCalendarView = function(viewType) {
+    console.log('🔄 Changement de vue vers:', viewType);
+    if (window.calendarInstance) {
+        window.calendarInstance.changeView(viewType);
+    } else {
+        window.initializeCalendar(viewType);
+    }
+    // Mettre à jour le style des boutons
+    document.getElementById('btn-month').classList.toggle('active', viewType === 'dayGridMonth');
+    document.getElementById('btn-week').classList.toggle('active', viewType === 'timeGridWeek');
+};
 
-    // Réinitialisation lors des navigations Turbo
-    document.addEventListener('turbo:load', function() {
-        if (document.getElementById('calendar')) {
-            console.log('Navigation Turbo détectée, réinitialisation du calendrier');
-            window.GroLotoCalendar.start();
-        }
-    });
+// Fonction de chargement alternatif
+window.loadFullCalendarAlternative = function() {
+    console.log('Tentative de chargement alternatif de FullCalendar...');
+    const calendarEl = document.getElementById('calendar');
+    if (calendarEl) {
+        calendarEl.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">' +
+            '<p>⚠️ Impossible de charger le calendrier</p>' +
+            '<p>Vérifiez votre connexion internet</p>' +
+            '</div>';
+    }
+};
 
-    // Nettoyage lors des navigations Turbo
-    document.addEventListener('turbo:before-render', function() {
-        if (window.GroLotoCalendar.instance) {
-            try {
-                window.GroLotoCalendar.instance.destroy();
-                console.log('Calendrier détruit avant navigation Turbo');
-            } catch(e) {
-                console.log('Erreur lors de la destruction du calendrier:', e);
-            }
-        }
-    });
+// Initialisation au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOM Content Loaded - Initialisation du planning des événements...');
+    
+    // Ajouter les event listeners pour les boutons
+    const btnMonth = document.getElementById('btn-month');
+    const btnWeek = document.getElementById('btn-week');
+    
+    if (btnMonth) {
+        btnMonth.addEventListener('click', function() {
+            console.log('Clic sur bouton Mois');
+            window.changeCalendarView('dayGridMonth');
+        });
+    }
+    
+    if (btnWeek) {
+        btnWeek.addEventListener('click', function() {
+            console.log('Clic sur bouton Semaine');
+            window.changeCalendarView('timeGridWeek');
+        });
+    }
+    
+    // Attendre un délai pour que l'élément soit visible
+    setTimeout(() => {
+        window.initializeCalendar();
+    }, 200);
+});
     </script>
 {% endblock %}
