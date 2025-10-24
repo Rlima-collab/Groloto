@@ -658,3 +658,48 @@
         right: 20px;
     }
 }
+
+/* Dark mode overrides for header and notifications */
+.dark .site-header {
+    background: var(--surface);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.dark .site-header .logo img { filter: brightness(0.95) contrast(1.05); }
+
+.dark .nav-menu a {
+    color: var(--text);
+}
+
+.dark .nav-menu a:hover { color: var(--accent); }
+
+.dark .settings-menu {
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(255,255,255,0.02) 100%);
+    box-shadow: 0 10px 25px rgba(2,6,23,0.6);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.dark .notification-dropdown,
+.dark .notification-list,
+.dark .notification-item {
+    background: var(--surface);
+    color: var(--text);
+}
+
+.dark .notification-header,
+.dark .notification-footer {
+    background: transparent;
+}
+
+.dark .notification-badge { background: var(--danger); color: #fff; border-color: var(--surface); }
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+}
+
+.theme-toggle label { font-size: 14px; color: var(--muted-text); }
+
+.theme-toggle input[type="checkbox"] { width: 18px; height: 18px; }

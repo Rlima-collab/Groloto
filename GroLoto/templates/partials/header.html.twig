@@ -63,6 +63,10 @@
                         <img src="{{ asset('images/settings.png') }}" alt="Paramètres" class="settings-icon">
                     </a>
                     <div class="settings-menu" id="settingsMenu">
+                        <div class="theme-toggle">
+                            <label for="darkModeToggle">Mode sombre</label>
+                            <input type="checkbox" id="darkModeToggle" aria-label="Activer le mode sombre">
+                        </div>
                         <a href="{{ path('app_profile') }}">Mon profil</a>
                         <a href="{{ path('app_logout') }}">
                             Déconnexion <img src="{{ asset('images/logout.png') }}" alt="Déconnexion" class="logout-icon">
@@ -362,5 +366,29 @@ document.addEventListener('DOMContentLoaded', function() {
             burgerMenu.classList.remove('active');
         });
     });
+
+    // Dark mode toggle initialization
+    try {
+        const darkToggle = document.getElementById('darkModeToggle');
+        const saved = localStorage.getItem('darkMode');
+        const enabled = saved === '1';
+        if (enabled) {
+            document.documentElement.classList.add('dark');
+        }
+        if (darkToggle) {
+            darkToggle.checked = enabled;
+            darkToggle.addEventListener('change', function(e) {
+                if (e.target.checked) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('darkMode', '1');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('darkMode', '0');
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Dark mode init error', e);
+    }
 });
 </script>
