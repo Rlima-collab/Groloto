@@ -1,5 +1,4 @@
 <link rel="stylesheet" href="{{ asset('css/header.css') }}">
-
 <header class="site-header">
     <div class="container">
         <div class="logo">
@@ -59,7 +58,6 @@
 function toggleSettingsMenu(event) {
     event.preventDefault();
     event.stopPropagation();
-    
     const menu = document.getElementById('settingsMenu');
     
     if (menu.style.display === 'block') {
@@ -72,9 +70,14 @@ function toggleSettingsMenu(event) {
 document.addEventListener('click', function(event) {
     const menu = document.getElementById('settingsMenu');
     const settingsDropdown = document.querySelector('.settings-dropdown');
-    
+    const nav = document.querySelector('.nav-menu');
+    const burger = document.querySelector('.burger-menu');
     if (menu && settingsDropdown && !settingsDropdown.contains(event.target)) {
         menu.style.display = 'none';
+    }
+    if (nav && burger && !nav.contains(event.target) && !burger.contains(event.target) && nav.classList.contains('active')) {
+        nav.classList.remove('active');
+        burger.classList.remove('active');
     }
 });
 
