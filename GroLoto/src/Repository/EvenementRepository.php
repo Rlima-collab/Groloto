@@ -65,4 +65,19 @@ class EvenementRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Trouve les événements futurs et récents (max 1 semaine dans le passé)
+     */
+    public function findRecentAndUpcoming(): array
+    {
+        $oneWeekAgo = new \DateTime('-1 week');
+        
+        return $this->createQueryBuilder('e')
+            ->where('e.date_debut >= :oneWeekAgo')
+            ->setParameter('oneWeekAgo', $oneWeekAgo)
+            ->orderBy('e.date_debut', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

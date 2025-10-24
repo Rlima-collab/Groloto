@@ -9,6 +9,131 @@
 {% endblock %}
 
 {% block body %}
+<style>
+/* Options menu global styles */
+.options-menu {
+    position: absolute;
+    z-index: 10000;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    min-width: 180px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    overflow: visible;
+}
+.no-hover:hover, .no-hover:focus {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+</style>
+
+<script>
+function openOptions(btn, token, acceptUrl) {
+    // close existing
+    if (window.__currentOptionsMenu) {
+        window.__currentOptionsMenu.remove();
+        window.__currentOptionsMenu = null;
+    }
+
+    const rect = btn.getBoundingClientRect();
+    const menu = document.createElement('div');
+    menu.className = 'options-menu';
+    const menuWidth = 180;
+    const left = Math.max(8 + window.scrollX, rect.right + window.scrollX - menuWidth);
+    const top = rect.bottom + 8 + window.scrollY;
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = acceptUrl;
+    form.style.margin = '0';
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = '_token';
+    input.value = token;
+    form.appendChild(input);
+
+    const acceptBtn = document.createElement('button');
+    acceptBtn.type = 'submit';
+    acceptBtn.className = 'btn btn-success';
+    acceptBtn.style.width = '100%';
+    acceptBtn.style.borderRadius = '0';
+    acceptBtn.style.background = 'none';
+    acceptBtn.style.color = '#15803d';
+    acceptBtn.style.textAlign = 'left';
+    acceptBtn.style.padding = '0.75rem 1rem';
+    acceptBtn.style.fontWeight = '600';
+    acceptBtn.textContent = '✓ Accepter';
+    form.appendChild(acceptBtn);
+
+    menu.appendChild(form);
+    document.body.appendChild(menu);
+    window.__currentOptionsMenu = menu;
+
+    setTimeout(() => document.addEventListener('mousedown', function onDocClick(e) {
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            closeOptions();
+            document.removeEventListener('mousedown', onDocClick);
+        }
+    }), 0);
+}
+
+function closeOptions() {
+    if (window.__currentOptionsMenu) {
+        try { window.__currentOptionsMenu.remove(); } catch(e) {}
+        window.__currentOptionsMenu = null;
+    }
+}
+
+function openOptionsRefuser(btn, inscriptionId, organisation, token) {
+    // close existing
+    if (window.__currentOptionsMenu) {
+        window.__currentOptionsMenu.remove();
+        window.__currentOptionsMenu = null;
+    }
+
+    const rect = btn.getBoundingClientRect();
+    const menu = document.createElement('div');
+    menu.className = 'options-menu';
+    const menuWidth = 180;
+    const left = Math.max(8 + window.scrollX, rect.right + window.scrollX - menuWidth);
+    const top = rect.bottom + 8 + window.scrollY;
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+
+    const btnRefuser = document.createElement('button');
+    btnRefuser.type = 'button';
+    btnRefuser.className = 'btn btn-danger';
+    btnRefuser.style.width = '100%';
+    btnRefuser.style.borderRadius = '0';
+    btnRefuser.style.background = 'none';
+    btnRefuser.style.color = '#dc2626';
+    btnRefuser.style.textAlign = 'left';
+    btnRefuser.style.padding = '0.75rem 1rem';
+    btnRefuser.style.fontWeight = '600';
+    btnRefuser.style.border = 'none';
+    btnRefuser.textContent = '✗ Refuser';
+    btnRefuser.onclick = function() {
+        closeOptions();
+        confirmRefuser(inscriptionId, organisation, token);
+    };
+
+    menu.appendChild(btnRefuser);
+    document.body.appendChild(menu);
+    window.__currentOptionsMenu = menu;
+
+    setTimeout(() => document.addEventListener('mousedown', function onDocClick(e) {
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            closeOptions();
+            document.removeEventListener('mousedown', onDocClick);
+        }
+    }), 0);
+}
+</script>
 <div class="hero-section">
     <div class="shine"></div>
     <div class="hero-content">
@@ -36,7 +161,7 @@
 
 <!-- Statistiques -->
 <div class="metrics-grid" style="max-width: 1400px; margin: 0 auto 2rem; padding: 0 2rem;">
-    <div class="card metric-card">
+    <div class="card metric-card blue-border" style="cursor: pointer;" onclick="filterInscriptions('all')">
         <div class="card-header">
             <span class="metric-title">Total demandes</span>
         </div>
@@ -45,7 +170,7 @@
             <p class="metric-change positive">Toutes les demandes</p>
         </div>
     </div>
-    <div class="card metric-card yellow-border">
+    <div class="card metric-card yellow-border" style="cursor: pointer;" onclick="filterInscriptions('en_attente')">
         <div class="card-header">
             <span class="metric-title">En attente</span>
         </div>
@@ -54,7 +179,7 @@
             <p class="metric-change warning">À traiter</p>
         </div>
     </div>
-    <div class="card metric-card green-border">
+    <div class="card metric-card green-border" style="cursor: pointer;" onclick="filterInscriptions('accepte')">
         <div class="card-header">
             <span class="metric-title">Acceptées</span>
         </div>
@@ -63,37 +188,27 @@
             <p class="metric-change positive">Validées</p>
         </div>
     </div>
-    <div class="card metric-card red-border">
+    <div class="card metric-card red-border" style="cursor: pointer; border-left: 4px solid #dc2626 !important; background: linear-gradient(135deg, #ffffff 0%, #fff8f8 100%) !important;" onclick="filterInscriptions('refuse')">
         <div class="card-header">
             <span class="metric-title">Refusées</span>
         </div>
         <div class="card-content">
             <div class="metric-value">{{ stats.refusees }}</div>
-            <p class="metric-change danger">Rejetées</p>
+            <p class="metric-change danger" style="color: #dc2626 !important;">Refusées</p>
         </div>
-    </div>
-</div>
-
-<!-- Filtres -->
-<div style="max-width: 1400px; margin: 0 auto 2rem; padding: 0 2rem;">
-    <div class="filter-tabs">
-        <button class="filter-tab active" onclick="filterInscriptions('all')">
-            Toutes ({{ stats.total }})
-        </button>
-        <button class="filter-tab" onclick="filterInscriptions('en_attente')">
-            En attente ({{ stats.en_attente }})
-        </button>
-        <button class="filter-tab" onclick="filterInscriptions('accepte')">
-            Acceptées ({{ stats.acceptees }})
-        </button>
-        <button class="filter-tab" onclick="filterInscriptions('refuse')">
-            Refusées ({{ stats.refusees }})
-        </button>
     </div>
 </div>
 
 <!-- Liste des inscriptions -->
 <div style="max-width: 1400px; margin: 0 auto; padding: 0 2rem 2rem;">
+    <!-- Message pour catégories vides -->
+    <div id="empty-message" style="display: none;">
+        <div class="card" style="text-align: center; padding: 3rem; background: #f9fafb;">
+            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">📋</div>
+            <h3 style="color: #9ca3af; margin-bottom: 0; font-weight: 500;">Aucune inscription dans cette catégorie</h3>
+        </div>
+    </div>
+    
     {% if inscriptions|length > 0 %}
         <div class="inscriptions-list">
             {% for inscription in inscriptions %}
@@ -194,19 +309,20 @@
                                     <span>✓</span> Accepter
                                 </button>
                             </form>
-                            
                             <button type="button" class="btn btn-danger" onclick="confirmRefuser({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('refuser_inscription_' ~ inscription.id) }}')">
                                 <span>✗</span> Refuser
                             </button>
-                            
-                            <button type="button" class="btn btn-secondary" onclick="confirmSupprimer({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('delete_inscription_' ~ inscription.id) }}')">
-                                <span>🗑️</span> Supprimer
+                        </div>
+                        {% elseif inscription.statut == 'accepte' %}
+                        <div style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
+                            <button type="button" class="btn btn-secondary no-hover" onclick="openOptionsRefuser(this, {{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('refuser_inscription_' ~ inscription.id) }}')" style="background: #f3f4f6; color: #374151;">
+                                Options <span>⋯</span>
                             </button>
                         </div>
-                        {% else %}
-                        <div class="action-buttons" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
-                            <button type="button" class="btn btn-secondary" onclick="confirmSupprimer({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('delete_inscription_' ~ inscription.id) }}')">
-                                <span>🗑️</span> Supprimer
+                        {% elseif inscription.statut == 'refuse' %}
+                        <div style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
+                            <button class="btn btn-secondary no-hover" type="button" onclick="openOptions(this, '{{ csrf_token('accepter_inscription_' ~ inscription.id) }}', '{{ path('admin_inscription_accepter', {'id': inscription.id}) }}')" style="background: #f3f4f6; color: #374151;">
+                                Options <span>⋯</span>
                             </button>
                         </div>
                         {% endif %}
@@ -253,37 +369,21 @@
 </div>
 
 <style>
-.filter-tabs {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    padding: 1rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.filter-tab {
-    padding: 0.625rem 1.25rem;
-    border: 1px solid #e5e7eb;
-    background: white;
-    border-radius: 6px;
-    font-weight: 500;
-    font-size: 0.875rem;
-    cursor: pointer;
+.metric-card {
     transition: all 0.2s;
-    color: #6b7280;
+    position: relative;
 }
 
-.filter-tab:hover {
-    background: #f9fafb;
-    border-color: #d1d5db;
-}
-
-.filter-tab.active {
-    background: #006909;
-    color: white;
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     border-color: #006909;
+}
+
+.metric-card.active-filter {
+    border: 3px solid #006909;
+    box-shadow: 0 4px 16px rgba(0, 105, 9, 0.3);
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
 }
 
 .inscriptions-list {
@@ -574,20 +674,30 @@
 <script>
 function filterInscriptions(statut) {
     const items = document.querySelectorAll('.inscription-item');
-    const tabs = document.querySelectorAll('.filter-tab');
+    const metricCards = document.querySelectorAll('.metric-card');
+    const emptyMessage = document.getElementById('empty-message');
     
-    // Update active tab
-    tabs.forEach(tab => tab.classList.remove('active'));
-    event.target.classList.add('active');
+    // Update active card
+    metricCards.forEach(card => card.classList.remove('active-filter'));
+    event.target.closest('.metric-card').classList.add('active-filter');
     
-    // Filter items
+    // Filter items and count visible
+    let visibleCount = 0;
     items.forEach(item => {
         if (statut === 'all' || item.dataset.statut === statut) {
             item.style.display = 'block';
+            visibleCount++;
         } else {
             item.style.display = 'none';
         }
     });
+    
+    // Show empty message if no items visible
+    if (visibleCount === 0) {
+        emptyMessage.style.display = 'block';
+    } else {
+        emptyMessage.style.display = 'none';
+    }
 }
 
 function confirmRefuser(id, organisation, token) {

@@ -1,0 +1,361 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des demandes{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/taches.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <h1 class="page-title">Gestion des demandes de tâches</h1>
+    <a href="{{ path('tache_index') }}" class="btn btn-secondary">Retour aux tâches</a>
+</div>
+
+<div class="container" style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+    
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    <div class="tabs" style="margin-bottom: 2rem;">
+        <a href="#" class="tab selected" id="tab-en-attente" onclick="showTab('en-attente')">
+            <span class="tab-text">En attente ({{ demandes_en_attente|length }})</span>
+        </a>
+        <a href="#" class="tab" id="tab-historique" onclick="showTab('historique')">
+            <span class="tab-text">Historique</span>
+        </a>
+    </div>
+
+    <div id="content-en-attente" class="tab-content">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Demandes en attente de validation</h2>
+                <p class="card-description">Acceptez ou refusez les demandes des bénévoles</p>
+            </div>
+            <div class="card-content">
+                {% if demandes_en_attente|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Bénévole</th>
+                                    <th>Tâche</th>
+                                    <th>Événement</th>
+                                    <th>Date tâche</th>
+                                    <th>Date demande</th>
+                                    <th>Message</th>
+                                    <th>Places restantes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for demande in demandes_en_attente %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}</strong>
+                                            <div style="font-size: 0.85em; color: #666;">{{ demande.benevole.utilisateur.email }}</div>
+                                            {% if demande.benevole.utilisateur.telephone %}
+                                                <div style="font-size: 0.85em; color: #666;">{{ demande.benevole.utilisateur.telephone }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td><strong>{{ demande.tache.titre }}</strong></td>
+                                        <td>
+                                            {% if demande.tache.evenement %}
+                                                {{ demande.tache.evenement.nom }}
+                                            {% else %}
+                                                <span style="color: #999;">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div>{{ demande.tache.debut|date('d/m/Y') }}</div>
+                                            <div style="font-size: 0.85em; color: #666;">{{ demande.tache.debut|date('H:i') }} - {{ demande.tache.fin|date('H:i') }}</div>
+                                        </td>
+                                        <td>{{ demande.dateDemande|date('d/m/Y H:i') }}</td>
+                                        <td>
+                                            {% if demande.messageBenevole %}
+                                                <div style="font-size: 0.9em; max-width: 200px;">{{ demande.messageBenevole }}</div>
+                                            {% else %}
+                                                <span style="color: #999;">Aucun message</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% set nbAffectations = 0 %}
+                                            {% for affectation in demande.tache.affectations %}
+                                                {% set nbAffectations = nbAffectations + 1 %}
+                                            {% endfor %}
+                                            <span class="badge {% if nbAffectations >= demande.tache.maxPersonnes %}badge-danger{% elseif nbAffectations >= (demande.tache.maxPersonnes * 0.8) %}badge-warning{% else %}badge-success{% endif %}">
+                                                {{ demande.tache.maxPersonnes - nbAffectations }} / {{ demande.tache.maxPersonnes }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button type="button" 
+                                                    class="btn btn-small btn-success" 
+                                                    data-demande-id="{{ demande.id }}"
+                                                    data-benevole-nom="{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}"
+                                                    data-tache-nom="{{ demande.tache.titre }}"
+                                                    data-csrf-token="{{ csrf_token('accepter_demande_' ~ demande.id) }}"
+                                                    onclick="openAccepterModal(this)">
+                                                Accepter
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn btn-small btn-danger" 
+                                                    data-demande-id="{{ demande.id }}"
+                                                    data-benevole-nom="{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}"
+                                                    data-tache-nom="{{ demande.tache.titre }}"
+                                                    data-csrf-token="{{ csrf_token('refuser_demande_' ~ demande.id) }}"
+                                                    onclick="openRefuserModal(this)">
+                                                Refuser
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        Aucune demande en attente.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div id="content-historique" class="tab-content" style="display: none;">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Historique des demandes</h2>
+                <p class="card-description">Toutes les demandes traitées</p>
+            </div>
+            <div class="card-content">
+                {% if toutes_demandes|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Bénévole</th>
+                                    <th>Tâche</th>
+                                    <th>Date demande</th>
+                                    <th>Statut</th>
+                                    <th>Date réponse</th>
+                                    <th>Admin</th>
+                                    <th>Messages</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for demande in toutes_demandes %}
+                                    <tr class="{% if demande.statut == 'acceptee' %}row-success{% elseif demande.statut == 'refusee' %}row-muted{% endif %}">
+                                        <td>{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}</td>
+                                        <td>
+                                            <strong>{{ demande.tache.titre }}</strong>
+                                            <div style="font-size: 0.85em; color: #666;">{{ demande.tache.debut|date('d/m/Y H:i') }}</div>
+                                        </td>
+                                        <td>{{ demande.dateDemande|date('d/m/Y H:i') }}</td>
+                                        <td>
+                                            {% if demande.statut == 'en_attente' %}
+                                                <span class="badge badge-warning">En attente</span>
+                                            {% elseif demande.statut == 'acceptee' %}
+                                                <span class="badge badge-success">Acceptée</span>
+                                            {% else %}
+                                                <span class="badge badge-danger">Refusée</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if demande.dateReponse %}
+                                                {{ demande.dateReponse|date('d/m/Y H:i') }}
+                                            {% else %}
+                                                <span style="color: #999;">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if demande.adminReponse %}
+                                                {{ demande.adminReponse.prenom }} {{ demande.adminReponse.nom }}
+                                            {% else %}
+                                                <span style="color: #999;">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if demande.messageBenevole %}
+                                                <div style="font-size: 0.85em; margin-bottom: 5px;"><strong>Bénévole:</strong> {{ demande.messageBenevole|slice(0, 50) }}{% if demande.messageBenevole|length > 50 %}...{% endif %}</div>
+                                            {% endif %}
+                                            {% if demande.messageAdmin %}
+                                                <div style="font-size: 0.85em; color: #2563eb;"><strong>Admin:</strong> {{ demande.messageAdmin|slice(0, 50) }}{% if demande.messageAdmin|length > 50 %}...{% endif %}</div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        Aucune demande enregistrée.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Accepter -->
+<div id="accepterModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close" onclick="closeAccepterModal()">&times;</span>
+        <h2 style="margin-top: 0; color: #10b981;">Accepter la demande</h2>
+        <p><strong>Bénévole:</strong> <span id="accepterBenevoleNom"></span></p>
+        <p><strong>Tâche:</strong> <span id="accepterTacheNom"></span></p>
+        <form id="accepterForm" method="POST">
+            <input type="hidden" name="_token" id="accepterCsrfToken">
+            <div class="form-group">
+                <label for="message_admin_accepter">Message pour le bénévole (optionnel)</label>
+                <textarea name="message_admin" id="message_admin_accepter" class="form-control" rows="3" placeholder="Message de confirmation..."></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeAccepterModal()">Annuler</button>
+                <button type="submit" class="btn btn-success">Accepter la demande</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Refuser -->
+<div id="refuserModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close" onclick="closeRefuserModal()">&times;</span>
+        <h2 style="margin-top: 0; color: #dc2626;">Refuser la demande</h2>
+        <p><strong>Bénévole:</strong> <span id="refuserBenevoleNom"></span></p>
+        <p><strong>Tâche:</strong> <span id="refuserTacheNom"></span></p>
+        <form id="refuserForm" method="POST">
+            <input type="hidden" name="_token" id="refuserCsrfToken">
+            <div class="form-group">
+                <label for="message_admin_refuser">Motif du refus (optionnel)</label>
+                <textarea name="message_admin" id="message_admin_refuser" class="form-control" rows="3" placeholder="Expliquez pourquoi vous refusez cette demande..."></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeRefuserModal()">Annuler</button>
+                <button type="submit" class="btn btn-danger">Refuser la demande</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 8px;
+    width: 80%;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+}
+
+.row-success {
+    background-color: #f0fdf4;
+}
+
+.row-muted {
+    background-color: #f9fafb;
+    color: #6b7280;
+}
+</style>
+
+<script>
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.style.display = 'none';
+    });
+    
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('selected');
+    });
+    
+    const contentEl = document.getElementById('content-' + tabName);
+    if (contentEl) {
+        contentEl.style.display = 'block';
+    }
+    
+    const tabEl = document.getElementById('tab-' + tabName);
+    if (tabEl) {
+        tabEl.classList.add('selected');
+    }
+}
+
+function openAccepterModal(button) {
+    const demandeId = button.getAttribute('data-demande-id');
+    const benevoleNom = button.getAttribute('data-benevole-nom');
+    const tacheNom = button.getAttribute('data-tache-nom');
+    const csrfToken = button.getAttribute('data-csrf-token');
+    
+    document.getElementById('accepterBenevoleNom').textContent = benevoleNom;
+    document.getElementById('accepterTacheNom').textContent = tacheNom;
+    document.getElementById('accepterForm').action = `/admin/accepter-demande/${demandeId}`;
+    document.getElementById('accepterCsrfToken').value = csrfToken;
+    document.getElementById('accepterModal').style.display = 'block';
+}
+
+function closeAccepterModal() {
+    document.getElementById('accepterModal').style.display = 'none';
+    document.getElementById('message_admin_accepter').value = '';
+}
+
+function openRefuserModal(button) {
+    const demandeId = button.getAttribute('data-demande-id');
+    const benevoleNom = button.getAttribute('data-benevole-nom');
+    const tacheNom = button.getAttribute('data-tache-nom');
+    const csrfToken = button.getAttribute('data-csrf-token');
+    
+    document.getElementById('refuserBenevoleNom').textContent = benevoleNom;
+    document.getElementById('refuserTacheNom').textContent = tacheNom;
+    document.getElementById('refuserForm').action = `/admin/refuser-demande/${demandeId}`;
+    document.getElementById('refuserCsrfToken').value = csrfToken;
+    document.getElementById('refuserModal').style.display = 'block';
+}
+
+function closeRefuserModal() {
+    document.getElementById('refuserModal').style.display = 'none';
+    document.getElementById('message_admin_refuser').value = '';
+}
+
+// Fermer les modals si on clique en dehors
+window.onclick = function(event) {
+    const accepterModal = document.getElementById('accepterModal');
+    const refuserModal = document.getElementById('refuserModal');
+    if (event.target == accepterModal) {
+        closeAccepterModal();
+    }
+    if (event.target == refuserModal) {
+        closeRefuserModal();
+    }
+}
+</script>
+
+{% endblock %}

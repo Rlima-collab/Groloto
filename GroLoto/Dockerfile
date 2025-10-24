@@ -1,58 +1,64 @@
-# Dockerfile pour application Symfony avec PHP-FPM
-FROM php:8.2-fpm-alpine
+# Dockerfile pour l'application Symfony GroLoto
+FROM php:8.2-apache
 
-# Prévenir les prompts interactifs
-ARG DEBIAN_FRONTEND=noninteractive
-
-# Installer les dépendances système et extensions PHP
-RUN apk add --no-cache \
+# Installation des dépendances système et extensions PHP
+RUN apt-get update && apt-get install -y \
     git \
     unzip \
-    icu-dev \
-    postgresql-dev \
+    libicu-dev \
     libzip-dev \
-    oniguruma-dev \
-    && docker-php-ext-configure intl \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    sqlite3 \
+    libsqlite3-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-        intl \
-        pdo \
-        pdo_pgsql \
-        zip \
-        opcache \
-    && apk del --no-cache \
-        icu-dev \
-        postgresql-dev \
-        libzip-dev \
-        oniguruma-dev
+    pdo \
+    pdo_sqlite \
+    intl \
+    zip \
+    gd \
+    opcache \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Configuration PHP optimisée pour développement
-RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
-    && echo "opcache.memory_consumption=256" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
-    && echo "opcache.max_accelerated_files=20000" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
+# Installation de Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Installer Composer
-COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+# Configuration d'Apache
+RUN a2enmod rewrite headers
+
+# Copie de la configuration Apache personnalisée
+COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 
 # Définir le répertoire de travail
 WORKDIR /var/www/html
 
-# Copier les fichiers de dépendances
-COPY composer.json composer.lock symfony.lock ./
+# Copier les fichiers de l'application
+COPY . /var/www/html
 
-# Installer les dépendances PHP (sans scripts pour éviter erreurs si app pas complète)
-RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist --optimize-autoloader || true
+# Créer les répertoires nécessaires avec les bonnes permissions
+RUN mkdir -p var/cache var/log var && \
+    chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 /var/www/html
 
-# Copier le reste de l'application
-COPY . .
+# Installation des dépendances PHP (avec dev pour éviter les erreurs de bundles)
+RUN composer install --optimize-autoloader --no-interaction --ignore-platform-reqs
 
-# Installer toutes les dépendances (avec scripts cette fois)
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader || true
+# Créer la base de données SQLite si elle n'existe pas
+RUN if [ ! -f var/data.db ]; then \
+        sqlite3 var/data.db < sql/groLoto.sql && \
+        chown www-data:www-data var/data.db && \
+        chmod 664 var/data.db; \
+    fi
 
-# Permissions pour www-data
-RUN chown -R www-data:www-data /var/www/html/var || true
+# Vider le cache Symfony
+RUN php bin/console cache:clear --env=prod && \
+    chown -R www-data:www-data var/
 
-# Exposer le port PHP-FPM
-EXPOSE 9000
+# Exposer le port 80
+EXPOSE 80
 
-# Lancer PHP-FPM
-CMD ["php-fpm"]
+# Commande de démarrage
+CMD ["apache2-foreground"]

@@ -31,10 +31,26 @@ class BenevoleController extends AbstractController
             'disponibles' => $totalBenevoles
         ];
 
-        // Récupération des tâches futures (une seule fois)
+        // Par défaut, on récupère les tâches futures globales
         $tachesBrutes = $tacheRepository->findTachesFutures();
 
-        // Formatage pour FullCalendar
+        // Si l'utilisateur connecté est lié à un bénévole, on filtre pour ne récupérer
+        // que ses tâches assignées via AffectationTache
+        $user = $this->getUser();
+        $benevoleForUser = null;
+        if ($user) {
+            // Rechercher un objet Benevole lié à cet utilisateur via le repository injecté
+            $benevoleForUser = $benevoleRepository->findOneBy(['utilisateur' => $user]);
+        }
+
+        if ($benevoleForUser) {
+            $tachesBrutes = $tacheRepository->findTachesFuturesForBenevole($benevoleForUser->getId());
+            // Si aucune tâche future (p.ex. tâches en 2024), on renvoie toutes les tâches assignées
+            if (empty($tachesBrutes)) {
+                $tachesBrutes = $tacheRepository->findTachesForBenevole($benevoleForUser->getId());
+            }
+        }
+
         $taches = [];
         foreach ($tachesBrutes as $tache) {
             $taches[] = [
@@ -53,14 +69,49 @@ class BenevoleController extends AbstractController
             ];
         }
 
-        // Tâches proches (optionnel : 5 prochaines)
-        $tachesProches = $tacheRepository->findTachesProches(5);
+        // Pour la liste "taches_proches" à droite, on applique le même filtrage
+        if ($benevoleForUser) {
+            $tachesProches = $tacheRepository->findTachesFuturesForBenevole($benevoleForUser->getId());
+            if (empty($tachesProches)) {
+                $tachesProches = $tacheRepository->findTachesForBenevole($benevoleForUser->getId());
+            }
+        } else {
+            $tachesProches = $tacheRepository->findTachesFutures();
+        }
+
+        // Convertir les entités Tache en tableaux simples pour le template
+        $tachesProchesData = [];
+        foreach ($tachesProches as $tp) {
+            $tachesProchesData[] = [
+                'id' => $tp->getId(),
+                'titre' => $tp->getTitre(),
+                'debut' => $tp->getDebut(),
+                'poste_requis' => $tp->getPosteRequis(),
+            ];
+        }
+
+        // Récupérer les tâches réalisées si l'utilisateur est un bénévole
+        $tachesRealiseesData = [];
+        if ($benevoleForUser) {
+            $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevoleForUser->getId());
+            foreach ($tachesRealisees as $tr) {
+                $tachesRealiseesData[] = [
+                    'id' => $tr->getId(),
+                    'titre' => $tr->getTitre(),
+                    'debut' => $tr->getDebut(),
+                    'fin' => $tr->getFin(),
+                    'poste_requis' => $tr->getPosteRequis(),
+                ];
+            }
+        }
 
         return $this->render('benevoles.html.twig', [
             'benevoles' => $benevoles,
             'metriques' => $metriques,
             'taches' => $taches,
-            'taches_proches' => $tachesProches
+            // fournir des tableaux simples pour le template
+            'taches_proches' => $tachesProchesData,
+            'taches_realisees' => $tachesRealiseesData
         ]);
     }
 

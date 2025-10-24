@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20251024124102 extends AbstractMigration
+final class Version20251024125728 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -22,6 +22,12 @@ final class Version20251024124102 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE CRENEAU (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_evenement INTEGER NOT NULL, titre VARCHAR(255) NOT NULL, poste_requis VARCHAR(255) DEFAULT NULL, debut DATETIME NOT NULL, fin DATETIME NOT NULL, max_personnes INTEGER NOT NULL, remarque CLOB DEFAULT NULL, date_creation DATETIME DEFAULT NULL, CONSTRAINT FK_C62375458B13D439 FOREIGN KEY (id_evenement) REFERENCES EVENEMENT (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_C62375458B13D439 ON CRENEAU (id_evenement)');
+        $this->addSql('CREATE TABLE DEMANDE_TACHE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_tache INTEGER NOT NULL, id_benevole INTEGER NOT NULL, id_admin_reponse INTEGER DEFAULT NULL, date_demande DATETIME NOT NULL, statut VARCHAR(20) NOT NULL, message_benevole CLOB DEFAULT NULL, message_admin CLOB DEFAULT NULL, date_reponse DATETIME DEFAULT NULL, CONSTRAINT FK_44B9A48F7D026145 FOREIGN KEY (id_tache) REFERENCES TACHE (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_44B9A48FE4DAA34E FOREIGN KEY (id_benevole) REFERENCES BENEVOLE (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_44B9A48F25A28D2B FOREIGN KEY (id_admin_reponse) REFERENCES UTILISATEUR (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE INDEX IDX_44B9A48F7D026145 ON DEMANDE_TACHE (id_tache)');
+        $this->addSql('CREATE INDEX IDX_44B9A48FE4DAA34E ON DEMANDE_TACHE (id_benevole)');
+        $this->addSql('CREATE INDEX IDX_44B9A48F25A28D2B ON DEMANDE_TACHE (id_admin_reponse)');
+        $this->addSql('CREATE TABLE NOTIFICATION (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_destinataire INTEGER NOT NULL, type VARCHAR(50) NOT NULL, message CLOB NOT NULL, lien VARCHAR(255) DEFAULT NULL, lue BOOLEAN DEFAULT 0 NOT NULL, created_at DATETIME NOT NULL, CONSTRAINT FK_2A663FDADD688AE0 FOREIGN KEY (id_destinataire) REFERENCES UTILISATEUR (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE INDEX IDX_2A663FDADD688AE0 ON NOTIFICATION (id_destinataire)');
         $this->addSql('CREATE TABLE messenger_messages (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, body CLOB NOT NULL, headers CLOB NOT NULL, queue_name VARCHAR(190) NOT NULL, created_at DATETIME NOT NULL --(DC2Type:datetime_immutable)
         , available_at DATETIME NOT NULL --(DC2Type:datetime_immutable)
         , delivered_at DATETIME DEFAULT NULL --(DC2Type:datetime_immutable)
@@ -125,10 +131,10 @@ final class Version20251024124102 extends AbstractMigration
         $this->addSql('CREATE TABLE STOCK (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, categorie VARCHAR(50) DEFAULT NULL, quantite INTEGER DEFAULT 0 NOT NULL, unite VARCHAR(255) DEFAULT NULL, seuil INTEGER DEFAULT 0 NOT NULL, valeur_unitaire DOUBLE PRECISION DEFAULT \'0\' NOT NULL, remarque CLOB DEFAULT NULL, derniere_modif DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
         $this->addSql('INSERT INTO STOCK (id, nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque, derniere_modif) SELECT id, nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque, derniere_modif FROM __temp__STOCK');
         $this->addSql('DROP TABLE __temp__STOCK');
-        $this->addSql('CREATE TEMPORARY TABLE __temp__TACHE AS SELECT id, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque, date_creation FROM TACHE');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__TACHE AS SELECT id, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque FROM TACHE');
         $this->addSql('DROP TABLE TACHE');
-        $this->addSql('CREATE TABLE TACHE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_evenement INTEGER NOT NULL, titre VARCHAR(255) NOT NULL, poste_requis VARCHAR(50) NOT NULL, debut DATETIME NOT NULL, fin DATETIME NOT NULL, max_personnes INTEGER DEFAULT NULL, remarque CLOB DEFAULT NULL, date_creation DATETIME NOT NULL, FOREIGN KEY (id_evenement) REFERENCES EVENEMENT (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
-        $this->addSql('INSERT INTO TACHE (id, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque, date_creation) SELECT id, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque, date_creation FROM __temp__TACHE');
+        $this->addSql('CREATE TABLE TACHE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_evenement INTEGER NOT NULL, titre VARCHAR(255) NOT NULL, poste_requis VARCHAR(100) NOT NULL, debut DATETIME NOT NULL, fin DATETIME NOT NULL, max_personnes INTEGER NOT NULL, remarque CLOB DEFAULT NULL, FOREIGN KEY (id_evenement) REFERENCES EVENEMENT (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('INSERT INTO TACHE (id, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque) SELECT id, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque FROM __temp__TACHE');
         $this->addSql('DROP TABLE __temp__TACHE');
         $this->addSql('CREATE INDEX IDX_64D3E2C58B13D439 ON TACHE (id_evenement)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__UTILISATEUR AS SELECT id, id_role, email, mot_de_passe, prenom, nom, telephone, date_creation, date_modification FROM UTILISATEUR');
@@ -149,6 +155,8 @@ final class Version20251024124102 extends AbstractMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('DROP TABLE CRENEAU');
+        $this->addSql('DROP TABLE DEMANDE_TACHE');
+        $this->addSql('DROP TABLE NOTIFICATION');
         $this->addSql('DROP TABLE messenger_messages');
         $this->addSql('CREATE TEMPORARY TABLE __temp__AFFECTATION_TACHE AS SELECT id, id_tache, id_benevole, id_utilisateur, date_affectation, statut, remarque FROM AFFECTATION_TACHE');
         $this->addSql('DROP TABLE AFFECTATION_TACHE');
@@ -244,10 +252,10 @@ final class Version20251024124102 extends AbstractMigration
         $this->addSql('CREATE TABLE STOCK (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, nom CLOB NOT NULL, categorie CLOB DEFAULT NULL, quantite INTEGER DEFAULT 0, unite CLOB DEFAULT NULL, seuil INTEGER DEFAULT 0, valeur_unitaire DOUBLE PRECISION DEFAULT \'0.0\', remarque CLOB DEFAULT NULL, derniere_modif DATETIME DEFAULT CURRENT_TIMESTAMP)');
         $this->addSql('INSERT INTO STOCK (id, nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque, derniere_modif) SELECT id, nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque, derniere_modif FROM __temp__STOCK');
         $this->addSql('DROP TABLE __temp__STOCK');
-        $this->addSql('CREATE TEMPORARY TABLE __temp__TACHE AS SELECT id, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque, date_creation FROM TACHE');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__TACHE AS SELECT id, id_evenement, titre, debut, fin, poste_requis, max_personnes, remarque FROM TACHE');
         $this->addSql('DROP TABLE TACHE');
-        $this->addSql('CREATE TABLE TACHE (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_evenement INTEGER NOT NULL, titre CLOB NOT NULL, poste_requis CLOB DEFAULT NULL, debut DATETIME NOT NULL, fin DATETIME NOT NULL, max_personnes INTEGER DEFAULT 1, remarque CLOB DEFAULT NULL, date_creation DATETIME DEFAULT CURRENT_TIMESTAMP, CONSTRAINT FK_64D3E2C58B13D439 FOREIGN KEY (id_evenement) REFERENCES EVENEMENT (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
-        $this->addSql('INSERT INTO TACHE (id, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque, date_creation) SELECT id, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque, date_creation FROM __temp__TACHE');
+        $this->addSql('CREATE TABLE TACHE (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_evenement INTEGER NOT NULL, titre CLOB NOT NULL, debut DATETIME NOT NULL, fin DATETIME NOT NULL, poste_requis CLOB DEFAULT NULL, max_personnes INTEGER DEFAULT 1, remarque CLOB DEFAULT NULL, date_creation DATETIME DEFAULT CURRENT_TIMESTAMP, CONSTRAINT FK_64D3E2C58B13D439 FOREIGN KEY (id_evenement) REFERENCES EVENEMENT (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('INSERT INTO TACHE (id, id_evenement, titre, debut, fin, poste_requis, max_personnes, remarque) SELECT id, id_evenement, titre, debut, fin, poste_requis, max_personnes, remarque FROM __temp__TACHE');
         $this->addSql('DROP TABLE __temp__TACHE');
         $this->addSql('CREATE INDEX IDX_64D3E2C58B13D439 ON TACHE (id_evenement)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__UTILISATEUR AS SELECT id, id_role, email, mot_de_passe, prenom, nom, telephone, date_creation, date_modification FROM UTILISATEUR');

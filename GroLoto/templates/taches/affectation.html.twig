@@ -1,0 +1,162 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gerer les benevoles - {{ tache.titre }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="taches-page">
+<div class="page-header">
+    <h1 class="page-title">Gerer les benevoles assignes</h1>
+    <a href="{{ path('tache_index') }}" class="btn btn-secondary">Retour a la liste</a>
+</div>
+
+<div class="container" style="max-width: 900px; margin: 2rem auto;">
+    <div class="card alert-info">
+        <div class="card-content">
+            <h3>{{ tache.titre }}</h3>
+            <div>
+                <p><strong>Evenement:</strong> 
+                    {% if tache.evenement %}
+                        {{ tache.evenement.nom }}
+                    {% else %}
+                        <span style="color: #6b7280;">Non defini</span>
+                    {% endif %}
+                </p>
+                <p><strong>Periode:</strong> {{ tache.debut|date('d/m/Y H:i') }} - {{ tache.fin|date('d/m/Y H:i') }}</p>
+                <p><strong>Poste requis:</strong> 
+                    {% if tache.posteRequis %}
+                        {{ tache.posteRequis }}
+                    {% else %}
+                        <span style="color: #6b7280;">Non specifie</span>
+                    {% endif %}
+                </p>
+                {% if tache.maxPersonnes %}
+                    <p style="margin-bottom: 0;"><strong>Maximum de personnes:</strong> {{ tache.maxPersonnes }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Assigner des benevoles</h2>
+            <p class="card-description">
+                Cochez les benevoles a assigner a cette tache
+                {% if tache.maxPersonnes %}
+                    <span style="color: #dc2626;">(Maximum: {{ tache.maxPersonnes }})</span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="card-content">
+            {% if benevolesActuels|length > 0 %}
+                <div class="alert-success">
+                    <h4>Benevoles actuellement assignes ({{ benevolesActuels|length }})</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem;">
+                        {% for benevole in benevolesActuels %}
+                            <span class="badge" style="background: #059669; color: white; padding: 0.5rem 1rem;">
+                                {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert-warning">
+                    <p>Aucun benevole n'est actuellement assigne a cette tache</p>
+                </div>
+            {% endif %}
+
+            {{ form_start(form) }}
+                <div class="form-group">
+                    {{ form_label(form.benevoles) }}
+                    <div class="checkboxes-container" id="benevoles-container">
+                        {{ form_widget(form.benevoles) }}
+                    </div>
+                    {{ form_errors(form.benevoles) }}
+                    {% if tache.maxPersonnes %}
+                        <div id="selection-counter" style="margin-top: 0.75rem; padding: 0.75rem; background: #f3f4f6; border-radius: 0.375rem; font-weight: 500;">
+                            <span id="counter-text">Bénévoles sélectionnés : <span id="selected-count">{{ benevolesActuels|length }}</span> / {{ tache.maxPersonnes }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Enregistrer les affectations</button>
+                    <a href="{{ path('tache_index') }}" class="btn btn-secondary">Annuler</a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const maxPersonnes = {{ tache.maxPersonnes ?? 'null' }};
+    
+    if (maxPersonnes !== null) {
+        const container = document.getElementById('benevoles-container');
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        const selectedCountSpan = document.getElementById('selected-count');
+        const counterDiv = document.getElementById('selection-counter');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        function updateCounter() {
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            selectedCountSpan.textContent = checkedCount;
+            
+            // Changer la couleur en fonction du nombre sélectionné
+            if (checkedCount > maxPersonnes) {
+                counterDiv.style.background = '#fee2e2';
+                counterDiv.style.color = '#991b1b';
+                counterDiv.style.border = '2px solid #dc2626';
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+                submitBtn.style.cursor = 'not-allowed';
+            } else if (checkedCount === maxPersonnes) {
+                counterDiv.style.background = '#fef3c7';
+                counterDiv.style.color = '#92400e';
+                counterDiv.style.border = '2px solid #f59e0b';
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+            } else {
+                counterDiv.style.background = '#f3f4f6';
+                counterDiv.style.color = '#374151';
+                counterDiv.style.border = '2px solid transparent';
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+            }
+        }
+        
+        // Ajouter l'événement sur toutes les checkboxes
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                updateCounter();
+                
+                // Si on dépasse la limite, empêcher de cocher plus
+                const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+                if (checkedCount > maxPersonnes && this.checked) {
+                    this.checked = false;
+                    alert('Vous ne pouvez pas sélectionner plus de ' + maxPersonnes + ' bénévole(s) pour cette tâche.');
+                    updateCounter();
+                }
+            });
+        });
+        
+        // Initialiser le compteur
+        updateCounter();
+    }
+});
+</script>
+
+{% endblock %}

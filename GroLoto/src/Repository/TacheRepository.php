@@ -22,14 +22,6 @@ class TacheRepository extends ServiceEntityRepository
     }
 
     /**
-     * Récupère toutes les tâches triées par date de début
-     */
-    public function findAll(): array
-    {
-        return $this->findBy([], ['debut' => 'ASC']);
-    }
-
-    /**
      * Récupère les tâches futures (début > maintenant)
      */
     public function findTachesFutures(): array
@@ -43,16 +35,98 @@ class TacheRepository extends ServiceEntityRepository
     }
 
     /**
-     * Récupère les prochaines tâches (limitées)
+     * Trouve les tâches futures assignées à un bénévole
      */
-    public function findTachesProches(int $limit = 5): array
+    public function findTachesFuturesForBenevole(int $benevoleId): array
     {
         return $this->createQueryBuilder('t')
+            ->innerJoin('App\\Entity\\AffectationTache', 'a', 'WITH', 'a.tache = t')
+            ->andWhere('IDENTITY(a.benevole) = :benevoleId')
             ->andWhere('t.debut > :now')
+            ->setParameter('benevoleId', $benevoleId)
             ->setParameter('now', new \DateTime())
             ->orderBy('t.debut', 'ASC')
-            ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Trouve toutes les tâches assignées à un bénévole
+     */
+    public function findTachesForBenevole(int $benevoleId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->innerJoin('App\\Entity\\AffectationTache', 'a', 'WITH', 'a.tache = t')
+            ->andWhere('IDENTITY(a.benevole) = :benevoleId')
+            ->setParameter('benevoleId', $benevoleId)
+            ->orderBy('t.debut', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Trouve les tâches réalisées (fin < now) assignées à un bénévole
+     */
+    public function findTachesRealiseesForBenevole(int $benevoleId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->innerJoin('App\\Entity\\AffectationTache', 'a', 'WITH', 'a.tache = t')
+            ->andWhere('IDENTITY(a.benevole) = :benevoleId')
+            ->andWhere('t.fin < :now')
+            ->setParameter('benevoleId', $benevoleId)
+            ->setParameter('now', new \DateTime())
+            ->orderBy('t.fin', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Trouve les tâches par poste requis
+     */
+    public function findByPosteRequis(string $poste): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.poste_requis = :poste')
+            ->setParameter('poste', $poste)
+            ->orderBy('t.debut', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Trouve les tâches pour une période donnée
+     */
+    public function findByDateRange(\DateTimeInterface $start, \DateTimeInterface $end): array
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.debut >= :start')
+            ->andWhere('t.fin <= :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->orderBy('t.debut', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Récupère TOUTES les tâches avec la relation événement chargée
+     * → Remplace la méthode par défaut
+     */
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder('t')
+            ->leftJoin('t.evenement', 'e')
+            ->addSelect('e')
+            ->orderBy('t.debut', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Alias pour findAll() avec relations
+     */
+    public function findAllWithRelations(): array
+    {
+        return $this->findAll();
     }
 }
