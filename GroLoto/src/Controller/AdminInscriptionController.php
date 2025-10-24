@@ -2,6 +2,8 @@
 namespace App\Controller;
 
 use App\Entity\InscriptionMecene;
+use App\Entity\Notification;
+use App\Entity\Role;
 use App\Entity\Stock;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -39,6 +41,7 @@ class AdminInscriptionController extends AbstractController
     public function accepter(InscriptionMecene $inscription, Request $request, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('accepter_inscription_' . $inscription->getId(), $request->request->get('_token'))) {
+            $statutPrecedent = $inscription->getStatut();
             $inscription->setStatut('accepte');
             
             // Créer automatiquement l'entrée de stock
@@ -60,9 +63,29 @@ class AdminInscriptionController extends AbstractController
             $stock->setDerniereModif(new \DateTime());
             
             $em->persist($stock);
+            
+            // Créer une notification pour le mécène
+            $notificationMecene = new Notification();
+            $notificationMecene->setDestinataire($inscription->getMecene()->getUtilisateur());
+            $notificationMecene->setType('inscription_acceptee');
+            
+            // Message personnalisé selon le statut précédent
+            if ($statutPrecedent === 'refuse') {
+                $notificationMecene->setMessage('Mise à jour : Votre inscription pour l\'événement "' . $inscription->getEvenement()->getNom() . '" a été acceptée.');
+            } else {
+                $notificationMecene->setMessage('Votre inscription pour l\'événement "' . $inscription->getEvenement()->getNom() . '" a été acceptée.');
+            }
+            
+            $notificationMecene->setLien($this->generateUrl('mecene_mes_inscriptions'));
+            $em->persist($notificationMecene);
+            
             $em->flush();
 
-            $this->addFlash('success', 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été acceptée et l\'article "' . $stock->getNom() . '" a été ajouté au stock.');
+            if ($statutPrecedent === 'refuse') {
+                $this->addFlash('success', 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été reconsidérée et acceptée.');
+            } else {
+                $this->addFlash('success', 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été acceptée et l\'article "' . $stock->getNom() . '" a été ajouté au stock.');
+            }
         } else {
             $this->addFlash('error', 'Token CSRF invalide.');
         }
@@ -97,6 +120,26 @@ class AdminInscriptionController extends AbstractController
             if ($remarqueRefus) {
                 $inscription->setRemarqueRefus($remarqueRefus);
             }
+            
+            // Créer une notification pour le mécène
+            $notificationMecene = new Notification();
+            $notificationMecene->setDestinataire($inscription->getMecene()->getUtilisateur());
+            $notificationMecene->setType('inscription_refusee');
+            
+            // Message personnalisé selon le statut précédent
+            if ($statutPrecedent === 'accepte') {
+                $messageNotif = 'Mise à jour concernant votre inscription pour l\'événement "' . $inscription->getEvenement()->getNom() . '".';
+            } else {
+                $messageNotif = 'Votre inscription pour l\'événement "' . $inscription->getEvenement()->getNom() . '" a été refusée.';
+            }
+            
+            if ($remarqueRefus) {
+                $messageNotif .= ' Raison : ' . $remarqueRefus;
+            }
+            $notificationMecene->setMessage($messageNotif);
+            $notificationMecene->setLien($this->generateUrl('mecene_mes_inscriptions'));
+            $em->persist($notificationMecene);
+            
             $em->flush();
 
             if ($statutPrecedent === 'accepte') {
