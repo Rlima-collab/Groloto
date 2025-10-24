@@ -75,6 +75,23 @@ class AdminInscriptionController extends AbstractController
     {
         if ($this->isCsrfTokenValid('refuser_inscription_' . $inscription->getId(), $request->request->get('_token'))) {
             $remarqueRefus = $request->request->get('remarque_refus');
+            $statutPrecedent = $inscription->getStatut();
+            
+            // Si l'inscription était acceptée, supprimer le stock associé
+            if ($statutPrecedent === 'accepte' && $inscription->getNomDon()) {
+                $stockRepository = $em->getRepository(Stock::class);
+                $stocks = $stockRepository->createQueryBuilder('s')
+                    ->where('s.nom = :nom')
+                    ->andWhere('s.remarque LIKE :remarque')
+                    ->setParameter('nom', $inscription->getNomDon())
+                    ->setParameter('remarque', '%' . $inscription->getMecene()->getOrganisation() . '%' . $inscription->getEvenement()->getNom() . '%')
+                    ->getQuery()
+                    ->getResult();
+                
+                foreach ($stocks as $stock) {
+                    $em->remove($stock);
+                }
+            }
             
             $inscription->setStatut('refuse');
             if ($remarqueRefus) {
@@ -82,7 +99,11 @@ class AdminInscriptionController extends AbstractController
             }
             $em->flush();
 
-            $this->addFlash('success', 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été refusée.');
+            if ($statutPrecedent === 'accepte') {
+                $this->addFlash('success', 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été refusée et l\'article a été retiré du stock.');
+            } else {
+                $this->addFlash('success', 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été refusée.');
+            }
         } else {
             $this->addFlash('error', 'Token CSRF invalide.');
         }
