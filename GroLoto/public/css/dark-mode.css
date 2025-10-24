@@ -1,0 +1,353 @@
+/* =============== DARK MODE GLOBAL STYLES =============== */
+
+/* Enhanced theme variables with better contrast */
+:root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-elevated: #f8f9fa;
+    --muted: #f8f9fa;
+    --border: #e0e0e0;
+    --text: #111827;
+    --text-secondary: #6b7280;
+    --accent: #006909;
+    --accent-hover: #005207;
+    --danger: #dc3545;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --card-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #d1d5db;
+    --shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme overrides with proper contrast */
+.dark {
+    --bg: #0b1120;
+    --surface: #151b2b;
+    --surface-elevated: #1a2332;
+    --muted: #0f1624;
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #e6eef8;
+    --text-secondary: #9ca3af;
+    --accent: #22c55e;
+    --accent-hover: #16a34a;
+    --danger: #ef4444;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --card-bg: #151b2b;
+    --input-bg: #1a2332;
+    --input-border: rgba(255, 255, 255, 0.1);
+    --shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* Base elements */
+.dark body {
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.dark main {
+    background-color: var(--bg);
+}
+
+/* Cards and containers */
+.dark .card,
+.dark .container,
+.dark .box,
+.dark .panel,
+.dark .section {
+    background-color: var(--card-bg);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+/* Hero sections */
+.dark .hero-section {
+    background: linear-gradient(145deg, #1a2332, #151b2b, #1f2937);
+    color: var(--text);
+}
+
+.dark .hero-section::before {
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.1), transparent 70%);
+}
+
+.dark .hero-section::after {
+    background-image: repeating-linear-gradient(
+        135deg,
+        rgba(34, 197, 94, 0.05) 0px,
+        rgba(34, 197, 94, 0.05) 2px,
+        transparent 2px,
+        transparent 20px
+    );
+}
+
+/* Tables */
+.dark table {
+    background-color: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.dark th {
+    background-color: var(--surface-elevated);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.dark td {
+    background-color: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.dark tr:hover td {
+    background-color: var(--surface-elevated);
+}
+
+.dark tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Forms and inputs */
+.dark input,
+.dark textarea,
+.dark select {
+    background-color: var(--input-bg);
+    color: var(--text);
+    border-color: var(--input-border);
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+    border-color: var(--accent);
+    background-color: var(--surface-elevated);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Buttons */
+.dark button,
+.dark .btn,
+.dark .button {
+    background-color: var(--surface-elevated);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.dark button:hover,
+.dark .btn:hover,
+.dark .button:hover {
+    background-color: var(--accent);
+    color: #ffffff;
+}
+
+.dark .btn-primary {
+    background-color: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+}
+
+.dark .btn-primary:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.dark .btn-danger {
+    background-color: var(--danger);
+    color: #ffffff;
+}
+
+.dark .btn-success {
+    background-color: var(--success);
+    color: #ffffff;
+}
+
+/* Links */
+.dark a {
+    color: var(--accent);
+}
+
+.dark a:hover {
+    color: var(--accent-hover);
+}
+
+/* Modal and overlays */
+.dark .modal,
+.dark .overlay,
+.dark .popup {
+    background-color: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.dark .modal-header,
+.dark .modal-footer {
+    background-color: var(--surface-elevated);
+    border-color: var(--border);
+}
+
+/* Lists */
+.dark ul li,
+.dark ol li {
+    color: var(--text);
+}
+
+/* Badges and labels */
+.dark .badge,
+.dark .label,
+.dark .tag {
+    background-color: var(--surface-elevated);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.dark .badge-success { background-color: var(--success); color: #fff; }
+.dark .badge-danger { background-color: var(--danger); color: #fff; }
+.dark .badge-warning { background-color: var(--warning); color: #fff; }
+
+/* Footer */
+.dark .footer-dark {
+    background-color: var(--surface);
+    border-top: 1px solid var(--border);
+}
+
+.dark .footer-dark h3,
+.dark .footer-dark p,
+.dark .footer-dark ul li,
+.dark .footer-dark a {
+    color: var(--text);
+}
+
+.dark .footer-dark a:hover {
+    color: var(--accent);
+}
+
+/* Specific overrides for better visibility */
+.dark .text-muted {
+    color: var(--text-secondary) !important;
+}
+
+.dark .bg-white,
+.dark .bg-light {
+    background-color: var(--surface) !important;
+}
+
+.dark .border {
+    border-color: var(--border) !important;
+}
+
+/* Dropdown menus */
+.dark .dropdown-menu {
+    background-color: var(--surface);
+    border-color: var(--border);
+}
+
+.dark .dropdown-item {
+    color: var(--text);
+}
+
+.dark .dropdown-item:hover {
+    background-color: var(--surface-elevated);
+    color: var(--accent);
+}
+
+/* Alerts */
+.dark .alert {
+    background-color: var(--surface-elevated);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.dark .alert-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.dark .alert-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.dark .alert-warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    border-color: var(--warning);
+    color: var(--warning);
+}
+
+/* Progress bars */
+.dark .progress {
+    background-color: var(--surface-elevated);
+}
+
+.dark .progress-bar {
+    background-color: var(--accent);
+}
+
+/* Tooltips */
+.dark .tooltip {
+    background-color: var(--surface-elevated);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+/* Pagination */
+.dark .pagination .page-link {
+    background-color: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.dark .pagination .page-link:hover {
+    background-color: var(--surface-elevated);
+    color: var(--accent);
+}
+
+.dark .pagination .page-item.active .page-link {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+}
+
+/* Code blocks */
+.dark pre,
+.dark code {
+    background-color: var(--surface-elevated);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+/* Scrollbar */
+.dark ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: var(--surface);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: var(--surface-elevated);
+    border-radius: 5px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+/* Image filters for better visibility */
+.dark img:not([src*=".svg"]) {
+    filter: brightness(0.9) contrast(1.1);
+}
+
+/* Selection */
+.dark ::selection {
+    background-color: var(--accent);
+    color: #ffffff;
+}
