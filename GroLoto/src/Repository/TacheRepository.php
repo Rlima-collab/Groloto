@@ -142,4 +142,12 @@ class TacheRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Trouve toutes les tâches avec les relations événement (alias pour findAll)
+     */
+    public function findAllWithRelations(): array
+    {
+        return $this->findAll();
+    }
 }
