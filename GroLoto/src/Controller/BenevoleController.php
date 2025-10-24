@@ -19,6 +19,7 @@ class BenevoleController extends AbstractController
     #[Route('/benevoles', name: 'benevoles')]
     public function index(BenevoleRepository $benevoleRepository, TacheRepository $tacheRepository): Response
     {
+        // Récupération des bénévoles
         $benevoles = $benevoleRepository->findActiveWithUser();
         $totalBenevoles = $benevoleRepository->countActive();
         $nouveauxBenevoles = count($benevoleRepository->findRecentlyRegistered());
@@ -30,8 +31,10 @@ class BenevoleController extends AbstractController
             'disponibles' => $totalBenevoles
         ];
 
+        // Récupération des tâches futures (une seule fois)
         $tachesBrutes = $tacheRepository->findTachesFutures();
-        
+
+        // Formatage pour FullCalendar
         $taches = [];
         foreach ($tachesBrutes as $tache) {
             $taches[] = [
@@ -42,7 +45,7 @@ class BenevoleController extends AbstractController
                 'backgroundColor' => '#3b82f6',
                 'borderColor' => '#2563eb',
                 'extendedProps' => [
-                    'evenement' => $tache->getEvenement() ? $tache->getEvenement()->getNom() : null,
+                    'evenement' => $tache->getEvenement()?->getNom(),
                     'poste_requis' => $tache->getPosteRequis(),
                     'max_personnes' => $tache->getMaxPersonnes(),
                     'remarques' => $tache->getRemarque()
@@ -50,7 +53,8 @@ class BenevoleController extends AbstractController
             ];
         }
 
-        $tachesProches = $tacheRepository->findTachesFutures();
+        // Tâches proches (optionnel : 5 prochaines)
+        $tachesProches = $tacheRepository->findTachesProches(5);
 
         return $this->render('benevoles.html.twig', [
             'benevoles' => $benevoles,
@@ -79,9 +83,10 @@ class BenevoleController extends AbstractController
 
         $form = $this->createForm(BenevoleEditType::class, $benevole);
         
+        // Pré-remplir les champs utilisateur
         $form->get('prenom')->setData($utilisateur->getPrenom());
         $form->get('nom')->setData($utilisateur->getNom());
-        $form->get('email')->setData($utilisateur->getEmail());
+        $form->get('email')-> devisData($utilisateur->getEmail());
         $form->get('telephone')->setData($utilisateur->getTelephone());
 
         $form->handleRequest($request);

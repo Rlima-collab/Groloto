@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un weekend{% endblock %}
+
+{% block body %}
+<div class="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg">
+    <h1 class="text-2xl font-bold mb-6 text-center">Créer un weekend + événements</h1>
+
+    {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+
+        <div class="bg-gray-50 p-4 rounded-lg">
+            {{ form_row(form.nom) }}
+            <div class="grid grid-cols-3 gap-4">
+                {{ form_row(form.date_vendredi) }}
+                {{ form_row(form.date_samedi) }}
+                {{ form_row(form.date_dimanche) }}
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <h2 class="text-xl font-semibold mb-4">Événements du weekend</h2>
+            <div id="evenements" data-prototype="{{ form_widget(form.evenements.vars.prototype)|e('html_attr') }}">
+                {% for evenement in form.evenements %}
+                    <div class="bg-blue-50 p-4 rounded-lg mb-4 border">
+                        {{ form_row(evenement.nom) }}
+                        <div class="grid grid-cols-2 gap-4">
+                            {{ form_row(evenement.date_debut) }}
+                            {{ form_row(evenement.lieu) }}
+                        </div>
+                        {{ form_row(evenement.description) }}
+                        <button type="button" class="remove-evenement text-red-600 text-sm">Supprimer</button>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="add-evenement" class="mt-2 text-blue-600 text-sm font-medium">
+                + Ajouter un événement
+            </button>
+        </div>
+
+        <div class="text-center mt-8">
+            <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
+                Créer le weekend
+            </button>
+        </div>
+
+    {{ form_end(form) }}
+</div>
+
+<script>
+document.getElementById('add-evenement').addEventListener('click', function() {
+    const collection = document.getElementById('evenements');
+    const widget = collection.dataset.prototype;
+    const index = collection.children.length;
+    const newWidget = widget.replace(/__name__/g, index);
+    const div = document.createElement('div');
+    div.innerHTML = newWidget;
+    div.className = 'bg-blue-50 p-4 rounded-lg mb-4 border';
+    collection.appendChild(div);
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-evenement')) {
+        e.target.closest('div').remove();
+    }
+});
+</script>
+{% endblock %}

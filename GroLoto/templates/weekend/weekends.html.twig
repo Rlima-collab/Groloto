@@ -1,0 +1,226 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Weekends{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('css/modele.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/evenements.css') }}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Weekends</h1>
+        <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité.</p>
+        {% if is_granted('ROLE_MECENE') and not is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('mecene_inscription') }}" class="hero-btn yellow">S'inscrire à un événement</a>
+        {% else %}
+            <a href="{% if isAdmin %}{{ path('app_weekend_create') }}{% else %}#calendar{% endif %}" 
+               class="hero-btn yellow">
+                {% if isAdmin %}Créer un Weekend{% else %}Voir le planning{% endif %}
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="page-header">
+    <h1 class="page-title">Planning des Weekends</h1>
+</div>
+
+<div class="metrics-grid">
+    <div class="card metric-card yellow-border">
+        <div class="card-header">
+            <span class="metric-title">Total Événements</span>
+            <span class="icon yellow">Chart</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ total_evenements }}</div>
+            <p class="metric-change positive">Tous les événements</p>
+        </div>
+    </div>
+    <div class="card metric-card green-border">
+        <div class="card-header">
+            <span class="metric-title">Événements Futurs</span>
+            <span class="icon green">Crystal Ball</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ evenements_futurs|length }}</div>
+            <p class="metric-change positive">À venir</p>
+        </div>
+    </div>
+    <div class="card metric-card blue-border">
+        <div class="card-header">
+            <span class="metric-title">Événements Passés</span>
+            <span class="icon blue">Book</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ evenements_passes|length }}</div>
+            <p class="metric-change warning">Terminés</p>
+        </div>
+    </div>
+    <div class="card metric-card yellow-border">
+        <div class="card-header">
+            <span class="metric-title">Ce mois-ci</span>
+            <span class="icon yellow">Calendar</span>
+        </div>
+        <div class="card-content">
+            <div class="metric-value">{{ evenements_ce_mois }}</div>
+            <p class="metric-change positive">Événements planifiés</p>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Calendar Calendrier des Weekends</h5>
+        </div>
+        <div class="card-content">
+            <div style="margin-bottom: 1rem; text-align: center;">
+                <button class="btn btn-outline-primary active" id="btn-month">Mois</button>
+                <button class="btn btn-outline-primary" id="btn-week">Semaine</button>
+            </div>
+            <div id="calendar"></div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Crystal Ball Prochains Weekends</h5>
+        </div>
+        <div class="card-content">
+            <div class="events-list">
+                {% if evenements_futurs|length > 0 %}
+                    {% for evenement in evenements_futurs|slice(0, 20) %}
+                        <div class="event-item {{ loop.index0 % 3 == 0 ? 'yellow-accent' : loop.index0 % 3 == 1 ? 'green-accent' : 'blue-accent' }}">
+                            <div class="event-date">
+                                <div class="event-month">{{ evenement.dateDebut|date('M')|upper }}</div>
+                                <div class="event-day">{{ evenement.dateDebut|date('d') }}</div>
+                            </div>
+                            <div class="event-details">
+                                <h4 class="event-title">{{ evenement.nom }}</h4>
+                                <p class="event-time">{{ evenement.dateDebut|date('H\\hi') }} - {{ evenement.lieu }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Aucun événement à venir.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="full-width-container">
+    <div class="card history-card">
+        <div class="card-header">
+            <h3 class="card-title">Clock Historique des Weekends</h3>
+        </div>
+        <div class="card-content">
+            <div class="history-list">
+                {% if evenements_passes|length > 0 %}
+                    {% for evenement in evenements_passes|slice(0, 5) %}
+                        <div class="history-item {{ loop.index0 % 3 == 0 ? 'yellow-accent' : loop.index0 % 3 == 1 ? 'green-accent' : 'blue-accent' }}">
+                            <div class="history-date">
+                                <div class="history-day">{{ evenement.dateDebut|date('d') }}</div>
+                                <div class="history-month">{{ evenement.dateDebut|date('M')|upper }}</div>
+                            </div>
+                            <div class="history-details">
+                                <h4 class="history-title">{{ evenement.nom }} - Terminé</h4>
+                                <p class="history-description">
+                                    {{ evenement.description|default('Événement organisé avec succès')|slice(0, 80) }}{{ evenement.description|length > 80 ? '...' }}
+                                </p>
+                                <p class="history-meta">
+                                    Événement du {{ evenement.dateDebut|date('d/m/Y') }}
+                                    {% if evenement.lieu %} - {{ evenement.lieu }}{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align: center; color: #6b7280; padding: 2rem;">Aucun événement dans l'historique.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        window.calendarEvents = {{ creneaux|raw }};
+        window.taches = {{ taches|raw }};
+    </script>
+
+    <script>
+        window.calendarInstance = null;
+
+        const loadFullCalendar = () => {
+            return new Promise((resolve, reject) => {
+                if (typeof FullCalendar !== 'undefined') return resolve();
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js';
+                script.onload = () => setTimeout(resolve, 100);
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        };
+
+        const initCalendar = (view = 'dayGridMonth') => {
+            const el = document.getElementById('calendar');
+            if (!el) return;
+
+            if (typeof FullCalendar === 'undefined') {
+                loadFullCalendar().then(() => setTimeout(() => initCalendar(view), 100));
+                return;
+            }
+
+            if (window.calendarInstance) window.calendarInstance.destroy();
+
+            const events = JSON.parse(window.taches);
+            const evenements = JSON.parse(window.calendarEvents);
+
+            window.calendarInstance = new FullCalendar.Calendar(el, {
+                initialView: view,
+                locale: 'fr',
+                height: 'auto',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+                buttonText: { today: 'Aujourd\'hui', month: 'Mois', week: 'Semaine' },
+                hiddenDays: [1, 2, 3, 4],
+                weekends: true,
+                firstDay: 5,
+                events: [...evenements, ...events],
+                eventClick: info => {
+                    const e = info.event;
+                    const p = e.extendedProps;
+                    let msg = `${e.title}\nDu ${e.start.toLocaleString()}`;
+                    if (e.end) msg += `\nAu ${e.end.toLocaleString()}`;
+                    if (p.description) msg += `\n\n${p.description}`;
+                    if (p.lieu) msg += `\nLieu: ${p.lieu}`;
+                    alert(msg);
+                },
+                nowIndicator: true,
+                slotMinTime: '07:00:00',
+                slotMaxTime: '22:00:00',
+                allDaySlot: false
+            });
+            window.calendarInstance.render();
+        };
+
+        const changeView = view => {
+            if (window.calendarInstance) window.calendarInstance.changeView(view);
+            document.getElementById('btn-month').classList.toggle('active', view === 'dayGridMonth');
+            document.getElementById('btn-week').classList.toggle('active', view === 'timeGridWeek');
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('btn-month')?.addEventListener('click', () => changeView('dayGridMonth'));
+            document.getElementById('btn-week')?.addEventListener('click', () => changeView('timeGridWeek'));
+            setTimeout(() => initCalendar(), 200);
+        });
+    </script>
+{% endblock %}

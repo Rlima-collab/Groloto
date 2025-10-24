@@ -6,9 +6,9 @@ use App\Entity\Evenement;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 
 class EvenementType extends AbstractType
 {
@@ -17,7 +17,7 @@ class EvenementType extends AbstractType
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom de l\'événement',
-                'attr' => ['class' => 'w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500']
+                'attr' => ['class' => 'w-full p-3 border rounded-lg']
             ])
             ->add('lieu', TextType::class, [
                 'label' => 'Lieu',
@@ -27,15 +27,11 @@ class EvenementType extends AbstractType
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
                 'required' => false,
-                'attr' => ['rows' => 3, 'class' => 'w-full p-3 border rounded-lg']
+                'attr' => ['rows' => 2, 'class' => 'w-full p-3 border rounded-lg']
             ])
-
-            // SEUL CHAMP : VENDREDI
-            ->add('dateVendredi', DateType::class, [
+            ->add('date_debut', DateType::class, [
                 'widget' => 'single_text',
-                'label' => 'Date du vendredi',
-                'data' => new \DateTime('next friday'),
-                'mapped' => false,
+                'label' => 'Date',
                 'attr' => ['class' => 'w-full p-3 border rounded-lg']
             ]);
     }

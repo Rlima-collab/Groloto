@@ -1,3 +1,4 @@
+-- 1. SUPPRIMER TOUTES LES TABLES
 DROP TABLE IF EXISTS HISTORIQUE_EVENEMENT;
 DROP TABLE IF EXISTS PARAMETRE;
 DROP TABLE IF EXISTS HELLOASSO;
@@ -15,15 +16,27 @@ DROP TABLE IF EXISTS MECENE;
 DROP TABLE IF EXISTS BENEVOLE;
 DROP TABLE IF EXISTS UTILISATEUR;
 DROP TABLE IF EXISTS ROLE;
+DROP TABLE IF EXISTS WEEKEND;
+
+-- 2. CRÉER LES TABLES (WEEKEND EN PREMIER)
+
+CREATE TABLE WEEKEND (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nom TEXT NOT NULL,
+  date_vendredi DATE NOT NULL,
+  date_samedi DATE NOT NULL,
+  date_dimanche DATE NOT NULL,
+  date_creation DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE ROLE (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   nom TEXT NOT NULL UNIQUE,
   description TEXT
 );
 
 CREATE TABLE UTILISATEUR (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_role INTEGER NOT NULL,
   email TEXT NOT NULL UNIQUE,
   mot_de_passe TEXT,
@@ -36,7 +49,7 @@ CREATE TABLE UTILISATEUR (
 );
 
 CREATE TABLE BENEVOLE (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_utilisateur INTEGER NOT NULL UNIQUE,
   remarque TEXT,
   actif BOOLEAN DEFAULT 1,
@@ -44,7 +57,7 @@ CREATE TABLE BENEVOLE (
 );
 
 CREATE TABLE MECENE (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_utilisateur INTEGER,
   organisation TEXT NOT NULL,
   siret TEXT NOT NULL,
@@ -52,7 +65,7 @@ CREATE TABLE MECENE (
 );
 
 CREATE TABLE LOT (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_mecene INTEGER,
   titre TEXT NOT NULL,
   description TEXT,
@@ -63,7 +76,7 @@ CREATE TABLE LOT (
 );
 
 CREATE TABLE CONVENTION (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_mecene INTEGER NOT NULL,
   nom_modele TEXT,
   url_pdf TEXT,
@@ -75,7 +88,7 @@ CREATE TABLE CONVENTION (
 );
 
 CREATE TABLE EVENEMENT (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_weekend INTEGER,
   nom TEXT NOT NULL,
   description TEXT,
@@ -87,7 +100,7 @@ CREATE TABLE EVENEMENT (
 );
 
 CREATE TABLE INSCRIPTION_MECENE (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_mecene INTEGER NOT NULL,
   id_evenement INTEGER NOT NULL,
   description_don TEXT NOT NULL,
@@ -101,7 +114,7 @@ CREATE TABLE INSCRIPTION_MECENE (
 );
 
 CREATE TABLE STOCK (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   nom TEXT NOT NULL,
   categorie TEXT,
   quantite INTEGER DEFAULT 0,
@@ -114,7 +127,7 @@ CREATE TABLE STOCK (
 );
 
 CREATE TABLE HISTORIQUE_STOCK (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_stock INTEGER NOT NULL,
   type_changement TEXT NOT NULL,
   quantite INTEGER NOT NULL,
@@ -129,7 +142,7 @@ CREATE TABLE HISTORIQUE_STOCK (
 );
 
 CREATE TABLE DISPONIBILITE_BENEVOLE (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_benevole INTEGER NOT NULL,
   id_evenement INTEGER NOT NULL,
   debut DATETIME,
@@ -141,7 +154,7 @@ CREATE TABLE DISPONIBILITE_BENEVOLE (
 );
 
 CREATE TABLE TACHE (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_evenement INTEGER NOT NULL,
   titre TEXT NOT NULL,
   poste_requis TEXT,
@@ -155,7 +168,7 @@ CREATE TABLE TACHE (
 );
 
 CREATE TABLE AFFECTATION_TACHE (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_tache INTEGER NOT NULL,
   id_benevole INTEGER NOT NULL,
   id_utilisateur INTEGER,
@@ -169,7 +182,7 @@ CREATE TABLE AFFECTATION_TACHE (
 );
 
 CREATE TABLE COMMUNICATION (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_evenement INTEGER,
   titre TEXT NOT NULL,
   type TEXT DEFAULT 'post',
@@ -184,7 +197,7 @@ CREATE TABLE COMMUNICATION (
 );
 
 CREATE TABLE HELLOASSO (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_evenement INTEGER,
   id_externe TEXT,
   prenom TEXT,
@@ -198,14 +211,14 @@ CREATE TABLE HELLOASSO (
 );
 
 CREATE TABLE PARAMETRE (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   cle TEXT NOT NULL UNIQUE,
   valeur TEXT,
   date_modification DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE HISTORIQUE_EVENEMENT (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_evenement INTEGER NOT NULL,
   action TEXT NOT NULL,
   description TEXT,
@@ -216,45 +229,45 @@ CREATE TABLE HISTORIQUE_EVENEMENT (
   FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
--- Insertions
+-- =============================================
+-- 3. INSERTIONS
+-- =============================================
+
 INSERT INTO ROLE (nom, description) VALUES
   ('admin', 'Administrateur organisation'),
   ('benevole', 'Bénévole participant aux événements'),
   ('mecene', 'Partenaire/mécène offrant des lots ou financements');
 
-INSERT INTO UTILISATEUR (id_role, email, prenom, nom, telephone, mot_de_passe, date_creation)
-VALUES
+INSERT INTO UTILISATEUR (id_role, email, prenom, nom, telephone, mot_de_passe, date_creation) VALUES
   (1, 'admin@groloto.local', 'Admin', 'User', '0600000000', '$2y$13$rPw4LiI3Pt91wm8QUAE20OGJ3Cl/wPS35ix1h5C1ZtpL06bPOqby2', datetime('now')),
   (2, 'benevole1@groloto.local', 'Alice', 'Durand', '0612345678', NULL, datetime('now')),
   (3, 'mecene1@groloto.local', 'Jean', 'Martin', '0712345678', NULL, datetime('now'));
 
-INSERT INTO BENEVOLE (id_utilisateur, remarque, actif)
-VALUES
+INSERT INTO BENEVOLE (id_utilisateur, remarque, actif) VALUES
   (2, 'Disponible surtout les week-ends', 1);
 
-INSERT INTO MECENE (id_utilisateur, organisation, siret)
-VALUES
+INSERT INTO MECENE (id_utilisateur, organisation, siret) VALUES
   (3, 'Boulangerie Martin', '12345678901234');
 
-INSERT INTO EVENEMENT (nom, description, date_debut, date_fin, lieu)
-VALUES
-  ('Tournoi de belote 2025', 'Compétition amicale avec lots pour les gagnants', '2025-11-01', '2025-11-01', 'Maison des associations'),
-  ('Soirée quizz caritative', 'Quiz généraliste pour récolter des fonds', '2025-11-02', '2025-11-02', 'Salle municipale'),
-  ('Concert solidaire', 'Concert avec groupes locaux au profit de l’association', '2025-11-03', '2025-11-03', 'Parc central'),
-  ('Vide-grenier Groloto', 'Vide-grenier pour collecter des fonds pour les projets associatifs', '2025-11-04', '2025-11-04', 'Place du marché'),
-  ('Groloto 2025', 'Loto caritatif annuel édition 2025', '2025-11-15', '2025-11-15', 'Salle des fêtes'),
-  ('Groloto 2024', 'Loto caritatif annuel', '2024-11-15', '2024-11-15', 'Salle des fêtes');
+INSERT INTO WEEKEND (nom, date_vendredi, date_samedi, date_dimanche) VALUES
+  ('Weekend Groloto 2025', '2025-11-14', '2025-11-15', '2025-11-16');
 
-INSERT INTO HISTORIQUE_EVENEMENT (id_evenement, action, description, id_utilisateur, date_action)
-VALUES
+INSERT INTO EVENEMENT (id_weekend, nom, description, date_debut, date_fin, lieu) VALUES
+  (NULL, 'Tournoi de belote 2025', 'Compétition amicale avec lots pour les gagnants', '2025-11-01', '2025-11-01', 'Maison des associations'),
+  (NULL, 'Soirée quizz caritative', 'Quiz généraliste pour récolter des fonds', '2025-11-02', '2025-11-02', 'Salle municipale'),
+  (NULL, 'Concert solidaire', 'Concert avec groupes locaux au profit de l’association', '2025-11-03', '2025-11-03', 'Parc central'),
+  (NULL, 'Vide-grenier Groloto', 'Vide-grenier pour collecter des fonds pour les projets associatifs', '2025-11-04', '2025-11-04', 'Place du marché'),
+  (1, 'Groloto 2025', 'Loto caritatif annuel édition 2025', '2025-11-15', '2025-11-15', 'Salle des fêtes'),
+  (NULL, 'Groloto 2024', 'Loto caritatif annuel', '2024-11-15', '2024-11-15', 'Salle des fêtes');
+
+INSERT INTO HISTORIQUE_EVENEMENT (id_evenement, action, description, id_utilisateur, date_action) VALUES
   (6, 'creation', 'Création de l''événement Groloto 2024', 1, '2024-10-01 10:00:00'),
   (6, 'modification', 'Mise à jour du lieu de Groloto 2024', 1, '2024-10-05 14:30:00'),
   (6, 'annulation', 'Annulation partielle d''une activité', 1, '2024-10-10 09:00:00'),
   (1, 'creation', 'Création du Tournoi de belote 2025', 1, '2025-09-01 08:00:00'),
   (2, 'creation', 'Création de la Soirée quizz caritative', 1, '2025-09-02 09:00:00');
 
-INSERT INTO STOCK (nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque)
-VALUES
+INSERT INTO STOCK (nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque) VALUES
   ('Panier gourmand', 'resto', 15, 'pièces', 5, 10.0, 'Lots donnés par Boulangerie Martin'),
   ('Bon d''achat restaurant', 'resto', 3, 'bons', 10, 30.0, 'Offert par Restaurant Le Gourmet'),
   ('Coffret livres', 'autre', 25, 'coffrets', 8, 25.0, 'Don Librairie des Arts'),
@@ -262,8 +275,7 @@ VALUES
   ('Pack boissons', 'bar', 50, 'bouteilles', 20, 5.0, 'Lots pour le bar'),
   ('Décoration de salle', 'deco', 10, 'kits', 2, 12.0, 'Décos pour l''événement');
 
-INSERT INTO HISTORIQUE_STOCK (id_stock, type_changement, quantite, raison, id_utilisateur)
-VALUES
+INSERT INTO HISTORIQUE_STOCK (id_stock, type_changement, quantite, raison, id_utilisateur) VALUES
   (1, 'entree', 10, 'Don initial Boulangerie Martin', 1),
   (2, 'sortie', 2, 'Lots utilisés pour tombola', 1),
   (3, 'entree', 15, 'Don Librairie des Arts', 1),
@@ -271,39 +283,31 @@ VALUES
   (5, 'entree', 50, 'Commande boissons sponsor', 1),
   (6, 'sortie', 3, 'Utilisé pour préparation salle', 1);
 
-INSERT INTO LOT (id_mecene, titre, description, quantite, valeur_estimee)
-VALUES
+INSERT INTO LOT (id_mecene, titre, description, quantite, valeur_estimee) VALUES
   (1, 'Panier gourmand premium', 'Composé de produits artisanaux', 5, 50.0),
   (1, 'Bon d''achat 50€', 'Utilisable dans la boulangerie', 10, 50.0);
 
-INSERT INTO CONVENTION (id_mecene, nom_modele, url_pdf, date_signature, methode_signature)
-VALUES
+INSERT INTO CONVENTION (id_mecene, nom_modele, url_pdf, date_signature, methode_signature) VALUES
   (1, 'Modele partenariat standard', '/docs/conventions/convention1.pdf', '2024-10-01', 'electronique');
 
-INSERT INTO TACHE (id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque)
-VALUES
+INSERT INTO TACHE (id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque) VALUES
   (6, 'Accueil participants', 'accueil', '2024-11-15 18:00:00', '2024-11-15 19:00:00', 3, 'Accueil et orientation des participants'),
   (6, 'Service bar', 'bar', '2024-11-15 19:00:00', '2024-11-15 22:00:00', 2, 'Préparer et servir les boissons');
 
-INSERT INTO AFFECTATION_TACHE (id_tache, id_benevole, id_utilisateur, statut, remarque)
-VALUES
+INSERT INTO AFFECTATION_TACHE (id_tache, id_benevole, id_utilisateur, statut, remarque) VALUES
   (1, 1, 2, 'confirme', 'Alice affectée à l''accueil');
 
-INSERT INTO DISPONIBILITE_BENEVOLE (id_benevole, id_evenement, debut, fin, remarque)
-VALUES
+INSERT INTO DISPONIBILITE_BENEVOLE (id_benevole, id_evenement, debut, fin, remarque) VALUES
   (1, 6, '2024-11-15 17:00:00', '2024-11-15 23:00:00', 'Disponible toute la durée de l''événement');
 
-INSERT INTO COMMUNICATION (id_evenement, titre, type, date_prevue, statut, budget, remarque)
-VALUES
+INSERT INTO COMMUNICATION (id_evenement, titre, type, date_prevue, statut, budget, remarque) VALUES
   (6, 'Campagne Facebook', 'post', '2024-10-15 10:00:00', 'programme', 50.0, 'Campagne sponsorisée Facebook'),
   (6, 'Affiches locales', 'affiche', '2024-10-20 09:00:00', 'fait', 30.0, 'Affiches imprimées et distribuées en ville');
 
-INSERT INTO HELLOASSO (id_evenement, id_externe, prenom, nom, email, telephone, type_ticket, date_achat)
-VALUES
+INSERT INTO HELLOASSO (id_evenement, id_externe, prenom, nom, email, telephone, type_ticket, date_achat) VALUES
   (6, 'HA12345', 'Paul', 'Lemoine', 'paul.lemoine@example.com', '0611223344', 'Entrée standard', '2024-10-10 15:00:00');
 
-INSERT INTO PARAMETRE (cle, valeur)
-VALUES
+INSERT INTO PARAMETRE (cle, valeur) VALUES
   ('site_name', 'Groloto Manager'),
   ('devise', '€'),
   ('email_contact', 'contact@groloto.local');
