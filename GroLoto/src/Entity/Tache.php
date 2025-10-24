@@ -2,6 +2,8 @@
 namespace App\Entity;
 
 use App\Repository\TacheRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TacheRepository::class)]
@@ -16,6 +18,9 @@ class Tache
     #[ORM\ManyToOne(targetEntity: Evenement::class, inversedBy: 'taches')]
     #[ORM\JoinColumn(name: "id_evenement", referencedColumnName: "id", nullable: false)]
     private ?Evenement $evenement = null;
+
+    #[ORM\OneToMany(mappedBy: 'tache', targetEntity: AffectationTache::class)]
+    private Collection $affectations;
 
     #[ORM\Column(type: "string", length: 255)]
     private ?string $titre = null;
@@ -37,6 +42,11 @@ class Tache
 
     #[ORM\Column(type: "datetime", nullable: true)]
     private ?\DateTimeInterface $date_creation = null;
+
+    public function __construct()
+    {
+        $this->affectations = new ArrayCollection();
+    }
 
     public function getId(): ?int { return $this->id; }
 
@@ -71,4 +81,31 @@ class Tache
     public function getDateCreation(): ?\DateTimeInterface { return $this->date_creation; }
     public function setDateCreation(?\DateTimeInterface $date_creation): self 
     { $this->date_creation = $date_creation; return $this; }
+
+    /**
+     * @return Collection<int, AffectationTache>
+     */
+    public function getAffectations(): Collection
+    {
+        return $this->affectations;
+    }
+
+    public function addAffectation(AffectationTache $affectation): self
+    {
+        if (!$this->affectations->contains($affectation)) {
+            $this->affectations->add($affectation);
+            $affectation->setTache($this);
+        }
+        return $this;
+    }
+
+    public function removeAffectation(AffectationTache $affectation): self
+    {
+        if ($this->affectations->removeElement($affectation)) {
+            if ($affectation->getTache() === $this) {
+                $affectation->setTache(null);
+            }
+        }
+        return $this;
+    }
 }

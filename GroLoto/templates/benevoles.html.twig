@@ -25,6 +25,9 @@
 
 <div class="page-header">
     <h1 class="page-title">Bénévoles & Planning</h1>
+    {% if not is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('benevole_taches_disponibles') }}" class="btn btn-primary">Rejoindre une tâche</a>
+    {% endif %}
 </div>
 
 <div class="benevoles-page">
