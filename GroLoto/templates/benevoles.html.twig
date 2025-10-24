@@ -25,9 +25,6 @@
 
 <div class="page-header">
     <h1 class="page-title">Bénévoles & Planning</h1>
-    {% if not is_granted('ROLE_ADMIN') %}
-        <a href="{{ path('benevole_taches_disponibles') }}" class="btn btn-primary">Rejoindre une tâche</a>
-    {% endif %}
 </div>
 
 <div class="benevoles-page">
@@ -68,20 +65,13 @@
     
     <div class="tabs">
         <a href="#" class="tab" id="tab-benevoles" onclick="showTab('benevoles')">
-            <span class="tab-icon">Liste</span>
-            <span class="tab-text">Liste des benevoles</span>
+            <span class="tab-icon">👥</span>
+            <span class="tab-text">Liste des bénévoles</span>
         </a>
-        {% if is_granted('ROLE_ADMIN') %}
-            <a href="{{ path('tache_index') }}" class="tab">
-                <span class="tab-icon">Gestion</span>
-                <span class="tab-text">Gerer taches</span>
-            </a>
-        {% else %}
-            <a href="#" class="tab" id="tab-planning" onclick="showTab('planning')">
-                <span class="tab-icon">Planning</span>
-                <span class="tab-text">Planning</span>
-            </a>
-        {% endif %}
+        <a href="#" class="tab" id="tab-planning" onclick="showTab('planning')">
+            <span class="tab-icon">📅</span>
+            <span class="tab-text">Planning</span>
+        </a>
     </div>
     
     <div id="content-benevoles" class="tab-content main-content">
@@ -128,13 +118,13 @@
                                 {% if is_granted('ROLE_ADMIN') %}
                                 <div class="benevole-actions">
                                     <a href="{{ path('benevole_edit', {'id': benevole.id}) }}" class="btn btn-small btn-primary">Modifier</a>
-                                    <a href="{{ path('benevole_planning', {'id': benevole.id}) }}" class="btn btn-small btn-secondary">Planning</a>
+                                    <a href="#" class="btn btn-small btn-secondary">Planning</a>
                                     <button type="button" 
                                             class="btn btn-small btn-danger" 
                                             data-benevole-id="{{ benevole.id }}"
                                             data-benevole-nom="{{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}"
                                             data-csrf-token="{{ csrf_token('delete_benevole_' ~ benevole.id) }}"
-                                            onclick="confirmDelete(this)">Supprimer</button>
+                                            onclick="confirmDelete(this)">🗑️</button>
                                 </div>
                                 {% endif %}
                             </div>

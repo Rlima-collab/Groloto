@@ -1,0 +1,355 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Notifications{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="notifications-page">
+        <h1 class="page-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            Mes Notifications
+        </h1>
+
+        {% if notifications|length > 0 %}
+            <div class="notification-actions">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="markAllAsReadBtn">
+                    Tout marquer comme lu
+                </button>
+            </div>
+
+            <div class="notifications-list">
+                {% for notification in notifications %}
+                    <div class="notification-card {% if not notification.lue %}notification-unread{% endif %} notification-type-{{ notification.type }}">
+                        <div class="notification-icon">
+                            {% if notification.type == 'nouvelle_inscription' %}
+                                <span class="icon-badge blue">📝</span>
+                            {% elseif notification.type == 'inscription_acceptee' %}
+                                <span class="icon-badge green">✅</span>
+                            {% elseif notification.type == 'inscription_refusee' %}
+                                <span class="icon-badge red">❌</span>
+                            {% else %}
+                                <span class="icon-badge gray">🔔</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="notification-body">
+                            {% if notification.type == 'inscription_acceptee' and '🎉' in notification.message %}
+                                <span class="notification-badge-special">Reconsidérée</span>
+                            {% elseif notification.type == 'inscription_refusee' and '⚠️' in notification.message %}
+                                <span class="notification-badge-special warning">Changement</span>
+                            {% endif %}
+                            <p class="notification-text">{{ notification.message }}</p>
+                            <span class="notification-date">
+                                🕒 {{ notification.createdAt|date('d/m/Y à H:i') }}
+                            </span>
+                        </div>
+
+                        <div class="notification-actions-card">
+                            {% if notification.lien %}
+                                <a href="{{ notification.lien }}" class="btn-notification-link">
+                                    Voir
+                                </a>
+                            {% endif %}
+                            {% if not notification.lue %}
+                                <button type="button" class="btn-mark-read" title="Marquer comme lu" onclick="markAsRead({{ notification.id }})">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-notifications-page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <h2>Aucune notification</h2>
+                <p>Vous n'avez pas encore reçu de notification.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.notifications-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 28px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+.page-title svg {
+    color: #006909;
+}
+
+.notification-actions {
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.notification-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.notification-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.notification-unread {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-left: 4px solid #006909;
+    animation: slideInNotification 0.5s ease-out;
+}
+
+@keyframes slideInNotification {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.notification-type-inscription_acceptee {
+    border-left-color: #10b981 !important;
+}
+
+.notification-type-inscription_refusee {
+    border-left-color: #ef4444 !important;
+}
+
+.notification-type-nouvelle_inscription {
+    border-left-color: #3b82f6 !important;
+}
+
+.notification-icon {
+    flex-shrink: 0;
+}
+
+.icon-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+.notification-card:hover .icon-badge {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.notification-badge-special {
+    display: inline-block;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.notification-badge-special.warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+.icon-badge.blue {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.icon-badge.green {
+    background: rgba(0, 105, 9, 0.1);
+}
+
+.icon-badge.red {
+    background: rgba(220, 38, 38, 0.1);
+}
+
+.icon-badge.gray {
+    background: rgba(156, 163, 175, 0.1);
+}
+
+.notification-body {
+    flex: 1;
+}
+
+.notification-text {
+    margin: 0 0 8px 0;
+    font-size: 15px;
+    color: #2c3e50;
+    line-height: 1.5;
+}
+
+.notification-date {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.notification-actions-card {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-notification-link {
+    padding: 8px 16px;
+    background: #006909;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s ease;
+}
+
+.btn-notification-link:hover {
+    background: #005207;
+    color: white;
+}
+
+.btn-mark-read {
+    background: #f0f0f0;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+}
+
+.btn-mark-read:hover {
+    background: #006909;
+    color: white;
+}
+
+.no-notifications-page {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.no-notifications-page svg {
+    color: #d1d5db;
+    margin-bottom: 20px;
+}
+
+.no-notifications-page h2 {
+    color: #6c757d;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.no-notifications-page p {
+    color: #9ca3af;
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    .notification-card {
+        flex-direction: column;
+    }
+    
+    .notification-actions-card {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+</style>
+
+<script>
+// Marquer toutes les notifications comme lues
+document.addEventListener('DOMContentLoaded', function() {
+    const markAllBtn = document.getElementById('markAllAsReadBtn');
+    
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = 'Chargement...';
+            this.disabled = true;
+            
+            fetch('{{ path('app_notifications_mark_all_read') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Recharger la page pour afficher l'état mis à jour
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                this.innerHTML = originalText;
+                this.disabled = false;
+                alert('Une erreur est survenue. Veuillez réessayer.');
+            });
+        });
+    }
+});
+
+// Marquer une notification comme lue
+function markAsRead(notificationId) {
+    fetch(`/notifications/${notificationId}/marquer-lue`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recharger la page pour afficher l'état mis à jour
+            window.location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue. Veuillez réessayer.');
+    });
+}
+</script>
+{% endblock %}
