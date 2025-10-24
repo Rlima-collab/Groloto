@@ -1,0 +1,162 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Taches{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="taches-page">
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Taches</h1>
+        <p class="hero-description">Creez, modifiez et assignez des taches aux benevoles pour vos evenements.</p>
+        <a href="{{ path('tache_new') }}" class="hero-btn yellow">+ Creer une tache</a>
+    </div>
+</div>
+
+<div class="page-header">
+    <h1 class="page-title">Toutes les Taches</h1>
+    <a href="{{ path('tache_new') }}" class="btn btn-primary">+ Nouvelle tache</a>
+</div>
+
+<div class="container">
+        <div class="card main-card">
+            <div class="card-header">
+                <h2 class="card-title">Liste des taches ({{ tachesData|length }})</h2>
+                <p class="card-description">Gerez toutes les taches de vos evenements</p>
+            </div>
+            <div class="card-content">
+                {% if tachesData|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Titre</th>
+                                    <th>Evenement</th>
+                                    <th>Date de debut</th>
+                                    <th>Date de fin</th>
+                                    <th>Poste requis</th>
+                                    <th>Benevoles assignes</th>
+                                    <th>Max personnes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in tachesData %}
+                                    {% set tache = data.tache %}
+                                    {% set now = date() %}
+                                    {% set isPast = tache.fin < now %}
+                                    {% set isFuture = tache.debut > now %}
+                                    <tr class="{{ isPast ? 'table-row-muted' : (isFuture ? 'table-row-future' : 'table-row-current') }}">
+                                        <td>{{ tache.id }}</td>
+                                        <td>
+                                            <strong>{{ tache.titre }}</strong>
+                                            {% if isPast %}
+                                                <span class="badge status" style="background: #9ca3af;">Terminee</span>
+                                            {% elseif isFuture %}
+                                                <span class="badge status" style="background: #3b82f6;">A venir</span>
+                                            {% else %}
+                                                <span class="badge status" style="background: #10b981;">En cours</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if tache.evenement %}
+                                                <span class="badge" style="background: #8b5cf6;">{{ tache.evenement.nom }}</span>
+                                            {% else %}
+                                                <span style="color: #9ca3af;">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ tache.debut|date('d/m/Y H:i') }}</td>
+                                        <td>{{ tache.fin|date('d/m/Y H:i') }}</td>
+                                        <td>
+                                            {% if tache.posteRequis %}
+                                                <span class="badge" style="background: #f59e0b;">{{ tache.posteRequis }}</span>
+                                            {% else %}
+                                                <span style="color: #9ca3af;">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if data.nbBenevoles > 0 %}
+                                                <div style="font-size: 0.85em;">
+                                                    {% for benevole in data.benevoles %}
+                                                        <span class="badge" style="background: #059669; margin: 2px;">{{ benevole }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                <small style="color: #6b7280;">({{ data.nbBenevoles }} benevole{{ data.nbBenevoles > 1 ? 's' : '' }})</small>
+                                            {% else %}
+                                                <span style="color: #dc2626;">Non assignee</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if tache.maxPersonnes %}
+                                                {{ tache.maxPersonnes }}
+                                            {% else %}
+                                                <span style="color: #9ca3af;">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ path('tache_edit', {'id': tache.id}) }}" 
+                                                   class="btn btn-small btn-primary" 
+                                                   title="Modifier">Modifier</a>
+                                                <a href="{{ path('tache_affectation', {'id': tache.id}) }}" 
+                                                   class="btn btn-small btn-secondary" 
+                                                   title="Gerer les benevoles">Benevoles</a>
+                                                <button type="button" 
+                                                        class="btn btn-small btn-danger" 
+                                                        data-tache-id="{{ tache.id }}"
+                                                        data-tache-titre="{{ tache.titre }}"
+                                                        data-csrf-token="{{ csrf_token('delete_tache_' ~ tache.id) }}"
+                                                        onclick="confirmDelete(this)"
+                                                        title="Supprimer">Supprimer</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">Taches</div>
+                        <h3>Aucune tache trouvee</h3>
+                        <p>Commencez par creer des taches pour vos evenements.</p>
+                        <a href="{{ path('tache_new') }}" class="btn btn-primary">+ Creer une tache</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+function confirmDelete(button) {
+    const tacheId = button.getAttribute('data-tache-id');
+    const tacheTitre = button.getAttribute('data-tache-titre');
+    const csrfToken = button.getAttribute('data-csrf-token');
+    
+    if (confirm(`Etes-vous sur de vouloir supprimer la tache "${tacheTitre}" ?\n\nCette action supprimera egalement toutes les affectations de benevoles associees.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/taches/${tacheId}/delete`;
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}
