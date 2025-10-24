@@ -2,35 +2,22 @@
 
 namespace App\Form;
 
-use App\Entity\Evenement;
+use App\Entity\Weekend;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
-class EvenementType extends AbstractType
+class WeekendType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('nom', TextType::class, [
-                'label' => 'Nom de l\'événement',
-                'attr' => ['class' => 'w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500']
-            ])
-            ->add('lieu', TextType::class, [
-                'label' => 'Lieu',
-                'required' => false,
+                'label' => 'Nom du weekend',
                 'attr' => ['class' => 'w-full p-3 border rounded-lg']
             ])
-            ->add('description', TextareaType::class, [
-                'label' => 'Description',
-                'required' => false,
-                'attr' => ['rows' => 3, 'class' => 'w-full p-3 border rounded-lg']
-            ])
-
-            // SEUL CHAMP : VENDREDI
             ->add('dateVendredi', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date du vendredi',
@@ -42,8 +29,6 @@ class EvenementType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'data_class' => Evenement::class,
-        ]);
+        $resolver->setDefaults(['data_class' => Weekend::class]);
     }
 }

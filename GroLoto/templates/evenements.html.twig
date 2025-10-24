@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Gestion des Événements{% endblock %}
+{% block title %}Gestion des Weekends{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -13,18 +13,18 @@
 <div class="hero-section">
     <div class="shine"></div>
     <div class="hero-content">
-        <h1 class="hero-title">Gestion des Événements</h1>
+        <h1 class="hero-title">Gestion des Weekends</h1>
         <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité.</p>
         {% if is_granted('ROLE_MECENE') and not is_granted('ROLE_ADMIN') %}
             <a href="{{ path('mecene_inscription') }}" class="hero-btn yellow">S'inscrire à un événement</a>
         {% else %}
-            <a href="{% if isAdmin %}{{ path('app_evenements_create') }}{% else %}#calendar{% endif %}" class="hero-btn yellow">{% if isAdmin %}Créer un événement{% else %}Voir le planning{% endif %}</a>
+            <a href="{% if isAdmin %}{{ path('app_evenements_create') }}{% else %}#calendar{% endif %}" class="hero-btn yellow">{% if isAdmin %}Créer un Weekend{% else %}Voir le planning{% endif %}</a>
         {% endif %}
     </div>
 </div>
 
 <div class="page-header">
-    <h1 class="page-title">Planning des Événements</h1>
+    <h1 class="page-title">Planning des Weekends</h1>
 </div>
 
 <div class="metrics-grid">
@@ -73,7 +73,7 @@
 <div class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <h5 class="card-title">📅 Calendrier des événements (Week-end seulement)</h5>
+            <h5 class="card-title">📅 Calendrier des Weekends</h5>
         </div>
         <div class="card-content">
             <div style="margin-bottom: 1rem; text-align: center;">
@@ -86,7 +86,7 @@
     
     <div class="card">
         <div class="card-header">
-            <h5 class="card-title">🔮 Prochains Événements</h5>
+            <h5 class="card-title">🔮 Prochains Weekends</h5>
         </div>
         <div class="card-content">
             <div class="events-list">
@@ -114,7 +114,7 @@
 <div class="full-width-container">
     <div class="card history-card">
         <div class="card-header">
-            <h3 class="card-title">🕒 Historique des Événements</h3>
+            <h3 class="card-title">🕒 Historique des Weekends</h3>
         </div>
         <div class="card-content">
             <div class="history-list">
