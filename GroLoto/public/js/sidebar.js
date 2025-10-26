@@ -6,6 +6,16 @@ document.addEventListener('DOMContentLoaded', function () {
     burgerMenu.addEventListener('click', function (event) {
         event.stopPropagation();
         sidebar.classList.toggle('collapsed');
+
+        // Close all submenus when collapsing the sidebar
+        if (sidebar.classList.contains('collapsed')) {
+            document.querySelectorAll('.submenu.active').forEach(activeSubmenu => {
+                activeSubmenu.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-link.active').forEach(activeLink => {
+                activeLink.classList.remove('active');
+            });
+        }
     });
 
     // Gestion des sous-menus avec animation de la flèche
