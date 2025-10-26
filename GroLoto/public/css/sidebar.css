@@ -258,3 +258,7 @@
         display: none;
     }
 }
+
+.sidebar.collapsed .nav-link .arrow {
+    display: none;
+}

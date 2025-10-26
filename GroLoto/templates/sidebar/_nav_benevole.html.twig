@@ -1,20 +1,71 @@
-{# templates/sidebar/_nav_benevole.html.twig #}
 <ul class="nav-list">
     <li class="nav-item">
         <a href="{{ path('dashboard') }}" class="nav-link">
-            <span class="nav-icon">📊</span>
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_dashboard.png') }}" alt="Tableau de bord">
+            </span>
             <span class="nav-text">Tableau de bord</span>
         </a>
     </li>
     <li class="nav-item">
-        <a href="{{ path('benevoles') }}" class="nav-link">
-            <span class="nav-icon">👥</span>
+        <a href="#" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="Evenement">
+            </span>
+            <span class="nav-text">Festivals</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="">Voir les Weekends</a></li>
+            <li><a href="">Voir les Évenements</a></li>
+            <li><a href="">S'inscrire à une tâche</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="#" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_benevole.png') }}" alt="Bénévoles">
+            </span>
             <span class="nav-text">Bénévoles</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="">Mon planning</a></li>
+            <li><a href="">Listes des Bénévoles</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('stocks') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_stock.png') }}" alt="Stocks">
+            </span>
+            <span class="nav-text">Stocks</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="">Inventaire</a></li>
+            <li><a href="">Mouvement</a></li>
+            <li><a href="">Historique</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('public_index') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_public.png') }}" alt="Public">
+            </span>
+            <span class="nav-text">Public</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_communication.png') }}" alt="Communication">
+            </span>
+            <span class="nav-text">Communication</span>
         </a>
     </li>
     <li class="nav-item">
         <a href="{{ path('app_contact') }}" class="nav-link">
-            <span class="nav-icon">📞</span>
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_contact.png') }}" alt="Contact">
+            </span>
             <span class="nav-text">Contact</span>
         </a>
     </li>

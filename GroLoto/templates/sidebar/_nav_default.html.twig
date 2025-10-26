@@ -1,14 +1,46 @@
-{# templates/sidebar/_nav_default.html.twig #}
+<div class="user-info">
+    <div class="user-avatar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+    </div>
+    <div class="user-role">Bienvenue !</div>
+</div>
 <ul class="nav-list">
     <li class="nav-item">
         <a href="{{ path('dashboard') }}" class="nav-link">
-            <span class="nav-icon">📊</span>
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_dashboard.png') }}" alt="Tableau de bord">
+            </span>
             <span class="nav-text">Tableau de bord</span>
         </a>
     </li>
     <li class="nav-item">
+        <a href="#" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="Evenement">
+            </span>
+            <span class="nav-text">Festivals</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="">Voir les Weekends</a></li>
+            <li><a href="">Voir les Évenements</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="#" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_communication.png') }}" alt="Communication">
+            </span>
+            <span class="nav-text">Communication</span>
+        </a>
+    </li>
+    <li class="nav-item">
         <a href="{{ path('app_contact') }}" class="nav-link">
-            <span class="nav-icon">📞</span>
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_contact.png') }}" alt="Contact">
+            </span>
             <span class="nav-text">Contact</span>
         </a>
     </li>

@@ -52,3 +52,68 @@
         </nav>
     </div>
 </header>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Header script loaded');
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const settingsToggle = document.getElementById('settingsToggle');
+        const settingsMenu = document.getElementById('settingsMenu');
+
+        if (notificationBell && notificationDropdown) {
+            notificationBell.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('Notification bell clicked');
+                if (notificationDropdown.style.display === 'block') {
+                    notificationDropdown.style.display = 'none';
+                    notificationDropdown.classList.remove('show-animation');
+                    console.log('Notification dropdown hidden');
+                } else {
+                    notificationDropdown.style.display = 'block';
+                    notificationDropdown.classList.add('show-animation');
+                    console.log('Notification dropdown shown');
+                    if (settingsMenu) {
+                        settingsMenu.style.display = 'none';
+                    }
+                }
+            });
+        } else {
+            console.error('Notification bell or dropdown not found');
+        }
+
+        if (settingsToggle && settingsMenu) {
+            settingsToggle.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('Settings toggle clicked');
+                if (settingsMenu.style.display === 'block') {
+                    settingsMenu.style.display = 'none';
+                    console.log('Settings menu hidden');
+                } else {
+                    settingsMenu.style.display = 'block';
+                    console.log('Settings menu shown');
+                    if (notificationDropdown) {
+                        notificationDropdown.style.display = 'none';
+                        notificationDropdown.classList.remove('show-animation');
+                    }
+                }
+            });
+        } else {
+            console.error('Settings toggle or menu not found');
+        }
+
+        document.addEventListener('click', function(event) {
+            if (notificationDropdown && !notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
+                notificationDropdown.style.display = 'none';
+                notificationDropdown.classList.remove('show-animation');
+                console.log('Notification dropdown closed due to outside click');
+            }
+            if (settingsMenu && !settingsToggle.contains(event.target) && !settingsMenu.contains(event.target)) {
+                settingsMenu.style.display = 'none';
+                console.log('Settings menu closed due to outside click');
+            }
+        });
+    });
+</script>

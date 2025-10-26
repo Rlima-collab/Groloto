@@ -1,26 +1,83 @@
-{# templates/sidebar/_nav_mecene.html.twig #}
 <ul class="nav-list">
     <li class="nav-item">
         <a href="{{ path('dashboard') }}" class="nav-link">
-            <span class="nav-icon">📊</span>
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_dashboard.png') }}" alt="Tableau de bord">
+            </span>
             <span class="nav-text">Tableau de bord</span>
         </a>
     </li>
     <li class="nav-item">
+        <a href="#" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="Evenement">
+            </span>
+            <span class="nav-text">Festivals</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="">S'inscrire à un Weekend</a></li>
+            <li><a href="">Voir les Weekend</a></li>
+            <li><a href="">Voir les Évènements</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="#" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_benevole.png') }}" alt="Bénévoles">
+            </span>
+            <span class="nav-text">Bénévoles</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="">Gérer bénévoles</a></li>
+            <li><a href="">Gérer les tâches</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
         <a href="{{ path('mecenes') }}" class="nav-link">
-            <span class="nav-icon">🎁</span>
-            <span class="nav-text">Mécènes & Lots</span>
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_mecene.png') }}" alt="Mécènes">
+            </span>
+            <span class="nav-text">Mécènes</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="">Voir les Mécènes</a></li>
+            <li><a href="">Voir les lots</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('stocks') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_stock.png') }}" alt="Stocks">
+            </span>
+            <span class="nav-text">Stocks</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="">Inventaire</a></li>
+            <li><a href="">Mouvement</a></li>
+            <li><a href="">Historique</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('public_index') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_public.png') }}" alt="Public">
+            </span>
+            <span class="nav-text">Public</span>
         </a>
     </li>
     <li class="nav-item">
-        <a href="{{ path('mecene_mes_inscriptions') }}" class="nav-link">
-            <span class="nav-icon">📝</span>
-            <span class="nav-text">Mes Inscriptions</span>
+        <a href="#" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_communication.png') }}" alt="Communication">
+            </span>
+            <span class="nav-text">Communication</span>
         </a>
     </li>
     <li class="nav-item">
         <a href="{{ path('app_contact') }}" class="nav-link">
-            <span class="nav-icon">📞</span>
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_contact.png') }}" alt="Contact">
+            </span>
             <span class="nav-text">Contact</span>
         </a>
     </li>
