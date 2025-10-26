@@ -2,123 +2,125 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}?v={{ 'now'|date('U') }}">
 {% endblock %}
 
 {% block body %}
-<div class="hero-section">
-    <div class="shine"></div>
-    <div class="hero-content">
-        <h1 class="hero-title">Bienvenue sur Groloto Manager</h1>
-        <p class="hero-description">Organisez vos événements caritatifs avec simplicité et efficacité.</p>
-        <a href="{{ path('app_evenements') }}" class="hero-btn yellow">Découvrir les événements</a>
-    </div>
-</div>
+<div class="dashboard-container">
+    <!-- En-tête -->
+    <header class="dashboard-header">
+        <h1>Tableau de bord</h1>
+        <p>Gérez vos événements caritatifs avec efficacité</p>
+    </header>
 
-<div class="page-header">
-    <h1 class="page-title">Tableau de bord Groloto</h1>
-</div>
+    <!-- Métriques générales (pour tous sauf utilisateurs non connectés) -->
+    {% if app.user %}
+        <section class="metrics-section">
+            <div class="metric-card">
+                <h3>Bénévoles actifs</h3>
+                <p class="metric-value">{{ volunteers_count }}</p>
+                <p class="metric-detail">+{{ new_volunteers }} ce mois</p>
+            </div>
+            <div class="metric-card">
+                <h3>Mécènes</h3>
+                <p class="metric-value">{{ sponsors_count }}</p>
+                <p class="metric-detail">Partenaires actuels</p>
+            </div>
+            <div class="metric-card">
+                <h3>Lots disponibles</h3>
+                <p class="metric-value">{{ prizes_count }}</p>
+                <p class="metric-detail">{{ out_of_stock }} en rupture</p>
+            </div>
+            <div class="metric-card">
+                <h3>Valeur du stock</h3>
+                <p class="metric-value">€{{ stock_value|number_format(0, ',', ' ') }}</p>
+                <p class="metric-detail">Valeur estimée</p>
+            </div>
+        </section>
+    {% endif %}
 
-<div class="metrics-grid">
-    <div class="card metric-card yellow-border">
-        <div class="card-header">
-            <span class="metric-title">Bénévoles</span>
-            <span class="icon yellow">👥</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ volunteers_count }}</div>
-            <p class="metric-change positive">+{{ new_volunteers }} ce mois</p>
-        </div>
-    </div>
-    <div class="card metric-card green-border">
-        <div class="card-header">
-            <span class="metric-title">Mécènes</span>
-            <span class="icon green">🎁</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ sponsors_count }}</div>
-            <p class="metric-change positive">+{{ new_sponsors }} ce mois</p>
-        </div>
-    </div>
-    <div class="card metric-card blue-border">
-        <div class="card-header">
-            <span class="metric-title">Lots disponibles</span>
-            <span class="icon blue">📦</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ prizes_count }}</div>
-            <p class="metric-change warning">{{ out_of_stock }} en rupture</p>
-        </div>
-    </div>
-    <div class="card metric-card yellow-border">
-        <div class="card-header">
-            <span class="metric-title">Stock total</span>
-            <span class="icon yellow">📊</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">€{{ stock_value|number_format(0, ',', ' ') }}</div>
-            <p class="metric-change positive">Valeur estimée</p>
-        </div>
-    </div>
-</div>
-
-<div class="dashboard-grid">
-    <!-- Calendar -->
-    <div class="card calendar-card">
-        <div class="card-header">
-            <h3 class="card-title">📅 Prochains événements</h3>
-        </div>
-        <div class="card-content">
-            <div class="events-list">
-                {% for event in events %}
-                    <div class="event-item {{ loop.index0 % 3 == 0 ? 'yellow-accent' : loop.index0 % 3 == 1 ? 'green-accent' : 'blue-accent' }}">
-                        <div class="event-date">
-                            <div class="event-month">{{ event.dateDebut|date('M')|upper }}</div>
-                            <div class="event-day">{{ event.dateDebut|date('d') }}</div>
-                        </div>
-                        <div class="event-details">
-                            <h4 class="event-title">{{ event.nom }}</h4>
-                            <p class="event-time">{{ event.dateDebut|date('H\\hi') }} - {{ event.lieu }}</p>
-                        </div>
+    <!-- Contenu spécifique par rôle -->
+    <section class="role-specific-section">
+        {% if is_granted('ROLE_ADMIN') %}
+            <h2>Gestion administrative</h2>
+            <div class="card">
+                <h3>Inscriptions en attente</h3>
+                <p class="metric-value">{{ role_data.pending_registrations|default(0) }}</p>
+                <a href="" class="btn">Voir les inscriptions</a>
+            </div>
+            <div class="card">
+                <h3>Événements à venir</h3>
+                {% for event in upcoming_events %}
+                    <div class="event-item">
+                        <span class="event-date">{{ event.dateDebut|date('d/m/Y') }}</span>
+                        <span class="event-name">{{ event.nom }}</span>
+                        <span class="event-location">{{ event.lieu }}</span>
                     </div>
                 {% else %}
                     <p>Aucun événement à venir.</p>
                 {% endfor %}
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="full-width-container">
-    <div class="card history-card">
-        <div class="card-header">
-            <h3 class="card-title">🕒 Historique des événements</h3>
-        </div>
-        <div class="card-content">
-            <div class="history-list">
-                {% for history in event_history %}
-                    <div class="history-item {{ loop.index0 % 3 == 0 ? 'yellow-accent' : loop.index0 % 3 == 1 ? 'green-accent' : 'blue-accent' }}">
-                        <div class="history-date">
-                            <div class="history-day">{{ history.dateAction|date('d') }}</div>
-                            <div class="history-month">{{ history.dateAction|date('M')|upper }}</div>
-                        </div>
-                        <div class="history-details">
-                            <h4 class="history-title">{{ history.evenement.nom }} - {{ history.action|capitalize }}</h4>
-                            <p class="history-description">{{ history.description|default('Aucune description') }}</p>
-                            <p class="history-meta">
-                                {% if history.utilisateur %}
-                                    Par {{ history.utilisateur.prenom }} {{ history.utilisateur.nom }} le {{ history.dateAction|date('d/m/Y H:i') }}
-                                {% else %}
-                                    Action système le {{ history.dateAction|date('d/m/Y H:i') }}
-                                {% endif %}
-                            </p>
-                        </div>
+        {% elseif is_granted('ROLE_MECENE') %}
+            <h2>Vos contributions</h2>
+            <div class="card">
+                <h3>Valeur totale des lots</h3>
+                <p class="metric-value">€{{ role_data.sponsor_contributions|default(0)|number_format(0, ',', ' ') }}</p>
+                <a href="" class="btn">Voir vos lots</a>
+            </div>
+            <div class="card">
+                <h3>Événements à venir</h3>
+                {% for event in upcoming_events %}
+                    <div class="event-item">
+                        <span class="event-date">{{ event.dateDebut|date('d/m/Y') }}</span>
+                        <span class="event-name">{{ event.nom }}</span>
+                        <span class="event-location">{{ event.lieu }}</span>
                     </div>
                 {% else %}
-                    <p>Aucun historique d'événement disponible.</p>
+                    <p>Aucun événement à venir.</p>
                 {% endfor %}
             </div>
-        </div>
-    </div>
+        {% elseif is_granted('ROLE_BENEVOLE') %}
+            <h2>Vos tâches</h2>
+            <div class="card">
+                <h3>Tâches en attente</h3>
+                {% for task in role_data.pending_tasks|default([]) %}
+                    <div class="task-item">
+                        <span class="task-name">{{ task.nom }}</span>
+                        <span class="task-deadline">{{ task.dateEcheance|date('d/m/Y') }}</span>
+                    </div>
+                {% else %}
+                    <p>Aucune tâche en attente.</p>
+                {% endfor %}
+                <a href="{{ path('app_tasks') }}" class="btn">Voir toutes les tâches</a>
+            </div>
+            <div class="card">
+                <h3>Événements à venir</h3>
+                {% for event in upcoming_events %}
+                    <div class="event-item">
+                        <span class="event-date">{{ event.dateDebut|date('d/m/Y') }}</span>
+                        <span class="event-name">{{ event.nom }}</span>
+                        <span class="event-location">{{ event.lieu }}</span>
+                    </div>
+                {% else %}
+                    <p>Aucun événement à venir.</p>
+                {% endfor %}
+            </div>
+        {% else %}
+            <h2>Bienvenue sur Groloto</h2>
+            <div class="card">
+                <h3>Événements publics</h3>
+                {% for event in role_data.public_events|default([]) %}
+                    <div class="event-item">
+                        <span class="event-date">{{ event.dateDebut|date('d/m/Y') }}</span>
+                        <span class="event-name">{{ event.nom }}</span>
+                        <span class="event-location">{{ event.lieu }}</span>
+                    </div>
+                {% else %}
+                    <p>Aucun événement public à venir.</p>
+                {% endfor %}
+                <a href="{{ path('app_login') }}" class="btn">Connexion pour plus d'options</a>
+            </div>
+        {% endif %}
+    </section>
 </div>
 {% endblock %}
