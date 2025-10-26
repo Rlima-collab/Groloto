@@ -2,7 +2,21 @@
 
 {% block title %}Modifier mon profil{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+{% endblock %}
+
 {% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Modifier mon Profil</h1>
+        <p class="hero-description">Mettez à jour vos informations personnelles.</p>
+        <a href="{{ path('app_profile') }}" class="hero-btn yellow">Voir mon profil</a>
+    </div>
+</div>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">

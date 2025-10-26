@@ -10,8 +10,17 @@
 
 {% block body %}
 <div class="taches-page">
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Créer une Tâche</h1>
+        <p class="hero-description">Ajoutez une nouvelle tâche pour vos événements caritatifs.</p>
+        <a href="{{ path('tache_index') }}" class="hero-btn yellow">Voir toutes les tâches</a>
+    </div>
+</div>
+
 <div class="page-header">
-    <h1 class="page-title">Creer une nouvelle tache</h1>
+    <h1 class="page-title">Nouvelle Tâche</h1>
     <a href="{{ path('tache_index') }}" class="btn btn-secondary">Retour a la liste</a>
 </div>
 

@@ -2,7 +2,21 @@
 
 {% block title %}Mes Notifications{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+{% endblock %}
+
 {% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Mes Notifications</h1>
+        <p class="hero-description">Consultez toutes vos notifications et alertes.</p>
+        <a href="{{ path('dashboard') }}" class="hero-btn yellow">Retour au tableau de bord</a>
+    </div>
+</div>
+
 <div class="container mt-5">
     <div class="notifications-page">
         <h1 class="page-title">

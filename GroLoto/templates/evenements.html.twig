@@ -1,0 +1,197 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Événements{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/evenements.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Événements</h1>
+        <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité.</p>
+        <a href="{{ path('app_weekends') }}" class="hero-btn yellow">Voir les weekends</a>
+    </div>
+</div>
+
+<div class="page-header">
+    <h1 class="page-title">Planning des Événements</h1>
+</div>
+
+<div class="evenements-page">
+    <!-- Key Metrics Cards -->
+    <div class="metrics-grid">
+        <div class="card metric-card yellow-border">
+            <div class="card-header">
+                <span class="metric-title">Total Événements</span>
+                <span class="icon yellow">📊</span>
+            </div>
+            <div class="card-content">
+                <div class="metric-value">{{ (evenements_passes|length + evenements_futurs|length) }}</div>
+                <p class="metric-change positive">Tous les événements</p>
+            </div>
+        </div>
+        <div class="card metric-card green-border">
+            <div class="card-header">
+                <span class="metric-title">Événements Futurs</span>
+                <span class="icon green">🔮</span>
+            </div>
+            <div class="card-content">
+                <div class="metric-value">{{ evenements_futurs|length }}</div>
+                <p class="metric-change positive">À venir</p>
+            </div>
+        </div>
+        <div class="card metric-card blue-border">
+            <div class="card-header">
+                <span class="metric-title">Ce Mois</span>
+                <span class="icon blue">📅</span>
+            </div>
+            <div class="card-content">
+                <div class="metric-value">{{ evenements_ce_mois }}</div>
+                <p class="metric-change neutral">Événements prévus</p>
+            </div>
+        </div>
+        <div class="card metric-card gray-border">
+            <div class="card-header">
+                <span class="metric-title">Terminés</span>
+                <span class="icon gray">✓</span>
+            </div>
+            <div class="card-content">
+                <div class="metric-value">{{ evenements_passes|length }}</div>
+                <p class="metric-change neutral">Événements passés</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendrier -->
+    <div class="card main-card">
+        <div class="card-header">
+            <h2 class="card-title">📅 Calendrier des événements et tâches</h2>
+            <p class="card-description">Vue d'ensemble de tous les événements et tâches planifiés</p>
+        </div>
+        <div class="card-content">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <!-- Événements à venir -->
+    {% if evenements_futurs|length > 0 %}
+    <div class="card main-card">
+        <div class="card-header">
+            <h2 class="card-title">🎯 Événements à venir</h2>
+            <p class="card-description">Prochains événements prévus</p>
+        </div>
+        <div class="card-content">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Date début</th>
+                            <th>Date fin</th>
+                            <th>Lieu</th>
+                            <th>Weekend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for evenement in evenements_futurs %}
+                            <tr>
+                                <td><strong>{{ evenement.nom }}</strong></td>
+                                <td>{{ evenement.dateDebut ? evenement.dateDebut|date('d/m/Y') : 'Non défini' }}</td>
+                                <td>{{ evenement.dateFin ? evenement.dateFin|date('d/m/Y') : 'Non défini' }}</td>
+                                <td>{{ evenement.lieu ?: 'Non défini' }}</td>
+                                <td>
+                                    {% if evenement.weekend %}
+                                        <span class="badge badge-info">{{ evenement.weekend.nom }}</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Aucun</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Événements passés -->
+    {% if evenements_passes|length > 0 %}
+    <div class="card main-card">
+        <div class="card-header">
+            <h2 class="card-title">📝 Événements passés</h2>
+            <p class="card-description">Historique des événements réalisés</p>
+        </div>
+        <div class="card-content">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Date début</th>
+                            <th>Date fin</th>
+                            <th>Lieu</th>
+                            <th>Weekend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for evenement in evenements_passes %}
+                            <tr class="event-passed">
+                                <td><strong>{{ evenement.nom }}</strong></td>
+                                <td>{{ evenement.dateDebut ? evenement.dateDebut|date('d/m/Y') : 'Non défini' }}</td>
+                                <td>{{ evenement.dateFin ? evenement.dateFin|date('d/m/Y') : 'Non défini' }}</td>
+                                <td>{{ evenement.lieu ?: 'Non défini' }}</td>
+                                <td>
+                                    {% if evenement.weekend %}
+                                        <span class="badge badge-info">{{ evenement.weekend.nom }}</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Aucun</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'fr',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listWeek'
+                },
+                buttonText: {
+                    today: "Aujourd'hui",
+                    month: 'Mois',
+                    week: 'Semaine',
+                    list: 'Liste'
+                },
+                events: {{ taches|raw }},
+                eventClick: function(info) {
+                    alert('Événement: ' + info.event.title);
+                },
+                height: 'auto'
+            });
+            calendar.render();
+        });
+    </script>
+{% endblock %}

@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
             link.appendChild(arrow);
 
             link.addEventListener('click', function (event) {
+                // Toujours empêcher la navigation par défaut si un sous-menu existe
                 event.preventDefault();
 
                 // Si sidebar est pliée, on l'ouvre temporairement

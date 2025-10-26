@@ -16,26 +16,26 @@
     <!-- Métriques générales (pour tous sauf utilisateurs non connectés) -->
     {% if app.user %}
         <section class="metrics-section">
-            <div class="metric-card">
+            <a href="{{ path('benevoles') }}" class="metric-card" style="text-decoration: none; color: inherit;">
                 <h3>Bénévoles actifs</h3>
                 <p class="metric-value">{{ volunteers_count }}</p>
                 <p class="metric-detail">+{{ new_volunteers }} ce mois</p>
-            </div>
-            <div class="metric-card">
+            </a>
+            <a href="{{ path('mecenes') }}" class="metric-card" style="text-decoration: none; color: inherit;">
                 <h3>Mécènes</h3>
                 <p class="metric-value">{{ sponsors_count }}</p>
                 <p class="metric-detail">Partenaires actuels</p>
-            </div>
-            <div class="metric-card">
+            </a>
+            <a href="{{ path('stocks') }}" class="metric-card" style="text-decoration: none; color: inherit;">
                 <h3>Lots disponibles</h3>
                 <p class="metric-value">{{ prizes_count }}</p>
                 <p class="metric-detail">{{ out_of_stock }} en rupture</p>
-            </div>
-            <div class="metric-card">
+            </a>
+            <a href="{{ path('stocks') }}" class="metric-card" style="text-decoration: none; color: inherit;">
                 <h3>Valeur du stock</h3>
                 <p class="metric-value">€{{ stock_value|number_format(0, ',', ' ') }}</p>
                 <p class="metric-detail">Valeur estimée</p>
-            </div>
+            </a>
         </section>
     {% endif %}
 
@@ -46,7 +46,7 @@
             <div class="card">
                 <h3>Inscriptions en attente</h3>
                 <p class="metric-value">{{ role_data.pending_registrations|default(0) }}</p>
-                <a href="" class="btn">Voir les inscriptions</a>
+                <a href="{{ path('admin_inscriptions') }}" class="btn">Voir les inscriptions</a>
             </div>
             <div class="card">
                 <h3>Événements à venir</h3>
@@ -59,13 +59,14 @@
                 {% else %}
                     <p>Aucun événement à venir.</p>
                 {% endfor %}
+                <a href="{{ path('app_weekends') }}" class="btn btn-primary">Voir tous les événements</a>
             </div>
         {% elseif is_granted('ROLE_MECENE') %}
             <h2>Vos contributions</h2>
             <div class="card">
                 <h3>Valeur totale des lots</h3>
                 <p class="metric-value">€{{ role_data.sponsor_contributions|default(0)|number_format(0, ',', ' ') }}</p>
-                <a href="" class="btn">Voir vos lots</a>
+                <a href="{{ path('stocks') }}" class="btn">Voir vos lots</a>
             </div>
             <div class="card">
                 <h3>Événements à venir</h3>
@@ -78,6 +79,7 @@
                 {% else %}
                     <p>Aucun événement à venir.</p>
                 {% endfor %}
+                <a href="{{ path('mecene_inscription') }}" class="btn btn-primary">S'inscrire à un événement</a>
             </div>
         {% elseif is_granted('ROLE_BENEVOLE') %}
             <h2>Vos tâches</h2>
@@ -91,7 +93,7 @@
                 {% else %}
                     <p>Aucune tâche en attente.</p>
                 {% endfor %}
-                <a href="{{ path('app_tasks') }}" class="btn">Voir toutes les tâches</a>
+                <a href="{{ path('benevole_taches_disponibles') }}" class="btn">Voir toutes les tâches</a>
             </div>
             <div class="card">
                 <h3>Événements à venir</h3>
@@ -104,6 +106,7 @@
                 {% else %}
                     <p>Aucun événement à venir.</p>
                 {% endfor %}
+                <a href="{{ path('app_weekends') }}" class="btn btn-primary">Voir tous les événements</a>
             </div>
         {% else %}
             <h2>Bienvenue sur Groloto</h2>

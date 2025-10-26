@@ -15,7 +15,7 @@ class DashboardController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
-    #[Route('/', name: 'dashboard')]
+    #[Route('/dashboard', name: 'dashboard')]
     public function index(): Response
     {
         $firstDayOfMonth = (new \DateTime('first day of this month'))->format('Y-m-d 00:00:00');

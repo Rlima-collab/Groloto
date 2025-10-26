@@ -2,7 +2,22 @@
 
 {% block title %}Créer un weekend{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/evenements.css') }}">
+{% endblock %}
+
 {% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Créer un Weekend</h1>
+        <p class="hero-description">Organisez un nouveau weekend d'événements caritatifs.</p>
+        <a href="{{ path('app_weekends') }}" class="hero-btn yellow">Voir tous les weekends</a>
+    </div>
+</div>
+
 <div class="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg">
     <h1 class="text-2xl font-bold mb-6 text-center">Créer un weekend + événements</h1>
 

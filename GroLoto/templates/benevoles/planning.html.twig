@@ -4,11 +4,21 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Planning Bénévole</h1>
+        <p class="hero-description">Consultez le planning et les disponibilités de {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}.</p>
+        <a href="{{ path('benevoles') }}" class="hero-btn yellow">Retour aux bénévoles</a>
+    </div>
+</div>
+
 <div class="page-header">
     <h1 class="page-title">Planning de {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}</h1>
     <a href="{{ path('benevoles') }}" class="btn btn-secondary">Retour à la liste</a>

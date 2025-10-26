@@ -4,12 +4,22 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/taches.css') }}">
 {% endblock %}
 
 {% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Tâches Disponibles</h1>
+        <p class="hero-description">Consultez et postulez aux tâches disponibles pour les événements.</p>
+        <a href="{{ path('benevoles') }}" class="hero-btn yellow">Retour aux bénévoles</a>
+    </div>
+</div>
+
 <div class="page-header">
-    <h1 class="page-title">Tâches disponibles</h1>
+    <h1 class="page-title">Mes Tâches</h1>
     <a href="{{ path('benevoles') }}" class="btn btn-secondary">Retour</a>
 </div>
 

@@ -5,6 +5,7 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
     <style>
         .edit-container {
             max-width: 800px;
@@ -205,6 +206,15 @@
 {% endblock %}
 
 {% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Modifier un Bénévole</h1>
+        <p class="hero-description">Mettez à jour les informations du bénévole.</p>
+        <a href="{{ path('benevoles') }}" class="hero-btn yellow">Retour aux bénévoles</a>
+    </div>
+</div>
+
 <div class="edit-container">
     <div class="edit-card">
         <div class="edit-header">
