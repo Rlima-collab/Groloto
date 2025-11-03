@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Gestion des Weekends{% endblock %}
+{% block title %}Gestion des Événements{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -14,35 +14,30 @@
 <div class="hero-section weekend-hero">
     <div class="shine"></div>
     <div class="hero-content">
-        <h1 class="hero-title">Gestion des Weekends</h1>
+        <h1 class="hero-title">Gestion des Événements</h1>
         <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité.</p>
-        {% if is_granted('ROLE_MECENE') and not is_granted('ROLE_ADMIN') %}
-            <a href="{{ path('mecene_inscription') }}" class="btn-night-blue">S'inscrire à un événement</a>
-        {% else %}
-            <a href="{% if isAdmin %}{{ path('app_weekend_create') }}{% else %}#calendar{% endif %}" 
-               class="btn-login">
-                {% if isAdmin %}Créer un Weekend{% else %}Voir le planning{% endif %}
-            </a>
+        {% if isAdmin %}
+            <a href="{{ path('app_evenements_create') }}" class="btn-login">Créer un Événement</a>
         {% endif %}
     </div>
 </div>
 
-<h2 style="font-size: 1.8rem; color: #1a3c5a; margin-bottom: 20px; text-align: center;">Planning des Weekends</h2>
+<h2 style="font-size: 1.8rem; color: #1a3c5a; margin-bottom: 20px; text-align: center;">Planning des Événements</h2>
 
 <div class="metrics-grid">
     <div class="metric-card">
         <h3>Total Événements</h3>
-        <p class="metric-value">{{ total_evenements }}</p>
+        <p class="metric-value">{{ metriques.total }}</p>
         <p class="metric-detail">Tous les événements</p>
     </div>
     <div class="metric-card">
         <h3>Événements Futurs</h3>
-        <p class="metric-value">{{ evenements_futurs|length }}</p>
+        <p class="metric-value">{{ metriques.futurs }}</p>
         <p class="metric-detail">À venir</p>
     </div>
     <div class="metric-card">
         <h3>Événements Passés</h3>
-        <p class="metric-value">{{ evenements_passes|length }}</p>
+        <p class="metric-value">{{ metriques.passes }}</p>
         <p class="metric-detail">Terminés</p>
     </div>
     <div class="metric-card">
@@ -55,7 +50,7 @@
 <div class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <h5 class="card-title">Calendrier des Weekends</h5>
+            <h5 class="card-title">Calendrier des Événements</h5>
         </div>
         <div class="card-content">
             <div style="margin-bottom: 1rem; text-align: center;">
@@ -68,7 +63,7 @@
     
     <div class="card">
         <div class="card-header">
-            <h5 class="card-title">Prochains Weekends</h5>
+            <h5 class="card-title">Prochains Événements</h5>
         </div>
         <div class="card-content">
             <div class="events-list">
@@ -96,12 +91,12 @@
 <div class="full-width-container">
     <div class="card history-card">
         <div class="card-header">
-            <h3 class="card-title">Historique des Weekends</h3>
+            <h3 class="card-title">Historique des Événements</h3>
         </div>
         <div class="card-content">
             <div class="history-list">
                 {% if evenements_passes|length > 0 %}
-                    {% for evenement in evenements_passes|slice(0, 5) %}
+                    {% for evenement in evenements_passes|slice(0, 10) %}
                         <div class="history-item blue-night-accent">
                             <div class="history-date">
                                 <div class="history-day">{{ evenement.dateDebut|date('d') }}</div>
@@ -131,8 +126,7 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-        window.calendarEvents = {{ creneaux|raw }};
-        window.taches = {{ taches|raw }};
+        window.calendarEvents = {{ taches|raw }};
     </script>
 
     <script>
@@ -160,9 +154,7 @@
 
             if (window.calendarInstance) window.calendarInstance.destroy();
 
-            // Les données sont déjà des objets JavaScript, pas besoin de parser
-            const events = window.taches || [];
-            const evenements = window.calendarEvents || [];
+            const events = window.calendarEvents || [];
 
             window.calendarInstance = new FullCalendar.Calendar(el, {
                 initialView: view,
@@ -170,17 +162,14 @@
                 height: 'auto',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
                 buttonText: { today: 'Aujourd\'hui', month: 'Mois', week: 'Semaine' },
-                hiddenDays: [1, 2, 3, 4],
                 weekends: true,
-                firstDay: 5,
-                events: [...evenements, ...events],
+                firstDay: 1,
+                events: events,
                 eventClick: info => {
                     const e = info.event;
                     const p = e.extendedProps;
                     let msg = `${e.title}\nDu ${e.start.toLocaleString()}`;
                     if (e.end) msg += `\nAu ${e.end.toLocaleString()}`;
-                    if (p.description) msg += `\n\n${p.description}`;
-                    if (p.lieu) msg += `\nLieu: ${p.lieu}`;
                     alert(msg);
                 },
                 nowIndicator: true,

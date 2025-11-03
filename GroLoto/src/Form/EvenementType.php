@@ -29,9 +29,10 @@ class EvenementType extends AbstractType
                 'required' => false,
                 'attr' => ['rows' => 2, 'class' => 'w-full p-3 border rounded-lg']
             ])
-            ->add('date_debut', DateType::class, [
+            ->add('dateVendredi', DateType::class, [
                 'widget' => 'single_text',
-                'label' => 'Date',
+                'label' => 'Date de début (vendredi)',
+                'mapped' => false,
                 'attr' => ['class' => 'w-full p-3 border rounded-lg']
             ]);
     }
