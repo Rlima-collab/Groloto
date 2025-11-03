@@ -5,83 +5,62 @@
 {% block stylesheets %}
     {{ parent() }}
     <link href="{{ asset('css/modele.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/evenements.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/weekend/weekend-common.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/weekend/weekend-list.css') }}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
-<div class="hero-section">
+<div class="hero-section weekend-hero">
     <div class="shine"></div>
     <div class="hero-content">
         <h1 class="hero-title">Gestion des Weekends</h1>
         <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité.</p>
         {% if is_granted('ROLE_MECENE') and not is_granted('ROLE_ADMIN') %}
-            <a href="{{ path('mecene_inscription') }}" class="hero-btn yellow">S'inscrire à un événement</a>
+            <a href="{{ path('mecene_inscription') }}" class="btn-night-blue">S'inscrire à un événement</a>
         {% else %}
             <a href="{% if isAdmin %}{{ path('app_weekend_create') }}{% else %}#calendar{% endif %}" 
-               class="hero-btn yellow">
+               class="btn-login">
                 {% if isAdmin %}Créer un Weekend{% else %}Voir le planning{% endif %}
             </a>
         {% endif %}
     </div>
 </div>
 
-<div class="page-header">
-    <h1 class="page-title">Planning des Weekends</h1>
-</div>
+<h2 style="font-size: 1.8rem; color: #1a3c5a; margin-bottom: 20px; text-align: center;">Planning des Weekends</h2>
 
 <div class="metrics-grid">
-    <div class="card metric-card yellow-border">
-        <div class="card-header">
-            <span class="metric-title">Total Événements</span>
-            <span class="icon yellow">Chart</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ total_evenements }}</div>
-            <p class="metric-change positive">Tous les événements</p>
-        </div>
+    <div class="metric-card">
+        <h3>Total Événements</h3>
+        <p class="metric-value">{{ total_evenements }}</p>
+        <p class="metric-detail">Tous les événements</p>
     </div>
-    <div class="card metric-card green-border">
-        <div class="card-header">
-            <span class="metric-title">Événements Futurs</span>
-            <span class="icon green">Crystal Ball</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ evenements_futurs|length }}</div>
-            <p class="metric-change positive">À venir</p>
-        </div>
+    <div class="metric-card">
+        <h3>Événements Futurs</h3>
+        <p class="metric-value">{{ evenements_futurs|length }}</p>
+        <p class="metric-detail">À venir</p>
     </div>
-    <div class="card metric-card blue-border">
-        <div class="card-header">
-            <span class="metric-title">Événements Passés</span>
-            <span class="icon blue">Book</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ evenements_passes|length }}</div>
-            <p class="metric-change warning">Terminés</p>
-        </div>
+    <div class="metric-card">
+        <h3>Événements Passés</h3>
+        <p class="metric-value">{{ evenements_passes|length }}</p>
+        <p class="metric-detail">Terminés</p>
     </div>
-    <div class="card metric-card yellow-border">
-        <div class="card-header">
-            <span class="metric-title">Ce mois-ci</span>
-            <span class="icon yellow">Calendar</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ evenements_ce_mois }}</div>
-            <p class="metric-change positive">Événements planifiés</p>
-        </div>
+    <div class="metric-card">
+        <h3>Ce mois-ci</h3>
+        <p class="metric-value">{{ evenements_ce_mois }}</p>
+        <p class="metric-detail">Événements planifiés</p>
     </div>
 </div>
 
 <div class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <h5 class="card-title">Calendar Calendrier des Weekends</h5>
+            <h5 class="card-title">Calendrier des Weekends</h5>
         </div>
         <div class="card-content">
             <div style="margin-bottom: 1rem; text-align: center;">
-                <button class="btn btn-outline-primary active" id="btn-month">Mois</button>
-                <button class="btn btn-outline-primary" id="btn-week">Semaine</button>
+                <button class="btn-outline-night-blue active" id="btn-month">Mois</button>
+                <button class="btn-outline-night-blue" id="btn-week">Semaine</button>
             </div>
             <div id="calendar"></div>
         </div>
@@ -89,13 +68,13 @@
     
     <div class="card">
         <div class="card-header">
-            <h5 class="card-title">Crystal Ball Prochains Weekends</h5>
+            <h5 class="card-title">Prochains Weekends</h5>
         </div>
         <div class="card-content">
             <div class="events-list">
                 {% if evenements_futurs|length > 0 %}
                     {% for evenement in evenements_futurs|slice(0, 20) %}
-                        <div class="event-item {{ loop.index0 % 3 == 0 ? 'yellow-accent' : loop.index0 % 3 == 1 ? 'green-accent' : 'blue-accent' }}">
+                        <div class="event-item blue-night-accent animate-fade-in">
                             <div class="event-date">
                                 <div class="event-month">{{ evenement.dateDebut|date('M')|upper }}</div>
                                 <div class="event-day">{{ evenement.dateDebut|date('d') }}</div>
@@ -107,7 +86,7 @@
                         </div>
                     {% endfor %}
                 {% else %}
-                    <p>Aucun événement à venir.</p>
+                    <p style="text-align: center; color: #64748b; padding: 2rem;">Aucun événement à venir.</p>
                 {% endif %}
             </div>
         </div>
@@ -117,13 +96,13 @@
 <div class="full-width-container">
     <div class="card history-card">
         <div class="card-header">
-            <h3 class="card-title">Clock Historique des Weekends</h3>
+            <h3 class="card-title">Historique des Weekends</h3>
         </div>
         <div class="card-content">
             <div class="history-list">
                 {% if evenements_passes|length > 0 %}
                     {% for evenement in evenements_passes|slice(0, 5) %}
-                        <div class="history-item {{ loop.index0 % 3 == 0 ? 'yellow-accent' : loop.index0 % 3 == 1 ? 'green-accent' : 'blue-accent' }}">
+                        <div class="history-item blue-night-accent">
                             <div class="history-date">
                                 <div class="history-day">{{ evenement.dateDebut|date('d') }}</div>
                                 <div class="history-month">{{ evenement.dateDebut|date('M')|upper }}</div>
@@ -141,7 +120,7 @@
                         </div>
                     {% endfor %}
                 {% else %}
-                    <p style="text-align: center; color: #6b7280; padding: 2rem;">Aucun événement dans l'historique.</p>
+                    <p style="text-align: center; color: #64748b; padding: 2rem;">Aucun événement dans l'historique.</p>
                 {% endif %}
             </div>
         </div>
@@ -181,8 +160,9 @@
 
             if (window.calendarInstance) window.calendarInstance.destroy();
 
-            const events = JSON.parse(window.taches);
-            const evenements = JSON.parse(window.calendarEvents);
+            // Les données sont déjà des objets JavaScript, pas besoin de parser
+            const events = window.taches || [];
+            const evenements = window.calendarEvents || [];
 
             window.calendarInstance = new FullCalendar.Calendar(el, {
                 initialView: view,
