@@ -124,11 +124,35 @@
     text-decoration: none;
     border-radius: 5px;
     margin-top: 15px;
-    transition: background 0.2s ease;
+    margin-right: 10px;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
 }
 
 .btn:hover {
     background: #2b5d8a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 60, 90, 0.3);
+}
+
+.btn-secondary {
+    background: #6b7280;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+}
+
+.quick-links {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 0;
+}
+
+.quick-links .btn {
+    margin-top: 0;
 }
 
 /* Responsive Design */

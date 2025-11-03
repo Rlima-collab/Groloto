@@ -175,16 +175,16 @@
 }
 
 .btn-primary {
-    background: #3b82f6;
+    background: #1a3c5a;
     color: white;
 }
 
 .btn-primary:hover {
-    background: #2563eb;
+    background: #2b5d8a;
     color: white;
     text-decoration: none;
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 2px 4px rgba(26, 60, 90, 0.2);
 }
 
 .btn-secondary {
@@ -197,7 +197,6 @@
     color: white;
     text-decoration: none;
 }
-
 .btn-danger {
     background: #dc2626;
     color: white;
@@ -211,17 +210,17 @@
 
 .btn-outline-primary {
     background: transparent;
-    color: #3b82f6;
-    border: 1px solid #3b82f6;
+    color: #1a3c5a;
+    border: 1px solid #1a3c5a;
 }
 
 .btn-outline-primary:hover {
-    background: #3b82f6;
+    background: #1a3c5a;
     color: white;
 }
 
 .btn-outline-primary.active {
-    background: #3b82f6;
+    background: #1a3c5a;
     color: white;
 }
 
@@ -255,7 +254,7 @@
 .card-title {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #111827;
+    color: #1a3c5a;
     margin: 0 0 0.25rem 0;
 }
 
@@ -452,7 +451,7 @@
 .page-title {
     font-size: 2rem;
     font-weight: 700;
-    color: #111827;
+    color: #1a3c5a;
     margin: 0;
 }
 
