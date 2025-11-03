@@ -30,7 +30,12 @@
                Voir les Weekends
             </a>
         </li>
-            <li><a href="">Voir les Évenements</a></li>
+            <li>
+                <a href="{{ path('app_evenements') }}"
+                   class="{% if app.request.attributes.get('_route') == 'app_evenements' %}active{% endif %}">
+                   Voir les Événements
+                </a>
+            </li>
         </ul>
     </li>
     <li class="nav-item">
