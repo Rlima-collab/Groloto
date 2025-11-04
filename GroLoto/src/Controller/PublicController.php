@@ -14,32 +14,73 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class PublicController extends AbstractController
 {
     #[Route('/public', name: 'public_index')]
-    public function index(
-        UtilisateurRepository $utilisateurRepository,
-        RoleRepository $roleRepository,
-        EntityManagerInterface $entityManager
+    public function index(): Response
+    {
+        // Redirection vers la page participants
+        return $this->redirectToRoute('public_participants');
+    }
+    
+    #[Route('/public/participants', name: 'public_participants')]
+    public function participants(
+        UtilisateurRepository $utilisateurRepository
     ): Response {
         // Métriques de base
         $totalInscrits = $utilisateurRepository->count([]);
         $nouveauxUtilisateurs = $this->getNouveauxUtilisateurs($utilisateurRepository);
         $utilisateursFideles = $this->getUtilisateursFideles($utilisateurRepository);
-        
-        // Calcul des revenus simulés (en attendant d'avoir une entité Event/Payment)
         $revenus = $this->calculerRevenus($totalInscrits);
         
         // Liste complète des participants
         $participants = $utilisateurRepository->findAll();
         
-        // Données pour les analytics
-        $analyticsData = $this->getAnalyticsData($utilisateurRepository, $roleRepository);
-        
-        return $this->render('public/public.html.twig', [
+        return $this->render('public/participants.html.twig', [
             'total_inscrits' => $totalInscrits,
             'revenus' => $revenus,
             'nouveaux' => $nouveauxUtilisateurs,
             'fideles' => $utilisateursFideles,
             'participants' => $participants,
+        ]);
+    }
+    
+    #[Route('/public/analyses', name: 'public_analyses')]
+    public function analyses(
+        UtilisateurRepository $utilisateurRepository,
+        RoleRepository $roleRepository
+    ): Response {
+        // Métriques de base
+        $totalInscrits = $utilisateurRepository->count([]);
+        $nouveauxUtilisateurs = $this->getNouveauxUtilisateurs($utilisateurRepository);
+        $utilisateursFideles = $this->getUtilisateursFideles($utilisateurRepository);
+        $revenus = $this->calculerRevenus($totalInscrits);
+        
+        // Données pour les analytics
+        $analyticsData = $this->getAnalyticsData($utilisateurRepository, $roleRepository);
+        
+        return $this->render('public/analyses.html.twig', [
+            'total_inscrits' => $totalInscrits,
+            'revenus' => $revenus,
+            'nouveaux' => $nouveauxUtilisateurs,
+            'fideles' => $utilisateursFideles,
             'analytics' => $analyticsData,
+        ]);
+    }
+    
+    #[Route('/public/import', name: 'public_import')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function import(
+        UtilisateurRepository $utilisateurRepository
+    ): Response {
+        // Métriques de base
+        $totalInscrits = $utilisateurRepository->count([]);
+        $nouveauxUtilisateurs = $this->getNouveauxUtilisateurs($utilisateurRepository);
+        $utilisateursFideles = $this->getUtilisateursFideles($utilisateurRepository);
+        $revenus = $this->calculerRevenus($totalInscrits);
+        
+        return $this->render('public/import.html.twig', [
+            'total_inscrits' => $totalInscrits,
+            'revenus' => $revenus,
+            'nouveaux' => $nouveauxUtilisateurs,
+            'fideles' => $utilisateursFideles,
         ]);
     }
     

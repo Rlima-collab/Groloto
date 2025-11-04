@@ -1,0 +1,213 @@
+/* =============== PUBLIC COMMON - STYLES PARTAGÉS =============== */
+
+/* =============== HERO SECTION =============== */
+.hero-section.public-hero {
+    background: linear-gradient(145deg, #1a1f3a, #2d3561, #1e2749);
+    color: #fff;
+    padding: 2rem 0 4rem 0;
+    padding-top: calc(2rem + 71px);
+    margin: -20px;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section.public-hero::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.15), transparent 70%);
+    transform: rotate(25deg);
+    opacity: 1;
+}
+
+.hero-section.public-hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(
+        135deg,
+        rgba(96, 165, 250, 0.1) 0px,
+        rgba(96, 165, 250, 0.1) 2px,
+        transparent 2px,
+        transparent 20px
+    );
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.hero-section.public-hero .shine {
+    background: linear-gradient(
+        135deg,
+        rgba(96, 165, 250, 0) 0%,
+        rgba(96, 165, 250, 0.4) 50%,
+        rgba(96, 165, 250, 0) 100%
+    );
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    animation: shine 3s infinite;
+    pointer-events: none;
+}
+
+@keyframes shine {
+    0% { left: -100%; opacity: 0; }
+    50% { opacity: 0.3; }
+    100% { left: 100%; opacity: 0; }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.hero-description {
+    color: #cbd5e1;
+    font-size: 1.125rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Bouton Login Style - Pour Hero */
+.btn-login {
+    position: relative;
+    padding: 12px 32px;
+    border-radius: 25px;
+    background: linear-gradient(90deg, #0a1419 0%, #1f2b38 50%, #0a1419 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    overflow: hidden;
+    display: inline-block;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    color: #fff;
+}
+
+.btn-login::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-login:hover::before {
+    left: 100%;
+}
+
+/* =============== BUTTONS =============== */
+.btn-night-blue {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+    color: white;
+    border: none;
+    padding: 0.625rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(13, 27, 42, 0.2);
+}
+
+.btn-night-blue:hover {
+    background: linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(13, 27, 42, 0.3);
+    color: white;
+}
+
+/* =============== CARDS =============== */
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* =============== STATISTICS CARDS - Style Dashboard =============== */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.metric-card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+.metric-card h3 {
+    font-size: 1.2rem;
+    color: #1a3c5a;
+    margin-bottom: 10px;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1a3c5a;
+}
+
+.metric-detail {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-top: 5px;
+}
+
+/* =============== RESPONSIVE =============== */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 1.875rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-value {
+        font-size: 1.75rem;
+    }
+}
