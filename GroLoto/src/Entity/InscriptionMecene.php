@@ -37,6 +37,18 @@ class InscriptionMecene
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $remarques = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $nom_don = null;
+
+    #[ORM\Column(length: 50)]
+    private ?string $categorie = null;
+
+    #[ORM\Column(type: 'integer')]
+    private ?int $quantite = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $valeur_unitaire = null;
+
     // --- GETTERS & SETTERS ---
 
     public function getId(): ?int
@@ -118,6 +130,50 @@ class InscriptionMecene
     public function setRemarques(?string $remarques): self
     {
         $this->remarques = $remarques;
+        return $this;
+    }
+
+    public function getNomDon(): ?string
+    {
+        return $this->nom_don;
+    }
+
+    public function setNomDon(string $nom_don): self
+    {
+        $this->nom_don = $nom_don;
+        return $this;
+    }
+
+    public function getCategorie(): ?string
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(string $categorie): self
+    {
+        $this->categorie = $categorie;
+        return $this;
+    }
+
+    public function getQuantite(): ?int
+    {
+        return $this->quantite;
+    }
+
+    public function setQuantite(int $quantite): self
+    {
+        $this->quantite = $quantite;
+        return $this;
+    }
+
+    public function getValeurUnitaire(): ?float
+    {
+        return $this->valeur_unitaire;
+    }
+
+    public function setValeurUnitaire(?float $valeur_unitaire): self
+    {
+        $this->valeur_unitaire = $valeur_unitaire;
         return $this;
     }
 }
