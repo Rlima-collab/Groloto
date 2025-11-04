@@ -3,10 +3,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const sidebar = document.getElementById('sidebar');
     const navLinks = document.querySelectorAll('.nav-link');
     const currentPath = window.location.pathname;
+    
+    // Initialiser l'état du body en fonction de la sidebar
+    if (sidebar.classList.contains('collapsed')) {
+        document.body.classList.add('sidebar-collapsed');
+    }
 
     burgerMenu.addEventListener('click', function (event) {
         event.stopPropagation();
         sidebar.classList.toggle('collapsed');
+        
+        // Ajouter/retirer la classe au body pour gérer le header
+        document.body.classList.toggle('sidebar-collapsed');
 
         // Close all submenus when collapsing the sidebar
         if (sidebar.classList.contains('collapsed')) {

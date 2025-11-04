@@ -2,7 +2,7 @@
 .site-header {
     position: fixed;
     top: 0;
-    left: 250px; /* commencer après la sidebar */
+    left: 250px; /* par défaut sidebar ouverte */
     right: 0;
     height: 70px;
     background: white;
@@ -15,8 +15,9 @@
     transition: left 0.3s ease;
 }
 
-.sidebar.collapsed ~ .site-header {
-    left: 60px; /* ajustement si sidebar réduite */
+/* Quand la sidebar est fermée (collapsed) */
+body.sidebar-collapsed .site-header {
+    left: 60px; /* se décale à gauche quand sidebar fermée */
 }
 
 .site-header .container {
@@ -77,6 +78,7 @@
     display: flex;
     gap: 20px;
     margin-right: 10px;
+    align-items: center;
 }
 
 .nav-menu a {
@@ -95,7 +97,8 @@
 /* Notifications Styles */
 .notification-icon-wrapper {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
 }
 
 .notification-bell {
@@ -108,7 +111,6 @@
     cursor: pointer;
     color: #444;
     transition: all 0.2s ease;
-    transition: transform 0.2s ease
 }
 /* Animation au survol */
 .notification-bell:hover {
@@ -455,12 +457,10 @@
 .settings-dropdown a img.settings-icon {
     width: 24px;
     height: 24px;
-    vertical-align: middle;
     cursor: pointer;
-    display: block;
+    display: flex;
+    align-items: center;
     transition: transform 0.4s ease;
-    position: relative;
-    top: 5px;
 }
 
 .settings-dropdown a:hover img.settings-icon {
