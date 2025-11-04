@@ -4,114 +4,112 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-list.css') }}">
+
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
-<div class="page-header">
-    <h1 class="page-title">Planning de {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}</h1>
-    <a href="{{ path('benevoles') }}" class="btn btn-secondary">Retour à la liste</a>
+<div class="hero-section benevoles-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Planning de {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}</h1>
+        <p class="hero-description">Vue d'ensemble des tâches assignées et du calendrier.</p>
+        <a href="{{ path('benevoles') }}" class="btn-login">Retour aux bénévoles</a>
+    </div>
 </div>
 
-<div class="benevoles-page">
-    <div class="container">
-        <div class="card main-card">
+<h2 style="font-size: 1.8rem; color: #1a3c5a; margin-bottom: 20px; text-align: center;">Statistiques</h2>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <h3>Total tâches</h3>
+        <p class="metric-value">{{ total_taches }}</p>
+        <p class="metric-detail">Toutes les tâches</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Tâches futures</h3>
+        <p class="metric-value">{{ total_futures }}</p>
+        <p class="metric-detail">À venir</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Tâches réalisées</h3>
+        <p class="metric-value">{{ total_realisees }}</p>
+        <p class="metric-detail">Complétées</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="dashboard-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+        <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Informations du bénévole</h2>
+                <h5 class="card-title">Calendrier des tâches</h5>
             </div>
             <div class="card-content">
-                <div class="info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                    <div class="info-item">
-                        <span class="info-label">Email:</span>
-                        <span class="info-text">{{ benevole.utilisateur.email }}</span>
-                    </div>
-                    {% if benevole.utilisateur.telephone %}
-                    <div class="info-item">
-                        <span class="info-label">Téléphone:</span>
-                        <span class="info-text">{{ benevole.utilisateur.telephone }}</span>
-                    </div>
-                    {% endif %}
-                    <div class="info-item">
-                        <span class="info-label">Inscrit le:</span>
-                        <span class="info-text">{{ benevole.utilisateur.dateCreation|date('d/m/Y') }}</span>
+                <div style="margin-bottom: 1rem; text-align: center;">
+                    <button class="btn-outline-night-blue active" id="btn-month" onclick="changeCalendarView('dayGridMonth')">Mois</button>
+                    <button class="btn-outline-night-blue" id="btn-week" onclick="changeCalendarView('timeGridWeek')">Semaine</button>
+                </div>
+                <div id="calendar"></div>
+            </div>
+        </div>
+        
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Tâches à venir</h5>
+                </div>
+                <div class="card-content">
+                    <div class="events-list" style="max-height: 300px; overflow-y: auto;">
+                        {% if taches_futures is defined and taches_futures is not empty %}
+                            {% for tache in taches_futures %}
+                                <div class="event-item blue-night-accent animate-fade-in">
+                                    <div class="event-date">
+                                        <div class="event-month">{{ tache.debut|date('M')|upper }}</div>
+                                        <div class="event-day">{{ tache.debut|date('d') }}</div>
+                                    </div>
+                                    <div class="event-details">
+                                        <h4 class="event-title">{{ tache.titre }}</h4>
+                                        <p class="event-time">{{ tache.debut|date('H\\hi') }}{% if tache.posteRequis %} - {{ tache.posteRequis }}{% endif %}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="text-align: center; color: #64748b; padding: 2rem;">Aucune tâche à venir.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card main-card" style="margin-top: 1.5rem;">
-            <div class="card-header">
-                <h2 class="card-title">Calendrier des tâches assignées</h2>
-            </div>
-            <div class="card-content">
-                <div class="row" style="display: flex; gap: 20px;">
-                    <div style="flex: 2;">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Vue calendrier</h5>
-                            </div>
-                            <div class="card-content">
-                                <div style="margin-bottom: 1em;">
-                                    <button class="btn btn-outline-primary active" id="btn-month" onclick="changeCalendarView('dayGridMonth')">Mois</button>
-                                    <button class="btn btn-outline-primary" id="btn-week" onclick="changeCalendarView('timeGridWeek')">Semaine</button>
+            <div class="card" style="margin-top: 1rem;">
+                <div class="card-header">
+                    <h5 class="card-title">Tâches réalisées</h5>
+                </div>
+                <div class="card-content">
+                    <div class="events-list" style="max-height: 300px; overflow-y: auto;">
+                        {% if taches_realisees is defined and taches_realisees is not empty %}
+                            {% for tache in taches_realisees|slice(0, 5) %}
+                                <div class="history-item blue-night-accent animate-fade-in">
+                                    <div class="history-date">
+                                        <div class="history-day">{{ tache.debut|date('d') }}</div>
+                                        <div class="history-month">{{ tache.debut|date('M')|upper }}</div>
+                                    </div>
+                                    <div class="history-details">
+                                        <h4 class="history-title">{{ tache.titre }}</h4>
+                                        <p class="history-description">
+                                            {{ tache.debut|date('d/m/Y H\\hi') }}{% if tache.posteRequis %} - {{ tache.posteRequis }}{% endif %}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div id="calendar"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="flex: 1;">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Tâches à venir</h5>
-                            </div>
-                            <div class="card-content">
-                                {% if taches_proches is defined and taches_proches is not empty %}
-                                    {% for tache in taches_proches %}
-                                        <div class="card" style="margin-bottom: 10px; padding: 10px; border: 1px solid #ddd;">
-                                            <h6>{{ tache.titre }}</h6>
-                                            <p style="font-size: 0.9em; margin: 5px 0;">
-                                                📅 {{ tache.debut|date('d/m/Y H:i') }}
-                                                {% if tache.poste_requis %}
-                                                    <br>💼 {{ tache.poste_requis }}
-                                                {% endif %}
-                                            </p>
-                                        </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div style="text-align: center; padding: 20px; color: #666;">
-                                        Aucune tâche planifiée.
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="card" style="margin-top: 10px;">
-                            <div class="card-header">
-                                <h5 class="card-title">Tâches réalisées</h5>
-                            </div>
-                            <div class="card-content">
-                                {% if taches_realisees is defined and taches_realisees is not empty %}
-                                    {% for tache in taches_realisees %}
-                                        <div class="card" style="margin-bottom: 10px; padding: 10px; border: 1px solid #e0e0e0; background:#fafafa;">
-                                            <h6>{{ tache.titre }}</h6>
-                                            <p style="font-size: 0.85em; margin: 5px 0; color:#666;">
-                                                ✅ Du {{ tache.debut|date('d/m/Y H:i') }} au {{ tache.fin|date('d/m/Y H:i') }}
-                                                {% if tache.poste_requis %}
-                                                    <br>💼 {{ tache.poste_requis }}
-                                                {% endif %}
-                                            </p>
-                                        </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div style="text-align: center; padding: 12px; color: #666;">
-                                        Aucune tâche réalisée pour le moment.
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="text-align: center; color: #64748b; padding: 2rem;">Aucune tâche réalisée.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -177,7 +175,8 @@ function initializeCalendar(viewType = 'dayGridMonth') {
         window.calendarInstance.destroy();
         window.calendarInstance = null;
     }
-    const events = {{ taches|json_encode|raw }};
+    const events = {{ taches|raw }};
+    console.log('Events chargés:', events);
     try {
         window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
             initialView: viewType,

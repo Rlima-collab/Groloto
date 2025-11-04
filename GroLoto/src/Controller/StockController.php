@@ -17,36 +17,68 @@ use Dompdf\Options;
 class StockController extends AbstractController
 {
     #[Route('/stocks', name: 'stocks')]
-    public function index(Request $request, EntityManagerInterface $em): Response
+    public function index(EntityManagerInterface $em): Response
     {
-        // Filtrage par mécène si paramètre présent
-        $meceneId = $request->query->get('mecene');
-        $meceneFiltre = null;
-        $lotsItems = [];
-        $inscriptionsItems = [];
-        
-        if ($meceneId) {
-            $meceneFiltre = $em->getRepository(\App\Entity\Mecene::class)->find($meceneId);
-            if ($meceneFiltre) {
-                // Récupérer les lots du mécène
-                $lotsItems = $em->getRepository(\App\Entity\Lot::class)->findBy(['mecene' => $meceneFiltre]);
-                
-                // Récupérer les inscriptions (dons) du mécène
-                $inscriptionsItems = $em->getRepository(\App\Entity\InscriptionMecene::class)->findBy(
-                    ['mecene' => $meceneFiltre],
-                    ['date_inscription' => 'DESC']
-                );
-            }
-        }
-        
-        // --- Inventaire ---
+        // Statistiques globales
         $stockItems = $em->getRepository(Stock::class)->findAll();
         $total_items = array_sum(array_map(fn($i) => $i->getQuantite(), $stockItems));
         $stock_value = array_sum(array_map(fn($i) => $i->getQuantite() * $i->getValeurUnitaire(), $stockItems));
         $low_stock_count = count(array_filter($stockItems, fn($i) => $i->getQuantite() <= $i->getSeuil()));
         $categories_count = count(array_unique(array_map(fn($i) => $i->getCategorie(), $stockItems)));
 
-        // --- Historique regroupé par année ---
+        return $this->render('stocks/index.html.twig', [
+            'total_items' => $total_items,
+            'stock_value' => $stock_value,
+            'low_stock_count' => $low_stock_count,
+            'categories_count' => $categories_count,
+        ]);
+    }
+
+    #[Route('/stocks/inventaire', name: 'stocks_inventaire')]
+    public function inventaire(EntityManagerInterface $em): Response
+    {
+        $stockItems = $em->getRepository(Stock::class)->findAll();
+        $total_items = array_sum(array_map(fn($i) => $i->getQuantite(), $stockItems));
+        $stock_value = array_sum(array_map(fn($i) => $i->getQuantite() * $i->getValeurUnitaire(), $stockItems));
+        $low_stock_count = count(array_filter($stockItems, fn($i) => $i->getQuantite() <= $i->getSeuil()));
+        $categories_count = count(array_unique(array_map(fn($i) => $i->getCategorie(), $stockItems)));
+
+        return $this->render('stocks/inventaire.html.twig', [
+            'stock_items' => $stockItems,
+            'total_items' => $total_items,
+            'stock_value' => $stock_value,
+            'low_stock_count' => $low_stock_count,
+            'categories_count' => $categories_count,
+        ]);
+    }
+
+    #[Route('/stocks/mouvements', name: 'stocks_mouvements')]
+    public function mouvements(EntityManagerInterface $em): Response
+    {
+        $stockItems = $em->getRepository(Stock::class)->findAll();
+        $total_items = array_sum(array_map(fn($i) => $i->getQuantite(), $stockItems));
+        $stock_value = array_sum(array_map(fn($i) => $i->getQuantite() * $i->getValeurUnitaire(), $stockItems));
+        $low_stock_count = count(array_filter($stockItems, fn($i) => $i->getQuantite() <= $i->getSeuil()));
+        $categories_count = count(array_unique(array_map(fn($i) => $i->getCategorie(), $stockItems)));
+
+        return $this->render('stocks/mouvements.html.twig', [
+            'total_items' => $total_items,
+            'stock_value' => $stock_value,
+            'low_stock_count' => $low_stock_count,
+            'categories_count' => $categories_count,
+        ]);
+    }
+
+    #[Route('/stocks/historique', name: 'stocks_historique')]
+    public function historique(EntityManagerInterface $em): Response
+    {
+        $stockItems = $em->getRepository(Stock::class)->findAll();
+        $total_items = array_sum(array_map(fn($i) => $i->getQuantite(), $stockItems));
+        $stock_value = array_sum(array_map(fn($i) => $i->getQuantite() * $i->getValeurUnitaire(), $stockItems));
+        $low_stock_count = count(array_filter($stockItems, fn($i) => $i->getQuantite() <= $i->getSeuil()));
+        $categories_count = count(array_unique(array_map(fn($i) => $i->getCategorie(), $stockItems)));
+
+        // Historique regroupé par année
         $historiqueRepo = $em->getRepository(HistoriqueStock::class);
         $historiqueBrut = $historiqueRepo->findAll();
 
@@ -65,26 +97,39 @@ class StockController extends AbstractController
 
             $historique_par_annee[$annee]['nb_articles']++;
             $historique_par_annee[$annee]['nb_mouvements']++;
-            // Valeur estimée approximative : quantité * valeur_unitaire du stock associé
             $stock = $histo->getStock();
             if ($stock) {
                 $historique_par_annee[$annee]['valeur_totale'] += $histo->getQuantite() * $stock->getValeurUnitaire();
             }
         }
 
-        // Trie par année décroissante
         krsort($historique_par_annee);
 
-        return $this->render('stocks/index.html.twig', [
+        return $this->render('stocks/historique.html.twig', [
+            'historique_par_annee' => $historique_par_annee,
+            'total_items' => $total_items,
+            'stock_value' => $stock_value,
+            'low_stock_count' => $low_stock_count,
+            'categories_count' => $categories_count,
+        ]);
+    }
+
+    #[Route('/stocks/gerer', name: 'stocks_gerer')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function gerer(EntityManagerInterface $em): Response
+    {
+        $stockItems = $em->getRepository(Stock::class)->findAll();
+        $total_items = array_sum(array_map(fn($i) => $i->getQuantite(), $stockItems));
+        $stock_value = array_sum(array_map(fn($i) => $i->getQuantite() * $i->getValeurUnitaire(), $stockItems));
+        $low_stock_count = count(array_filter($stockItems, fn($i) => $i->getQuantite() <= $i->getSeuil()));
+        $categories_count = count(array_unique(array_map(fn($i) => $i->getCategorie(), $stockItems)));
+
+        return $this->render('stocks/gerer.html.twig', [
             'stock_items' => $stockItems,
             'total_items' => $total_items,
             'stock_value' => $stock_value,
             'low_stock_count' => $low_stock_count,
             'categories_count' => $categories_count,
-            'historique_par_annee' => $historique_par_annee,
-            'mecene_filtre' => $meceneFiltre,
-            'lots_items' => $lotsItems,
-            'inscriptions_items' => $inscriptionsItems
         ]);
     }
 
@@ -166,7 +211,7 @@ class StockController extends AbstractController
         $stock = $em->getRepository(\App\Entity\Stock::class)->find($articleId);
         if (!$stock) {
             $this->addFlash('error', 'Article introuvable.');
-            return $this->redirectToRoute('stocks');
+            return $this->redirectToRoute('stocks_gerer');
         }
 
         // Mise à jour du stock
@@ -176,7 +221,7 @@ class StockController extends AbstractController
             $stock->setQuantite(max(0, $stock->getQuantite() - $quantite));
         }
 
-        // Enregistrer dans l’historique
+        // Enregistrer dans l'historique
         $historique = new \App\Entity\HistoriqueStock();
         $historique->setStock($stock);
         $historique->setTypeChangement($type);
@@ -190,7 +235,7 @@ class StockController extends AbstractController
         $em->flush();
 
         $this->addFlash('success', 'Mouvement enregistré avec succès');
-        return $this->redirectToRoute('stocks');
+        return $this->redirectToRoute('stocks_gerer');
     }
 
     #[Route('/stocks/export-inventaire', name: 'stocks_export_inventaire')]
