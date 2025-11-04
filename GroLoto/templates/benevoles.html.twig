@@ -68,10 +68,12 @@
             <span class="tab-icon">👥</span>
             <span class="tab-text">Liste des bénévoles</span>
         </a>
+        {% if is_granted('ROLE_BENEVOLE') or is_granted('ROLE_ADMIN') %}
         <a href="#" class="tab" id="tab-planning" onclick="showTab('planning')">
             <span class="tab-icon">📅</span>
             <span class="tab-text">Planning</span>
         </a>
+        {% endif %}
     </div>
     
     <div id="content-benevoles" class="tab-content main-content">

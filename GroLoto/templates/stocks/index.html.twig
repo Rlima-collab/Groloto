@@ -308,25 +308,54 @@ document.querySelectorAll('.smooth-scroll').forEach(link => {
     });
 });
 
-// Gérer le défilement automatique vers l'ancrage au chargement de la page
-document.addEventListener('DOMContentLoaded', function() {
-    const hash = window.location.hash;
-    if (hash === '#inventaire') {
-        // Activer l'onglet inventaire
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelector('[data-tab="inventaire"]').classList.add('active');
-        document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
-        document.getElementById('inventaire').classList.add('active');
+// Fonction pour gérer les ancres et activer les onglets
+function handleHashChange() {
+    const hash = window.location.hash.substring(1); // Retirer le #
+    
+    if (hash) {
+        // Mapping des ancres vers les onglets
+        const tabMap = {
+            'inventaire': 'inventaire',
+            'mouvements': 'mouvements',
+            'historique': 'historique',
+            'ajouter': 'ajouter'
+        };
         
-        // Défiler vers la section inventaire
-        setTimeout(() => {
-            document.getElementById('inventaire').scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }, 100);
+        const targetTab = tabMap[hash];
+        
+        if (targetTab) {
+            // Activer l'onglet correspondant
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            const targetButton = document.querySelector(`[data-tab="${targetTab}"]`);
+            if (targetButton) {
+                targetButton.classList.add('active');
+            }
+            
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
+            const targetSection = document.getElementById(targetTab);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // Défiler vers la section après un court délai
+            setTimeout(() => {
+                const element = document.getElementById(targetTab);
+                if (element) {
+                    element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }, 100);
+        }
     }
-});
+}
+
+// Gérer le chargement initial de la page
+document.addEventListener('DOMContentLoaded', handleHashChange);
+
+// Gérer les changements d'ancre sans rechargement de page
+window.addEventListener('hashchange', handleHashChange);
 </script>
 
 <!-- === CSS du menu (identique au visuel) === -->

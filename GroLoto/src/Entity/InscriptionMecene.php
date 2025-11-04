@@ -22,6 +22,18 @@ class InscriptionMecene
     #[ORM\JoinColumn(name: 'evenement_id', referencedColumnName: 'id', nullable: false)]
     private ?Evenement $evenement = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $nom_don = null;
+
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    private ?string $categorie = null;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $quantite = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $valeur_unitaire = null;
+
     #[ORM\Column(type: 'text')]
     private ?string $description_don = null;
 
@@ -118,6 +130,50 @@ class InscriptionMecene
     public function setRemarques(?string $remarques): self
     {
         $this->remarques = $remarques;
+        return $this;
+    }
+
+    public function getNomDon(): ?string
+    {
+        return $this->nom_don;
+    }
+
+    public function setNomDon(?string $nom_don): self
+    {
+        $this->nom_don = $nom_don;
+        return $this;
+    }
+
+    public function getCategorie(): ?string
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?string $categorie): self
+    {
+        $this->categorie = $categorie;
+        return $this;
+    }
+
+    public function getQuantite(): ?int
+    {
+        return $this->quantite;
+    }
+
+    public function setQuantite(?int $quantite): self
+    {
+        $this->quantite = $quantite;
+        return $this;
+    }
+
+    public function getValeurUnitaire(): ?float
+    {
+        return $this->valeur_unitaire;
+    }
+
+    public function setValeurUnitaire(?float $valeur_unitaire): self
+    {
+        $this->valeur_unitaire = $valeur_unitaire;
         return $this;
     }
 }
