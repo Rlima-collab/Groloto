@@ -203,13 +203,16 @@ class DemandeTacheController extends AbstractController
      */
     #[Route('/admin/demandes-taches', name: 'admin_demandes_taches')]
     #[IsGranted('ROLE_ADMIN')]
+
     public function listeDemandes(
         DemandeTacheRepository $demandeRepository,
         AffectationTacheRepository $affectationRepository
     ): Response
+
     {
         $demandesEnAttente = $demandeRepository->findEnAttente();
         $toutesLesDemandes = $demandeRepository->findBy([], ['date_demande' => 'DESC']);
+
 
         // Calculer le nombre d'affectations pour chaque tâche
         $affectationsParTache = [];
@@ -217,13 +220,16 @@ class DemandeTacheController extends AbstractController
             $tacheId = $demande->getTache()->getId();
             if (!isset($affectationsParTache[$tacheId])) {
                 $affectationsParTache[$tacheId] = $affectationRepository->countBenevolesByTache($demande->getTache());
+
             }
         }
 
         return $this->render('demande_tache/admin_liste.html.twig', [
             'demandes_en_attente' => $demandesEnAttente,
             'toutes_demandes' => $toutesLesDemandes,
+
             'affectations_par_tache' => $affectationsParTache
+
         ]);
     }
 

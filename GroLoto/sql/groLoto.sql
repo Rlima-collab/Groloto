@@ -7,6 +7,8 @@ DROP TABLE IF EXISTS HISTORIQUE_EVENEMENT;
 DROP TABLE IF EXISTS PARAMETRE;
 DROP TABLE IF EXISTS HELLOASSO;
 DROP TABLE IF EXISTS COMMUNICATION;
+DROP TABLE IF EXISTS DEMANDE_ANNULATION;
+DROP TABLE IF EXISTS DEMANDE_TACHE;
 DROP TABLE IF EXISTS AFFECTATION_TACHE;
 DROP TABLE IF EXISTS TACHE;
 DROP TABLE IF EXISTS DISPONIBILITE_BENEVOLE;
@@ -187,7 +189,38 @@ CREATE TABLE TACHE (
     FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
 );
 
--- AFFECTATION_TACHE
+CREATE TABLE DEMANDE_TACHE (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_tache INTEGER NOT NULL,
+  id_benevole INTEGER NOT NULL,
+  id_admin_reponse INTEGER,
+  date_demande DATETIME DEFAULT CURRENT_TIMESTAMP,
+  statut TEXT DEFAULT 'en_attente',
+  message_benevole TEXT,
+  message_admin TEXT,
+  date_reponse DATETIME,
+  CONSTRAINT check_statut_demande CHECK (statut IN ('en_attente', 'acceptee', 'refusee')),
+  FOREIGN KEY (id_tache) REFERENCES TACHE(id),
+  FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
+  FOREIGN KEY (id_admin_reponse) REFERENCES UTILISATEUR(id)
+);
+
+CREATE TABLE DEMANDE_ANNULATION (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_affectation INTEGER NOT NULL,
+  id_benevole INTEGER NOT NULL,
+  id_admin_reponse INTEGER,
+  date_demande DATETIME DEFAULT CURRENT_TIMESTAMP,
+  statut TEXT DEFAULT 'en_attente',
+  motif_benevole TEXT,
+  message_admin TEXT,
+  date_reponse DATETIME,
+  CONSTRAINT check_statut_annulation CHECK (statut IN ('en_attente', 'acceptee', 'refusee')),
+  FOREIGN KEY (id_affectation) REFERENCES AFFECTATION_TACHE(id),
+  FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
+  FOREIGN KEY (id_admin_reponse) REFERENCES UTILISATEUR(id)
+);
+
 CREATE TABLE AFFECTATION_TACHE (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_tache INTEGER NOT NULL,
@@ -364,6 +397,12 @@ INSERT INTO AFFECTATION_TACHE (id_tache, id_benevole, id_utilisateur, statut, re
   (1, 1, 2, 'confirme', 'Alice affectée à l''accueil'),
   (3, 1, 1, 'confirme', 'Affecté à la mise en place de la scène (benevole1)'),
   (4, 2, 1, 'assigne', 'Affecté à l''accueil billetterie (benevole2)');
+
+INSERT INTO DEMANDE_TACHE (id_tache, id_benevole, statut, message_benevole, date_demande)
+VALUES
+  (2, 1, 'en_attente', 'Je souhaite participer au service bar', '2024-11-10 10:00:00'),
+  (3, 2, 'acceptee', 'Disponible pour le montage', '2025-11-01 14:00:00'),
+  (4, 1, 'refusee', 'Intéressé par l''accueil', '2025-11-02 09:00:00');
 
 INSERT INTO DISPONIBILITE_BENEVOLE (id_benevole, id_evenement, debut, fin, remarque) VALUES
   (1, 6, '2024-11-15 17:00:00', '2024-11-15 23:00:00', 'Disponible toute la durée de l''événement');

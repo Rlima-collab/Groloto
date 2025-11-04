@@ -1,192 +1,83 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier la tache{% endblock %}
+{% block title %}Modifier la tâche{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/taches.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-forms.css') }}">
 {% endblock %}
 
 {% block body %}
 <div class="taches-page">
-<div class="page-header">
-    <h1 class="page-title">Modifier la tache : {{ tache.titre }}</h1>
-    <a href="{{ path('tache_index') }}" class="btn btn-secondary">Retour a la liste</a>
-</div>
+<div class="container" style="padding-top: calc(71px + 2rem);">
+    <div class="page-header">
+        <h1 class="page-title">Modifier la tâche : {{ tache.titre }}</h1>
+        <a href="{{ path('tache_index') }}" class="btn btn-secondary">Retour à la liste</a>
+    </div>
 
-<div class="container" style="max-width: 800px; margin: 2rem auto;">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Informations de la tache</h2>
-            <p class="card-description">Modifiez les details de la tache #{{ tache.id }}</p>
-        </div>
-        <div class="card-content">
-            {{ form_start(form) }}
-                <div class="form-grid">
-                    <div class="form-group required">
-                        {{ form_label(form.titre) }}
-                        {{ form_widget(form.titre) }}
-                        {{ form_errors(form.titre) }}
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Informations de la tâche</h2>
+                <p class="card-description">Modifiez les détails de la tâche #{{ tache.id }}</p>
+            </div>
+            <div class="card-content">
+                {{ form_start(form) }}
+                    <div class="form-grid">
+                        <div class="form-group required">
+                            {{ form_label(form.titre) }}
+                            {{ form_widget(form.titre) }}
+                            {{ form_errors(form.titre) }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form_label(form.evenement) }}
+                            {{ form_widget(form.evenement) }}
+                            {{ form_errors(form.evenement) }}
+                            <small class="form-text">L'événement auquel cette tâche est rattachée</small>
+                        </div>
+
+                        <div class="form-group required">
+                            {{ form_label(form.debut) }}
+                            {{ form_widget(form.debut) }}
+                            {{ form_errors(form.debut) }}
+                        </div>
+
+                        <div class="form-group required">
+                            {{ form_label(form.fin) }}
+                            {{ form_widget(form.fin) }}
+                            {{ form_errors(form.fin) }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form_label(form.posteRequis) }}
+                            {{ form_widget(form.posteRequis) }}
+                            {{ form_errors(form.posteRequis) }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form_label(form.maxPersonnes) }}
+                            {{ form_widget(form.maxPersonnes) }}
+                            {{ form_errors(form.maxPersonnes) }}
+                        </div>
+
+                        <div class="form-group full-width">
+                            {{ form_label(form.remarque) }}
+                            {{ form_widget(form.remarque) }}
+                            {{ form_errors(form.remarque) }}
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        {{ form_label(form.evenement) }}
-                        {{ form_widget(form.evenement) }}
-                        {{ form_errors(form.evenement) }}
-                        <small class="form-text">L'evenement auquel cette tache est rattachee</small>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                        <a href="{{ path('tache_index') }}" class="btn btn-secondary">Annuler</a>
                     </div>
-
-                    <div class="form-group required">
-                        {{ form_label(form.debut) }}
-                        {{ form_widget(form.debut) }}
-                        {{ form_errors(form.debut) }}
-                    </div>
-
-                    <div class="form-group required">
-                        {{ form_label(form.fin) }}
-                        {{ form_widget(form.fin) }}
-                        {{ form_errors(form.fin) }}
-                    </div>
-
-                    <div class="form-group">
-                        {{ form_label(form.posteRequis) }}
-                        {{ form_widget(form.posteRequis) }}
-                        {{ form_errors(form.posteRequis) }}
-                    </div>
-
-                    <div class="form-group">
-                        {{ form_label(form.maxPersonnes) }}
-                        {{ form_widget(form.maxPersonnes) }}
-                        {{ form_errors(form.maxPersonnes) }}
-                    </div>
-
-                    <div class="form-group full-width">
-                        {{ form_label(form.remarque) }}
-                        {{ form_widget(form.remarque) }}
-                        {{ form_errors(form.remarque) }}
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-                    <a href="{{ path('tache_index') }}" class="btn btn-secondary">Annuler</a>
-                </div>
-            {{ form_end(form) }}
+                {{ form_end(form) }}
+            </div>
         </div>
     </div>
 </div>
 </div>
-
-<style>
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-group.full-width {
-    grid-column: 1 / -1;
-}
-
-.form-group label {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #374151;
-}
-
-.form-control {
-    padding: 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    font-size: 1rem;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-text {
-    font-size: 0.875rem;
-    color: #6b7280;
-    margin-top: 0.25rem;
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e5e7eb;
-}
-
-.form-errors {
-    color: #dc2626;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-</style>
-
-<style>
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-group.full-width {
-    grid-column: 1 / -1;
-}
-
-.form-group label {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #374151;
-}
-
-.form-control {
-    padding: 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    font-size: 1rem;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-text {
-    font-size: 0.875rem;
-    color: #6b7280;
-    margin-top: 0.25rem;
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e5e7eb;
-}
-
-.form-errors {
-    color: #dc2626;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-</style>
 {% endblock %}

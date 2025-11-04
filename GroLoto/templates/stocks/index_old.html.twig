@@ -1,0 +1,236 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Stocks{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-list.css') }}">
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="hero-section stocks-hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <div class="container">
+            <div class="hero-text">
+                <h1 class="hero-title">Gestion des Stocks</h1>
+                <p class="hero-subtitle">Suivi des lots, inventaire et mouvements pour vos événements</p>
+            </div>
+        </div>
+    </div>
+    <div class="hero-shine"></div>
+</div>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
+
+    <!-- Flash Messages -->
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% if mecene_filtre %}
+        <div class="alert alert-info shadow-sm mb-4">
+            <i class="bi bi-filter-circle me-2"></i>
+            <strong>Filtré par mécène :</strong> {{ mecene_filtre.organisation }}
+            <a href="{{ path('stocks') }}" class="btn btn-sm btn-outline-secondary ms-3">
+                <i class="bi bi-x-lg me-1"></i>Retirer le filtre
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Cartes de statistiques -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Articles</span>
+                <span class="stat-icon">📦</span>
+            </div>
+            <div class="stat-value">{{ total_items }}</div>
+            <div class="stat-label">Inventaire actuel</div>
+        </div>
+
+        <div class="stat-card success">
+            <div class="stat-header">
+                <span class="stat-title">Valeur totale</span>
+                <span class="stat-icon">💰</span>
+            </div>
+            <div class="stat-value">{{ stock_value|number_format(0, ',', ' ') }} €</div>
+            <div class="stat-label">Estimation globale</div>
+        </div>
+
+        <div class="stat-card danger">
+            <div class="stat-header">
+                <span class="stat-title">Alertes stock</span>
+                <span class="stat-icon">⚠️</span>
+            </div>
+            <div class="stat-value">{{ low_stock_count }}</div>
+            <div class="stat-label">Articles critiques</div>
+        </div>
+
+        <div class="stat-card info">
+            <div class="stat-header">
+                <span class="stat-title">Catégories</span>
+                <span class="stat-icon">📂</span>
+            </div>
+            <div class="stat-value">{{ categories_count }}</div>
+            <div class="stat-label">Types d'articles</div>
+        </div>
+    </div>
+
+    <!-- Onglets de navigation -->
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab {% if not mecene_filtre %}selected{% endif %}" onclick="switchTab(event, 'inventaire')">
+                <i class="bi bi-box-seam"></i> Inventaire
+            </button>
+            <button class="tab" onclick="switchTab(event, 'mouvements')">
+                <i class="bi bi-arrow-left-right"></i> Mouvements
+            </button>
+            <button class="tab" onclick="switchTab(event, 'historique')">
+                <i class="bi bi-clock-history"></i> Historique
+            </button>
+            {% if is_granted('ROLE_ADMIN') %}
+            <button class="tab" onclick="switchTab(event, 'ajouter')">
+                <i class="bi bi-plus-circle"></i> Ajouter
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Contenu des onglets -->
+
+    <!-- Inventaire -->
+    <div id="tab-inventaire" class="tab-content" {% if not mecene_filtre %}style="display: block;"{% endif %}>
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="mb-0" style="color: #0d1b2a; font-weight: 600;">
+                        <i class="bi bi-box-seam me-2"></i>Inventaire des lots
+                    </h3>
+                    <a href="{{ path('stocks_export_inventaire') }}" class="btn btn-outline-night-blue">
+                        <i class="bi bi-download me-1"></i>Exporter CSV
+                    </a>
+                </div>
+
+                {% if stock_items is empty %}
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <h3>Aucun article en stock</h3>
+                        <p>Commencez par ajouter des articles à votre inventaire.</p>
+                    </div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">Article</th>
+                                    <th style="width: 15%;">Catégorie</th>
+                                    <th style="width: 10%; text-align: right;">Stock</th>
+                                    <th style="width: 10%; text-align: right;">Seuil</th>
+                                    <th style="width: 15%; text-align: right;">Valeur estimée</th>
+                                    <th style="width: 10%;">Unité</th>
+                                    <th style="width: 15%; text-align: center;">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in stock_items %}
+                                    <tr>
+                                        <td class="name">{{ item.nom }}</td>
+                                        <td>
+                                            <span class="badge category">
+                                                {% if item.categorie == 'bar' %}🍺 Bar
+                                                {% elseif item.categorie == 'resto' %}🍽️ Resto
+                                                {% elseif item.categorie == 'deco' %}🎨 Déco
+                                                {% else %}📋 {{ item.categorie|capitalize }}{% endif %}
+                                            </span>
+                                        </td>
+                                        <td class="text-right">
+                                            <strong>{{ item.quantite }}</strong>
+                                        </td>
+                                        <td class="text-right text-muted">{{ item.seuil }}</td>
+                                        <td class="text-right value">
+                                            {{ (item.quantite * item.valeurUnitaire)|number_format(2, ',', ' ') }} €
+                                        </td>
+                                        <td>
+                                            <span class="badge unit">{{ item.unite }}</span>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            {% if item.quantite <= item.seuil * 0.5 %}
+                                                <span class="badge status danger">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>Critique
+                                                </span>
+                                            {% elseif item.quantite <= item.seuil %}
+                                                <span class="badge status warning">
+                                                    <i class="bi bi-exclamation-circle me-1"></i>Faible
+                                                </span>
+                                            {% else %}
+                                                <span class="badge status success">
+                                                    <i class="bi bi-check-circle me-1"></i>Normal
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Mouvements -->
+    <div id="tab-mouvements" class="tab-content" style="display: none;">
+        {% include 'stocks/_mouvements.html.twig' %}
+    </div>
+
+    <!-- Historique -->
+    <div id="tab-historique" class="tab-content" style="display: none;">
+        {% include 'stocks/_historique.html.twig' %}
+    </div>
+
+    <!-- Ajouter -->
+    {% if is_granted('ROLE_ADMIN') %}
+    <div id="tab-ajouter" class="tab-content" style="display: none;">
+        {% include 'stocks/_ajouter.html.twig' %}
+    </div>
+    {% endif %}
+
+    <!-- Boutons d'action -->
+    <div class="mt-4 d-flex gap-2">
+        <a href="{{ path('dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Retour au tableau de bord
+        </a>
+    </div>
+</div>
+
+<script>
+function switchTab(event, tabName) {
+    // Cacher tous les contenus
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => content.style.display = 'none');
+    
+    // Désactiver tous les onglets
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => tab.classList.remove('selected'));
+    
+    // Activer l'onglet cliqué
+    event.currentTarget.classList.add('selected');
+    
+    // Afficher le contenu correspondant
+    document.getElementById('tab-' + tabName).style.display = 'block';
+}
+</script>
+{% endblock %}

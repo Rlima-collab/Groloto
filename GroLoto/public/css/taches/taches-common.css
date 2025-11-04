@@ -1,0 +1,267 @@
+/* =============== COMMON STYLES - TACHES =============== */
+
+/* Hero Section - Identique à Bénévoles/Weekend */
+.hero-section.taches-hero {
+    background: linear-gradient(145deg, #1a1f3a, #2d3561, #1e2749);
+    color: #fff;
+    padding: 2rem 0 4rem 0;
+    padding-top: calc(2rem + 71px);
+    margin: -20px;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section.taches-hero::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.15), transparent 70%);
+    transform: rotate(25deg);
+    opacity: 1;
+}
+
+.hero-section.taches-hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(
+        135deg,
+        rgba(96, 165, 250, 0.1) 0px,
+        rgba(96, 165, 250, 0.1) 2px,
+        transparent 2px,
+        transparent 20px
+    );
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.hero-section.taches-hero .shine {
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(96, 165, 250, 0) 0%,
+        rgba(96, 165, 250, 0.4) 50%,
+        rgba(96, 165, 250, 0) 100%
+    );
+    transform: skewX(-20deg);
+    animation: shine-move 5s infinite linear;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes shine-move {
+    0%   { left: -150%; }
+    100% { left: 150%; }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hero-description {
+    font-size: 1.2rem;
+    color: #cbd5e1;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* Boutons Bleu Nocturne - Style Tableau de Bord */
+.btn-night-blue {
+    background-color: #0d1b2a;
+    color: #fff;
+    padding: 0.875rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(13, 27, 42, 0.3);
+    display: inline-block;
+    text-decoration: none;
+}
+
+.btn-night-blue:hover {
+    background-color: #1a3c5a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(13, 27, 42, 0.4);
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-outline-night-blue {
+    background-color: transparent;
+    color: #0d1b2a;
+    border: 2px solid #0d1b2a;
+    padding: 0.75rem 1.75rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.btn-outline-night-blue:hover {
+    background-color: #0d1b2a;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Bouton Login avec effet brillant - Utilisé dans hero */
+.btn-login {
+    background: linear-gradient(135deg, #0a1419, #1f2b38);
+    color: #fff;
+    padding: 0.875rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(10, 20, 25, 0.4);
+    display: inline-block;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-login::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -150%;
+    width: 100%;
+    height: 200%;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: skewX(-20deg);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0%   { left: -150%; }
+    50%  { left: -150%; }
+    100% { left: 150%; }
+}
+
+.btn-login:hover {
+    background: linear-gradient(135deg, #1f2b38, #0a1419);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(10, 20, 25, 0.5);
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Card */
+.card {
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fafbfc;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.25rem 0;
+}
+
+.card-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+/* Page Structure */
+.taches-page {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f9fafb;
+  color: #111827;
+  line-height: 1.6;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.main-card {
+    margin-top: 2rem;
+}
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem 0;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}

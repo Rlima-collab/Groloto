@@ -1,0 +1,199 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mouvements - Gestion des Stocks{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-list.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Configuration commune
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#6b7280';
+
+        // 1️⃣ Évolution des entrées/sorties
+        const ctx1 = document.getElementById('mouvementsChart');
+        if (ctx1) {
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'J-1', 'Aujourd\'hui'],
+                    datasets: [
+                        {
+                            label: 'Entrées',
+                            data: [12, 19, 7, 15, 12, 9, 18],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#10b981'
+                        },
+                        {
+                            label: 'Sorties',
+                            data: [10, 5, 8, 12, 14, 7, 9],
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#ef4444'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                padding: 15,
+                                font: { weight: '600' }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f3f4f6' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2️⃣ Répartition par catégorie
+        const ctx2 = document.getElementById('categoriesChart');
+        if (ctx2) {
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Bar', 'Resto', 'Déco', 'Autre'],
+                    datasets: [{
+                        label: 'Articles',
+                        data: [12, 20, 8, 7],
+                        backgroundColor: [
+                            '#3b82f6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#6b7280'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { weight: '600' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 3️⃣ État global (critique / faible / normal)
+        const ctx3 = document.getElementById('etatStockChart');
+        if (ctx3) {
+            new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['Critique', 'Faible', 'Normal'],
+                    datasets: [{
+                        label: 'Nombre d\'articles',
+                        data: [2, 3, 15],
+                        backgroundColor: [
+                            '#ef4444',
+                            '#f59e0b',
+                            '#10b981'
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 5 },
+                            grid: { color: '#f3f4f6' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    });
+    </script>
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Mouvements de Stock</h1>
+        <p class="hero-description">Analyse graphique des entrées et sorties</p>
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('stocks_gerer') }}" class="btn-login">Ajouter un mouvement</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
+
+    <!-- Cartes de statistiques -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>Articles</h3>
+            <p class="metric-value">{{ total_items }}</p>
+            <p class="metric-detail">Inventaire actuel</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Valeur totale</h3>
+            <p class="metric-value">{{ stock_value|number_format(0, ',', ' ') }} €</p>
+            <p class="metric-detail">Estimation globale</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Alertes stock</h3>
+            <p class="metric-value">{{ low_stock_count }}</p>
+            <p class="metric-detail">Articles critiques</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Catégories</h3>
+            <p class="metric-value">{{ categories_count }}</p>
+            <p class="metric-detail">Types d'articles</p>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    {% include 'stocks/_mouvements.html.twig' %}
+</div>
+{% endblock %}

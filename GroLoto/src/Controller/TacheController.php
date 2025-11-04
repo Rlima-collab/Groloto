@@ -21,9 +21,49 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class TacheController extends AbstractController
 {
     #[Route('', name: 'tache_index')]
-    public function index(TacheRepository $tacheRepository, AffectationTacheRepository $affectationRepository): Response
+    public function index(Request $request, TacheRepository $tacheRepository, AffectationTacheRepository $affectationRepository): Response
     {
-        $taches = $tacheRepository->findAllWithRelations();
+        // Récupérer les paramètres de filtre
+        $filtre = $request->query->get('filtre', 'toutes'); // toutes, futures, en_cours, passees
+        $tri = $request->query->get('tri', 'date_proche'); // date_proche, date_eloignee, titre
+        
+        // Récupérer les tâches selon le filtre
+        $now = new \DateTime();
+        $queryBuilder = $tacheRepository->createQueryBuilder('t')
+            ->leftJoin('t.evenement', 'e')
+            ->addSelect('e');
+        
+        switch ($filtre) {
+            case 'futures':
+                $queryBuilder->andWhere('t.debut > :now')
+                    ->setParameter('now', $now);
+                break;
+            case 'en_cours':
+                $queryBuilder->andWhere('t.debut <= :now')
+                    ->andWhere('t.fin >= :now')
+                    ->setParameter('now', $now);
+                break;
+            case 'passees':
+                $queryBuilder->andWhere('t.fin < :now')
+                    ->setParameter('now', $now);
+                break;
+            // 'toutes' : pas de filtre
+        }
+        
+        // Appliquer le tri
+        switch ($tri) {
+            case 'date_proche':
+                $queryBuilder->orderBy('t.debut', 'ASC');
+                break;
+            case 'date_eloignee':
+                $queryBuilder->orderBy('t.debut', 'DESC');
+                break;
+            case 'titre':
+                $queryBuilder->orderBy('t.titre', 'ASC');
+                break;
+        }
+        
+        $taches = $queryBuilder->getQuery()->getResult();
         
         // Pour chaque tâche, récupérer les bénévoles assignés
         $tachesData = [];
@@ -46,6 +86,8 @@ class TacheController extends AbstractController
         
         return $this->render('taches/index.html.twig', [
             'tachesData' => $tachesData,
+            'filtreActif' => $filtre,
+            'triActif' => $tri,
         ]);
     }
 
