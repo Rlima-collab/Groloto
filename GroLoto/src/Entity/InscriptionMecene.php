@@ -15,11 +15,11 @@ class InscriptionMecene
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Mecene::class)]
-    #[ORM\JoinColumn(name: 'mecene_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\JoinColumn(name: 'id_mecene', referencedColumnName: 'id', nullable: false)]
     private ?Mecene $mecene = null;
 
     #[ORM\ManyToOne(targetEntity: Evenement::class)]
-    #[ORM\JoinColumn(name: 'evenement_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\JoinColumn(name: 'id_evenement', referencedColumnName: 'id', nullable: false)]
     private ?Evenement $evenement = null;
 
     #[ORM\Column(type: 'text')]

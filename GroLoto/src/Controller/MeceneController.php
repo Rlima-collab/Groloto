@@ -2,8 +2,10 @@
 namespace App\Controller;
 
 use App\Entity\Mecene;
+use App\Entity\Lot;
 use App\Form\MeceneEditType;
 use App\Repository\MeceneRepository;
+use App\Repository\LotRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,24 +16,112 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_MECENE')]
 class MeceneController extends AbstractController
 {
+    /**
+     * Page "Voir les mécènes" - Liste de tous les mécènes
+     */
     #[Route('/mecenes', name: 'mecenes')]
-    public function index(MeceneRepository $meceneRepository): Response
+    public function index(MeceneRepository $meceneRepository, LotRepository $lotRepository): Response
     {
         // Récupération de tous les mécènes depuis la base de données
         $mecenes = $meceneRepository->findAllWithUser();
         $totalMecenes = $meceneRepository->countAll();
+        $totalLots = $lotRepository->countAll();
 
         // Données pour les métriques
         $metriques = [
             'total' => $totalMecenes,
             'nouveaux' => 0, // Placeholder: pas de date de création dans la base
-            'actifs' => $totalMecenes, // Placeholder for now
-            'disponibles' => $totalMecenes // Placeholder for now
+            'actifs' => $totalMecenes,
+            'disponibles' => $totalLots
         ];
 
         return $this->render('mecenes.html.twig', [
             'mecenes' => $mecenes,
             'metriques' => $metriques
+        ]);
+    }
+
+    /**
+     * Page "Voir les lots" - Liste de tous les lots
+     */
+    #[Route('/mecene/lots', name: 'mecene_lots')]
+    public function lots(
+        MeceneRepository $meceneRepository,
+        LotRepository $lotRepository
+    ): Response {
+        $utilisateur = $this->getUser();
+        $mecene = $meceneRepository->findOneBy(['utilisateur' => $utilisateur]);
+
+        // Si admin, afficher tous les lots, sinon seulement ceux du mécène connecté
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $lots = $lotRepository->findAllWithMecene();
+            $valeurTotale = $lotRepository->getTotalValue();
+            $nombreLots = $lotRepository->countAll();
+        } elseif ($mecene) {
+            $lots = $lotRepository->findByMecene($mecene);
+            $valeurTotale = $lotRepository->getTotalValueByMecene($mecene);
+            $nombreLots = $lotRepository->countByMecene($mecene);
+        } else {
+            $lots = [];
+            $valeurTotale = 0;
+            $nombreLots = 0;
+        }
+
+        // Statistiques
+        $metriques = [
+            'total' => $nombreLots,
+            'valeur' => $valeurTotale,
+            'mecenes' => $this->isGranted('ROLE_ADMIN') ? 
+                count(array_unique(array_map(fn($lot) => $lot->getMecene()?->getId(), $lots))) : 1
+        ];
+
+        return $this->render('mecenes/lots.html.twig', [
+            'lots' => $lots,
+            'mecene' => $mecene,
+            'metriques' => $metriques,
+            'valeur_totale' => $valeurTotale
+        ]);
+    }
+
+    /**
+     * Page "Voir les lots d'un mécène" - Lots d'un mécène spécifique
+     */
+    #[Route('/mecenes/{id}/lots', name: 'mecene_voir_lots')]
+    public function voirLotsMecene(
+        int $id,
+        MeceneRepository $meceneRepository,
+        LotRepository $lotRepository
+    ): Response {
+        $mecene = $meceneRepository->find($id);
+
+        if (!$mecene) {
+            $this->addFlash('error', 'Mécène non trouvé.');
+            return $this->redirectToRoute('mecenes');
+        }
+
+        // Vérifier les permissions : admin ou le mécène lui-même
+        $utilisateur = $this->getUser();
+        if (!$this->isGranted('ROLE_ADMIN') && $mecene->getUtilisateur() !== $utilisateur) {
+            $this->addFlash('error', 'Vous n\'avez pas accès à cette page.');
+            return $this->redirectToRoute('dashboard');
+        }
+
+        $lots = $lotRepository->findByMecene($mecene);
+        $valeurTotale = $lotRepository->getTotalValueByMecene($mecene);
+        $nombreLots = $lotRepository->countByMecene($mecene);
+
+        // Statistiques
+        $metriques = [
+            'total' => $nombreLots,
+            'valeur' => $valeurTotale,
+            'mecenes' => 1
+        ];
+
+        return $this->render('mecenes/lots_mecene.html.twig', [
+            'lots' => $lots,
+            'mecene' => $mecene,
+            'metriques' => $metriques,
+            'valeur_totale' => $valeurTotale
         ]);
     }
 

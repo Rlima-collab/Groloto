@@ -5,160 +5,128 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/mecenes.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
 {% endblock %}
 
 {% block body %}
-<div class="hero-section">
+<div class="hero-section benevoles-hero">
     <div class="shine"></div>
     <div class="hero-content">
         <h1 class="hero-title">Gestion des Mécènes</h1>
-        <p class="hero-description">Inscriptions, lots et conventions pour vos événements caritatifs.</p>
-        <a href="#liste-mecenes" class="hero-btn yellow">Voir les mécènes</a>
+        <p class="hero-description">Partenaires, lots et conventions pour vos événements caritatifs.</p>
+        <a href="#liste-mecenes" class="btn-login">Voir les mécènes</a>
     </div>
 </div>
 
-<div class="page-header">
-    <h1 class="page-title">Mécènes & Partenaires</h1>
+<br>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <h3>Total mécènes</h3>
+        <p class="metric-value">{{ metriques.total }}</p>
+        <p class="metric-detail">Mécènes actifs</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Nouveaux ce mois</h3>
+        <p class="metric-value">{{ metriques.nouveaux }}</p>
+        <p class="metric-detail">Inscriptions récentes</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Lots disponibles</h3>
+        <p class="metric-value">{{ metriques.disponibles }}</p>
+        <p class="metric-detail">Contributions offertes</p>
+    </div>
 </div>
 
-<div class="mecenes-page">
-    <!-- Key Metrics Cards -->
-    <div class="metrics-grid">
-        <div class="card metric-card">
-            <div class="card-header">
-                <span class="metric-title">Total mécènes</span>
-            </div>
-            <div class="card-content">
-                <div class="metric-value">{{ metriques.total }}</div>
-                <p class="metric-change positive">Mécènes actifs</p>
-            </div>
+<div class="container">
+    <div class="card main-card" id="liste-mecenes">
+        <div class="card-header">
+            <h2 class="card-title">Liste des Mécènes</h2>
+            <p class="card-description">Gestion des mécènes et partenaires</p>
         </div>
-        <div class="card metric-card">
-            <div class="card-header">
-                <span class="metric-title">Nouveaux ce mois</span>
-            </div>
-            <div class="card-content">
-                <div class="metric-value">{{ metriques.nouveaux }}</div>
-                <p class="metric-change positive">Inscriptions récentes</p>
-            </div>
-        </div>
-        <div class="card metric-card">
-            <div class="card-header">
-                <span class="metric-title">Lots disponibles</span>
-            </div>
-            <div class="card-content">
-                <div class="metric-value">{{ metriques.disponibles }}</div>
-                <p class="metric-change positive">Prêts à être utilisés</p>
-            </div>
-        </div>
-    </div>
-    <div class="container">
-        <div class="tabs">
-            <a href="{{ path('mecenes') }}" class="tab selected">
-                <span class="tab-icon">👥</span>
-                <span class="tab-text">Liste des mécènes</span>
-            </a>
-            <a href="{{ path('stocks') }}#inventaire" class="tab">
-                <span class="tab-icon">🎁</span>
-                <span class="tab-text">Lots</span>
-            </a>
-            <a href="#" class="tab">
-                <span class="tab-icon">📜</span>
-                <span class="tab-text">Conventions</span>
-            </a>
-        </div>
-        <!-- Liste des mécènes -->
-        <div class="main-content" id="liste-mecenes">
-            <div class="card main-card">
-                <div class="card-header">
-                    <h2 class="card-title">Liste des Mécènes</h2>
-                    <p class="card-description">Gestion des mécènes inscrits</p>
-                </div>
-                <div class="card-content">
-                    {% if mecenes|length > 0 %}
-                        <div class="mecenes-grid">
-                            {% for mecene in mecenes %}
-                                <div class="mecene-card">
-                                    <div class="mecene-header">
-                                        <h3 class="mecene-name">
-                                            {{ mecene.utilisateur.prenom }} {{ mecene.utilisateur.nom }} ({{ mecene.organisation }})
-                                        </h3>
-                                        <span class="badge status success">Actif</span>
-                                    </div>
-                                    <div class="mecene-info">
-                                        <div class="info-item">
-                                            <span class="info-icon">✉️</span>
-                                            <span class="info-text">{{ mecene.utilisateur.email }}</span>
-                                        </div>
-                                        {% if mecene.utilisateur.telephone %}
-                                            <div class="info-item">
-                                                <span class="info-icon">📞</span>
-                                                <span class="info-text">{{ mecene.utilisateur.telephone }}</span>
-                                            </div>
-                                        {% endif %}
-                                        <div class="info-item">
-                                            <span class="info-icon">🔍</span>
-                                            <span class="info-text">SIRET: {{ mecene.siret }}</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="info-icon">📅</span>
-                                            <span class="info-text">Inscrit le {{ mecene.utilisateur.dateCreation|date('d/m/Y') }}</span>
-                                        </div>
-                                    </div>
-                                    {% if is_granted('ROLE_ADMIN') %}
-                                    <div class="mecene-actions">
-                                        <a href="{{ path('mecene_edit', {'id': mecene.id}) }}" class="btn btn-small btn-primary">Modifier</a>
-                                        <a href="{{ path('stocks', {'mecene': mecene.id}) }}" class="btn btn-small btn-secondary">Lots</a>
-                                        <a href="#" class="btn btn-small btn-secondary">Conventions</a>
-                                        <button type="button" 
-                                                class="btn btn-small btn-danger" 
-                                                data-mecene-id="{{ mecene.id }}"
-                                                data-mecene-nom="{{ mecene.organisation }}"
-                                                data-csrf-token="{{ csrf_token('delete_mecene_' ~ mecene.id) }}"
-                                                onclick="confirmDeleteMecene(this)">🗑️</button>
-                                    </div>
-                                    {% endif %}
+        <div class="card-content">
+            {% if mecenes|length > 0 %}
+                <div class="benevoles-grid">
+                    {% for mecene in mecenes %}
+                        <div class="benevole-card">
+                            <div class="benevole-header">
+                                <h3 class="benevole-name">
+                                    {{ mecene.utilisateur.prenom }} {{ mecene.utilisateur.nom }}
+                                </h3>
+                                <span class="badge status success">Actif</span>
+                            </div>
+                            
+                            <div class="benevole-info">
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Organisation:</strong> {{ mecene.organisation }}</span>
                                 </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="empty-state">
-                            <div class="empty-icon">👥</div>
-                            <h3>Aucun mécène trouvé</h3>
-                            <p>Commencez par ajouter des mécènes à votre base de données.</p>
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Email:</strong> {{ mecene.utilisateur.email }}</span>
+                                </div>
+                                {% if mecene.utilisateur.telephone %}
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Téléphone:</strong> {{ mecene.utilisateur.telephone }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="info-item">
+                                    <span class="info-text"><strong>SIRET:</strong> {{ mecene.siret }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Inscrit le:</strong> {{ mecene.utilisateur.dateCreation|date('d/m/Y') }}</span>
+                                </div>
+                            </div>
+                            
                             {% if is_granted('ROLE_ADMIN') %}
-                            <a href="#" class="btn btn-primary">Ajouter un mécène</a>
+                            <div class="benevole-actions">
+                                <a href="{{ path('mecene_voir_lots', {'id': mecene.id}) }}" class="btn btn-small btn-primary">Voir lots</a>
+                                <a href="{{ path('mecene_edit', {'id': mecene.id}) }}" class="btn btn-small btn-secondary">Modifier</a>
+                                <button type="button" 
+                                        class="btn btn-small btn-danger" 
+                                        data-mecene-id="{{ mecene.id }}"
+                                        data-mecene-nom="{{ mecene.organisation }}"
+                                        data-csrf-token="{{ csrf_token('delete_mecene_' ~ mecene.id) }}"
+                                        onclick="confirmDeleteMecene(this)">Supprimer</button>
+                            </div>
                             {% endif %}
                         </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>Aucun mécène trouvé</h3>
+                    <p>Commencez par ajouter des mécènes à votre base de données.</p>
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <a href="#" class="btn btn-primary">Ajouter un mécène</a>
                     {% endif %}
                 </div>
-            </div>
-                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
+{% endblock %}
 
-<script>
-// Fonction de confirmation de suppression
+{% block javascripts %}
+    {{ parent() }}
+    <script>
 function confirmDeleteMecene(button) {
     const meceneId = button.getAttribute('data-mecene-id');
     const meceneNom = button.getAttribute('data-mecene-nom');
     const csrfToken = button.getAttribute('data-csrf-token');
     
     if (confirm(`Êtes-vous sûr de vouloir supprimer le mécène "${meceneNom}" ?\n\nCette action est irréversible et supprimera toutes les données associées.`)) {
-        // Créer un formulaire pour la suppression
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/mecenes/${meceneId}/delete`;
         
-        // Ajouter le token CSRF
         const csrfInput = document.createElement('input');
         csrfInput.type = 'hidden';
         csrfInput.name = '_token';
         csrfInput.value = csrfToken;
         form.appendChild(csrfInput);
         
-        // Ajouter le formulaire au body et le soumettre
         document.body.appendChild(form);
         form.submit();
     }
