@@ -1,0 +1,126 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inventaire - Gestion des Stocks{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-list.css') }}">
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Inventaire</h1>
+        <p class="hero-description">Liste complète des articles en stock</p>
+        <a href="{{ path('stocks_export_inventaire') }}" class="btn-login">Exporter en CSV</a>
+    </div>
+</div>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
+
+    <!-- Cartes de statistiques -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>Articles</h3>
+            <p class="metric-value">{{ total_items }}</p>
+            <p class="metric-detail">Inventaire actuel</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Valeur totale</h3>
+            <p class="metric-value">{{ stock_value|number_format(0, ',', ' ') }} €</p>
+            <p class="metric-detail">Estimation globale</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Alertes stock</h3>
+            <p class="metric-value">{{ low_stock_count }}</p>
+            <p class="metric-detail">Articles critiques</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Catégories</h3>
+            <p class="metric-value">{{ categories_count }}</p>
+            <p class="metric-detail">Types d'articles</p>
+        </div>
+    </div>
+
+    <!-- Inventaire -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="mb-0" style="color: #0d1b2a; font-weight: 600;">
+                    <i class="bi bi-box-seam me-2"></i>Inventaire des lots
+                </h3>
+            </div>
+
+            {% if stock_items is empty %}
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <h3>Aucun article en stock</h3>
+                    <p>Commencez par ajouter des articles à votre inventaire.</p>
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Article</th>
+                                <th style="width: 15%;">Catégorie</th>
+                                <th style="width: 10%; text-align: right;">Stock</th>
+                                <th style="width: 10%; text-align: right;">Seuil</th>
+                                <th style="width: 15%; text-align: right;">Valeur estimée</th>
+                                <th style="width: 10%;">Unité</th>
+                                <th style="width: 15%; text-align: center;">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in stock_items %}
+                                <tr>
+                                    <td class="name">{{ item.nom }}</td>
+                                    <td>
+                                        <span class="badge category">
+                                            {% if item.categorie == 'bar' %}🍺 Bar
+                                            {% elseif item.categorie == 'resto' %}🍽️ Resto
+                                            {% elseif item.categorie == 'deco' %}🎨 Déco
+                                            {% else %}📋 {{ item.categorie|capitalize }}{% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <strong>{{ item.quantite }}</strong>
+                                    </td>
+                                    <td class="text-right text-muted">{{ item.seuil }}</td>
+                                    <td class="text-right value">
+                                        {{ (item.quantite * item.valeurUnitaire)|number_format(2, ',', ' ') }} €
+                                    </td>
+                                    <td>
+                                        <span class="badge unit">{{ item.unite }}</span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        {% if item.quantite <= item.seuil * 0.5 %}
+                                            <span class="badge status danger">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>Critique
+                                            </span>
+                                        {% elseif item.quantite <= item.seuil %}
+                                            <span class="badge status warning">
+                                                <i class="bi bi-exclamation-circle me-1"></i>Faible
+                                            </span>
+                                        {% else %}
+                                            <span class="badge status success">
+                                                <i class="bi bi-check-circle me-1"></i>Normal
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

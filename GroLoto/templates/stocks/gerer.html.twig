@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gérer Stock - Gestion des Stocks{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-list.css') }}">
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gérer Stock</h1>
+        <p class="hero-description">Ajouter des mouvements de stock (entrées/sorties)</p>
+        <a href="{{ path('stocks_inventaire') }}" class="btn-login">Voir l'inventaire</a>
+    </div>
+</div>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
+
+    <!-- Flash Messages -->
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    <!-- Cartes de statistiques -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>Articles</h3>
+            <p class="metric-value">{{ total_items }}</p>
+            <p class="metric-detail">Inventaire actuel</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Valeur totale</h3>
+            <p class="metric-value">{{ stock_value|number_format(0, ',', ' ') }} €</p>
+            <p class="metric-detail">Estimation globale</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Alertes stock</h3>
+            <p class="metric-value">{{ low_stock_count }}</p>
+            <p class="metric-detail">Articles critiques</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Catégories</h3>
+            <p class="metric-value">{{ categories_count }}</p>
+            <p class="metric-detail">Types d'articles</p>
+        </div>
+    </div>
+
+    <!-- Formulaire d'ajout -->
+    {% include 'stocks/_ajouter.html.twig' %}
+</div>
+{% endblock %}

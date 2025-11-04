@@ -1,0 +1,358 @@
+/* =============== STOCKS LIST - STYLES SPÉCIFIQUES =============== */
+
+/* =============== TABS =============== */
+.tabs-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tab {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    color: #6b7280;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tab:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.tab.selected {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(13, 27, 42, 0.25);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =============== TABLES =============== */
+.table-responsive {
+    overflow-x: auto;
+    margin-top: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+}
+
+.table thead {
+    background: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.table th {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.875rem;
+    color: #111827;
+}
+
+.table tbody tr {
+    transition: background-color 0.15s;
+}
+
+.table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table .text-right {
+    text-align: right;
+}
+
+.table .name {
+    font-weight: 600;
+    color: #0d1b2a;
+}
+
+.table .value {
+    font-weight: 600;
+    color: #10b981;
+}
+
+/* =============== BADGES =============== */
+.badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.badge.category {
+    background-color: #e5e7eb;
+    color: #374151;
+}
+
+.badge.unit {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.badge.status {
+    font-weight: 600;
+}
+
+.badge.status.success {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge.status.warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge.status.danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.badge.status.info {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+/* =============== EMPTY STATE =============== */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6b7280;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+    color: #9ca3af;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    color: #374151;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.empty-state p {
+    font-size: 0.875rem;
+    margin-bottom: 2rem;
+    color: #6b7280;
+}
+
+/* =============== FILTERS =============== */
+.filters-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+}
+
+.filters-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: end;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.filter-group select,
+.filter-group input {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    transition: border-color 0.2s ease;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: #0d1b2a;
+    box-shadow: 0 0 0 3px rgba(13, 27, 42, 0.1);
+}
+
+/* =============== STOCK LEVEL INDICATORS =============== */
+.stock-level {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stock-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.stock-indicator.high {
+    background-color: #10b981;
+}
+
+.stock-indicator.medium {
+    background-color: #f59e0b;
+}
+
+.stock-indicator.low {
+    background-color: #ef4444;
+}
+
+/* =============== ACTION BUTTONS =============== */
+.actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+    transform: scale(1.1);
+}
+
+.btn-icon.edit {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.btn-icon.edit:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-icon.delete {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.btn-icon.delete:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-icon.view {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.btn-icon.view:hover {
+    background: #10b981;
+    color: white;
+}
+
+/* =============== RESPONSIVE =============== */
+@media (max-width: 768px) {
+    .tabs {
+        flex-direction: column;
+    }
+
+    .tab {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .table-responsive {
+        border: none;
+        border-radius: 0;
+    }
+
+    .table {
+        font-size: 0.8125rem;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.625rem 0.5rem;
+    }
+
+    .filters-row {
+        flex-direction: column;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .actions-cell {
+        flex-direction: column;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
