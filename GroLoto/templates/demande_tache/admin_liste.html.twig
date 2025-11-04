@@ -4,22 +4,29 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/taches.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-list.css') }}">
 {% endblock %}
 
 {% block body %}
-<div class="page-header">
-    <h1 class="page-title">Gestion des demandes de tâches</h1>
-    <a href="{{ path('tache_index') }}" class="btn btn-secondary">Retour aux tâches</a>
+<div class="taches-page">
+<div class="hero-section taches-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Demandes de Tâches</h1>
+        <p class="hero-description">Gérez les demandes des bénévoles pour participer aux tâches</p>
+        <a href="{{ path('tache_index') }}" class="btn-login">Retour aux tâches</a>
+    </div>
 </div>
 
-<div class="container" style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+<div class="container">
     
     {% for message in app.flashes('success') %}
         <div class="alert alert-success">{{ message }}</div>
     {% endfor %}
     {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">{{ message }}</div>
+        <div class="alert alert-danger" style="background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">{{ message }}</div>
     {% endfor %}
 
     <div class="tabs" style="margin-bottom: 2rem;">
@@ -31,7 +38,7 @@
         </a>
     </div>
 
-    <div id="content-en-attente" class="tab-content">
+    <div id="content-en-attente" class="tab-content" style="display: block;">
         <div class="card">
             <div class="card-header">
                 <h2 class="card-title">Demandes en attente de validation</h2>
@@ -84,10 +91,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% set nbAffectations = 0 %}
-                                            {% for affectation in demande.tache.affectations %}
-                                                {% set nbAffectations = nbAffectations + 1 %}
-                                            {% endfor %}
+                                            {% set nbAffectations = nb_affectations_par_tache[demande.tache.id] ?? 0 %}
                                             <span class="badge {% if nbAffectations >= demande.tache.maxPersonnes %}badge-danger{% elseif nbAffectations >= (demande.tache.maxPersonnes * 0.8) %}badge-warning{% else %}badge-success{% endif %}">
                                                 {{ demande.tache.maxPersonnes - nbAffectations }} / {{ demande.tache.maxPersonnes }}
                                             </span>
@@ -118,8 +122,10 @@
                         </table>
                     </div>
                 {% else %}
-                    <div class="alert alert-info">
-                        Aucune demande en attente.
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <h3>Aucune demande en attente</h3>
+                        <p>Les nouvelles demandes des bénévoles apparaîtront ici</p>
                     </div>
                 {% endif %}
             </div>
@@ -193,13 +199,16 @@
                         </table>
                     </div>
                 {% else %}
-                    <div class="alert alert-info">
-                        Aucune demande enregistrée.
+                    <div class="empty-state">
+                        <div class="empty-icon">📁</div>
+                        <h3>Aucune demande enregistrée</h3>
+                        <p>L'historique des demandes traitées s'affichera ici</p>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <!-- Modal Accepter -->

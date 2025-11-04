@@ -5,82 +5,51 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
 {% endblock %}
 
-{% block javascripts %}
-    {{ parent() }}
-{% endblock %}
+
 
 {% block body %}
-<div class="hero-section">
+<div class="hero-section benevoles-hero">
     <div class="shine"></div>
     <div class="hero-content">
         <h1 class="hero-title">Gestion des Bénévoles</h1>
         <p class="hero-description">Inscriptions, disponibilités et planning pour vos événements caritatifs.</p>
-        <a href="#liste-benevoles" class="hero-btn yellow">Voir les bénévoles</a>
+        <a href="#liste-benevoles" class="btn-login">Voir les bénévoles</a>
     </div>
 </div>
 
-<div class="page-header">
-    <h1 class="page-title">Bénévoles & Planning</h1>
-</div>
-
-<div class="benevoles-page">
+<br>
 
 <div class="metrics-grid">
-    <div class="card metric-card">
-        <div class="card-header">
-            <span class="metric-title">Total bénévoles</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ metriques.total }}</div>
-            <p class="metric-change positive">Bénévoles actifs</p>
-        </div>
+    <div class="metric-card">
+        <h3>Total bénévoles</h3>
+        <p class="metric-value">{{ metriques.total }}</p>
+        <p class="metric-detail">Bénévoles actifs</p>
     </div>
 
-    <div class="card metric-card">
-        <div class="card-header">
-            <span class="metric-title">Nouveaux ce mois</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ metriques.nouveaux }}</div>
-            <p class="metric-change positive">Inscriptions récentes</p>
-        </div>
+    <div class="metric-card">
+        <h3>Nouveaux ce mois</h3>
+        <p class="metric-value">{{ metriques.nouveaux }}</p>
+        <p class="metric-detail">Inscriptions récentes</p>
     </div>
 
-    <div class="card metric-card">
-        <div class="card-header">
-            <span class="metric-title">Disponibles</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ metriques.disponibles }}</div>
-            <p class="metric-change positive">Prêts à aider</p>
-        </div>
+    <div class="metric-card">
+        <h3>Disponibles</h3>
+        <p class="metric-value">{{ metriques.disponibles }}</p>
+        <p class="metric-detail">Prêts à aider</p>
     </div>
 </div>
 
 <div class="container">
-    
-    <div class="tabs">
-        <a href="#" class="tab" id="tab-benevoles" onclick="showTab('benevoles')">
-            <span class="tab-icon">👥</span>
-            <span class="tab-text">Liste des bénévoles</span>
-        </a>
-        <a href="#" class="tab" id="tab-planning" onclick="showTab('planning')">
-            <span class="tab-icon">📅</span>
-            <span class="tab-text">Planning</span>
-        </a>
-    </div>
-    
-    <div id="content-benevoles" class="tab-content main-content">
-        <div class="card main-card" id="liste-benevoles">
-            <div class="card-header">
-                <h2 class="card-title">Liste des Bénévoles</h2>
-                <p class="card-description">Gestion des bénévoles inscrits</p>
-            </div>
-            <div class="card-content">
+    <div class="card main-card" id="liste-benevoles">
+        <div class="card-header">
+            <h2 class="card-title">Liste des Bénévoles</h2>
+            <p class="card-description">Gestion des bénévoles inscrits</p>
+        </div>
+        <div class="card-content">
                 {% if benevoles|length > 0 %}
                     <div class="benevoles-grid">
                         {% for benevole in benevoles %}
@@ -118,13 +87,13 @@
                                 {% if is_granted('ROLE_ADMIN') %}
                                 <div class="benevole-actions">
                                     <a href="{{ path('benevole_edit', {'id': benevole.id}) }}" class="btn btn-small btn-primary">Modifier</a>
-                                    <a href="#" class="btn btn-small btn-secondary">Planning</a>
+                                    <a href="{{ path('benevole_planning', {'id': benevole.id}) }}" class="btn btn-small btn-secondary">Voir planning</a>
                                     <button type="button" 
                                             class="btn btn-small btn-danger" 
                                             data-benevole-id="{{ benevole.id }}"
                                             data-benevole-nom="{{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}"
                                             data-csrf-token="{{ csrf_token('delete_benevole_' ~ benevole.id) }}"
-                                            onclick="confirmDelete(this)">🗑️</button>
+                                            onclick="confirmDelete(this)">Supprimer</button>
                                 </div>
                                 {% endif %}
                             </div>
@@ -143,249 +112,12 @@
             </div>
         </div>
     </div>
-    
-    <div id="content-planning" class="tab-content main-content" style="display: none;">
-        <div class="card main-card">
-            <div class="card-header">
-                <h2 class="card-title">Planning des Tâches</h2>
-                <p class="card-description">Planification pour les vendredis, samedis et dimanches</p>
-            </div>
-            <div class="card-content">
-                <div class="row" style="display: flex; gap: 20px;">
-                    <div style="flex: 2;">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Calendrier des tâches (Week-end seulement)</h5>
-                            </div>
-                            <div class="card-content">
-                                <div style="margin-bottom: 1em;">
-                                    <button class="btn btn-outline-primary" id="btn-month" onclick="changeCalendarView('dayGridMonth')">Mois</button>
-                                    <button class="btn btn-outline-primary" id="btn-week" onclick="changeCalendarView('timeGridWeek')">Semaine</button>
-                                </div>
-                                <div id="calendar"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="flex: 1;">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Tâches à venir</h5>
-                            </div>
-                            <div class="card-content">
-                                {% if taches_proches is defined and taches_proches is not empty %}
-                                    {% for tache in taches_proches %}
-                                        <div class="card" style="margin-bottom: 10px; padding: 10px; border: 1px solid #ddd;">
-                                            <h6>{{ tache.titre }}</h6>
-                                            <p style="font-size: 0.9em; margin: 5px 0;">
-                                                📅 {{ tache.debut|date('d/m/Y H:i') }}
-                                                {% if tache.poste_requis %}
-                                                    <br>💼 {{ tache.poste_requis }}
-                                                {% endif %}
-                                            </p>
-                                        </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div style="text-align: center; padding: 20px; color: #666;">
-                                        ℹ️ Aucune tâche planifiée.
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="card" style="margin-top: 10px;">
-                            <div class="card-header">
-                                <h5 class="card-title">Tâches réalisées</h5>
-                            </div>
-                            <div class="card-content">
-                                {% if taches_realisees is defined and taches_realisees is not empty %}
-                                    {% for tache in taches_realisees %}
-                                        <div class="card" style="margin-bottom: 10px; padding: 10px; border: 1px solid #e0e0e0; background:#fafafa;">
-                                            <h6>{{ tache.titre }}</h6>
-                                            <p style="font-size: 0.85em; margin: 5px 0; color:#666;">
-                                                ✅ Du {{ tache.debut|date('d/m/Y H:i') }} au {{ tache.fin|date('d/m/Y H:i') }}
-                                                {% if tache.poste_requis %}
-                                                    <br>💼 {{ tache.poste_requis }}
-                                                {% endif %}
-                                            </p>
-                                        </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div style="text-align: center; padding: 12px; color: #666;">
-                                        ✅ Aucune tâche réalisée pour le moment.
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
-</div>
+{% endblock %}
 
-<script>
-window.calendarInstance = null;
-
-function loadFullCalendarScript() {
-    return new Promise((resolve, reject) => {
-        if (typeof FullCalendar !== 'undefined') {
-            console.log('FullCalendar déjà disponible');
-            resolve();
-            return;
-        }
-        
-        const script = document.createElement('script');
-    // Charger FullCalendar depuis un fichier local
-    script.src = '{{ asset('js/fullcalendar/index.global.min.js') }}';
-    console.log('Chargement de FullCalendar depuis asset local:', script.src);
-        
-        script.onload = function() {
-            console.log('Script FullCalendar chargé');
-            setTimeout(() => {
-                if (typeof FullCalendar !== 'undefined') {
-                    console.log('FullCalendar disponible !');
-                    resolve();
-                } else {
-                    console.error('FullCalendar non trouvé après chargement');
-                    reject(new Error('FullCalendar non disponible après chargement'));
-                }
-            }, 100);
-        };
-        
-        script.onerror = function(error) {
-            console.error('Échec du chargement de FullCalendar:', error);
-            reject(new Error('Impossible de charger FullCalendar'));
-        };
-        
-        document.head.appendChild(script);
-    });
-}
-
-function initializeCalendar(viewType = 'dayGridMonth') {
-    console.log('Tentative d\'initialisation du calendrier...');
-    const calendarEl = document.getElementById('calendar');
-    if (!calendarEl) {
-        console.error('Element #calendar non trouvé dans le DOM');
-        return;
-    }
-    if (typeof FullCalendar === 'undefined') {
-        loadFullCalendarScript().then(() => {
-            setTimeout(() => {
-                initializeCalendar(viewType);
-            }, 100);
-        }).catch(error => {
-            loadFullCalendarAlternative();
-        });
-        return;
-    }
-    if (window.calendarInstance) {
-        window.calendarInstance.destroy();
-        window.calendarInstance = null;
-    }
-    const events = {{ taches|json_encode|raw }};
-    try {
-        window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
-            initialView: viewType,
-            locale: 'fr',
-            height: 'auto',
-            // afficher les 7 jours de la semaine (ne plus limiter à ven/sam/dim)
-            hiddenDays: [],
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: ''
-            },
-            buttonText: {
-                today: 'Aujourd\'hui',
-                month: 'Mois',
-                week: 'Semaine',
-                day: 'Jour',
-            },
-            events: events,
-            eventClick: function(info) {
-                const event = info.event;
-                const props = event.extendedProps;
-                let details = 'Titre: ' + event.title + '\n';
-                details += 'Début: ' + event.start.toLocaleString() + '\n';
-                details += 'Fin: ' + event.end.toLocaleString() + '\n';
-                if (props.evenement) details += 'Événement: ' + props.evenement + '\n';
-                if (props.poste_requis) details += 'Poste: ' + props.poste_requis + '\n';
-                if (props.max_personnes) details += 'Max personnes: ' + props.max_personnes + '\n';
-                if (props.remarques) details += 'Remarques: ' + props.remarques + '\n';
-                alert(details);
-            },
-            eventDisplay: 'block',
-            nowIndicator: true,
-            slotMinTime: '07:00:00',
-            slotMaxTime: '22:00:00',
-            allDaySlot: false,
-            firstDay: 1
-        });
-        window.calendarInstance.render();
-    } catch (error) {
-        loadFullCalendarAlternative();
-    }
-}
-
-function changeCalendarView(viewType) {
-    if (window.calendarInstance) {
-        window.calendarInstance.changeView(viewType);
-    } else {
-        initializeCalendar(viewType);
-    }
-    document.getElementById('btn-month').classList.toggle('active', viewType === 'dayGridMonth');
-    document.getElementById('btn-week').classList.toggle('active', viewType === 'timeGridWeek');
-}
-
-function loadFullCalendarAlternative() {
-    console.log('Tentative de chargement alternatif de FullCalendar...');
-    const calendarEl = document.getElementById('calendar');
-    if (calendarEl) {
-        calendarEl.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">' +
-            '<p>⚠️ Impossible de charger le calendrier</p>' +
-            '<p>Vérifiez votre connexion internet</p>' +
-            '</div>';
-    }
-}
-
-function showTab(tabName) {
-    console.log('Changing to tab:', tabName);
-    
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.style.display = 'none';
-    });
-    
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('selected');
-    });
-    
-    const contentEl = document.getElementById('content-' + tabName);
-    if (contentEl) {
-        contentEl.style.display = 'block';
-        console.log('Contenu affiché pour:', tabName);
-    } else {
-        console.error('Contenu non trouvé pour:', tabName);
-    }
-    
-    const tabEl = document.getElementById('tab-' + tabName);
-    if (tabEl) {
-        tabEl.classList.add('selected');
-    }
-    
-    if (tabName === 'planning') {
-        console.log('Onglet planning activé, initialisation du calendrier...');
-        setTimeout(() => {
-            initializeCalendar();
-        }, 200);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded');
-    document.getElementById('tab-benevoles').classList.add('selected');
-});
-
+{% block javascripts %}
+    {{ parent() }}
+    <script>
 function confirmDelete(button) {
     const benevoleId = button.getAttribute('data-benevole-id');
     const benevoleNom = button.getAttribute('data-benevole-nom');

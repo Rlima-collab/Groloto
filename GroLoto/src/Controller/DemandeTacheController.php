@@ -190,14 +190,25 @@ class DemandeTacheController extends AbstractController
      */
     #[Route('/admin/demandes-taches', name: 'admin_demandes_taches')]
     #[IsGranted('ROLE_ADMIN')]
-    public function listeDemandes(DemandeTacheRepository $demandeRepository): Response
+    public function listeDemandes(DemandeTacheRepository $demandeRepository, AffectationTacheRepository $affectationRepository): Response
     {
         $demandesEnAttente = $demandeRepository->findEnAttente();
         $toutesLesDemandes = $demandeRepository->findBy([], ['date_demande' => 'DESC']);
 
+        // Compter les affectations pour chaque tâche des demandes en attente
+        $nbAffectationsParTache = [];
+        foreach ($demandesEnAttente as $demande) {
+            $tacheId = $demande->getTache()->getId();
+            if (!isset($nbAffectationsParTache[$tacheId])) {
+                $nbAffectations = $affectationRepository->count(['tache' => $demande->getTache()]);
+                $nbAffectationsParTache[$tacheId] = $nbAffectations;
+            }
+        }
+
         return $this->render('demande_tache/admin_liste.html.twig', [
             'demandes_en_attente' => $demandesEnAttente,
-            'toutes_demandes' => $toutesLesDemandes
+            'toutes_demandes' => $toutesLesDemandes,
+            'nb_affectations_par_tache' => $nbAffectationsParTache
         ]);
     }
 
