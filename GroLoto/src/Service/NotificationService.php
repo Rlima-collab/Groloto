@@ -26,18 +26,16 @@ class NotificationService
     public function createNotification(
         Utilisateur $utilisateur,
         string $type,
-        string $titre,
         string $message,
         ?string $lien = null
     ): Notification {
         $notification = new Notification();
-        $notification->setUtilisateur($utilisateur);
+        $notification->setDestinataire($utilisateur);
         $notification->setType($type);
-        $notification->setTitre($titre);
         $notification->setMessage($message);
         $notification->setLien($lien);
-        $notification->setLu(false);
-        $notification->setDateCreation(new \DateTime());
+        $notification->setLue(false);
+        // createdAt is set in constructor
 
         $this->entityManager->persist($notification);
         $this->entityManager->flush();
@@ -53,7 +51,6 @@ class NotificationService
         $this->createNotification(
             $admin,
             'demande_tache',
-            'Nouvelle demande de tâche',
             "{$benevoleNom} souhaite rejoindre la tâche \"{$tacheNom}\"",
             '/admin/demandes-taches'
         );
@@ -67,8 +64,7 @@ class NotificationService
         $this->createNotification(
             $benevole,
             'acceptation_tache',
-            'Demande acceptée',
-            "Votre demande pour la tâche \"{$tacheNom}\" a été acceptée !",
+            "Votre demande pour la tâche \"{$tacheNom}\" a été acceptée ! Consultez vos demandes pour plus de détails.",
             '/benevole/taches-disponibles'
         );
     }
@@ -86,7 +82,6 @@ class NotificationService
         $this->createNotification(
             $benevole,
             'refus_tache',
-            'Demande refusée',
             $message,
             '/benevole/taches-disponibles'
         );
@@ -100,7 +95,6 @@ class NotificationService
         $this->createNotification(
             $benevole,
             'affectation_tache',
-            'Nouvelle affectation',
             "Vous avez été affecté(e) à la tâche \"{$tacheNom}\"",
             '/benevoles'
         );
@@ -114,7 +108,6 @@ class NotificationService
         $this->createNotification(
             $admin,
             'demande_mecene',
-            'Nouvelle demande de mécène',
             "{$meceneNom} souhaite participer à l'événement \"{$evenementNom}\"",
             '/mecenes'
         );
@@ -128,7 +121,6 @@ class NotificationService
         $this->createNotification(
             $mecene,
             'acceptation_mecene',
-            'Demande acceptée',
             "Votre demande pour l'événement \"{$evenementNom}\" a été acceptée !",
             '/mecenes'
         );
@@ -147,7 +139,6 @@ class NotificationService
         $this->createNotification(
             $mecene,
             'refus_mecene',
-            'Demande refusée',
             $message,
             '/mecenes'
         );
@@ -161,7 +152,6 @@ class NotificationService
         $this->createNotification(
             $admin,
             'demande_annulation',
-            'Demande d\'annulation de tâche',
             "{$benevoleNom} souhaite annuler son affectation à la tâche \"{$tacheNom}\"",
             '/admin/demandes-annulations'
         );
@@ -175,7 +165,6 @@ class NotificationService
         $this->createNotification(
             $benevole,
             'acceptation_annulation',
-            'Annulation acceptée',
             "Votre demande d'annulation pour la tâche \"{$tacheNom}\" a été acceptée.",
             '/benevoles'
         );
@@ -194,7 +183,6 @@ class NotificationService
         $this->createNotification(
             $benevole,
             'refus_annulation',
-            'Annulation refusée',
             $message,
             '/benevoles'
         );
@@ -205,7 +193,7 @@ class NotificationService
      */
     public function markAsRead(Notification $notification): void
     {
-        $notification->setLu(true);
+        $notification->setLue(true);
         $this->entityManager->flush();
     }
 
@@ -214,6 +202,6 @@ class NotificationService
      */
     public function markAllAsRead(Utilisateur $utilisateur): void
     {
-        $this->notificationRepository->markAllAsReadForUser($utilisateur);
+        $this->notificationRepository->markAllAsReadByUser($utilisateur);
     }
 }
