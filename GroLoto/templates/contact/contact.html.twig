@@ -4,65 +4,119 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/contact.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 {% endblock %}
 
 {% block body %}
-<div class="hero-section">
+<!-- HERO NOCTURNE -->
+<div class="hero-section weekend-hero">
     <div class="shine"></div>
     <div class="hero-content">
-        <h1 class="hero-title">Contactez-nous</h1>
-        <p class="hero-description">Une question ? Une suggestion ? Nous sommes là pour vous aider !</p>
-        <a href="#contact" class="hero-btn yellow">Nous contacter</a>
+        <h1 class="hero-title">
+            <i class="fas fa-envelope-open-text me-2"></i> Contactez-nous
+        </h1>
+        <p class="hero-description">
+            Une question ? Une suggestion ? Nous sommes à votre écoute.
+        </p>
+        <a href="#contact-form" class="hero-btn black">
+            <i class="fas fa-paper-plane me-2"></i> Envoyer un message
+        </a>
     </div>
 </div>
-<div class="contact-container">
 
+<!-- MESSAGES FLASH -->
+<div class="container mt-4">
     {% for message in app.flashes('success') %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ message }}
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fas fa-check-circle me-2"></i> {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     {% endfor %}
+</div>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-7">
-            <div id="contact" class="contact-card p-4 p-md-5 shadow-lg">
-                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+<!-- FORMULAIRE DE CONTACT -->
+<section class="contact-section py-5" id="contact-form">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9 col-xl-8"> <!-- LARGEUR AUGMENTÉE -->
+                <div class="contact-card">
 
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        {{ form_label(form.nom) }}
-                        {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Jean Dupont'}}) }}
-                        {{ form_errors(form.nom) }}
+                    <!-- EN-TÊTE -->
+                    <div class="card-header">
+                        <h2>Formulaire de contact</h2>
+                        <p class="mb-0">Tous les champs sont requis</p>
                     </div>
-                    <div class="col-md-6">
-                        {{ form_label(form.email) }}
-                        {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'jean@example.com'}}) }}
-                        {{ form_errors(form.email) }}
+
+                    <!-- CORPS DU FORMULAIRE -->
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+
+                    <div class="form-body">
+
+                        <!-- Ligne 1 : Nom + Email -->
+                        <div class="row g-5"> <!-- ESPACE ENTRE COLONNES -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.nom, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.nom, {'attr': {
+                                        'class': 'form-control form-control-lg',
+                                        'placeholder': 'Jean Dupont'
+                                    }}) }}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form_errors(form.nom) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.email, {'attr': {
+                                        'class': 'form-control form-control-lg',
+                                        'placeholder': 'jean@example.com'
+                                    }}) }}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form_errors(form.email) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sujet -->
+                        <div class="form-group mt-4">
+                            {{ form_label(form.sujet, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.sujet, {'attr': {
+                                'class': 'form-control form-control-lg',
+                                'placeholder': 'Sujet de votre message'
+                            }}) }}
+                            <div class="invalid-feedback d-block">
+                                {{ form_errors(form.sujet) }}
+                            </div>
+                        </div>
+
+                        <!-- Message -->
+                        <div class="form-group mt-4">
+                            {{ form_label(form.message, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.message, {'attr': {
+                                'class': 'form-control form-control-lg',
+                                'rows': 7,
+                                'placeholder': 'Écrivez votre message ici...'
+                            }}) }}
+                            <div class="invalid-feedback d-block">
+                                {{ form_errors(form.message) }}
+                            </div>
+                        </div>
+
+                        <!-- Bouton -->
+                        <div class="text-center mt-5">
+                            {{ form_widget(form.envoyer, {'attr': {'class': 'btn btn-primary px-5'}}) }}
+                        </div>
+
                     </div>
-                </div>
 
-                <div class="mt-3">
-                    {{ form_label(form.sujet) }}
-                    {{ form_widget(form.sujet, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Demande d\'information'}}) }}
-                    {{ form_errors(form.sujet) }}
+                    {{ form_end(form) }}
                 </div>
-
-                <div class="mt-3">
-                    {{ form_label(form.message) }}
-                    {{ form_widget(form.message, {'attr': {'class': 'form-control', 'rows': 5, 'placeholder': 'Écrivez votre message ici...'}}) }}
-                    {{ form_errors(form.message) }}
-                </div>
-
-                <div class="text-center mt-4">
-                    {{ form_widget(form.envoyer) }}
-                </div>
-
-                {{ form_end(form) }}
             </div>
         </div>
     </div>
+</section>
 {% endblock %}

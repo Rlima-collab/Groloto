@@ -17,7 +17,7 @@
         <ul class="submenu">
             <li><a href="">Voir les Weekends</a></li>
             <li><a href="">Voir les Évenements</a></li>
-            <li><a href="">S'inscrire à une tâche</a></li>
+            <li><a href="{{ path('benevole_taches_disponibles') }}">S'inscrire à une tâche</a></li>
         </ul>
     </li>
     <li class="nav-item">
@@ -28,8 +28,8 @@
             <span class="nav-text">Bénévoles</span>
         </a>
         <ul class="submenu">
-            <li><a href="">Mon planning</a></li>
-            <li><a href="">Listes des Bénévoles</a></li>
+            <li><a href="{{ path('benevole_mon_planning') }}">Mon planning</a></li>
+            <li><a href="{{ path('benevoles') }}">Listes des Bénévoles</a></li>
         </ul>
     </li>
     <li class="nav-item">

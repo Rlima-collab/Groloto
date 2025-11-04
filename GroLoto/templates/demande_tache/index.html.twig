@@ -4,13 +4,14 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('css/taches.css') }}">
 {% endblock %}
 
 {% block body %}
 <div class="page-header">
     <h1 class="page-title">Tâches disponibles</h1>
-    <a href="{{ path('benevoles') }}" class="btn btn-secondary">Retour</a>
+    <a href="{{ path('dashboard') }}" class="btn btn-secondary">Retour au tableau de bord</a>
 </div>
 
 <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">

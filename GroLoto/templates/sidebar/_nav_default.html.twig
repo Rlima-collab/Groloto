@@ -24,8 +24,18 @@
             <span class="nav-text">Festivals</span>
         </a>
         <ul class="submenu">
-            <li><a href="">Voir les Weekends</a></li>
-            <li><a href="">Voir les Évenements</a></li>
+            <li>
+            <a href="{{ path('app_weekends') }}"
+               class="{% if app.request.attributes.get('_route') == 'app_weekends' %}active{% endif %}">
+               Voir les Weekends
+            </a>
+        </li>
+            <li>
+                <a href="{{ path('app_evenements') }}"
+                   class="{% if app.request.attributes.get('_route') == 'app_evenements' %}active{% endif %}">
+                   Voir les Évènements
+                </a>
+            </li>
         </ul>
     </li>
     <li class="nav-item">

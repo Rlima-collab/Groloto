@@ -14,7 +14,13 @@
 <div class="hero-section weekend-hero">
     <div class="shine"></div>
     <div class="hero-content">
-        <h1 class="hero-title">Gestion des Weekends</h1>
+        <h1 class="hero-title">
+            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                Gestion des Weekends
+            {% else %}
+                Voir les Weekends
+            {% endif %}
+        </h1>
         <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité.</p>
         {% if is_granted('ROLE_MECENE') and not is_granted('ROLE_ADMIN') %}
             <a href="{{ path('mecene_inscription') }}" class="btn-night-blue">S'inscrire à un événement</a>
@@ -27,7 +33,7 @@
     </div>
 </div>
 
-<h2 style="font-size: 1.8rem; color: #1a3c5a; margin-bottom: 20px; text-align: center;">Planning des Weekends</h2>
+<br/>
 
 <div class="metrics-grid">
     <div class="metric-card">

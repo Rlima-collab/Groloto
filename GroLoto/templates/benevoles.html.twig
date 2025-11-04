@@ -4,9 +4,11 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
     <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
+ weekend
 {% endblock %}
 
 
@@ -118,6 +120,7 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
+
 function confirmDelete(button) {
     const benevoleId = button.getAttribute('data-benevole-id');
     const benevoleNom = button.getAttribute('data-benevole-nom');
@@ -139,4 +142,5 @@ function confirmDelete(button) {
     }
 }
 </script>
+
 {% endblock %}
