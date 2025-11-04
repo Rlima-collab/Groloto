@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Entity\DemandeTache;
 use App\Entity\AffectationTache;
+use App\Entity\Notification;
 use App\Repository\DemandeTacheRepository;
 use App\Repository\TacheRepository;
 use App\Repository\BenevoleRepository;
 use App\Repository\AffectationTacheRepository;
+use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -89,6 +91,7 @@ class DemandeTacheController extends AbstractController
         BenevoleRepository $benevoleRepository,
         DemandeTacheRepository $demandeRepository,
         AffectationTacheRepository $affectationRepository,
+        UtilisateurRepository $utilisateurRepository,
         EntityManagerInterface $entityManager
     ): Response {
         $user = $this->getUser();
@@ -140,6 +143,23 @@ class DemandeTacheController extends AbstractController
         $demande->setMessageBenevole($request->request->get('message', ''));
 
         $entityManager->persist($demande);
+        
+        // Créer une notification pour tous les admins
+        $admins = $utilisateurRepository->findByRoleName('admin');
+        $benevoleNom = $benevole->getUtilisateur()->getPrenom() . ' ' . $benevole->getUtilisateur()->getNom();
+        
+        foreach ($admins as $admin) {
+            $notification = new Notification();
+            $notification->setDestinataire($admin);
+            $notification->setMessage("{$benevoleNom} a demandé à rejoindre la tâche \"{$tache->getTitre()}\"");
+            $notification->setType('demande_tache');
+            $notification->setLien($this->generateUrl('admin_demandes_taches'));
+            $notification->setCreatedAt(new \DateTime());
+            $notification->setLue(false);
+            
+            $entityManager->persist($notification);
+        }
+        
         $entityManager->flush();
 
         $this->addFlash('success', 'Votre demande a été envoyée à l\'administrateur.');
@@ -265,6 +285,17 @@ class DemandeTacheController extends AbstractController
         $demande->setMessageAdmin($request->request->get('message_admin', ''));
 
         $entityManager->persist($affectation);
+        
+        // Créer une notification pour le bénévole
+        $notification = new Notification();
+        $notification->setDestinataire($demande->getBenevole()->getUtilisateur());
+        $notification->setMessage("Votre demande pour la tâche \"{$tache->getTitre()}\" a été acceptée ✅");
+        $notification->setType('demande_acceptee');
+        $notification->setLien($this->generateUrl('benevole_taches_disponibles'));
+        $notification->setCreatedAt(new \DateTime());
+        $notification->setLue(false);
+        
+        $entityManager->persist($notification);
         $entityManager->flush();
 
         $benevoleNom = $demande->getBenevole()->getUtilisateur()->getPrenom() . ' ' . 
@@ -307,6 +338,17 @@ class DemandeTacheController extends AbstractController
         $demande->setAdminReponse($this->getUser());
         $demande->setMessageAdmin($request->request->get('message_admin', ''));
 
+        // Créer une notification pour le bénévole
+        $notification = new Notification();
+        $notification->setDestinataire($demande->getBenevole()->getUtilisateur());
+        $tacheNom = $demande->getTache()->getTitre();
+        $notification->setMessage("Votre demande pour la tâche \"{$tacheNom}\" a été refusée ❌");
+        $notification->setType('demande_refusee');
+        $notification->setLien($this->generateUrl('benevole_taches_disponibles'));
+        $notification->setCreatedAt(new \DateTime());
+        $notification->setLue(false);
+        
+        $entityManager->persist($notification);
         $entityManager->flush();
 
         $benevoleNom = $demande->getBenevole()->getUtilisateur()->getPrenom() . ' ' . 

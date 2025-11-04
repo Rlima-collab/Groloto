@@ -18,6 +18,52 @@ class DashboardController extends AbstractController
     #[Route('/', name: 'dashboard')]
     public function index(): Response
     {
+        // Si l'utilisateur n'est pas connecté, afficher la page publique
+        if (!$this->getUser()) {
+            return $this->renderPublicDashboard();
+        }
+
+        // Sinon, afficher le dashboard connecté
+        return $this->renderAuthenticatedDashboard();
+    }
+
+    private function renderPublicDashboard(): Response
+    {
+        $upcomingEvents = $this->entityManager->createQuery(
+            'SELECT e FROM App\Entity\Evenement e
+             WHERE e.date_debut >= :today
+             ORDER BY e.date_debut ASC'
+        )
+        ->setParameter('today', new \DateTime())
+        ->setMaxResults(6)
+        ->getResult();
+
+        $totalEvents = $this->entityManager->createQuery(
+            'SELECT COUNT(e.id) FROM App\Entity\Evenement e'
+        )
+        ->getSingleScalarResult();
+
+        $volunteersCount = $this->entityManager->createQuery(
+            'SELECT COUNT(b.id) FROM App\Entity\Benevole b WHERE b.actif = :actif'
+        )
+        ->setParameter('actif', true)
+        ->getSingleScalarResult();
+
+        $sponsorsCount = $this->entityManager->createQuery(
+            'SELECT COUNT(m.id) FROM App\Entity\Mecene m'
+        )
+        ->getSingleScalarResult();
+
+        return $this->render('dashboard_public.html.twig', [
+            'upcoming_events' => $upcomingEvents,
+            'total_events' => $totalEvents ?? 0,
+            'volunteers_count' => $volunteersCount ?? 0,
+            'sponsors_count' => $sponsorsCount ?? 0,
+        ]);
+    }
+
+    private function renderAuthenticatedDashboard(): Response
+    {
         $firstDayOfMonth = (new \DateTime('first day of this month'))->format('Y-m-d 00:00:00');
         $firstDayOfNextMonth = (new \DateTime('first day of next month'))->format('Y-m-d 00:00:00');
 

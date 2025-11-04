@@ -81,11 +81,12 @@
             </div>
         </div>
     </div>
-        <div class="card main-card">
-            <div class="card-header">
-                <h2 class="card-title">Liste des taches ({{ tachesData|length }})</h2>
-                <p class="card-description">Gerez toutes les taches de vos evenements</p>
-            </div>
+
+    <div class="card main-card">
+        <div class="card-header">
+            <h2 class="card-title">Liste des taches ({{ tachesData|length }})</h2>
+            <p class="card-description">Gerez toutes les taches de vos evenements</p>
+        </div>
             <div class="card-content">
                 {% if tachesData|length > 0 %}
                     <div class="table-responsive">
@@ -180,7 +181,7 @@
                     </div>
                 {% else %}
                     <div class="empty-state">
-                        <div class="empty-icon">Taches</div>
+                        <div class="empty-icon"><i class="bi bi-clipboard-check-fill" style="font-size: 3rem;"></i></div>
                         <h3>Aucune tache trouvee</h3>
                         <p>Commencez par creer des taches pour vos evenements.</p>
                         <a href="{{ path('tache_new') }}" class="btn btn-primary">+ Creer une tache</a>
@@ -189,7 +190,6 @@
             </div>
         </div>
     </div>
-</div>
 </div>
 
 <script>
