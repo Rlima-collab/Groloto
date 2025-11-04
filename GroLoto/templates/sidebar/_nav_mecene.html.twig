@@ -8,20 +8,20 @@
         </a>
     </li>
     <li class="nav-item">
-        <a href="#" class="nav-link">
+        <a href="{{ path('app_weekends') }}" class="nav-link">
             <span class="nav-icon">
                 <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="Evenement">
             </span>
             <span class="nav-text">Festivals</span>
         </a>
         <ul class="submenu">
-            <li><a href="">S'inscrire à un Weekend</a></li>
-            <li><a href="">Voir les Weekends</a></li>
-            <li><a href="">Voir les Évènements</a></li>
+            <li><a href="{{ path('mecene_inscription') }}">S'inscrire à un Weekend</a></li>
+            <li><a href="{{ path('app_weekends') }}">Voir les Weekends</a></li>
+            <li><a href="{{ path('app_evenements') }}">Voir les Évènements</a></li>
         </ul>
     </li>
     <li class="nav-item">
-        <a href="#" class="nav-link">
+        <a href="{{ path('benevoles') }}" class="nav-link">
             <span class="nav-icon">
                 <img src="{{ asset('images/sidebar/logo_benevole.png') }}" alt="Bénévoles">
             </span>
@@ -36,8 +36,8 @@
             <span class="nav-text">Mécènes</span>
         </a>
         <ul class="submenu">
-            <li><a href="">Voir les Mécènes</a></li>
-            <li><a href="">Voir les lots</a></li>
+            <li><a href="{{ path('mecenes') }}">Voir les Mécènes</a></li>
+            <li><a href="{{ path('stocks') }}#inventaire">Voir les lots</a></li>
         </ul>
     </li>
     <li class="nav-item">
