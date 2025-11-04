@@ -29,43 +29,43 @@
 
 <!-- Cartes de résumé -->
 <div class="metrics-grid">
-    <div class="card metric-card yellow-border">
+    <div class="card metric-card ">
         <div class="card-header">
             <span class="metric-title">Articles</span>
-            <span class="icon yellow"></span>
+            <span class="icon"></span>
         </div>
         <div class="card-content">
             <div class="metric-value">{{ total_items }}</div>
-            <p class="metric-change positive">Inventaire actuel</p>
+            <p class="metric-change">Inventaire actuel</p>
         </div>
     </div>
 
-    <div class="card metric-card green-border">
+    <div class="card metric-card ">
         <div class="card-header">
             <span class="metric-title">Valeur totale</span>
-            <span class="icon green"></span>
+            <span class="icon"></span>
         </div>
         <div class="card-content">
             <div class="metric-value">€{{ stock_value|number_format(0, ',', ' ') }}</div>
-            <p class="metric-change positive">Estimation globale</p>
+            <p class="metric-change">Estimation globale</p>
         </div>
     </div>
 
-    <div class="card metric-card red-border">
+    <div class="card metric-card ">
         <div class="card-header">
             <span class="metric-title">Alertes stock</span>
-            <span class="icon red"></span>
+            <span class="icon"></span>
         </div>
         <div class="card-content">
             <div class="metric-value">{{ low_stock_count }}</div>
-            <p class="metric-change negative">Articles critiques</p>
+            <p class="metric-change">Articles critiques</p>
         </div>
     </div>
 
-    <div class="card metric-card blue-border">
+    <div class="card metric-card ">
         <div class="card-header">
             <span class="metric-title">Catégories</span>
-            <span class="icon blue"></span>
+            <span class="icon"></span>
         </div>
         <div class="card-content">
             <div class="metric-value">{{ categories_count }}</div>

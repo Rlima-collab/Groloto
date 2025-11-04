@@ -1,25 +1,12 @@
-/* =============== TABLEAU INVENTAIRE =============== */
-
-/* =============== MÉTRIQUES CARDS =============== */
-.metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
+/* =============== HERO SECTION - BLEU FONCÉ =============== */
 .hero-section {
     margin: -20px;
-    background: linear-gradient(145deg, #f9f9f9, #f0f0f0, #f1f1f1);
+    background: linear-gradient(135deg, #0a1419 0%, #0d1b2a 50%, #1e3a50 100%);
     color: #fff;
-    padding: 2rem 3rem 4rem 3rem; /* Réduction encore plus importante */
-    padding-top: calc(2rem + 71px); /* Compensation pour le header fixe de taille ajustée */
-    margin-bottom: 0.5rem; /* Réduction de l'espace avec le contenu suivant */
+    padding: 2rem 3rem 4rem 3rem;
+    padding-top: calc(2rem + 71px);
+    margin-bottom: 0.5rem;
     text-align: center;
-    transition: all 0.3s ease-in-out;
     position: relative;
     overflow: hidden;
 }
@@ -31,52 +18,22 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.15), transparent 70%);
+    background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);
     transform: rotate(25deg);
     opacity: 1;
-}
-
-.hero-section::after {
-    content: "";
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-image: repeating-linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.15) 0px,
-        rgba(255, 255, 255, 0.15) 2px,
-        transparent 2px,
-        transparent 20px
-    );
-    opacity: 0.5;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.hero-section::after {
-    position: relative;
-}
-
-.hero-section::before,
-.hero-section::after {
     z-index: 0;
 }
 
 .hero-section .shine {
     position: absolute;
-    top: 0; left: -150%;
+    top: 0;
+    left: -150%;
     width: 50%;
     height: 100%;
-    background: linear-gradient(
-        135deg,
-        rgba(255,255,255,0) 0%,
-        rgba(255,255,255,0.6) 50%,
-        rgba(255,255,255,0) 100%
-    );
+    background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
     transform: skewX(-20deg);
-    animation: shine-move 5s infinite linear;
+    animation: shine-move 8s infinite linear;
     z-index: 1;
-    pointer-events: none;
 }
 
 @keyframes shine-move {
@@ -87,47 +44,121 @@
 .hero-title {
     font-size: 2.5rem;
     font-weight: 800;
-    color: #111;
+    color: #ffffff;
     margin-bottom: 0.75rem;
     letter-spacing: -1px;
     position: relative;
     z-index: 2;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .hero-description {
     font-size: 1.2rem;
-    color: #444;
+    color: #e0f2fe;
     margin-bottom: 2rem;
     line-height: 1.6;
     position: relative;
     z-index: 2;
 }
 
-.hero-btn.yellow {
-    background: linear-gradient(135deg, #ffd600, #ffb800);
-    color: #111;
+.hero-btn {
+    background: #ffd600;
+    color: #0d1b2a;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     padding: 0.9rem 2rem;
     border-radius: 2rem;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(255, 214, 0, 0.3);
     transition: all 0.3s ease;
     position: relative;
     z-index: 2;
     text-decoration: none;
+    display: inline-block;
 }
 
-.hero-btn.yellow:hover {
-    background: linear-gradient(135deg, #f1c901, #e2a302);
+.hero-btn:hover {
+    background: #ffed4e;
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    box-shadow: 0 6px 16px rgba(255, 214, 0, 0.4);
     text-decoration: none;
 }
 
-/* Styles du tableau d'inventaire */
+/* =============== CARTES MÉTRIQUES - SIMPLE ET HARMONISÉ =============== */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.metric-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(13, 27, 42, 0.08);
+    transition: all 0.3s ease;
+    border-left: 4px solid #0d1b2a;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(13, 27, 42, 0.15);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.metric-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.icon {
+    font-size: 1.5rem;
+    color: #0d1b2a;
+    opacity: 0.3;
+}
+
+.card-content {
+    padding: 0;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #0d1b2a;
+    margin: 0;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.metric-change {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.metric-change.positive { 
+    color: #0d1b2a;
+}
+
+.metric-change.negative { 
+    color: #6b7280;
+}
 
 .table-wrapper {
   overflow-x: auto;
+  border-radius: 8px;
 }
 
 .inventory-table {
@@ -138,8 +169,8 @@
 }
 
 .inventory-table thead {
-  background: #f4f6f8;
-  color: #333;
+  background: #0d1b2a;
+  color: #ffffff;
   text-transform: uppercase;
   font-size: 0.8rem;
   letter-spacing: 0.5px;
@@ -148,33 +179,34 @@
 .inventory-table th,
 .inventory-table td {
   padding: 12px 15px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .inventory-table tbody tr:nth-child(even) {
-  background-color: #fafafa;
+  background-color: #f8fafc;
 }
 
 .inventory-table tbody tr:hover {
-  background-color: #f1f3f6;
+  background-color: #e0f2fe;
   transition: background-color 0.2s ease-in-out;
 }
 
 .inventory-table td.name {
   font-weight: 600;
-  color: #2c3e50;
+  color: #0d1b2a;
 }
 
 .inventory-table td.value {
   font-weight: 600;
-  color: #28a745;
+  color: #0d1b2a;
   text-align: right;
 }
 
 .inventory-table td.empty {
   text-align: center;
   font-style: italic;
-  color: #777;
+  color: #6b7280;
+  padding: 2rem;
 }
 
 .text-right {
@@ -183,33 +215,44 @@
 
 .badge {
   display: inline-block;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.8rem;
   font-weight: 600;
 }
 
 .badge.category {
-  background: #d1ecf1;
-  color: #0c5460;
+  background: #dbeafe;
+  color: #0d1b2a;
+  border: 1px solid #93c5fd;
 }
 
 .badge.unit {
-  background: #e2e3e5;
-  color: #383d41;
+  background: #e0e7ff;
+  color: #0d1b2a;
+  border: 1px solid #c7d2fe;
 }
 
 .badge.status.success {
-  background: #d4edda;
-  color: #155724;
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
 }
 
 .badge.status.warning {
-  background: #fff3cd;
-  color: #856404;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
 }
 
 .badge.status.danger {
-  background: #f8d7da;
-  color: #721c24;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
 }
