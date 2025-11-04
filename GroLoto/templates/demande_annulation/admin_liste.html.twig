@@ -1,0 +1,226 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Demandes d'annulation de tâches{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Demandes d'annulation de tâches</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    <!-- Demandes en attente -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h2 class="h5 mb-0">
+                <i class="bi bi-clock-history"></i> Demandes en attente
+                <span class="badge bg-dark">{{ demandes_en_attente|length }}</span>
+            </h2>
+        </div>
+        <div class="card-body">
+            {% if demandes_en_attente is empty %}
+                <p class="text-muted mb-0">Aucune demande d'annulation en attente.</p>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Bénévole</th>
+                                <th>Tâche</th>
+                                <th>Date demande</th>
+                                <th>Motif</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for demande in demandes_en_attente %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}</strong><br>
+                                        <small class="text-muted">{{ demande.benevole.utilisateur.email }}</small>
+                                    </td>
+                                    <td>
+                                        <strong>{{ demande.affectation.tache.titre }}</strong><br>
+                                        <small class="text-muted">
+                                            {{ demande.affectation.tache.debut|date('d/m/Y H:i') }} - 
+                                            {{ demande.affectation.tache.fin|date('d/m/Y H:i') }}
+                                        </small>
+                                    </td>
+                                    <td>{{ demande.dateDemande|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        {% if demande.motifBenevole %}
+                                            {{ demande.motifBenevole }}
+                                        {% else %}
+                                            <em class="text-muted">Aucun motif fourni</em>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-success" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#accepterModal{{ demande.id }}">
+                                            <i class="bi bi-check-lg"></i> Accepter
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#refuserModal{{ demande.id }}">
+                                            <i class="bi bi-x-lg"></i> Refuser
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Modal Accepter -->
+                                <div class="modal fade" id="accepterModal{{ demande.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Accepter la demande d'annulation</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form method="post" action="{{ path('admin_accepter_annulation', {id: demande.id}) }}">
+                                                <div class="modal-body">
+                                                    <p>Êtes-vous sûr de vouloir accepter cette demande d'annulation ?</p>
+                                                    <p><strong>Bénévole :</strong> {{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}</p>
+                                                    <p><strong>Tâche :</strong> {{ demande.affectation.tache.titre }}</p>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="message_admin_accepter{{ demande.id }}" class="form-label">Message pour le bénévole (optionnel)</label>
+                                                        <textarea class="form-control" id="message_admin_accepter{{ demande.id }}" 
+                                                                  name="message_admin" rows="3"></textarea>
+                                                    </div>
+                                                    
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('accepter_annulation_' ~ demande.id) }}">
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                    <button type="submit" class="btn btn-success">Confirmer l'acceptation</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Refuser -->
+                                <div class="modal fade" id="refuserModal{{ demande.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Refuser la demande d'annulation</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form method="post" action="{{ path('admin_refuser_annulation', {id: demande.id}) }}">
+                                                <div class="modal-body">
+                                                    <p>Êtes-vous sûr de vouloir refuser cette demande d'annulation ?</p>
+                                                    <p><strong>Bénévole :</strong> {{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}</p>
+                                                    <p><strong>Tâche :</strong> {{ demande.affectation.tache.titre }}</p>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="message_admin_refuser{{ demande.id }}" class="form-label">Motif du refus</label>
+                                                        <textarea class="form-control" id="message_admin_refuser{{ demande.id }}" 
+                                                                  name="message_admin" rows="3" required></textarea>
+                                                    </div>
+                                                    
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('refuser_annulation_' ~ demande.id) }}">
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                    <button type="submit" class="btn btn-danger">Confirmer le refus</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Toutes les demandes -->
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h2 class="h5 mb-0">
+                <i class="bi bi-list-ul"></i> Historique des demandes
+            </h2>
+        </div>
+        <div class="card-body">
+            {% if toutes_demandes is empty %}
+                <p class="text-muted mb-0">Aucune demande d'annulation.</p>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Statut</th>
+                                <th>Bénévole</th>
+                                <th>Tâche</th>
+                                <th>Date demande</th>
+                                <th>Date réponse</th>
+                                <th>Motif bénévole</th>
+                                <th>Réponse admin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for demande in toutes_demandes %}
+                                <tr>
+                                    <td>
+                                        {% if demande.statut == 'en_attente' %}
+                                            <span class="badge bg-warning text-dark">En attente</span>
+                                        {% elseif demande.statut == 'acceptee' %}
+                                            <span class="badge bg-success">Acceptée</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Refusée</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}</td>
+                                    <td>{{ demande.affectation.tache.titre }}</td>
+                                    <td>{{ demande.dateDemande|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        {% if demande.dateReponse %}
+                                            {{ demande.dateReponse|date('d/m/Y H:i') }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if demande.motifBenevole %}
+                                            {{ demande.motifBenevole }}
+                                        {% else %}
+                                            <em class="text-muted">Non fourni</em>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if demande.messageAdmin %}
+                                            {{ demande.messageAdmin }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ path('dashboard') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour au tableau de bord
+        </a>
+    </div>
+</div>
+{% endblock %}

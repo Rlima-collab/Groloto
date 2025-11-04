@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un événement{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-create.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section weekend-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Créer un Événement</h1>
+        <p class="hero-description">Planifiez un nouvel événement caritatif.</p>
+        <a href="{{ path('app_evenements') }}" class="btn-login">Voir tous les événements</a>
+    </div>
+</div>
+
+<div class="weekend-create-container">
+    <div class="weekend-form-card">
+        <div class="weekend-form-header">
+            <h2>Informations de l'Événement</h2>
+        </div>
+
+        {{ form_start(form, {'attr': {'class': 'form-night-blue'}}) }}
+
+            <div class="mb-4">
+                {{ form_row(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom de l\'événement'}}) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_row(form.dateVendredi, {'attr': {'class': 'form-control'}, 'label': 'Date de l\'événement (vendredi)'}) }}
+                <small class="text-muted">L'événement se terminera automatiquement le dimanche (2 jours après)</small>
+            </div>
+
+            <div class="mb-4">
+                {{ form_row(form.lieu, {'attr': {'class': 'form-control', 'placeholder': 'Lieu de l\'événement'}}) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_row(form.description, {'attr': {'class': 'form-control', 'rows': 5, 'placeholder': 'Description de l\'événement...'}}) }}
+            </div>
+
+            <div class="text-center mt-8">
+                <button type="submit" class="btn-night-blue">
+                    Créer l'événement
+                </button>
+                <a href="{{ path('app_evenements') }}" class="btn-outline-night-blue ml-3">
+                    Annuler
+                </a>
+            </div>
+
+            <div style="display: none;">
+                {{ form_rest(form) }}
+            </div>
+
+        {{ form_end(form, {'render_rest': false}) }}
+    </div>
+</div>
+
+<style>
+.ml-3 {
+    margin-left: 1rem;
+}
+
+.text-muted {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+</style>
+{% endblock %}

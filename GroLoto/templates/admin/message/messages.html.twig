@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+{% block title %}Messages reçus{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>Messages reçus</h1>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Expéditeur</th>
+                    <th>Sujet</th>
+                    <th>Message</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for msg in messages %}
+                {% set parts = msg.message|split('] ', 2) %}
+                {% set hasSubject = parts|length > 1 and parts[0]|slice(0,1) == '[' %}
+                <tr class="{% if not msg.lu %}table-warning fw-bold{% endif %}">
+                    <td>{{ msg.createdAt|date('d/m H:i') }}</td>
+                    <td>
+                        {{ msg.nom }}<br>
+                        <small><a href="mailto:{{ msg.email }}">{{ msg.email }}</a></small>
+                    </td>
+                    <td>
+                        {% if hasSubject %}
+                            <strong>{{ parts[0]|slice(1) }}</strong>
+                        {% else %}
+                            <em>Aucun sujet</em>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small>
+                            {{ (hasSubject ? parts[1] : msg.message)|slice(0, 80) }}
+                            {% if (hasSubject ? parts[1] : msg.message)|length > 80 %}...{% endif %}
+                        </small>
+                    </td>
+                    <td>
+                        {% if msg.reponse %}
+                            <span class="badge bg-success">Répondu</span>
+                        {% else %}
+                            <span class="badge bg-secondary">En attente</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#reply{{ msg.id }}">
+                            Répondre
+                        </button>
+
+                        <form method="post" action="{{ path('admin_message_delete', {id: msg.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer ?')">
+                            <button class="btn btn-sm btn-danger">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+
+                <!-- Modal Réponse -->
+                <div class="modal fade" id="reply{{ msg.id }}">
+                    <div class="modal-dialog modal-lg">
+                        <form method="post" action="{{ path('admin_message_reply', {id: msg.id}) }}">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5>Répondre à {{ msg.nom }}</h5>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong>Message original :</strong></p>
+                                    <div class="bg-light p-3 rounded mb-3">
+                                        {{ msg.message|nl2br }}
+                                    </div>
+                                    <textarea name="reponse" class="form-control" rows="6" placeholder="Votre réponse..." required></textarea>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-success">Envoyer</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <tr><td colspan="6" class="text-center py-4">Aucun message</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

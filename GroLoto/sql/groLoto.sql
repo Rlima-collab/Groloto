@@ -1,4 +1,8 @@
--- 1. SUPPRIMER TOUTES LES TABLES
+-- =============================================
+-- SUPPRESSION COMPLÈTE DES TABLES
+-- =============================================
+DROP TABLE IF EXISTS CONTACT_MESSAGE;
+DROP TABLE IF EXISTS NOTIFICATION;
 DROP TABLE IF EXISTS HISTORIQUE_EVENEMENT;
 DROP TABLE IF EXISTS PARAMETRE;
 DROP TABLE IF EXISTS HELLOASSO;
@@ -17,220 +21,278 @@ DROP TABLE IF EXISTS BENEVOLE;
 DROP TABLE IF EXISTS UTILISATEUR;
 DROP TABLE IF EXISTS ROLE;
 DROP TABLE IF EXISTS WEEKEND;
+DROP TABLE IF EXISTS messenger_messages;
 
--- 2. CRÉER LES TABLES (WEEKEND EN PREMIER)
+-- =============================================
+-- CRÉATION DES TABLES
+-- =============================================
 
+-- WEEKEND
 CREATE TABLE WEEKEND (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  nom TEXT NOT NULL,
-  date_vendredi DATE NOT NULL,
-  date_samedi DATE NOT NULL,
-  date_dimanche DATE NOT NULL,
-  date_creation DATETIME DEFAULT CURRENT_TIMESTAMP
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    date_vendredi DATE NOT NULL,
+    date_samedi DATE NOT NULL,
+    date_dimanche DATE NOT NULL,
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ROLE
 CREATE TABLE ROLE (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  nom TEXT NOT NULL UNIQUE,
-  description TEXT
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL UNIQUE,
+    description TEXT
 );
 
+-- UTILISATEUR
 CREATE TABLE UTILISATEUR (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_role INTEGER NOT NULL,
-  email TEXT NOT NULL UNIQUE,
-  mot_de_passe TEXT,
-  prenom TEXT,
-  nom TEXT,
-  telephone TEXT,
-  date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-  date_modification DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_role) REFERENCES ROLE(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_role INTEGER NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    mot_de_passe TEXT,
+    prenom TEXT,
+    nom TEXT,
+    telephone TEXT,
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    date_modification DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_role) REFERENCES ROLE(id)
 );
 
+-- BENEVOLE
 CREATE TABLE BENEVOLE (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_utilisateur INTEGER NOT NULL UNIQUE,
-  remarque TEXT,
-  actif BOOLEAN DEFAULT 1,
-  FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_utilisateur INTEGER NOT NULL UNIQUE,
+    remarque TEXT,
+    actif BOOLEAN DEFAULT 1,
+    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
+-- MECENE
 CREATE TABLE MECENE (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_utilisateur INTEGER,
-  organisation TEXT NOT NULL,
-  siret TEXT NOT NULL,
-  FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_utilisateur INTEGER,
+    organisation TEXT NOT NULL,
+    siret TEXT NOT NULL,
+    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
+-- LOT
 CREATE TABLE LOT (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_mecene INTEGER,
-  titre TEXT NOT NULL,
-  description TEXT,
-  quantite INTEGER DEFAULT 1,
-  valeur_estimee REAL DEFAULT 0.0,
-  date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_mecene) REFERENCES MECENE(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_mecene INTEGER,
+    titre TEXT NOT NULL,
+    description TEXT,
+    quantite INTEGER DEFAULT 1,
+    valeur_estimee REAL DEFAULT 0.0,
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_mecene) REFERENCES MECENE(id)
 );
 
+-- CONVENTION
 CREATE TABLE CONVENTION (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_mecene INTEGER NOT NULL,
-  nom_modele TEXT,
-  url_pdf TEXT,
-  date_signature DATETIME,
-  methode_signature TEXT DEFAULT 'aucune',
-  date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT check_methode_signature CHECK (methode_signature IN ('aucune', 'manuelle', 'electronique')),
-  FOREIGN KEY (id_mecene) REFERENCES MECENE(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_mecene INTEGER NOT NULL,
+    nom_modele TEXT,
+    url_pdf TEXT,
+    date_signature DATETIME,
+    methode_signature TEXT DEFAULT 'aucune',
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT check_methode_signature CHECK (methode_signature IN ('aucune', 'manuelle', 'electronique')),
+    FOREIGN KEY (id_mecene) REFERENCES MECENE(id)
 );
 
+-- EVENEMENT
 CREATE TABLE EVENEMENT (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_weekend INTEGER,
-  nom TEXT NOT NULL,
-  description TEXT,
-  date_debut DATE,
-  date_fin DATE,
-  lieu TEXT,
-  date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_weekend) REFERENCES WEEKEND(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_weekend INTEGER,
+    nom TEXT NOT NULL,
+    description TEXT,
+    date_debut DATE,
+    date_fin DATE,
+    lieu TEXT,
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_weekend) REFERENCES WEEKEND(id)
 );
 
+-- INSCRIPTION_MECENE
 CREATE TABLE INSCRIPTION_MECENE (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_mecene INTEGER NOT NULL,
-  id_evenement INTEGER NOT NULL,
-  description_don TEXT NOT NULL,
-  montant_estime REAL,
-  statut TEXT DEFAULT 'en_attente',
-  date_inscription DATETIME DEFAULT CURRENT_TIMESTAMP,
-  remarques TEXT,
-  CONSTRAINT check_statut CHECK (statut IN ('en_attente', 'accepte', 'refuse')),
-  FOREIGN KEY (id_mecene) REFERENCES MECENE(id),
-  FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_mecene INTEGER NOT NULL,
+    id_evenement INTEGER NOT NULL,
+    description_don TEXT NOT NULL,
+    montant_estime REAL,
+    statut TEXT DEFAULT 'en_attente',
+    date_inscription DATETIME DEFAULT CURRENT_TIMESTAMP,
+    remarques TEXT,
+    CONSTRAINT check_statut CHECK (statut IN ('en_attente', 'accepte', 'refuse')),
+    FOREIGN KEY (id_mecene) REFERENCES MECENE(id),
+    FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
 );
 
+-- STOCK
 CREATE TABLE STOCK (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  nom TEXT NOT NULL,
-  categorie TEXT,
-  quantite INTEGER DEFAULT 0,
-  unite TEXT,
-  seuil INTEGER DEFAULT 0,
-  valeur_unitaire REAL DEFAULT 0.0,
-  remarque TEXT,
-  derniere_modif DATETIME DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT check_categorie CHECK (categorie IN ('bar', 'resto', 'deco', 'autre'))
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    categorie TEXT,
+    quantite INTEGER DEFAULT 0,
+    unite TEXT,
+    seuil INTEGER DEFAULT 0,
+    valeur_unitaire REAL DEFAULT 0.0,
+    remarque TEXT,
+    derniere_modif DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT check_categorie CHECK (categorie IN ('bar', 'resto', 'deco', 'autre'))
 );
 
+-- HISTORIQUE_STOCK
 CREATE TABLE HISTORIQUE_STOCK (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_stock INTEGER NOT NULL,
-  type_changement TEXT NOT NULL,
-  quantite INTEGER NOT NULL,
-  raison TEXT,
-  id_evenement INTEGER,
-  id_utilisateur INTEGER,
-  date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT check_type_changement CHECK (type_changement IN ('entree', 'sortie', 'ajustement')),
-  FOREIGN KEY (id_stock) REFERENCES STOCK(id),
-  FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id),
-  FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_stock INTEGER NOT NULL,
+    type_changement TEXT NOT NULL,
+    quantite INTEGER NOT NULL,
+    raison TEXT,
+    id_evenement INTEGER,
+    id_utilisateur INTEGER,
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT check_type_changement CHECK (type_changement IN ('entree', 'sortie', 'ajustement')),
+    FOREIGN KEY (id_stock) REFERENCES STOCK(id),
+    FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id),
+    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
+-- DISPONIBILITE_BENEVOLE
 CREATE TABLE DISPONIBILITE_BENEVOLE (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_benevole INTEGER NOT NULL,
-  id_evenement INTEGER NOT NULL,
-  debut DATETIME,
-  fin DATETIME,
-  remarque TEXT,
-  date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
-  FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_benevole INTEGER NOT NULL,
+    id_evenement INTEGER NOT NULL,
+    debut DATETIME,
+    fin DATETIME,
+    remarque TEXT,
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
+    FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
 );
 
+-- TACHE
 CREATE TABLE TACHE (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_evenement INTEGER NOT NULL,
-  titre TEXT NOT NULL,
-  poste_requis TEXT,
-  debut DATETIME NOT NULL,
-  fin DATETIME NOT NULL,
-  max_personnes INTEGER DEFAULT 1,
-  remarque TEXT,
-  date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT check_poste_requis CHECK (poste_requis IN ('bar', 'accueil', 'cuisine', 'technique', 'autre')),
-  FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_evenement INTEGER NOT NULL,
+    titre TEXT NOT NULL,
+    poste_requis TEXT,
+    debut DATETIME NOT NULL,
+    fin DATETIME NOT NULL,
+    max_personnes INTEGER DEFAULT 1,
+    remarque TEXT,
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT check_poste_requis CHECK (poste_requis IN ('bar', 'accueil', 'cuisine', 'technique', 'autre')),
+    FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
 );
 
+-- AFFECTATION_TACHE
 CREATE TABLE AFFECTATION_TACHE (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_tache INTEGER NOT NULL,
-  id_benevole INTEGER NOT NULL,
-  id_utilisateur INTEGER,
-  date_affectation DATETIME DEFAULT CURRENT_TIMESTAMP,
-  statut TEXT DEFAULT 'assigne',
-  remarque TEXT,
-  CONSTRAINT check_statut CHECK (statut IN ('assigne', 'confirme', 'annule')),
-  FOREIGN KEY (id_tache) REFERENCES TACHE(id),
-  FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
-  FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_tache INTEGER NOT NULL,
+    id_benevole INTEGER NOT NULL,
+    id_utilisateur INTEGER,
+    date_affectation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    statut TEXT DEFAULT 'assigne',
+    remarque TEXT,
+    CONSTRAINT check_statut CHECK (statut IN ('assigne', 'confirme', 'annule')),
+    FOREIGN KEY (id_tache) REFERENCES TACHE(id),
+    FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
+    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
+-- COMMUNICATION
 CREATE TABLE COMMUNICATION (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_evenement INTEGER,
-  titre TEXT NOT NULL,
-  type TEXT DEFAULT 'post',
-  date_prevue DATETIME,
-  statut TEXT DEFAULT 'brouillon',
-  budget REAL DEFAULT 0.0,
-  remarque TEXT,
-  date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT check_type CHECK (type IN ('post', 'affiche', 'flyer', 'email', 'autre')),
-  CONSTRAINT check_statut CHECK (statut IN ('brouillon', 'programme', 'fait', 'annule')),
-  FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_evenement INTEGER,
+    titre TEXT NOT NULL,
+    type TEXT DEFAULT 'post',
+    date_prevue DATETIME,
+    statut TEXT DEFAULT 'brouillon',
+    budget REAL DEFAULT 0.0,
+    remarque TEXT,
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT check_type CHECK (type IN ('post', 'affiche', 'flyer', 'email', 'autre')),
+    CONSTRAINT check_statut CHECK (statut IN ('brouillon', 'programme', 'fait', 'annule')),
+    FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
 );
 
+-- HELLOASSO
 CREATE TABLE HELLOASSO (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_evenement INTEGER,
-  id_externe TEXT,
-  prenom TEXT,
-  nom TEXT,
-  email TEXT,
-  telephone TEXT,
-  type_ticket TEXT,
-  date_achat DATETIME,
-  date_import DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_evenement INTEGER,
+    id_externe TEXT,
+    prenom TEXT,
+    nom TEXT,
+    email TEXT,
+    telephone TEXT,
+    type_ticket TEXT,
+    date_achat DATETIME,
+    date_import DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
 );
 
+-- PARAMETRE
 CREATE TABLE PARAMETRE (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  cle TEXT NOT NULL UNIQUE,
-  valeur TEXT,
-  date_modification DATETIME DEFAULT CURRENT_TIMESTAMP
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cle TEXT NOT NULL UNIQUE,
+    valeur TEXT,
+    date_modification DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- HISTORIQUE_EVENEMENT
 CREATE TABLE HISTORIQUE_EVENEMENT (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  id_evenement INTEGER NOT NULL,
-  action TEXT NOT NULL,
-  description TEXT,
-  id_utilisateur INTEGER,
-  date_action DATETIME DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT check_action CHECK (action IN ('creation', 'modification', 'annulation', 'autre')),
-  FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id),
-  FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_evenement INTEGER NOT NULL,
+    action TEXT NOT NULL,
+    description TEXT,
+    id_utilisateur INTEGER,
+    date_action DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT check_action CHECK (action IN ('creation', 'modification', 'annulation', 'autre')),
+    FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id),
+    FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
+);
+
+-- CONTACT_MESSAGE
+CREATE TABLE CONTACT_MESSAGE (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    email TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    lu BOOLEAN DEFAULT 0,
+    repondu_par_id INTEGER,
+    reponse TEXT,
+    repondu_le DATETIME,
+    FOREIGN KEY (repondu_par_id) REFERENCES UTILISATEUR(id)
+);
+
+-- NOTIFICATION
+CREATE TABLE NOTIFICATION (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_destinataire INTEGER NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    message TEXT NOT NULL,
+    lien VARCHAR(255),
+    lue BOOLEAN DEFAULT 0,
+    created_at DATETIME NOT NULL,
+    FOREIGN KEY (id_destinataire) REFERENCES UTILISATEUR(id)
+);
+
+-- MESSENGER_MESSAGES
+CREATE TABLE messenger_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    body TEXT NOT NULL,
+    headers TEXT NOT NULL,
+    queue_name VARCHAR(190) NOT NULL,
+    created_at DATETIME NOT NULL,
+    available_at DATETIME NOT NULL,
+    delivered_at DATETIME DEFAULT NULL
 );
 
 -- =============================================
--- 3. INSERTIONS
+-- INSERTIONS DE DONNÉES
 -- =============================================
 
 INSERT INTO ROLE (nom, description) VALUES
@@ -244,8 +306,7 @@ INSERT INTO UTILISATEUR (id_role, email, prenom, nom, telephone, mot_de_passe, d
   (3, 'mecene1@groloto.local', 'Jean', 'Martin', '0712345678', '$2y$13$rPw4LiI3Pt91wm8QUAE20OGJ3Cl/wPS35ix1h5C1ZtpL06bPOqby2', datetime('now')),
   (2, 'benevole2@groloto.local', 'Bob', 'Lefevre', '0623456789', '$2y$13$rPw4LiI3Pt91wm8QUAE20OGJ3Cl/wPS35ix1h5C1ZtpL06bPOqby2', datetime('now'));
 
-INSERT INTO BENEVOLE (id_utilisateur, remarque, actif)
-VALUES
+INSERT INTO BENEVOLE (id_utilisateur, remarque, actif) VALUES
   (2, 'Disponible surtout les week-ends', 1),
   (4, 'Disponible en semaine', 1);
 
@@ -299,8 +360,7 @@ INSERT INTO TACHE (id_evenement, titre, poste_requis, debut, fin, max_personnes,
   (5, 'Montage scène', 'technique', '2025-11-14 09:00:00', '2025-11-14 12:00:00', 4, 'Montage de la scène et sonorisation'),
   (5, 'Accueil billetterie', 'accueil', '2025-11-15 17:00:00', '2025-11-15 19:00:00', 3, 'Accueil du public et vérification des billets');
 
-INSERT INTO AFFECTATION_TACHE (id_tache, id_benevole, id_utilisateur, statut, remarque)
-VALUES
+INSERT INTO AFFECTATION_TACHE (id_tache, id_benevole, id_utilisateur, statut, remarque) VALUES
   (1, 1, 2, 'confirme', 'Alice affectée à l''accueil'),
   (3, 1, 1, 'confirme', 'Affecté à la mise en place de la scène (benevole1)'),
   (4, 2, 1, 'assigne', 'Affecté à l''accueil billetterie (benevole2)');

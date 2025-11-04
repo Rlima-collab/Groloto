@@ -239,10 +239,6 @@
     margin-left: 60px;
 }
 
-.content {
-    padding: 20px;
-}
-
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
     .sidebar {

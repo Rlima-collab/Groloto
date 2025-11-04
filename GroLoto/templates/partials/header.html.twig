@@ -55,65 +55,165 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Header script loaded');
         const notificationBell = document.getElementById('notificationBell');
         const notificationDropdown = document.getElementById('notificationDropdown');
+        const notificationBadge = document.getElementById('notificationBadge');
+        const notificationList = document.getElementById('notificationList');
+        const markAllReadButton = document.getElementById('markAllReadButton');
         const settingsToggle = document.getElementById('settingsToggle');
         const settingsMenu = document.getElementById('settingsMenu');
 
+        // Helper: fetch unread count and update badge
+        async function updateBadge() {
+            try {
+                const res = await fetch('{{ path('app_notifications_count') }}');
+                if (!res.ok) return;
+                const data = await res.json();
+                const count = data.count || 0;
+                if (count > 0) {
+                    notificationBadge.style.display = 'inline-block';
+                    notificationBadge.textContent = count;
+                } else {
+                    notificationBadge.style.display = 'none';
+                }
+            } catch (e) {
+                console.error('Failed to update notification badge', e);
+            }
+        }
+
+        // Helper: fetch unread notifications and render list
+        async function loadUnread() {
+            try {
+                const res = await fetch('{{ path('app_notifications_unread') }}');
+                if (!res.ok) return;
+                const items = await res.json();
+                notificationList.innerHTML = '';
+                if (!items || items.length === 0) {
+                    notificationList.innerHTML = '<p class="no-notifications">Aucune notification</p>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'notification-item';
+                    el.innerHTML = `
+                        <div class="notification-item-body">
+                            <div class="notification-text">${escapeHtml(item.message)}</div>
+                            <div class="notification-meta">${item.createdAt}</div>
+                        </div>
+                        <div class="notification-actions">
+                            <a href="#" class="btn-view" data-id="${item.id}" data-lien="${item.lien || ''}">Voir</a>
+                        </div>
+                    `;
+                    notificationList.appendChild(el);
+                });
+            } catch (e) {
+                console.error('Failed to load unread notifications', e);
+            }
+        }
+
+        // Mark a single notification as read and redirect
+        async function markReadAndRedirect(id, lien) {
+            try {
+                const res = await fetch('/notifications/' + id + '/marquer-lue', { method: 'POST', headers: {'X-Requested-With':'XMLHttpRequest', 'Content-Type':'application/json'} });
+                if (res.ok) {
+                    if (lien) {
+                        window.location.href = lien;
+                    } else {
+                        window.location.href = '{{ path('app_notifications') }}';
+                    }
+                } else {
+                    console.error('Failed to mark notification read', await res.text());
+                }
+            } catch (e) {
+                console.error('Error marking notification read', e);
+            }
+        }
+
+        // Escape helper to prevent XSS
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         if (notificationBell && notificationDropdown) {
-            notificationBell.addEventListener('click', function(event) {
+            notificationBell.addEventListener('click', async function(event) {
                 event.preventDefault();
                 event.stopPropagation();
-                console.log('Notification bell clicked');
                 if (notificationDropdown.style.display === 'block') {
                     notificationDropdown.style.display = 'none';
                     notificationDropdown.classList.remove('show-animation');
-                    console.log('Notification dropdown hidden');
                 } else {
+                    // show dropdown and refresh list
                     notificationDropdown.style.display = 'block';
                     notificationDropdown.classList.add('show-animation');
-                    console.log('Notification dropdown shown');
-                    if (settingsMenu) {
-                        settingsMenu.style.display = 'none';
-                    }
+                    if (settingsMenu) settingsMenu.style.display = 'none';
+                    await loadUnread();
+                    // attach click handlers to view buttons
+                    notificationList.querySelectorAll('.btn-view').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const id = this.dataset.id;
+                            const lien = this.dataset.lien || '';
+                            markReadAndRedirect(id, lien);
+                        });
+                    });
+                    // after rendering, refresh badge count
+                    await updateBadge();
                 }
             });
-        } else {
-            console.error('Notification bell or dropdown not found');
+        }
+
+        // Mark all as read
+        if (markAllReadButton) {
+            markAllReadButton.addEventListener('click', async function(e) {
+                e.preventDefault();
+                try {
+                    const res = await fetch('{{ path('app_notifications_mark_all_read') }}', { method: 'POST', headers: {'X-Requested-With':'XMLHttpRequest'} });
+                    if (res.ok) {
+                        await updateBadge();
+                        await loadUnread();
+                    }
+                } catch (err) {
+                    console.error('Failed to mark all read', err);
+                }
+            });
         }
 
         if (settingsToggle && settingsMenu) {
             settingsToggle.addEventListener('click', function(event) {
                 event.preventDefault();
                 event.stopPropagation();
-                console.log('Settings toggle clicked');
                 if (settingsMenu.style.display === 'block') {
                     settingsMenu.style.display = 'none';
-                    console.log('Settings menu hidden');
                 } else {
                     settingsMenu.style.display = 'block';
-                    console.log('Settings menu shown');
                     if (notificationDropdown) {
                         notificationDropdown.style.display = 'none';
                         notificationDropdown.classList.remove('show-animation');
                     }
                 }
             });
-        } else {
-            console.error('Settings toggle or menu not found');
         }
 
+        // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             if (notificationDropdown && !notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
                 notificationDropdown.style.display = 'none';
                 notificationDropdown.classList.remove('show-animation');
-                console.log('Notification dropdown closed due to outside click');
             }
             if (settingsMenu && !settingsToggle.contains(event.target) && !settingsMenu.contains(event.target)) {
                 settingsMenu.style.display = 'none';
-                console.log('Settings menu closed due to outside click');
             }
         });
+
+        // Initial badge load
+        updateBadge();
+        // Poll badge every 30s
+        setInterval(updateBadge, 30000);
     });
 </script>
