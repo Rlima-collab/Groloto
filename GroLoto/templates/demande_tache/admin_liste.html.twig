@@ -91,7 +91,9 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% set nbAffectations = nb_affectations_par_tache[demande.tache.id] ?? 0 %}
+
+                                            {% set nbAffectations = affectations_par_tache[demande.tache.id] ?? 0 %}
+
                                             <span class="badge {% if nbAffectations >= demande.tache.maxPersonnes %}badge-danger{% elseif nbAffectations >= (demande.tache.maxPersonnes * 0.8) %}badge-warning{% else %}badge-success{% endif %}">
                                                 {{ demande.tache.maxPersonnes - nbAffectations }} / {{ demande.tache.maxPersonnes }}
                                             </span>
