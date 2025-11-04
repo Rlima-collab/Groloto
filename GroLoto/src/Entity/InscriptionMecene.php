@@ -49,6 +49,9 @@ class InscriptionMecene
     #[ORM\Column(type: 'float', nullable: true)]
     private ?float $valeur_unitaire = null;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $remarque_refus = null;
+
     // --- GETTERS & SETTERS ---
 
     public function getId(): ?int
@@ -174,6 +177,17 @@ class InscriptionMecene
     public function setValeurUnitaire(?float $valeur_unitaire): self
     {
         $this->valeur_unitaire = $valeur_unitaire;
+        return $this;
+    }
+
+    public function getRemarqueRefus(): ?string
+    {
+        return $this->remarque_refus;
+    }
+
+    public function setRemarqueRefus(?string $remarque_refus): self
+    {
+        $this->remarque_refus = $remarque_refus;
         return $this;
     }
 }
