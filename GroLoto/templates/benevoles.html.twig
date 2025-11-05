@@ -52,7 +52,8 @@
         <div class="card-content">
                 {% if benevoles|length > 0 %}
                     <div class="benevoles-grid">
-                        {% for benevole in benevoles %}
+                        {% for item in benevoles %}
+                            {% set benevole = item.benevole %}
                             <div class="benevole-card">
                                 <div class="benevole-header">
                                     <h3 class="benevole-name">
@@ -75,6 +76,10 @@
                                     <div class="info-item">
                                         <span class="info-icon">📅</span>
                                         <span class="info-text">Inscrit le {{ benevole.utilisateur.dateCreation|date('d/m/Y') }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-icon"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i></span>
+                                        <span class="info-text"><strong>{{ item.nb_taches_realisees }}</strong> tâche{% if item.nb_taches_realisees > 1 %}s{% endif %} réalisée{% if item.nb_taches_realisees > 1 %}s{% endif %}</span>
                                     </div>
                                 </div>
 
