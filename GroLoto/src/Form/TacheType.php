@@ -3,17 +3,18 @@
 namespace App\Form;
 
 use App\Entity\Tache;
-use App\Entity\Evenement;
-use App\Repository\EvenementRepository;
+use App\Entity\Weekend;
+use App\Repository\WeekendRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\{
+    TextType,
+    TextareaType,
+    IntegerType,
+    DateTimeType
+};
 
 class TacheType extends AbstractType
 {
@@ -25,34 +26,34 @@ class TacheType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'Ex: Vente de billets'
-                ]
+                ],
             ])
             ->add('debut', DateTimeType::class, [
                 'label' => 'Date et heure de début',
                 'widget' => 'single_text',
-                'attr' => ['class' => 'form-control']
+                'attr' => ['class' => 'form-control'],
             ])
             ->add('fin', DateTimeType::class, [
                 'label' => 'Date et heure de fin',
                 'widget' => 'single_text',
-                'attr' => ['class' => 'form-control']
+                'attr' => ['class' => 'form-control'],
             ])
             ->add('posteRequis', TextType::class, [
                 'label' => 'Poste requis',
                 'required' => false,
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Ex: Vendeur, Caissier, Accueil, Bar, Cuisine...'
-                ]
+                    'placeholder' => 'Ex: Bar, Accueil, Cuisine...'
+                ],
             ])
             ->add('maxPersonnes', IntegerType::class, [
-                'label' => 'Nombre maximum de personnes',
+                'label' => 'Nombre max de personnes',
                 'required' => false,
                 'attr' => [
                     'class' => 'form-control',
                     'min' => 1,
                     'placeholder' => 'Ex: 5'
-                ]
+                ],
             ])
             ->add('remarque', TextareaType::class, [
                 'label' => 'Remarques',
@@ -60,39 +61,28 @@ class TacheType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'rows' => 4,
-                    'placeholder' => 'Informations complémentaires...'
-                ]
+                    'placeholder' => 'Infos supplémentaires...'
+                ],
             ])
-            ->add('evenement', EntityType::class, [
-                'class' => Evenement::class,
-                'query_builder' => function (EvenementRepository $repository) {
-                    return $repository->createQueryBuilder('e')
-                        ->where('e.date_debut >= :oneWeekAgo')
-                        ->setParameter('oneWeekAgo', new \DateTime('-1 week'))
-                        ->orderBy('e.date_debut', 'ASC');
-                },
-                'choice_label' => function(Evenement $evenement) {
-                    $dateDebut = $evenement->getDateDebut() ? $evenement->getDateDebut()->format('d/m/Y') : '';
-                    $dateFin = $evenement->getDateFin() ? $evenement->getDateFin()->format('d/m/Y') : '';
-                    
-                    if ($dateDebut && $dateFin) {
-                        if ($dateDebut === $dateFin) {
-                            return sprintf('%s - %s', $evenement->getNom(), $dateDebut);
-                        } else {
-                            return sprintf('%s - Du %s au %s', $evenement->getNom(), $dateDebut, $dateFin);
-                        }
-                    } elseif ($dateDebut) {
-                        return sprintf('%s - %s', $evenement->getNom(), $dateDebut);
-                    }
-                    
-                    return $evenement->getNom();
-                },
-                'label' => 'Événement associé',
-                'required' => false,
-                'placeholder' => 'Sélectionner un événement',
-                'attr' => ['class' => 'form-control']
-            ])
-        ;
+
+            // WEEKEND UNIQUEMENT
+            ->add('weekend', EntityType::class, [
+                'class' => Weekend::class,
+                'query_builder' => fn(WeekendRepository $wr) => $wr->createQueryBuilder('w')
+                    ->where('w.date_dimanche >= :today')
+                    ->setParameter('today', new \DateTime())
+                    ->orderBy('w.date_vendredi', 'ASC'),
+                'choice_label' => fn(Weekend $w) => sprintf(
+                    '%s (du %s au %s)',
+                    $w->getNom(),
+                    $w->getDateVendredi()->format('d/m/Y'),
+                    $w->getDateDimanche()->format('d/m/Y')
+                ),
+                'label' => 'Weekend associé',
+                'placeholder' => 'Choisir un weekend',
+                'required' => true,
+                'attr' => ['class' => 'form-control'],
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
