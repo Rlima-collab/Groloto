@@ -1,90 +1,276 @@
 {% extends 'base.html.twig' %}
-{% block title %}Messages reçus{% endblock %}
+{% block title %}Messagerie{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/gmail-messaging.css') }}?v={{ 'now'|date('U') }}">
+{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <h1>Messages reçus</h1>
+<div class="gmail-container">
+    <!-- Sidebar -->
+    <div class="gmail-sidebar">
+        <button id="openCompose" class="gmail-compose-btn-rect" title="Nouveau message">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 5v14m-7-7h14"></path>
+            </svg>
+            Nouveau message
+        </button>
+        <div class="gmail-filter-tabs">
+            <button class="filter-tab active" data-filter="all">Tous</button>
+            <button class="filter-tab" data-filter="unread">Non lus</button>
+            <button class="filter-tab" data-filter="replied">Répondus</button>
+        </div>
+    </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>Date</th>
-                    <th>Expéditeur</th>
-                    <th>Sujet</th>
-                    <th>Message</th>
-                    <th>Statut</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for msg in messages %}
-                {% set parts = msg.message|split('] ', 2) %}
-                {% set hasSubject = parts|length > 1 and parts[0]|slice(0,1) == '[' %}
-                <tr class="{% if not msg.lu %}table-warning fw-bold{% endif %}">
-                    <td>{{ msg.createdAt|date('d/m H:i') }}</td>
-                    <td>
-                        {{ msg.nom }}<br>
-                        <small><a href="mailto:{{ msg.email }}">{{ msg.email }}</a></small>
-                    </td>
-                    <td>
-                        {% if hasSubject %}
-                            <strong>{{ parts[0]|slice(1) }}</strong>
-                        {% else %}
-                            <em>Aucun sujet</em>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <small>
-                            {{ (hasSubject ? parts[1] : msg.message)|slice(0, 80) }}
-                            {% if (hasSubject ? parts[1] : msg.message)|length > 80 %}...{% endif %}
-                        </small>
-                    </td>
-                    <td>
-                        {% if msg.reponse %}
-                            <span class="badge bg-success">Répondu</span>
-                        {% else %}
-                            <span class="badge bg-secondary">En attente</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#reply{{ msg.id }}">
-                            Répondre
-                        </button>
+    <!-- Main Content -->
+    <div class="gmail-main">
+        <!-- Header -->
+        <div class="gmail-header">
+            <h1>Messagerie</h1>
+            <div class="gmail-search">
+                <input type="text" placeholder="Rechercher un message..." class="gmail-search-input" id="searchInput">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </div>
+        </div>
 
-                        <form method="post" action="{{ path('admin_message_delete', {id: msg.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer ?')">
-                            <button class="btn btn-sm btn-danger">Supprimer</button>
-                        </form>
-                    </td>
-                </tr>
-
-                <!-- Modal Réponse -->
-                <div class="modal fade" id="reply{{ msg.id }}">
-                    <div class="modal-dialog modal-lg">
-                        <form method="post" action="{{ path('admin_message_reply', {id: msg.id}) }}">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5>Répondre à {{ msg.nom }}</h5>
-                                </div>
-                                <div class="modal-body">
-                                    <p><strong>Message original :</strong></p>
-                                    <div class="bg-light p-3 rounded mb-3">
-                                        {{ msg.message|nl2br }}
-                                    </div>
-                                    <textarea name="reponse" class="form-control" rows="6" placeholder="Votre réponse..." required></textarea>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-success">Envoyer</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+        <!-- Messages List -->
+        <div class="gmail-messages-list" id="messagesList">
+            {% if messages|length == 0 %}
+                <div class="gmail-empty">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <p>Aucun message</p>
                 </div>
             {% else %}
-                <tr><td colspan="6" class="text-center py-4">Aucun message</td></tr>
-            {% endfor %}
-            </tbody>
-        </table>
+                {% for msg in messages %}
+                    {% set parts = msg.message|split('] ', 2) %}
+                    {% set hasSubject = parts|length > 1 and parts[0]|slice(0,1) == '[' %}
+                    {% set subject = hasSubject ? parts[0]|slice(1) : 'Aucun sujet' %}
+                    {% set body = hasSubject ? parts[1] : msg.message %}
+
+                    <div class="gmail-message-item {% if not msg.lu %}unread{% endif %} {% if msg.reponse %}replied{% endif %}"
+                         data-id="{{ msg.id }}"
+                         data-subject="{{ subject }}"
+                         data-sender="{{ msg.nom }}"
+                         data-email="{{ msg.email }}"
+                         data-date="{{ msg.createdAt|date('d/m/Y à H:i') }}"
+                         data-body="{{ body }}"
+                         data-reply-date="{{ msg.reponduLe ? msg.reponduLe|date('d/m à H:i') : '' }}"
+                         data-reply-content="{{ msg.reponse|default('') }}"
+                         data-filter="{% if not msg.lu %}unread{% elseif msg.reponse %}replied{% else %}all{% endif %}">
+                        <div class="gmail-message-preview">
+                            <div class="gmail-sender">
+                                <strong>{{ msg.nom }}</strong>
+                                <small class="text-muted">&lt;{{ msg.email }}&gt;</small>
+                            </div>
+                            <div class="gmail-subject">{{ subject }}</div>
+                            <div class="gmail-snippet">{{ body|slice(0, 80) }}{% if body|length > 80 %}...{% endif %}</div>
+                            <div class="gmail-date">{{ msg.createdAt|date('d/m H:i') }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Détail du message -->
+        <div class="gmail-message-detail" id="messageDetail" style="display: none;">
+            <div class="gmail-detail-header">
+                <button id="backToList" class="gmail-back-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <h3 id="detailSubject"></h3>
+            </div>
+            <div class="gmail-detail-meta">
+                <strong id="detailSender"></strong> &lt;<a id="detailEmail" href="#"></a>&gt;
+                <span class="text-muted" id="detailDate"></span>
+            </div>
+            <div class="gmail-detail-body" id="detailBody"></div>
+
+            <div id="detailReplyBox" style="display: none;" class="mt-4">
+                <strong>Vous avez répondu le <span id="replyDate"></span> :</strong>
+                <div class="gmail-reply-content" id="replyContent"></div>
+            </div>
+
+            <div class="gmail-actions mt-4">
+                <button id="replyBtn" class="gmail-reply-btn">Répondre</button>
+                <form method="post" action="" id="deleteForm" class="d-inline" onsubmit="return confirm('Supprimer ce message ?')">
+                    <button type="submit" class="gmail-delete-btn">Supprimer</button>
+                </form>
+            </div>
+
+            <div id="replyForm" style="display: none;" class="mt-4">
+                <form method="post" action="" id="replyFormElement">
+                    <textarea name="reponse" class="gmail-textarea" rows="5" placeholder="Tapez votre réponse..." required></textarea>
+                    <div class="mt-3">
+                        <button type="submit" class="gmail-send-btn">Envoyer</button>
+                        <button type="button" id="cancelReply" class="gmail-cancel-btn">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- POPUP COMPOSE (bas droite) -->
+<div id="composePopup" class="gmail-compose-popup" style="display: none;">
+    <div class="gmail-compose-header">
+        <span>Nouveau message</span>
+        <button id="closeCompose" class="gmail-close-btn">x</button>
+    </div>
+    <form id="composeForm" action="{{ path('admin_message_new') }}" method="post">
+        {# Champs du formulaire #}
+        <input type="email" name="to" placeholder="Destinataire" class="gmail-compose-input" required>
+        <input type="text" name="subject" placeholder="Sujet" class="gmail-compose-input">
+        <textarea name="message" rows="10" placeholder="Message..." class="gmail-compose-textarea" required></textarea>
+        <div class="gmail-compose-footer">
+            <button type="submit" class="gmail-send-btn">Envoyer</button>
+            <button type="button" id="discardCompose" class="gmail-discard-btn">Supprimer le brouillon</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const openBtn = document.getElementById('openCompose');
+            const popup = document.getElementById('composePopup');
+            const closeBtn = document.getElementById('closeCompose');
+            const discardBtn = document.getElementById('discardCompose');
+            const form = document.getElementById('composeForm');
+
+            // Ouvrir popup
+            openBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popup.style.display = 'block';
+                popup.querySelector('input[name="to"]').focus();
+            });
+
+            // Fermer
+            closeBtn.addEventListener('click', () => popup.style.display = 'none');
+            discardBtn.addEventListener('click', () => {
+                form.reset();
+                popup.style.display = 'none';
+            });
+
+            // Fermer si clic dehors
+            document.addEventListener('click', (e) => {
+                if (!popup.contains(e.target) && !openBtn.contains(e.target)) {
+                    popup.style.display = 'none';
+                }
+            });
+
+            // Soumission AJAX
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+
+                try {
+                    const res = await fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+
+                    const data = await res.json();
+
+                    if (data.success) {
+                        this.reset();
+                        popup.style.display = 'none';
+                        alert(data.message || 'Message envoyé !');
+                        location.reload(); // Rafraîchir la liste
+                    } else {
+                        alert(data.error || 'Erreur lors de l\'envoi.');
+                    }
+                } catch (err) {
+                    alert('Erreur réseau.');
+                }
+            });
+
+            // === LISTE, DÉTAIL, FILTRES, RECHERCHE ===
+            const items = document.querySelectorAll('.gmail-message-item');
+            const detail = document.getElementById('messageDetail');
+            const list = document.getElementById('messagesList');
+            const backBtn = document.getElementById('backToList');
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            const searchInput = document.getElementById('searchInput');
+
+            items.forEach(item => {
+                item.addEventListener('click', function () {
+                    const id = this.dataset.id;
+                    const subject = this.dataset.subject;
+                    const sender = this.dataset.sender;
+                    const email = this.dataset.email;
+                    const date = this.dataset.date;
+                    const body = this.dataset.body;
+                    const replyDate = this.dataset.replyDate;
+                    const replyContent = this.dataset.replyContent;
+
+                    document.getElementById('detailSubject').textContent = subject;
+                    document.getElementById('detailSender').textContent = sender;
+                    document.getElementById('detailEmail').textContent = email;
+                    document.getElementById('detailEmail').href = 'mailto:' + email;
+                    document.getElementById('detailDate').textContent = date;
+                    document.getElementById('detailBody').innerHTML = body.replace(/\n/g, '<br>');
+
+                    const replyBox = document.getElementById('detailReplyBox');
+                    if (replyContent) {
+                        replyBox.style.display = 'block';
+                        document.getElementById('replyDate').textContent = replyDate;
+                        document.getElementById('replyContent').innerHTML = replyContent.replace(/\n/g, '<br>');
+                    } else {
+                        replyBox.style.display = 'none';
+                    }
+
+                    document.getElementById('deleteForm').action = `{{ path('admin_message_delete', {'id': 'PLACEHOLDER'}) }}`.replace('PLACEHOLDER', id);
+                    document.getElementById('replyFormElement').action = `{{ path('admin_message_reply', {'id': 'PLACEHOLDER'}) }}`.replace('PLACEHOLDER', id);
+
+                    list.style.display = 'none';
+                    detail.style.display = 'block';
+                });
+            });
+
+            backBtn.addEventListener('click', () => {
+                detail.style.display = 'none';
+                list.style.display = 'block';
+            });
+
+            document.getElementById('replyBtn').addEventListener('click', () => {
+                document.getElementById('replyForm').style.display = 'block';
+            });
+            document.getElementById('cancelReply').addEventListener('click', () => {
+                document.getElementById('replyForm').style.display = 'none';
+            });
+
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const filter = tab.dataset.filter;
+                    items.forEach(item => {
+                        const itemFilter = item.dataset.filter;
+                        item.style.display = (filter === 'all' || itemFilter === filter) ? 'block' : 'none';
+                    });
+                });
+            });
+
+            searchInput.addEventListener('input', () => {
+                const term = searchInput.value.toLowerCase();
+                items.forEach(item => {
+                    const text = (item.dataset.subject + ' ' + item.dataset.sender + ' ' + item.dataset.body).toLowerCase();
+                    item.style.display = text.includes(term) ? 'block' : 'none';
+                });
+            });
+        });
+    </script>
 {% endblock %}
