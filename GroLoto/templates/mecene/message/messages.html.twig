@@ -166,11 +166,11 @@ const formData = new FormData();
 formData.append('message', message);
 let url;
 if (currentConversationId === 'new') {
-url = '{{ path('admin_message_new') }}';
+url = '{{ path('mecene_message_new') }}';
 formData.append('to', adminEmail);
 formData.append('subject', 'Nouveau message');
 } else {
-url = '{{ path('admin_message_reply', {'id': 'PLACEHOLDER'}) }}'.replace('PLACEHOLDER', currentConversationId);
+url = '{{ path('mecene_message_reply', {'id': 'PLACEHOLDER'}) }}'.replace('PLACEHOLDER', currentConversationId);
 formData.append('reponse', message);
 }
 const response = await fetch(url, { method: 'POST', body: formData, headers: {'X-Requested-With': 'XMLHttpRequest'} });

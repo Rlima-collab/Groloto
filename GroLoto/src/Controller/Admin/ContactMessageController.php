@@ -25,11 +25,56 @@ class ContactMessageController extends AbstractController
     #[Route('', name: 'admin_messages')]
     public function index(): Response
     {
+        $user = $this->getUser();
+        $adminEmail = $user->getEmail();
+
+        // Récupérer les messages racines (parent_id IS NULL) où l'admin est soit destinataire, soit expéditeur
         $messages = $this->em->getRepository(ContactMessage::class)
-            ->findAllOrdered();
+            ->createQueryBuilder('cm')
+            ->where('cm.parent_id IS NULL')
+            ->andWhere('cm.destinataire = :email OR cm.email = :email')
+            ->setParameter('email', $adminEmail)
+            ->orderBy('cm.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        // Pour chaque message racine, charger la conversation complète
+        foreach ($messages as $msg) {
+            $msg->conversation = $this->getConversationThread($msg->getId());
+        }
 
         return $this->render('admin/message/messages.html.twig', [
             'messages' => $messages,
+        ]);
+    }
+
+    /**
+     * Récupère tous les messages d'un fil de discussion
+     */
+    private function getConversationThread(int $rootMessageId): array
+    {
+        return $this->em->getRepository(ContactMessage::class)
+            ->createQueryBuilder('cm')
+            ->where('cm.parent_id = :parentId')
+            ->setParameter('parentId', $rootMessageId)
+            ->orderBy('cm.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    #[Route('/envoyes', name: 'admin_messages_sent')]
+    public function sent(): Response
+    {
+        $user = $this->getUser();
+        $adminEmail = $user->getEmail();
+
+        // Messages envoyés par l'admin (email = admin email, destinataire rempli)
+        $messages = $this->em->getRepository(ContactMessage::class)
+            ->findBy(['email' => $adminEmail], ['createdAt' => 'DESC']);
+
+        return $this->render('admin/message/messages.html.twig', [
+            'messages' => $messages,
+            'sent_view' => true,
         ]);
     }
 
@@ -50,6 +95,19 @@ class ContactMessageController extends AbstractController
             return $this->json(['success' => false, 'error' => 'Destinataire et message requis'], 400);
         }
 
+        // Enregistrer le message dans la base
+        $user = $this->getUser();
+        $fullMessage = $subject ? "[{$subject}] {$message}" : $message;
+        
+        $cm = new ContactMessage();
+        $cm->setNom($user->getPrenom() . ' ' . $user->getNom())
+            ->setEmail($user->getEmail())
+            ->setDestinataire($to)
+            ->setMessage($fullMessage);
+        
+        $this->em->persist($cm);
+        $this->em->flush();
+
         try {
             $email = (new Email())
                 ->from('contact@groloto.com')
@@ -58,6 +116,24 @@ class ContactMessageController extends AbstractController
                 ->html(nl2br(htmlspecialchars($message)));
 
             $mailer->send($email);
+
+            // créer une notification pour l'utilisateur destinataire si trouvé
+            try {
+                $userDest = $this->em->getRepository(\App\Entity\Utilisateur::class)->findOneByEmail($to);
+                if ($userDest) {
+                    $notif = new Notification();
+                    $notif->setDestinataire($userDest)
+                        ->setType('contact')
+                        ->setMessage("Vous avez reçu un message de l'admin")
+                        ->setLien((strtolower($userDest->getRole()?->getNom() ?? '') === 'benevole') ? '/benevole/messages' : ((strtolower($userDest->getRole()?->getNom() ?? '') === 'mecene') ? '/mecene/messages' : '/'))
+                        ->setLue(false)
+                        ->setCreatedAt(new \DateTime());
+                    $this->em->persist($notif);
+                    $this->em->flush();
+                }
+            } catch (\Exception $e) {
+                // ignore notification failures
+            }
 
             return $this->json(['success' => true, 'message' => 'Message envoyé !']);
         } catch (\Exception $e) {
@@ -100,22 +176,9 @@ class ContactMessageController extends AbstractController
             $notif->setLue(true);
         }
 
-        // 2. Créer une notification pour l'expéditeur du message
+        // 2. Récupérer l'expéditeur du message pour la notification plus tard
         $expediteur = $em->getRepository(\App\Entity\Utilisateur::class)
             ->findOneByEmail($message->getEmail());
-
-        if ($expediteur) {
-            $notification = new Notification();
-            $notification
-                ->setDestinataire($expediteur)
-                ->setType('reponse_contact')
-                ->setMessage("Un admin a répondu à votre message")
-                ->setLien('/contact/message/' . $message->getId())  // L'utilisateur pourra ouvrir la réponse spécifique
-                ->setLue(false)
-                ->setCreatedAt(new \DateTime());
-
-            $em->persist($notification);
-        }
 
         $em->flush();
 
@@ -138,6 +201,38 @@ class ContactMessageController extends AbstractController
             ");
 
         $mailer->send($email);
+        // 4. Créer un message destiné à l'utilisateur pour qu'il apparaisse dans sa boîte de réception
+        try {
+            $admin = $this->getUser();
+            $replyFull = '[Reponse admin] ' . $reponse;
+            
+            // Déterminer le parent_id : si le message actuel a déjà un parent, on utilise ce parent, sinon on utilise l'ID du message actuel
+            $rootParentId = $message->getParentId() ?? $message->getId();
+            
+            $cmReply = new ContactMessage();
+            $cmReply->setNom(trim(($admin->getPrenom() ?? '') . ' ' . ($admin->getNom() ?? '')))
+                ->setEmail($admin->getEmail())
+                ->setDestinataire($message->getEmail())
+                ->setMessage($replyFull)
+                ->setParentId($rootParentId); // Lien vers le message racine
+            $em->persist($cmReply);
+            $em->flush();
+
+            // si l'expéditeur existe en BDD, créer une notification pointant vers sa messagerie
+            if ($expediteur) {
+                $notif2 = new Notification();
+                $notif2->setDestinataire($expediteur)
+                    ->setType('reponse_contact')
+                    ->setMessage('Vous avez reçu une réponse d\'un admin')
+                    ->setLien((strtolower($expediteur->getRole()?->getNom() ?? '') === 'benevole') ? '/benevole/messages' : ((strtolower($expediteur->getRole()?->getNom() ?? '') === 'mecene') ? '/mecene/messages' : '/'))
+                    ->setLue(false)
+                    ->setCreatedAt(new \DateTime());
+                $em->persist($notif2);
+                $em->flush();
+            }
+        } catch (\Exception $e) {
+            // ne pas bloquer si la persistance échoue
+        }
         $this->addFlash('success', 'Réponse envoyée !');
 
         return $this->redirectToRoute('admin_messages');
