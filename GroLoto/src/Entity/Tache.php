@@ -24,33 +24,22 @@ class Tache
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $fin = null;
 
-    #[ORM\Column(length: 100)]
-    private ?string $poste_requis = null;
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $posteRequis = null;
 
-    #[ORM\Column]
-    private ?int $max_personnes = null;
+    #[ORM\Column(nullable: true)]
+    private ?int $maxPersonnes = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $remarque = null;
 
     #[ORM\ManyToOne(targetEntity: Weekend::class, inversedBy: 'taches')]
-    #[ORM\JoinColumn(name: "id_weekend", referencedColumnName: "id", nullable: false)]
+    #[ORM\JoinColumn(name: 'id_weekend', referencedColumnName: 'id', nullable: false)]
     private ?Weekend $weekend = null;
 
-    public function getWeekend(): ?Weekend
-    {
-        return $this->weekend;
-    }
-
-    public function setWeekend(?Weekend $weekend): self
-    {
-        $this->weekend = $weekend;
-        return $this;
-    }
-    #[ORM\JoinColumn(nullable: false, name: 'id_evenement', referencedColumnName: 'id')]
-    private ?Evenement $evenement = null;
-
-    // --- GETTERS & SETTERS ---
+    // ====================
+    // GETTERS & SETTERS
+    // ====================
 
     public function getId(): ?int
     {
@@ -92,23 +81,23 @@ class Tache
 
     public function getPosteRequis(): ?string
     {
-        return $this->poste_requis;
+        return $this->posteRequis;
     }
 
-    public function setPosteRequis(string $poste_requis): self
+    public function setPosteRequis(?string $posteRequis): self
     {
-        $this->poste_requis = $poste_requis;
+        $this->posteRequis = $posteRequis;
         return $this;
     }
 
     public function getMaxPersonnes(): ?int
     {
-        return $this->max_personnes;
+        return $this->maxPersonnes;
     }
 
-    public function setMaxPersonnes(int $max_personnes): self
+    public function setMaxPersonnes(?int $maxPersonnes): self
     {
-        $this->max_personnes = $max_personnes;
+        $this->maxPersonnes = $maxPersonnes;
         return $this;
     }
 
@@ -123,15 +112,14 @@ class Tache
         return $this;
     }
 
-    // AJOUTÉ : getter pour la relation evenement
-    public function getEvenement(): ?Evenement
+    public function getWeekend(): ?Weekend
     {
-        return $this->evenement;
+        return $this->weekend;
     }
 
-    public function setEvenement(?Evenement $evenement): self
+    public function setWeekend(Weekend $weekend): self
     {
-        $this->evenement = $evenement;
+        $this->weekend = $weekend;
         return $this;
     }
 }
