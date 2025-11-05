@@ -21,6 +21,17 @@ class BenevoleController extends AbstractController
     {
         // Récupération des bénévoles
         $benevoles = $benevoleRepository->findActiveWithUser();
+        
+        // Ajouter le nombre de tâches réalisées pour chaque bénévole
+        $benevolesAvecStats = [];
+        foreach ($benevoles as $benevole) {
+            $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
+            $benevolesAvecStats[] = [
+                'benevole' => $benevole,
+                'nb_taches_realisees' => count($tachesRealisees)
+            ];
+        }
+        
         $totalBenevoles = $benevoleRepository->countActive();
         $nouveauxBenevoles = count($benevoleRepository->findRecentlyRegistered());
 
@@ -106,7 +117,7 @@ class BenevoleController extends AbstractController
         }
 
         return $this->render('benevoles.html.twig', [
-            'benevoles' => $benevoles,
+            'benevoles' => $benevolesAvecStats,
             'metriques' => $metriques,
             'taches' => $taches,
             // fournir des tableaux simples pour le template
