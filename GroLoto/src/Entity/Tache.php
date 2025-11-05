@@ -33,7 +33,20 @@ class Tache
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $remarque = null;
 
-    #[ORM\ManyToOne(targetEntity: Evenement::class, inversedBy: 'taches')]
+    #[ORM\ManyToOne(targetEntity: Weekend::class, inversedBy: 'taches')]
+    #[ORM\JoinColumn(name: "id_weekend", referencedColumnName: "id", nullable: false)]
+    private ?Weekend $weekend = null;
+
+    public function getWeekend(): ?Weekend
+    {
+        return $this->weekend;
+    }
+
+    public function setWeekend(?Weekend $weekend): self
+    {
+        $this->weekend = $weekend;
+        return $this;
+    }
     #[ORM\JoinColumn(nullable: false, name: 'id_evenement', referencedColumnName: 'id')]
     private ?Evenement $evenement = null;
 

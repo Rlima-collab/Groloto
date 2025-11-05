@@ -23,8 +23,8 @@
                 <h3>{{ tache.titre }}</h3>
                 <div>
                     <p><strong>Événement :</strong> 
-                        {% if tache.evenement %}
-                            {{ tache.evenement.nom }}
+                            {% if tache.weekend %}
+                                {{ tache.weekend.nom }} (du {{ tache.weekend.dateVendredi|date('d/m/Y') }} au {{ tache.weekend.dateDimanche|date('d/m/Y') }})
                         {% else %}
                             <span style="color: #6b7280;">Non défini</span>
                         {% endif %}

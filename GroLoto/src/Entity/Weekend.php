@@ -34,10 +34,41 @@ class Weekend
     #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Evenement::class, orphanRemoval: true)]
     private Collection $evenements;
 
+    #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Tache::class, orphanRemoval: true)]
+    private Collection $taches;
+
     public function __construct()
     {
         $this->evenements = new ArrayCollection();
-        $this->date_creation = new \DateTime();
+        $this->taches = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection<int, Tache>
+     */
+    public function getTaches(): Collection
+    {
+        return $this->taches;
+    }
+
+    public function addTache(Tache $tache): self
+    {
+        if (!$this->taches->contains($tache)) {
+            $this->taches->add($tache);
+            $tache->setWeekend($this);
+        }
+        return $this;
+    }
+
+    public function removeTache(Tache $tache): self
+    {
+        if ($this->taches->removeElement($tache)) {
+            // Set the owning side to null (unless already changed)
+            if ($tache->getWeekend() === $this) {
+                $tache->setWeekend(null);
+            }
+        }
+        return $this;
     }
 
     public function getId(): ?int { return $this->id; }
