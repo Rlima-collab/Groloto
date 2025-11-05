@@ -7,6 +7,7 @@ use App\Form\WeekendType;
 use App\Repository\WeekendRepository;
 use App\Repository\EvenementRepository;
 use App\Repository\TacheRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -47,6 +48,23 @@ class WeekendController extends AbstractController
             ];
         }, $evenements);
 
+        // Weekends pour le calendrier
+        $weekendsData = array_map(function ($w) {
+            $end = $w->getDateDimanche() ? (clone $w->getDateDimanche())->modify('+1 day')->format('Y-m-d') : null;
+            $evenementsNoms = array_map(fn($e) => $e->getNom(), $w->getEvenements()->toArray());
+            return [
+                'title' => 'Weekend du ' . $w->getDateVendredi()->format('d/m'),
+                'start' => $w->getDateVendredi()->format('Y-m-d'),
+                'end' => $end,
+                'type' => 'weekend',
+                'backgroundColor' => '#10b981',
+                'borderColor' => '#059669',
+                'extendedProps' => [
+                    'evenements' => implode(', ', $evenementsNoms),
+                ]
+            ];
+        }, $weekendRepo->findAll());
+
         $taches = array_map(function ($t) {
             return [
                 'title' => $t->getTitre() . ' (' . $t->getPosteRequis() . ')',
@@ -74,19 +92,36 @@ class WeekendController extends AbstractController
 
             // Calendrier
             'creneaux' => json_encode($creneaux, JSON_UNESCAPED_SLASHES),
+            'weekendsData' => json_encode($weekendsData, JSON_UNESCAPED_SLASHES),
             'taches' => json_encode($taches, JSON_UNESCAPED_SLASHES),
         ]);
     }
 
     #[Route('/create', name: 'app_weekend_create')]
-    public function create(Request $request): Response
+    public function create(Request $request, EntityManagerInterface $em): Response
     {
         $weekend = new Weekend();
         $form = $this->createForm(WeekendType::class, $weekend);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            // Récupérer le nombre de jours du formulaire
+            $nombreJours = $form->get('nombre_jours')->getData() ?? 3;
+            
+            // Calculer automatiquement samedi et dimanche à partir du vendredi
+            $dateVendredi = $weekend->getDateVendredi();
+            if ($dateVendredi) {
+                // Samedi = vendredi + 1 jour
+                $dateSamedi = (clone $dateVendredi)->modify('+1 day');
+                $weekend->setDateSamedi($dateSamedi);
+                
+                // Dimanche = vendredi + 2 jours (ou selon le nombre de jours)
+                if ($nombreJours >= 3) {
+                    $dateDimanche = (clone $dateVendredi)->modify('+2 days');
+                    $weekend->setDateDimanche($dateDimanche);
+                }
+            }
+            
             $em->persist($weekend);
             $em->flush();
 

@@ -78,21 +78,30 @@
         </div>
         <div class="card-content">
             <div class="events-list">
-                {% if evenements_futurs|length > 0 %}
-                    {% for evenement in evenements_futurs|slice(0, 20) %}
+                {% set weekends_futurs = weekends|filter(w => w.dateVendredi > date()) %}
+                {% if weekends_futurs|length > 0 %}
+                    {% for weekend in weekends_futurs|slice(0, 20) %}
                         <div class="event-item blue-night-accent animate-fade-in">
                             <div class="event-date">
-                                <div class="event-month">{{ evenement.dateDebut|date('M')|upper }}</div>
-                                <div class="event-day">{{ evenement.dateDebut|date('d') }}</div>
+                                <div class="event-month">{{ weekend.dateVendredi|date('M')|upper }}</div>
+                                <div class="event-day">{{ weekend.dateVendredi|date('d') }}</div>
                             </div>
                             <div class="event-details">
-                                <h4 class="event-title">{{ evenement.nom }}</h4>
-                                <p class="event-time">{{ evenement.dateDebut|date('H\\hi') }} - {{ evenement.lieu }}</p>
+                                <h4 class="event-title">Weekend du {{ weekend.dateVendredi|date('d/m') }} au {{ weekend.dateDimanche|date('d/m/Y') }}</h4>
+                                <p class="event-time">
+                                    {% if weekend.evenements is not empty %}
+                                        {% for event in weekend.evenements %}
+                                            {{ event.nom }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        Aucun événement associé
+                                    {% endif %}
+                                </p>
                             </div>
                         </div>
                     {% endfor %}
                 {% else %}
-                    <p style="text-align: center; color: #64748b; padding: 2rem;">Aucun événement à venir.</p>
+                    <p style="text-align: center; color: #64748b; padding: 2rem;">Aucun weekend à venir.</p>
                 {% endif %}
             </div>
         </div>
@@ -138,6 +147,7 @@
     {{ parent() }}
     <script>
         window.calendarEvents = {{ creneaux|raw }};
+        window.weekendsData = {{ weekendsData|raw }};
         window.taches = {{ taches|raw }};
     </script>
 
@@ -169,6 +179,7 @@
             // Les données sont déjà des objets JavaScript, pas besoin de parser
             const events = window.taches || [];
             const evenements = window.calendarEvents || [];
+            const weekends = window.weekendsData || [];
 
             window.calendarInstance = new FullCalendar.Calendar(el, {
                 initialView: view,
@@ -176,10 +187,10 @@
                 height: 'auto',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
                 buttonText: { today: 'Aujourd\'hui', month: 'Mois', week: 'Semaine' },
-                hiddenDays: [1, 2, 3, 4],
+                hiddenDays: [],
                 weekends: true,
-                firstDay: 5,
-                events: [...evenements, ...events],
+                firstDay: 1,
+                events: [...evenements, ...weekends, ...events],
                 eventClick: info => {
                     const e = info.event;
                     const p = e.extendedProps;
@@ -187,6 +198,7 @@
                     if (e.end) msg += `\nAu ${e.end.toLocaleString()}`;
                     if (p.description) msg += `\n\n${p.description}`;
                     if (p.lieu) msg += `\nLieu: ${p.lieu}`;
+                    if (p.evenements) msg += `\nÉvénements: ${p.evenements}`;
                     alert(msg);
                 },
                 nowIndicator: true,
