@@ -7,6 +7,129 @@
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
     <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
+    <style>
+        .search-filter-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .search-bar-container {
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1a3c5a;
+            box-shadow: 0 0 0 3px rgba(26, 60, 90, 0.1);
+        }
+
+        .filters-container {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .filter-select {
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #1a3c5a;
+        }
+
+        .btn-reset-filters {
+            padding: 0.75rem 1.25rem;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-reset-filters:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .results-count {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #1a3c5a;
+            border: 1px solid #d1d5db;
+        }
+
+        #countCurrent {
+            color: #059669;
+            font-size: 1.1rem;
+        }
+
+        .benevole-card.hidden {
+            display: none;
+        }
+
+        .no-results-message {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .filters-container {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .btn-reset-filters {
+                width: 100%;
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
@@ -47,6 +170,45 @@
             <h2 class="card-title">Liste des Mécènes</h2>
             <p class="card-description">Gestion des mécènes et partenaires</p>
         </div>
+
+        <!-- Barre de recherche et filtres -->
+        <div class="search-filter-section">
+            <div class="search-bar-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Rechercher par nom, organisation, email...">
+            </div>
+            
+            <div class="filters-container">
+                {% if is_granted('ROLE_ADMIN') and weekends is defined %}
+                <div class="filter-group">
+                    <label for="filterWeekend" class="filter-label">Week-end :</label>
+                    <select id="filterWeekend" class="filter-select">
+                        <option value="">Tous les week-ends</option>
+                        {% for weekend in weekends %}
+                            <option value="{{ weekend.id }}" {% if weekend_filtre and weekend_filtre.id == weekend.id %}selected{% endif %}>
+                                {{ weekend.nom }} ({{ weekend.dateVendredi|date('d/m/Y') }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="filter-group">
+                    <label for="sortBy" class="filter-label">Trier par :</label>
+                    <select id="sortBy" class="filter-select">
+                        <option value="nom">Nom (A-Z)</option>
+                        <option value="organisation">Organisation (A-Z)</option>
+                        <option value="date">Date d'inscription</option>
+                    </select>
+                </div>
+
+                <button id="resetFilters" class="btn-reset-filters">🔄 Réinitialiser</button>
+            </div>
+
+            <div id="resultsCount" class="results-count">
+                Affichage de <span id="countCurrent">{{ mecenes|length }}</span> mécène(s)
+            </div>
+        </div>
+
         <div class="card-content">
             {% if mecenes|length > 0 %}
                 <div class="benevoles-grid">
@@ -111,6 +273,129 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const filterWeekend = document.getElementById('filterWeekend');
+    const sortBy = document.getElementById('sortBy');
+    const resetButton = document.getElementById('resetFilters');
+    const meceneCards = document.querySelectorAll('.benevole-card');
+    const gridContainer = document.querySelector('.benevoles-grid');
+    const countCurrent = document.getElementById('countCurrent');
+
+    // Fonction de recherche et filtrage
+    function filterAndSort() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const weekendId = filterWeekend ? filterWeekend.value : '';
+        const sortOption = sortBy.value;
+        
+        let visibleCards = [];
+        
+        meceneCards.forEach(card => {
+            const name = card.querySelector('.benevole-name').textContent.toLowerCase();
+            const organisation = card.querySelector('.info-text:first-child').textContent.toLowerCase();
+            const email = card.querySelectorAll('.info-text')[1].textContent.toLowerCase();
+            
+            // Recherche par texte
+            const matchesSearch = !searchTerm || 
+                name.includes(searchTerm) || 
+                organisation.includes(searchTerm) || 
+                email.includes(searchTerm);
+            
+            // Filtre par weekend (si implémenté côté serveur)
+            let matchesWeekend = true;
+            if (weekendId) {
+                // Pour l'instant, on affiche tous les mécènes
+                // Dans une vraie implémentation, vous ajouteriez un attribut data-weekend-id sur chaque carte
+                matchesWeekend = true;
+            }
+            
+            if (matchesSearch && matchesWeekend) {
+                card.classList.remove('hidden');
+                visibleCards.push(card);
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+        
+        // Tri des cartes visibles
+        if (sortOption && visibleCards.length > 0) {
+            visibleCards.sort((a, b) => {
+                let valA, valB;
+                
+                switch(sortOption) {
+                    case 'nom':
+                        valA = a.querySelector('.benevole-name').textContent.trim();
+                        valB = b.querySelector('.benevole-name').textContent.trim();
+                        break;
+                    case 'organisation':
+                        valA = a.querySelector('.info-text:first-child').textContent.split(':')[1].trim();
+                        valB = b.querySelector('.info-text:first-child').textContent.split(':')[1].trim();
+                        break;
+                    case 'date':
+                        valA = a.querySelector('.info-item:last-child .info-text').textContent.split(':')[1].trim();
+                        valB = b.querySelector('.info-item:last-child .info-text').textContent.split(':')[1].trim();
+                        // Inverser l'ordre pour avoir les plus récents en premier
+                        return valB.localeCompare(valA);
+                }
+                
+                return valA.localeCompare(valB);
+            });
+            
+            // Réorganiser le DOM
+            visibleCards.forEach(card => {
+                gridContainer.appendChild(card);
+            });
+        }
+        
+        // Mettre à jour le compteur
+        countCurrent.textContent = visibleCards.length;
+        
+        // Afficher un message si aucun résultat
+        let noResultsMsg = document.querySelector('.no-results-message');
+        if (visibleCards.length === 0) {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('div');
+                noResultsMsg.className = 'no-results-message';
+                noResultsMsg.innerHTML = '🔍 Aucun mécène ne correspond à votre recherche';
+                gridContainer.parentElement.insertBefore(noResultsMsg, gridContainer);
+            }
+            gridContainer.style.display = 'none';
+        } else {
+            if (noResultsMsg) {
+                noResultsMsg.remove();
+            }
+            gridContainer.style.display = 'grid';
+        }
+    }
+    
+    // Fonction de réinitialisation
+    function resetFilters() {
+        searchInput.value = '';
+        if (filterWeekend) filterWeekend.value = '';
+        sortBy.value = 'nom';
+        filterAndSort();
+    }
+    
+    // Écouteurs d'événements
+    searchInput.addEventListener('input', filterAndSort);
+    
+    if (filterWeekend) {
+        filterWeekend.addEventListener('change', function() {
+            if (this.value) {
+                window.location.href = `?weekend=${this.value}`;
+            } else {
+                filterAndSort();
+            }
+        });
+    }
+    
+    sortBy.addEventListener('change', filterAndSort);
+    resetButton.addEventListener('click', resetFilters);
+    
+    // Appliquer le tri initial
+    filterAndSort();
+});
+
 function confirmDeleteMecene(button) {
     const meceneId = button.getAttribute('data-mecene-id');
     const meceneNom = button.getAttribute('data-mecene-nom');
