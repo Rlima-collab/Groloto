@@ -25,7 +25,7 @@
             <h2>Informations de l'Événement</h2>
         </div>
 
-        {{ form_start(form, {'attr': {'class': 'form-night-blue', 'id': 'evenement-form'}}) }}
+        {{ form_start(form, {'attr': {'class': 'form-night-blue', 'id': 'evenement-form', 'enctype': 'multipart/form-data'}}) }}
 
             <div class="mb-4">
                 {{ form_row(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom de l\'événement'}}) }}
