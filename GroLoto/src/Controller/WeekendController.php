@@ -12,6 +12,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 #[Route('/weekend')]
 class WeekendController extends AbstractController
@@ -51,7 +53,7 @@ class WeekendController extends AbstractController
                 'borderColor'     => '#2563eb',
                 'extendedProps'   => [
                     'description' => $e->getDescription() ?? '',
-                    'lieu'        => $e->getLieu() ??ũi,
+                    'lieu'        => $e->getLieu() ?? '',
                 ],
             ];
         }, $evenements);
@@ -72,6 +74,8 @@ class WeekendController extends AbstractController
                 ]
             ];
         }, $weekendRepo->findAll());
+
+        $tachesBrutes = $tacheRepo->findAll();
 
         $taches = array_map(function ($t) {
             $weekend = $t->getWeekend();
@@ -98,6 +102,33 @@ class WeekendController extends AbstractController
             ];
         }, $tachesBrutes);
 
+        // ─────────────── WEEKENDS POUR JS ───────────────
+        $weekendsForJs = array_map(function($w) {
+            return [
+                'id' => $w->getId(),
+                'dateVendredi' => $w->getDateVendredi()->format('Y-m-d'),
+                'dateSamedi' => $w->getDateSamedi()->format('Y-m-d'),
+                'dateDimanche' => $w->getDateDimanche()->format('Y-m-d'),
+                'coverImage' => $w->getCoverImage(),
+                'evenements' => array_map(fn($e) => [
+                    'id' => $e->getId(),
+                    'nom' => $e->getNom(),
+                    'dateDebut' => $e->getDateDebut()->format('Y-m-d'),
+                    'dateFin' => $e->getDateFin() ? $e->getDateFin()->format('Y-m-d') : null,
+                    'lieu' => $e->getLieu(),
+                    'description' => $e->getDescription(),
+                ], $w->getEvenements()->toArray()),
+                'taches' => array_map(fn($t) => [
+                    'id' => $t->getId(),
+                    'titre' => $t->getTitre(),
+                    'debut' => $t->getDebut()->format('Y-m-d\TH:i:s'),
+                    'fin' => $t->getFin()->format('Y-m-d\TH:i:s'),
+                    'posteRequis' => $t->getPosteRequis(),
+                    'maxPersonnes' => $t->getMaxPersonnes(),
+                ], $w->getTaches()->toArray()),
+            ];
+        }, $weekendRepo->findAll());
+
         // ─────────────── RENDER ───────────────
         return $this->render('weekend/weekends.html.twig', [
             'weekends'           => $weekendRepo->findAll(),
@@ -112,6 +143,7 @@ class WeekendController extends AbstractController
             // Calendrier
             'creneaux' => json_encode($creneaux, JSON_UNESCAPED_SLASHES),
             'weekendsData' => json_encode($weekendsData, JSON_UNESCAPED_SLASHES),
+            'weekendsForJs' => json_encode($weekendsForJs, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'taches' => json_encode($taches, JSON_UNESCAPED_SLASHES),
         ]);
     }
@@ -141,6 +173,28 @@ class WeekendController extends AbstractController
                 }
             }
             
+            // Gestion de l'upload de l'image de couverture (optionnel)
+            /** @var UploadedFile|null $coverFile */
+            $coverFile = $form->get('cover_image')->getData();
+            if ($coverFile) {
+                $projectDir = $this->getParameter('kernel.project_dir');
+                $uploadsDir = $projectDir . '/public/uploads/weekends';
+                if (!is_dir($uploadsDir)) {
+                    @mkdir($uploadsDir, 0755, true);
+                }
+
+                $originalExtension = $coverFile->guessExtension() ?: 'jpg';
+                $safeName = uniqid('weekend_') . '.' . $originalExtension;
+                try {
+                    $coverFile->move($uploadsDir, $safeName);
+                    // stocker le chemin relatif
+                    $weekend->setCoverImage('uploads/weekends/' . $safeName);
+                } catch (FileException $e) {
+                    // Ne pas bloquer la création du weekend en cas d'erreur d'upload
+                    $this->addFlash('warning', 'Impossible d\'uploader l\'image de couverture. Le weekend a été créé sans image.');
+                }
+            }
+
             $em->persist($weekend);
             $em->flush();
 

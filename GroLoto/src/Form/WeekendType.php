@@ -11,6 +11,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\File as FileConstraint;
 
 class WeekendType extends AbstractType
 {
@@ -43,6 +45,19 @@ class WeekendType extends AbstractType
                 'help' => 'Nombre de jours du weekend (par défaut: 3 jours - vendredi, samedi, dimanche)'
             ])
 
+            ->add('cover_image', FileType::class, [
+                'label' => 'Image de couverture (optionnelle)',
+                'mapped' => false,
+                'required' => false,
+                'constraints' => [
+                    new FileConstraint([
+                        'maxSize' => '5M',
+                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
+                        'mimeTypesMessage' => 'Veuillez télécharger une image JPG, PNG ou WebP valide',
+                    ])
+                ],
+                'attr' => ['class' => 'w-full']
+            ])
             // ÉVÉNEMENTS IMBRIQUÉS
             ->add('evenements', CollectionType::class, [
                 'entry_type' => EvenementType::class,

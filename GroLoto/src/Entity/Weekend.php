@@ -31,6 +31,9 @@ class Weekend
     #[ORM\Column(type: "datetime")]
     private ?\DateTimeInterface $date_creation = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $cover_image = null;
+
     #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Evenement::class, orphanRemoval: true)]
     private Collection $evenements;
 
@@ -41,6 +44,7 @@ class Weekend
     {
         $this->evenements = new ArrayCollection();
         $this->taches = new ArrayCollection();
+        $this->date_creation = new \DateTime();
     }
 
     /**
@@ -86,6 +90,17 @@ class Weekend
     public function setDateDimanche(\DateTimeInterface $date_dimanche): self { $this->date_dimanche = $date_dimanche; return $this; }
 
     public function getDateCreation(): ?\DateTimeInterface { return $this->date_creation; }
+
+    public function getCoverImage(): ?string
+    {
+        return $this->cover_image;
+    }
+
+    public function setCoverImage(?string $cover_image): self
+    {
+        $this->cover_image = $cover_image;
+        return $this;
+    }
 
     /**
      * @return Collection<int, Evenement>
