@@ -10,7 +10,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class EvenementController extends AbstractController
 {
@@ -91,27 +93,44 @@ class EvenementController extends AbstractController
     }
 
     #[Route('/evenements/create', name: 'app_evenements_create')]
-    public function create(Request $request, EntityManagerInterface $em): Response
+    public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
     {
         $evenement = new Evenement();
+        
+        // Définir la date par défaut à aujourd'hui
+        $evenement->setDateDebut(new \DateTime());
+        
         $form = $this->createForm(EvenementType::class, $evenement);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $dateVendredi = $form->get('dateVendredi')->getData();
+            // Gestion de l'upload d'image
+            $imageFile = $form->get('imageFile')->getData();
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
 
-            // Vendredi → date_debut
-            $evenement->setDateDebut($dateVendredi);
+                try {
+                    $imageFile->move(
+                        $this->getParameter('kernel.project_dir').'/public/images/evenements',
+                        $newFilename
+                    );
+                    $evenement->setImage($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image');
+                }
+            }
 
-            // Dimanche = vendredi + 2 jours
-            $dateFin = clone $dateVendredi;
-            $dateFin->modify('+2 days');
-            $evenement->setDateFin($dateFin);
+            // Si pas de date_fin définie, utiliser date_debut
+            if (!$evenement->getDateFin() && $evenement->getDateDebut()) {
+                $evenement->setDateFin($evenement->getDateDebut());
+            }
 
             $em->persist($evenement);
             $em->flush();
 
-            $this->addFlash('success', 'Événement créé : du ' . $dateVendredi->format('d/m/Y') . ' au ' . $dateFin->format('d/m/Y'));
+            $this->addFlash('success', 'Événement créé avec succès !');
             return $this->redirectToRoute('app_evenements');
         }
 

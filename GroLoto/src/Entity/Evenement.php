@@ -31,6 +31,15 @@ class Evenement
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     private ?string $lieu = null;
 
+    #[ORM\Column(type: "time", nullable: true)]
+    private ?\DateTimeInterface $heure_debut = null;
+
+    #[ORM\Column(type: "integer", nullable: true)]
+    private ?int $duree_minutes = null;
+
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $image = null;
+
     #[ORM\Column(type: "datetime")]
     private ?\DateTimeInterface $date_creation = null;
 
@@ -63,6 +72,28 @@ class Evenement
 
     public function getLieu(): ?string { return $this->lieu; }
     public function setLieu(?string $lieu): self { $this->lieu = $lieu; return $this; }
+
+    public function getHeureDebut(): ?\DateTimeInterface { return $this->heure_debut; }
+    public function setHeureDebut(?\DateTimeInterface $heure_debut): self { $this->heure_debut = $heure_debut; return $this; }
+
+    public function getDureeMinutes(): ?int { return $this->duree_minutes; }
+    public function setDureeMinutes(?int $duree_minutes): self { $this->duree_minutes = $duree_minutes; return $this; }
+
+    public function getImage(): ?string { return $this->image; }
+    public function setImage(?string $image): self { $this->image = $image; return $this; }
+
+    /**
+     * Calcule l'heure de fin à partir de l'heure de début et de la durée
+     */
+    public function getHeureFin(): ?\DateTimeInterface
+    {
+        if ($this->heure_debut && $this->duree_minutes) {
+            $heureFin = clone $this->heure_debut;
+            $heureFin->modify('+' . $this->duree_minutes . ' minutes');
+            return $heureFin;
+        }
+        return null;
+    }
 
     public function getDateCreation(): ?\DateTimeInterface { return $this->date_creation; }
 
