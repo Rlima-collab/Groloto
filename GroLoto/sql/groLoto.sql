@@ -29,7 +29,7 @@ DROP TABLE IF EXISTS messenger_messages;
 -- CRÉATION DES TABLES
 -- =============================================
 
--- WEEKEND
+-- WEEKEND (CORRIGÉE : cover_image ajoutée correctement)
 CREATE TABLE WEEKEND (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT NOT NULL,

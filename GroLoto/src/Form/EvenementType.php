@@ -33,6 +33,15 @@ class EvenementType extends AbstractType
                            $weekend->getDateVendredi()->format('d/m/Y') . ' - ' . 
                            $weekend->getDateDimanche()->format('d/m/Y') . ')';
                 },
+                // expose the weekend dates in data- attributes on each <option>
+                'choice_attr' => function(?Weekend $weekend) {
+                    if (!$weekend) return [];
+                    return [
+                        'data-vendredi' => $weekend->getDateVendredi()?->format('Y-m-d'),
+                        'data-samedi' => $weekend->getDateSamedi()?->format('Y-m-d'),
+                        'data-dimanche' => $weekend->getDateDimanche()?->format('Y-m-d'),
+                    ];
+                },
                 'label' => 'Week-end associé',
                 'placeholder' => 'Sélectionnez un week-end',
                 'required' => true,
@@ -55,7 +64,6 @@ class EvenementType extends AbstractType
                 'required' => true,
                 'attr' => [
                     'class' => 'w-full p-3 border rounded-lg',
-                    'placeholder' => 'Ex: 120 pour 2 heures',
                     'min' => 1
                 ],
                 'constraints' => [
