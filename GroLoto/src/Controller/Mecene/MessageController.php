@@ -14,7 +14,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 
 #[Route('/mecene/messages')]
-#[IsGranted('ROLE_BENEVOLE')]
+#[IsGranted('ROLE_MECENE')]
 class MessageController extends AbstractController
 {
     public function __construct(private EntityManagerInterface $em) {}
@@ -28,18 +28,35 @@ class MessageController extends AbstractController
         $messages = [];
         if ($email) {
             // Récupérer les messages racines (parent_id IS NULL) où l'utilisateur est soit destinataire, soit expéditeur
+            // ET qui ne sont pas masqués pour cet utilisateur
             $messages = $this->em->getRepository(ContactMessage::class)
                 ->createQueryBuilder('cm')
                 ->where('cm.parent_id IS NULL')
                 ->andWhere('cm.destinataire = :email OR cm.email = :email')
+                ->andWhere('cm.masqueePour IS NULL OR cm.masqueePour NOT LIKE :emailPattern')
                 ->setParameter('email', $email)
+                ->setParameter('emailPattern', '%' . $email . '%')
                 ->orderBy('cm.createdAt', 'DESC')
                 ->getQuery()
                 ->getResult();
 
-            // Pour chaque message racine, charger la conversation complète
+            // Pour chaque message racine, charger la conversation complète et déterminer le rôle
             foreach ($messages as $msg) {
                 $msg->conversation = $this->getConversationThread($msg->getId());
+                
+                // Déterminer le dernier message de la conversation
+                if (!empty($msg->conversation)) {
+                    $lastReply = end($msg->conversation);
+                    $msg->lastMessage = $lastReply->getMessage();
+                    $msg->lastMessageDate = $lastReply->getCreatedAt();
+                } else {
+                    $msg->lastMessage = $msg->getMessage();
+                    $msg->lastMessageDate = $msg->getCreatedAt();
+                }
+                
+                // Déterminer le rôle de l'interlocuteur
+                $otherEmail = ($msg->getEmail() === $email) ? $msg->getDestinataire() : $msg->getEmail();
+                $msg->otherUserRole = $this->getUserRole($otherEmail);
             }
         }
 
@@ -59,6 +76,26 @@ class MessageController extends AbstractController
             'messages' => $messages,
             'adminEmail' => $adminEmail,
         ]);
+    }
+
+    /**
+     * Détermine le rôle d'un utilisateur par son email
+     */
+    private function getUserRole(?string $email): string
+    {
+        if (!$email) return 'Inconnu';
+        
+        $user = $this->em->getRepository(\App\Entity\Utilisateur::class)
+            ->findOneBy(['email' => $email]);
+        
+        if (!$user) return 'Externe';
+        
+        $roles = $user->getRoles();
+        if (in_array('ROLE_ADMIN', $roles)) return 'Admin';
+        if (in_array('ROLE_MECENE', $roles)) return 'Mécène';
+        if (in_array('ROLE_BENEVOLE', $roles)) return 'Bénévole';
+        
+        return 'Utilisateur';
     }
 
     /**
@@ -108,7 +145,6 @@ class MessageController extends AbstractController
         ]);
     }
 
-    // AJAX compose -> envoie au contact@groloto.com et stocke le message
     #[Route('/nouveau', name: 'mecene_message_new', methods: ['POST'])]
     public function new(Request $request, MailerInterface $mailer): JsonResponse
     {
@@ -138,14 +174,12 @@ class MessageController extends AbstractController
 
         $adminEmail = $adminUser ? $adminUser->getEmail() : 'contact@groloto.com';
 
-        // Formater le message avec le sujet
-        $fullMessage = $subject ? "[{$subject}] {$messageText}" : $messageText;
-
+        // Créer un nouveau message racine (nouvelle conversation)
         $cm = new ContactMessage();
         $cm->setNom($nom)
             ->setEmail($email)
             ->setDestinataire($adminEmail)
-            ->setMessage($fullMessage);
+            ->setMessage($messageText);
 
         $this->em->persist($cm);
         $this->em->flush();
@@ -165,7 +199,7 @@ class MessageController extends AbstractController
                 $notification->setDestinataire($adm)
                     ->setType('contact')
                     ->setMessage(sprintf('Nouveau message de %s', $nom))
-                    ->setLien('/admin/messages/' . $cm->getId())
+                    ->setLien('/admin/messages?conv=' . $cm->getId())
                     ->setLue(false);
                 $this->em->persist($notification);
             }
@@ -186,31 +220,85 @@ class MessageController extends AbstractController
             // ignore mail failure for now
         }
 
-        return $this->json(['success' => true, 'message' => 'Message envoyé !']);
+        return $this->json(['success' => true, 'message' => 'Message envoyé !', 'conversationId' => $cm->getId()]);
     }
 
     #[Route('/{id}/delete', name: 'mecene_message_delete', methods: ['POST'])]
-    public function delete(ContactMessage $message): Response
+    public function delete(ContactMessage $message, Request $request): Response
     {
+        $isAjax = $request->isXmlHttpRequest();
+        
         // sécurité : n'autoriser que le propriétaire (email)
         $user = $this->getUser();
-        if ($user->getEmail() !== $message->getEmail()) {
+        if ($user->getEmail() !== $message->getEmail() && $user->getEmail() !== $message->getDestinataire()) {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'error' => 'Action non autorisée'], 403);
+            }
             $this->addFlash('error', 'Action non autorisée.');
             return $this->redirectToRoute('mecene_messages');
         }
 
-        $this->em->remove($message);
-        $this->em->flush();
-        $this->addFlash('success', 'Message supprimé.');
+        // Clôturer la conversation avant de la masquer
+        $message->setCloturee(true);
 
+        // Ne pas supprimer, mais masquer pour l'utilisateur
+        $message->masquerPour($user->getEmail());
+        $this->em->flush();
+        
+        if ($isAjax) {
+            return $this->json(['success' => true, 'message' => 'Conversation supprimée']);
+        }
+        
+        $this->addFlash('success', 'Message supprimé.');
         return $this->redirectToRoute('mecene_messages');
     }
 
-    #[Route('/{id}/repondre', name: 'mecene_message_reply', methods: ['POST'])]
-    public function reply(Request $request, ContactMessage $message, MailerInterface $mailer): Response
+    #[Route('/{id}/cloturer', name: 'mecene_message_close', methods: ['POST'])]
+    public function cloturer(ContactMessage $message, Request $request): JsonResponse
     {
+        $user = $this->getUser();
+        if ($user->getEmail() !== $message->getEmail() && $user->getEmail() !== $message->getDestinataire()) {
+            return $this->json(['success' => false, 'error' => 'Action non autorisée'], 403);
+        }
+
+        $message->setCloturee(true);
+        $this->em->flush();
+
+        return $this->json(['success' => true, 'message' => 'Conversation clôturée']);
+    }
+
+    #[Route('/{id}/repondre', name: 'mecene_message_reply', methods: ['POST'])]
+    public function reply(Request $request, ContactMessage $message, MailerInterface $mailer): JsonResponse
+    {
+        $isAjax = $request->isXmlHttpRequest();
+        
+        $currentUser = $this->getUser();
+        $currentEmail = $currentUser->getEmail();
+
+        // Vérifier si la conversation est masquée par l'autre utilisateur
+        $otherEmail = ($message->getEmail() === $currentEmail) ? $message->getDestinataire() : $message->getEmail();
+        if ($message->isMasqueePour($otherEmail)) {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'error' => 'Cette conversation a été supprimée par l\'autre utilisateur.'], 410);
+            }
+            $this->addFlash('error', 'Cette conversation a été supprimée par l\'autre utilisateur.');
+            return $this->redirectToRoute('mecene_messages');
+        }
+        
+        // Vérifier si la conversation est clôturée
+        if ($message->isCloturee()) {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'error' => 'Cette conversation est clôturée.'], 403);
+            }
+            $this->addFlash('error', 'Cette conversation est clôturée.');
+            return $this->redirectToRoute('mecene_messages');
+        }
+        
         $reponse = trim($request->request->get('reponse')) ?: trim($request->request->get('message'));
         if (!$reponse) {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'error' => 'La réponse est vide.'], 400);
+            }
             $this->addFlash('error', 'La réponse est vide.');
             return $this->redirectToRoute('mecene_messages');
         }
@@ -235,9 +323,6 @@ class MessageController extends AbstractController
         if (preg_match('/^\[([^\]]+)\]/', $message->getMessage(), $matches)) {
             $subject = 'Re: ' . $matches[1];
         }
-
-        // Créer un nouveau message de réponse lié au parent
-        $fullMessage = "[{$subject}] " . $reponse;
         
         // Déterminer le message racine (parent_id)
         $rootParentId = $message->getParentId() ?? $message->getId();
@@ -246,7 +331,7 @@ class MessageController extends AbstractController
         $newMessage->setNom($nom)
             ->setEmail($user->getEmail())
             ->setDestinataire($adminEmail)
-            ->setMessage($fullMessage)
+            ->setMessage($reponse)
             ->setParentId($rootParentId); // Lien vers le message racine
 
         $this->em->persist($newMessage);
@@ -267,7 +352,7 @@ class MessageController extends AbstractController
                 $notification->setDestinataire($adm)
                     ->setType('contact')
                     ->setMessage(sprintf('Nouvelle réponse de %s', $nom))
-                    ->setLien('/admin/messages')
+                    ->setLien('/admin/messages?conv=' . $rootParentId)
                     ->setLue(false);
                 $this->em->persist($notification);
             }
@@ -293,6 +378,10 @@ class MessageController extends AbstractController
             $mailer->send($email);
         } catch (\Exception $e) {
             // ignore
+        }
+
+        if ($isAjax) {
+            return $this->json(['success' => true, 'message' => 'Réponse envoyée !']);
         }
 
         $this->addFlash('success', 'Réponse envoyée.');

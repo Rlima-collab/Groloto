@@ -267,6 +267,8 @@ CREATE TABLE CONTACT_MESSAGE (
     reponse TEXT,
     repondu_le DATETIME,
     parent_id INTEGER DEFAULT NULL,
+    cloturee BOOLEAN DEFAULT 0,
+    masquee_pour TEXT DEFAULT NULL,
     FOREIGN KEY (repondu_par_id) REFERENCES UTILISATEUR(id),
     FOREIGN KEY (parent_id) REFERENCES CONTACT_MESSAGE(id)
 );

@@ -349,8 +349,8 @@
                             </div>
                         </div>
                         <div class="notification-actions">
-                            {% if notif.lien or notif.type == 'contact' %}
-                                <a href="#" class="btn-view" data-action="view">Voir</a>
+                            {% if notif.lien %}
+                                <a href="{{ notif.lien }}" class="btn-view">Voir</a>
                             {% endif %}
                             {% if not notif.lue %}
                                 <button type="button" class="btn-mark-read" data-action="mark-read">

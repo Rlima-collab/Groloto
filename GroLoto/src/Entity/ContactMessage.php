@@ -44,6 +44,12 @@ class ContactMessage
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $parent_id = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $cloturee = false;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $masqueePour = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
@@ -85,4 +91,27 @@ class ContactMessage
 
     public function getParentId(): ?int { return $this->parent_id; }
     public function setParentId(?int $parent_id): self { $this->parent_id = $parent_id; return $this; }
+
+    public function isCloturee(): bool { return $this->cloturee; }
+    public function setCloturee(bool $cloturee): self { $this->cloturee = $cloturee; return $this; }
+
+    public function getMasqueePour(): ?string { return $this->masqueePour; }
+    public function setMasqueePour(?string $masqueePour): self { $this->masqueePour = $masqueePour; return $this; }
+    
+    public function isMasqueePour(string $email): bool
+    {
+        if (!$this->masqueePour) return false;
+        $emails = explode(',', $this->masqueePour);
+        return in_array($email, $emails);
+    }
+    
+    public function masquerPour(string $email): self
+    {
+        $emails = $this->masqueePour ? explode(',', $this->masqueePour) : [];
+        if (!in_array($email, $emails)) {
+            $emails[] = $email;
+            $this->masqueePour = implode(',', $emails);
+        }
+        return $this;
+    }
 }
