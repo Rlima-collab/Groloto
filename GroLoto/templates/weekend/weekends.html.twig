@@ -6,35 +6,30 @@
     {{ parent() }}
     <link href="{{ asset('css/modele.css') }}" rel="stylesheet">
     <link href="{{ asset('css/weekends_cards.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
-<div class="hero-section weekend-hero">
+<!-- Hero Section -->
+<div class="hero-section stocks-hero">
     <div class="shine"></div>
     <div class="hero-content">
-        <h1 class="hero-title">
-            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-                Gestion des Weekends
-            {% else %}
-                Voir les Weekends
-            {% endif %}
-        </h1>
-        <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité.</p>
+        <h1 class="hero-title">Gestion des Weekends</h1>
+        <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité</p>
         {% if isAdmin %}
-            <a href="{{ path('app_weekend_create') }}" class="btn-login">
-                <i class="bi bi-plus-circle"></i> Créer un Weekend
-            </a>
+            <a href="{{ path('app_weekend_create') }}" class="btn-login">Créer un weekend</a>
         {% endif %}
     </div>
 </div>
 
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
 <div class="weekends-container">
     {% if weekends|length > 0 %}
         <div class="weekends-grid">
             {% for weekend in weekends %}
                 {% set now = date() %}
-                {% set isPast = weekend.dateDimanche < now %}
+                {% set isPast = weekend.dateFin < now %}
                 {% set nbEvenements = weekend.evenements|length %}
                 {% set nbTaches = weekend.taches|length %}
                 
@@ -52,7 +47,7 @@
                         
                         <div class="weekend-card-dates">
                             <i class="bi bi-calendar-range"></i>
-                            <span>{{ weekend.dateVendredi|date('d/m') }} → {{ weekend.dateDimanche|date('d/m') }}</span>
+                            <span>{{ weekend.dateDebut|date('d/m') }} → {{ weekend.dateFin|date('d/m') }}</span>
                         </div>
                         
                         <div class="weekend-card-info">
@@ -88,14 +83,9 @@
             <i class="bi bi-calendar-x"></i>
             <h3>Aucun weekend planifié</h3>
             <p>Commencez par créer votre premier weekend</p>
-            {% if isAdmin %}
-                <br>
-                <a href="{{ path('app_weekend_create') }}" class="btn-login">
-                    <i class="bi bi-plus-circle"></i> Créer un Weekend
-                </a>
-            {% endif %}
         </div>
     {% endif %}
+</div>
 </div>
 
 <!-- Modal détail weekend -->
@@ -139,10 +129,10 @@
                     <button class="weekend-detail-close" onclick="closeWeekendDetail()">
                         <i class="bi bi-x"></i>
                     </button>
-                    <h2 class="weekend-detail-title">Weekend du ${formatDate(weekend.dateVendredi)}</h2>
+                    <h2 class="weekend-detail-title">${weekend.nom}</h2>
                     <div class="weekend-detail-dates">
                         <i class="bi bi-calendar-range"></i>
-                        ${formatDate(weekend.dateVendredi)} → ${formatDate(weekend.dateDimanche)}
+                        ${formatDate(weekend.dateDebut)} → ${formatDate(weekend.dateFin)}
                     </div>
                     ${weekend.coverImage ? `
                         <div class="weekend-cover" style="margin-top:1rem;">
@@ -341,7 +331,7 @@
             }
             
             // Trouver la date la plus ancienne (événements ou tâches)
-            let earliestDate = new Date(weekend.dateVendredi);
+            let earliestDate = new Date(weekend.dateDebut);
             
             // Vérifier les événements
             if (weekend.evenements && weekend.evenements.length > 0) {

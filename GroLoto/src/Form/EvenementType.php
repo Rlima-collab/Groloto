@@ -30,16 +30,15 @@ class EvenementType extends AbstractType
                 'class' => Weekend::class,
                 'choice_label' => function(Weekend $weekend) {
                     return $weekend->getNom() . ' (' . 
-                           $weekend->getDateVendredi()->format('d/m/Y') . ' - ' . 
-                           $weekend->getDateDimanche()->format('d/m/Y') . ')';
+                           $weekend->getDateDebut()->format('d/m/Y') . ' - ' . 
+                           $weekend->getDateFin()->format('d/m/Y') . ')';
                 },
                 // expose the weekend dates in data- attributes on each <option>
                 'choice_attr' => function(?Weekend $weekend) {
                     if (!$weekend) return [];
                     return [
-                        'data-vendredi' => $weekend->getDateVendredi()?->format('Y-m-d'),
-                        'data-samedi' => $weekend->getDateSamedi()?->format('Y-m-d'),
-                        'data-dimanche' => $weekend->getDateDimanche()?->format('Y-m-d'),
+                        'data-debut' => $weekend->getDateDebut()?->format('Y-m-d'),
+                        'data-fin' => $weekend->getDateFin()?->format('Y-m-d'),
                     ];
                 },
                 'label' => 'Week-end associé',

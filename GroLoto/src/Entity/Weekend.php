@@ -20,13 +20,10 @@ class Weekend
     private ?string $nom = null;
 
     #[ORM\Column(type: "date")]
-    private ?\DateTimeInterface $date_vendredi = null;
+    private ?\DateTimeInterface $date_debut = null;
 
     #[ORM\Column(type: "date")]
-    private ?\DateTimeInterface $date_samedi = null;
-
-    #[ORM\Column(type: "date")]
-    private ?\DateTimeInterface $date_dimanche = null;
+    private ?\DateTimeInterface $date_fin = null;
 
     #[ORM\Column(type: "datetime")]
     private ?\DateTimeInterface $date_creation = null;
@@ -80,14 +77,11 @@ class Weekend
     public function getNom(): ?string { return $this->nom; }
     public function setNom(string $nom): self { $this->nom = $nom; return $this; }
 
-    public function getDateVendredi(): ?\DateTimeInterface { return $this->date_vendredi; }
-    public function setDateVendredi(\DateTimeInterface $date_vendredi): self { $this->date_vendredi = $date_vendredi; return $this; }
+    public function getDateDebut(): ?\DateTimeInterface { return $this->date_debut; }
+    public function setDateDebut(\DateTimeInterface $date_debut): self { $this->date_debut = $date_debut; return $this; }
 
-    public function getDateSamedi(): ?\DateTimeInterface { return $this->date_samedi; }
-    public function setDateSamedi(\DateTimeInterface $date_samedi): self { $this->date_samedi = $date_samedi; return $this; }
-
-    public function getDateDimanche(): ?\DateTimeInterface { return $this->date_dimanche; }
-    public function setDateDimanche(\DateTimeInterface $date_dimanche): self { $this->date_dimanche = $date_dimanche; return $this; }
+    public function getDateFin(): ?\DateTimeInterface { return $this->date_fin; }
+    public function setDateFin(\DateTimeInterface $date_fin): self { $this->date_fin = $date_fin; return $this; }
 
     public function getDateCreation(): ?\DateTimeInterface { return $this->date_creation; }
 

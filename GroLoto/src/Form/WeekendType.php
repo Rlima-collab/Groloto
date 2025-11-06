@@ -23,26 +23,23 @@ class WeekendType extends AbstractType
                 'label' => 'Nom du weekend',
                 'attr' => ['class' => 'w-full p-3 border rounded-lg']
             ])
-            ->add('date_vendredi', DateType::class, [
+            ->add('date_debut', DateType::class, [
                 'widget' => 'single_text',
-                'label' => 'Date de départ (Vendredi)',
+                'label' => 'Date de début',
                 'attr' => [
                     'class' => 'w-full p-3 border rounded-lg',
-                    'placeholder' => 'Date de début du weekend'
+                    'placeholder' => 'Date de début'
                 ],
-                'help' => 'Sélectionnez la date du vendredi (premier jour du weekend)'
+                'help' => 'Sélectionnez la date de début du weekend'
             ])
-            ->add('nombre_jours', IntegerType::class, [
-                'label' => 'Nombre de jours',
-                'mapped' => false,
-                'data' => 3,
+            ->add('date_fin', DateType::class, [
+                'widget' => 'single_text',
+                'label' => 'Date de fin',
                 'attr' => [
                     'class' => 'w-full p-3 border rounded-lg',
-                    'min' => 1,
-                    'max' => 7,
-                    'placeholder' => '3'
+                    'placeholder' => 'Date de fin'
                 ],
-                'help' => 'Nombre de jours du weekend (par défaut: 3 jours - vendredi, samedi, dimanche)'
+                'help' => 'Sélectionnez la date de fin du weekend'
             ])
 
             ->add('cover_image', FileType::class, [
