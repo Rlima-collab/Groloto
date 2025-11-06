@@ -472,6 +472,98 @@
     border-left-width: 4px !important;
 }
 
+/* Custom event content styles */
+.fc-event-content-custom {
+    padding: 6px 8px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.fc-event-title-custom {
+    font-weight: 600;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    white-space: normal;
+    overflow: hidden;
+}
+
+.fc-event-title-custom i {
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.fc-event-meta {
+    font-size: 0.75rem;
+    opacity: 0.95;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.badge-poste {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.badge-personnes {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* Amélioration de la lisibilité des slots */
+.weekend-detail-modal .fc-timegrid-slot {
+    height: 3.5em !important;
+}
+
+.weekend-detail-modal .fc-timegrid-axis {
+    width: 60px !important;
+}
+
+.weekend-detail-modal .fc-timegrid-slot-label-cushion {
+    padding: 8px 4px;
+}
+
+/* Réduction du chevauchement */
+.weekend-detail-modal .fc-timegrid-event {
+    border-radius: 4px;
+    margin-bottom: 2px;
+}
+
+.weekend-detail-modal .fc-timegrid-event-harness {
+    margin-right: 2px;
+}
+
+/* Vue liste améliorée */
+.weekend-detail-modal .fc-list-event:hover td {
+    background-color: #f3f4f6;
+}
+
+.weekend-detail-modal .fc-list-event-title {
+    font-weight: 500;
+}
+
+.weekend-detail-modal .fc-list-event-time {
+    color: #6b7280;
+    font-weight: 500;
+}
+
 /* Empty state */
 .empty-state {
     text-align: center;

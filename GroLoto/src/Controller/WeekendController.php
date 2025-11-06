@@ -115,6 +115,8 @@ class WeekendController extends AbstractController
                     'nom' => $e->getNom(),
                     'dateDebut' => $e->getDateDebut()->format('Y-m-d'),
                     'dateFin' => $e->getDateFin() ? $e->getDateFin()->format('Y-m-d') : null,
+                    'heureDebut' => $e->getHeureDebut() ? $e->getHeureDebut()->format('H:i:s') : null,
+                    'dureeMinutes' => $e->getDureeMinutes(),
                     'lieu' => $e->getLieu(),
                     'description' => $e->getDescription(),
                 ], $w->getEvenements()->toArray()),
