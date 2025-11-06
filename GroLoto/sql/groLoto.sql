@@ -112,6 +112,9 @@ CREATE TABLE EVENEMENT (
     date_debut DATE,
     date_fin DATE,
     lieu TEXT,
+    heure_debut TIME,
+    duree_minutes INTEGER,
+    image TEXT,
     date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_weekend) REFERENCES WEEKEND(id)
 );
