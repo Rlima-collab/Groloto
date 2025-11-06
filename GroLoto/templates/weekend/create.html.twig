@@ -31,10 +31,17 @@
                 {{ form_row(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Weekend Groloto Novembre 2025'}}) }}
             </div>
 
-            <div class="grid-3 mb-4">
+            <div class="grid-2 mb-4">
                 {{ form_row(form.date_vendredi, {'attr': {'class': 'form-control'}}) }}
-                {{ form_row(form.date_samedi, {'attr': {'class': 'form-control'}}) }}
-                {{ form_row(form.date_dimanche, {'attr': {'class': 'form-control'}}) }}
+                {{ form_row(form.nombre_jours, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            
+            <div class="alert alert-info mb-4" style="background: #e0f2fe; border-left: 4px solid #0ea5e9; padding: 1rem; border-radius: 8px;">
+                <strong>ℹ️ Info :</strong> Les dates du samedi et dimanche seront calculées automatiquement à partir de la date de départ et du nombre de jours.
+            </div>
+
+            <div class="mb-4">
+                {{ form_row(form.cover_image, {'attr': {'class': 'form-control'}}) }}
             </div>
 
             <div class="mt-6">
