@@ -124,9 +124,53 @@
             margin-bottom: 1rem;
         }
 
+        .filter-section {
+            background: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.95rem;
+        }
+
+        .filter-select {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #1a3c5a;
+        }
+
         @media (max-width: 768px) {
             .lot-details {
                 grid-template-columns: 1fr;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-select {
+                min-width: 100%;
             }
         }
     </style>
@@ -175,6 +219,19 @@
             <p class="card-description">Catalogue des contributions de ce mécène</p>
         </div>
         <div class="card-content">
+            <!-- Filtre par week-end -->
+            <div class="filter-section">
+                <label for="filterWeekend" class="filter-label">Filtrer par week-end :</label>
+                <select id="filterWeekend" class="filter-select" onchange="if(this.value) window.location.href='?weekend=' + this.value; else window.location.href='{{ path('mecene_voir_lots', {id: mecene.id}) }}';">
+                    <option value="">Tous les week-ends</option>
+                    {% for weekend in weekends %}
+                        <option value="{{ weekend.id }}" {% if weekend_filtre and weekend_filtre.id == weekend.id %}selected{% endif %}>
+                            {{ weekend.nom }} ({{ weekend.dateVendredi|date('d/m/Y') }} - {{ weekend.dateDimanche|date('d/m/Y') }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <div class="mecene-info-banner">
                 <div class="mecene-icon">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
