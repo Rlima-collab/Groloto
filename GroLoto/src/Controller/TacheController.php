@@ -30,8 +30,8 @@ class TacheController extends AbstractController
         // Récupérer les tâches selon le filtre
         $now = new \DateTime();
         $queryBuilder = $tacheRepository->createQueryBuilder('t')
-            ->leftJoin('t.evenement', 'e')
-            ->addSelect('e');
+            ->leftJoin('t.weekend', 'w')
+            ->addSelect('w');
         
         switch ($filtre) {
             case 'futures':

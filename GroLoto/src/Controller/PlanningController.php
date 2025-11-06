@@ -70,8 +70,8 @@ class PlanningController extends AbstractController
                         'type' => 'tache',
                         'poste' => $tache->getPosteRequis(),
                         'max_personnes' => $tache->getMaxPersonnes(),
-                        'evenement' => $tache->getEvenement() ? $tache->getEvenement()->getNom() : 'Non rattaché',
-                        'lieu' => $tache->getEvenement() ? $tache->getEvenement()->getLieu() : null
+                        'weekend' => $tache->getWeekend() ? $tache->getWeekend()->getNom() : 'Non rattaché',
+                        'lieu' => null
                     ]
                 ];
             }

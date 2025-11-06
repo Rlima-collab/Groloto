@@ -36,6 +36,7 @@ CREATE TABLE WEEKEND (
     date_vendredi DATE NOT NULL,
     date_samedi DATE NOT NULL,
     date_dimanche DATE NOT NULL,
+    cover_image TEXT,
     date_creation DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -112,6 +113,9 @@ CREATE TABLE EVENEMENT (
     date_debut DATE,
     date_fin DATE,
     lieu TEXT,
+    heure_debut TIME,
+    duree_minutes INTEGER,
+    image TEXT,
     date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_weekend) REFERENCES WEEKEND(id)
 );
@@ -126,6 +130,11 @@ CREATE TABLE INSCRIPTION_MECENE (
     statut TEXT DEFAULT 'en_attente',
     date_inscription DATETIME DEFAULT CURRENT_TIMESTAMP,
     remarques TEXT,
+    nom_don TEXT NOT NULL,
+    categorie TEXT NOT NULL,
+    quantite INTEGER NOT NULL,
+    valeur_unitaire REAL,
+    remarque_refus TEXT,
     CONSTRAINT check_statut CHECK (statut IN ('en_attente', 'accepte', 'refuse')),
     FOREIGN KEY (id_mecene) REFERENCES MECENE(id),
     FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
@@ -177,16 +186,14 @@ CREATE TABLE DISPONIBILITE_BENEVOLE (
 -- TACHE
 CREATE TABLE TACHE (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_evenement INTEGER NOT NULL,
+    id_weekend INTEGER NOT NULL,
     titre TEXT NOT NULL,
     poste_requis TEXT,
     debut DATETIME NOT NULL,
     fin DATETIME NOT NULL,
     max_personnes INTEGER DEFAULT 1,
     remarque TEXT,
-    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT check_poste_requis CHECK (poste_requis IN ('bar', 'accueil', 'cuisine', 'technique', 'autre')),
-    FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
+    FOREIGN KEY (id_weekend) REFERENCES WEEKEND(id)
 );
 
 CREATE TABLE DEMANDE_TACHE (
@@ -387,11 +394,11 @@ INSERT INTO LOT (id_mecene, titre, description, quantite, valeur_estimee) VALUES
 INSERT INTO CONVENTION (id_mecene, nom_modele, url_pdf, date_signature, methode_signature) VALUES
   (1, 'Modele partenariat standard', '/docs/conventions/convention1.pdf', '2024-10-01', 'electronique');
 
-INSERT INTO TACHE (id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque) VALUES
-  (6, 'Accueil participants', 'accueil', '2024-11-15 18:00:00', '2024-11-15 19:00:00', 3, 'Accueil et orientation des participants'),
-  (6, 'Service bar', 'bar', '2024-11-15 19:00:00', '2024-11-15 22:00:00', 2, 'Préparer et servir les boissons'),
-  (5, 'Montage scène', 'technique', '2025-11-14 09:00:00', '2025-11-14 12:00:00', 4, 'Montage de la scène et sonorisation'),
-  (5, 'Accueil billetterie', 'accueil', '2025-11-15 17:00:00', '2025-11-15 19:00:00', 3, 'Accueil du public et vérification des billets');
+INSERT INTO TACHE (id_weekend, titre, poste_requis, debut, fin, max_personnes, remarque) VALUES
+  (1, 'Accueil participants', 'accueil', '2025-11-15 18:00:00', '2025-11-15 19:00:00', 3, 'Accueil et orientation des participants'),
+  (1, 'Service bar', 'bar', '2025-11-15 19:00:00', '2025-11-15 22:00:00', 2, 'Préparer et servir les boissons'),
+  (1, 'Montage scène', 'technique', '2025-11-14 09:00:00', '2025-11-14 12:00:00', 4, 'Montage de la scène et sonorisation'),
+  (1, 'Accueil billetterie', 'accueil', '2025-11-15 17:00:00', '2025-11-15 19:00:00', 3, 'Accueil du public et vérification des billets');
 
 INSERT INTO AFFECTATION_TACHE (id_tache, id_benevole, id_utilisateur, statut, remarque) VALUES
   (1, 1, 2, 'confirme', 'Alice affectée à l''accueil'),

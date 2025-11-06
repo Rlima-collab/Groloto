@@ -72,7 +72,7 @@ class BenevoleController extends AbstractController
                 'backgroundColor' => '#3b82f6',
                 'borderColor' => '#2563eb',
                 'extendedProps' => [
-                    'evenement' => $tache->getEvenement()?->getNom(),
+                    'weekend' => $tache->getWeekend()?->getNom(),
                     'poste_requis' => $tache->getPosteRequis(),
                     'max_personnes' => $tache->getMaxPersonnes(),
                     'remarques' => $tache->getRemarque()
@@ -155,7 +155,7 @@ class BenevoleController extends AbstractController
                 'backgroundColor' => '#1a3c5a',
                 'borderColor' => '#2b5d8a',
                 'extendedProps' => [
-                    'evenement' => $tache->getEvenement()?->getNom(),
+                    'weekend' => $tache->getWeekend()?->getNom(),
                     'poste_requis' => $tache->getPosteRequis(),
                     'max_personnes' => $tache->getMaxPersonnes(),
                     'remarques' => $tache->getRemarque()
@@ -315,7 +315,7 @@ class BenevoleController extends AbstractController
                 'backgroundColor' => '#0d1b2a',
                 'borderColor' => '#1a3c5a',
                 'extendedProps' => [
-                    'evenement' => $tache->getEvenement()?->getNom(),
+                    'weekend' => $tache->getWeekend()?->getNom(),
                     'poste_requis' => $tache->getPosteRequis(),
                     'max_personnes' => $tache->getMaxPersonnes(),
                     'remarques' => $tache->getRemarque()

@@ -274,11 +274,13 @@
             if (weekend.evenements && weekend.evenements.length > 0) {
                 weekend.evenements.forEach(event => {
                     events.push({
-                        title: event.nom,
+                        title: '📅 ' + event.nom,
                         start: event.dateDebut,
                         end: event.dateFin ? new Date(new Date(event.dateFin).getTime() + 86400000).toISOString().split('T')[0] : null,
-                        backgroundColor: '#3b82f6',
-                        borderColor: '#2563eb',
+                        backgroundColor: '#0d1b2a',
+                        borderColor: '#1e3a5f',
+                        textColor: '#ffffff',
+                        classNames: ['event-evenement'],
                         extendedProps: {
                             type: 'evenement',
                             description: event.description,
@@ -288,15 +290,40 @@
                 });
             }
             
-            // Ajouter les tâches
+            // Ajouter les tâches avec des couleurs différentes selon le poste
             if (weekend.taches && weekend.taches.length > 0) {
                 weekend.taches.forEach(tache => {
+                    // Couleurs par type de poste
+                    let color = '#fbbf24'; // jaune par défaut
+                    let borderColor = '#f59e0b';
+                    let icon = '📋';
+                    
+                    if (tache.posteRequis === 'accueil') {
+                        color = '#3b82f6';
+                        borderColor = '#2563eb';
+                        icon = '👋';
+                    } else if (tache.posteRequis === 'bar') {
+                        color = '#8b5cf6';
+                        borderColor = '#7c3aed';
+                        icon = '🍹';
+                    } else if (tache.posteRequis === 'technique') {
+                        color = '#ef4444';
+                        borderColor = '#dc2626';
+                        icon = '🔧';
+                    } else if (tache.posteRequis === 'cuisine') {
+                        color = '#10b981';
+                        borderColor = '#059669';
+                        icon = '👨‍🍳';
+                    }
+                    
                     events.push({
-                        title: tache.titre,
+                        title: icon + ' ' + tache.titre,
                         start: tache.debut,
                         end: tache.fin,
-                        backgroundColor: '#10b981',
-                        borderColor: '#059669',
+                        backgroundColor: color,
+                        borderColor: borderColor,
+                        textColor: '#ffffff',
+                        classNames: ['event-tache'],
                         extendedProps: {
                             type: 'tache',
                             posteRequis: tache.posteRequis,
@@ -323,10 +350,23 @@
                 },
                 slotMinTime: '06:00:00',
                 slotMaxTime: '23:00:00',
+                slotDuration: '00:30:00',
+                slotLabelInterval: '01:00',
                 allDaySlot: true,
                 weekends: true,
                 firstDay: 5, // Commence le vendredi
+                expandRows: true,
+                eventMinHeight: 40,
+                eventShortHeight: 35,
                 events: events,
+                eventContent: function(arg) {
+                    return {
+                        html: `<div style="padding: 4px 6px; font-weight: 600; font-size: 0.85rem; line-height: 1.3;">
+                                ${arg.event.title}
+                                ${arg.event.extendedProps.posteRequis ? `<br><small style="opacity: 0.9;">👤 ${arg.event.extendedProps.maxPersonnes || '∞'} pers.</small>` : ''}
+                               </div>`
+                    };
+                },
                 eventClick: function(info) {
                     const event = info.event;
                     const props = event.extendedProps;
