@@ -16,6 +16,10 @@ class Lot
     #[ORM\JoinColumn(name: "id_mecene", referencedColumnName: "id", nullable: true)]
     private ?Mecene $mecene = null;
 
+    #[ORM\ManyToOne(targetEntity: Weekend::class)]
+    #[ORM\JoinColumn(name: "id_weekend", referencedColumnName: "id", nullable: true)]
+    private ?Weekend $weekend = null;
+
     #[ORM\Column(type: "string")]
     private string $titre;
 
@@ -46,6 +50,17 @@ class Lot
     public function setMecene(?Mecene $mecene): self
     {
         $this->mecene = $mecene;
+        return $this;
+    }
+
+    public function getWeekend(): ?Weekend
+    {
+        return $this->weekend;
+    }
+
+    public function setWeekend(?Weekend $weekend): self
+    {
+        $this->weekend = $weekend;
         return $this;
     }
 
