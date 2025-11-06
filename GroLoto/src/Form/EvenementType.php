@@ -3,12 +3,19 @@
 namespace App\Form;
 
 use App\Entity\Evenement;
+use App\Entity\Weekend;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\TimeType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\Positive;
 
 class EvenementType extends AbstractType
 {
@@ -19,6 +26,42 @@ class EvenementType extends AbstractType
                 'label' => 'Nom de l\'événement',
                 'attr' => ['class' => 'w-full p-3 border rounded-lg']
             ])
+            ->add('weekend', EntityType::class, [
+                'class' => Weekend::class,
+                'choice_label' => function(Weekend $weekend) {
+                    return $weekend->getNom() . ' (' . 
+                           $weekend->getDateVendredi()->format('d/m/Y') . ' - ' . 
+                           $weekend->getDateDimanche()->format('d/m/Y') . ')';
+                },
+                'label' => 'Week-end associé',
+                'placeholder' => 'Sélectionnez un week-end',
+                'required' => true,
+                'attr' => ['class' => 'w-full p-3 border rounded-lg']
+            ])
+            ->add('date_debut', DateType::class, [
+                'widget' => 'single_text',
+                'label' => 'Date de l\'événement',
+                'required' => true,
+                'attr' => ['class' => 'w-full p-3 border rounded-lg']
+            ])
+            ->add('heure_debut', TimeType::class, [
+                'widget' => 'single_text',
+                'label' => 'Heure de début',
+                'required' => true,
+                'attr' => ['class' => 'w-full p-3 border rounded-lg']
+            ])
+            ->add('duree_minutes', IntegerType::class, [
+                'label' => 'Durée (en minutes)',
+                'required' => true,
+                'attr' => [
+                    'class' => 'w-full p-3 border rounded-lg',
+                    'placeholder' => 'Ex: 120 pour 2 heures',
+                    'min' => 1
+                ],
+                'constraints' => [
+                    new Positive(message: 'La durée doit être positive')
+                ]
+            ])
             ->add('lieu', TextType::class, [
                 'label' => 'Lieu',
                 'required' => false,
@@ -27,13 +70,26 @@ class EvenementType extends AbstractType
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
                 'required' => false,
-                'attr' => ['rows' => 2, 'class' => 'w-full p-3 border rounded-lg']
+                'attr' => ['rows' => 4, 'class' => 'w-full p-3 border rounded-lg']
             ])
-            ->add('dateVendredi', DateType::class, [
-                'widget' => 'single_text',
-                'label' => 'Date de début (vendredi)',
+            ->add('imageFile', FileType::class, [
+                'label' => 'Image de l\'événement',
                 'mapped' => false,
-                'attr' => ['class' => 'w-full p-3 border rounded-lg']
+                'required' => false,
+                'attr' => ['class' => 'w-full p-3 border rounded-lg'],
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/jpg',
+                            'image/png',
+                            'image/gif',
+                            'image/webp',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPEG, PNG, GIF ou WebP)',
+                    ])
+                ],
             ]);
     }
 
