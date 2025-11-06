@@ -6,6 +6,7 @@ use App\Entity\Lot;
 use App\Form\MeceneEditType;
 use App\Repository\MeceneRepository;
 use App\Repository\LotRepository;
+use App\Repository\WeekendRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,12 +21,31 @@ class MeceneController extends AbstractController
      * Page "Voir les mécènes" - Liste de tous les mécènes
      */
     #[Route('/mecenes', name: 'mecenes')]
-    public function index(MeceneRepository $meceneRepository, LotRepository $lotRepository): Response
-    {
-        // Récupération de tous les mécènes depuis la base de données
-        $mecenes = $meceneRepository->findAllWithUser();
-        $totalMecenes = $meceneRepository->countAll();
-        $totalLots = $lotRepository->countAll();
+    public function index(
+        Request $request,
+        MeceneRepository $meceneRepository,
+        LotRepository $lotRepository,
+        WeekendRepository $weekendRepository
+    ): Response {
+        // Récupérer le filtre week-end depuis la requête
+        $weekendId = $request->query->get('weekend');
+        $weekendFiltre = null;
+        
+        if ($weekendId) {
+            $weekendFiltre = $weekendRepository->find($weekendId);
+        }
+
+        // Récupération des mécènes selon le filtre
+        if ($this->isGranted('ROLE_ADMIN') && $weekendFiltre) {
+            $mecenes = $meceneRepository->findByWeekend($weekendFiltre);
+        } else {
+            $mecenes = $meceneRepository->findAllWithUser();
+        }
+
+        $totalMecenes = count($mecenes);
+        $totalLots = $weekendFiltre ? 
+            count($lotRepository->findByWeekend($weekendFiltre)) : 
+            $lotRepository->countAll();
 
         // Données pour les métriques
         $metriques = [
@@ -35,9 +55,14 @@ class MeceneController extends AbstractController
             'disponibles' => $totalLots
         ];
 
+        // Récupérer tous les week-ends pour le filtre
+        $weekends = $this->isGranted('ROLE_ADMIN') ? $weekendRepository->findAll() : [];
+
         return $this->render('mecenes.html.twig', [
             'mecenes' => $mecenes,
-            'metriques' => $metriques
+            'metriques' => $metriques,
+            'weekends' => $weekends,
+            'weekend_filtre' => $weekendFiltre
         ]);
     }
 
@@ -46,17 +71,32 @@ class MeceneController extends AbstractController
      */
     #[Route('/mecene/lots', name: 'mecene_lots')]
     public function lots(
+        Request $request,
         MeceneRepository $meceneRepository,
-        LotRepository $lotRepository
+        LotRepository $lotRepository,
+        WeekendRepository $weekendRepository
     ): Response {
         $utilisateur = $this->getUser();
         $mecene = $meceneRepository->findOneBy(['utilisateur' => $utilisateur]);
 
+        // Récupérer le filtre week-end depuis la requête
+        $weekendId = $request->query->get('weekend');
+        $weekendFiltre = null;
+        
+        if ($weekendId) {
+            $weekendFiltre = $weekendRepository->find($weekendId);
+        }
+
         // Si admin, afficher tous les lots, sinon seulement ceux du mécène connecté
         if ($this->isGranted('ROLE_ADMIN')) {
-            $lots = $lotRepository->findAllWithMecene();
-            $valeurTotale = $lotRepository->getTotalValue();
-            $nombreLots = $lotRepository->countAll();
+            if ($weekendFiltre) {
+                $lots = $lotRepository->findByWeekend($weekendFiltre);
+                $valeurTotale = $lotRepository->getTotalValueByWeekend($weekendFiltre);
+            } else {
+                $lots = $lotRepository->findAllWithMecene();
+                $valeurTotale = $lotRepository->getTotalValue();
+            }
+            $nombreLots = count($lots);
         } elseif ($mecene) {
             $lots = $lotRepository->findByMecene($mecene);
             $valeurTotale = $lotRepository->getTotalValueByMecene($mecene);
@@ -75,11 +115,16 @@ class MeceneController extends AbstractController
                 count(array_unique(array_map(fn($lot) => $lot->getMecene()?->getId(), $lots))) : 1
         ];
 
+        // Récupérer tous les week-ends pour le filtre
+        $weekends = $this->isGranted('ROLE_ADMIN') ? $weekendRepository->findAll() : [];
+
         return $this->render('mecenes/lots.html.twig', [
             'lots' => $lots,
             'mecene' => $mecene,
             'metriques' => $metriques,
-            'valeur_totale' => $valeurTotale
+            'valeur_totale' => $valeurTotale,
+            'weekends' => $weekends,
+            'weekend_filtre' => $weekendFiltre
         ]);
     }
 
@@ -89,8 +134,10 @@ class MeceneController extends AbstractController
     #[Route('/mecenes/{id}/lots', name: 'mecene_voir_lots')]
     public function voirLotsMecene(
         int $id,
+        Request $request,
         MeceneRepository $meceneRepository,
-        LotRepository $lotRepository
+        LotRepository $lotRepository,
+        WeekendRepository $weekendRepository
     ): Response {
         $mecene = $meceneRepository->find($id);
 
@@ -106,9 +153,25 @@ class MeceneController extends AbstractController
             return $this->redirectToRoute('dashboard');
         }
 
-        $lots = $lotRepository->findByMecene($mecene);
-        $valeurTotale = $lotRepository->getTotalValueByMecene($mecene);
-        $nombreLots = $lotRepository->countByMecene($mecene);
+        // Récupérer le filtre week-end depuis la requête
+        $weekendId = $request->query->get('weekend');
+        $weekendFiltre = null;
+        
+        if ($weekendId) {
+            $weekendFiltre = $weekendRepository->find($weekendId);
+        }
+
+        // Récupérer les lots selon le filtre
+        if ($weekendFiltre) {
+            // Filtrer par weekend ET par mécène
+            $allLotsByWeekend = $lotRepository->findByWeekend($weekendFiltre);
+            $lots = array_filter($allLotsByWeekend, fn($lot) => $lot->getMecene() === $mecene);
+        } else {
+            $lots = $lotRepository->findByMecene($mecene);
+        }
+
+        $valeurTotale = array_sum(array_map(fn($lot) => $lot->getValeurEstimee() * $lot->getQuantite(), $lots));
+        $nombreLots = count($lots);
 
         // Statistiques
         $metriques = [
@@ -117,11 +180,16 @@ class MeceneController extends AbstractController
             'mecenes' => 1
         ];
 
+        // Récupérer tous les week-ends pour le filtre
+        $weekends = $weekendRepository->findAll();
+
         return $this->render('mecenes/lots_mecene.html.twig', [
             'lots' => $lots,
             'mecene' => $mecene,
             'metriques' => $metriques,
-            'valeur_totale' => $valeurTotale
+            'valeur_totale' => $valeurTotale,
+            'weekends' => $weekends,
+            'weekend_filtre' => $weekendFiltre
         ]);
     }
 

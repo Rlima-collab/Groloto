@@ -219,6 +219,17 @@
                                         <span class="detail-value">{{ (lot.valeurEstimee * lot.quantite)|number_format(2, ',', ' ') }} €</span>
                                     </div>
                                 </div>
+                                {% if lot.weekend %}
+                                <div class="detail-item" style="grid-column: 1 / -1; background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1px solid #3b82f6;">
+                                    <div class="detail-info">
+                                        <span class="detail-label" style="color: #1e40af;">Week-end associé</span>
+                                        <span class="detail-value" style="color: #1e40af;">{{ lot.weekend.nom }}</span>
+                                        <span style="font-size: 0.85rem; color: #3b82f6; margin-top: 0.25rem;">
+                                            📅 {{ lot.weekend.dateVendredi|date('d/m/Y') }} - {{ lot.weekend.dateDimanche|date('d/m/Y') }}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% endif %}
                                 {% if lot.dateCreation %}
                                 <div class="detail-item" style="grid-column: 1 / -1;">
                                     <div class="detail-info">
