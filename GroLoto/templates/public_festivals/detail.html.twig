@@ -10,6 +10,9 @@
 
 {% block body %}
 <div class="weekend-banner">
+    <a href="{{ path('public_festivals') }}" class="back-button" title="Retour à la liste">
+        <i class="bi bi-arrow-left"></i>
+    </a>
     {% if weekend.coverImage %}
         {% if weekend.coverImage matches('/^uploads\\//') or weekend.coverImage matches('/^images\\//') %}
             <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}" class="banner-image">
@@ -31,7 +34,7 @@
 <div class="weekend-content">
     {% if evenements|length > 0 %}
         <div class="events-timeline">
-            {% for evenement in evenements|sort((a, b) => a.dateDebut <=> b.dateDebut) %}
+            {% for evenement in evenements %}
                 <div class="event-row {% if loop.index is odd %}left-image{% else %}right-image{% endif %}">
                     <div class="event-image">
                         {% if evenement.image %}
@@ -43,15 +46,21 @@
                     <div class="event-details">
                         <h2>{{ evenement.nom }}</h2>
                         <div class="event-info">
-                            <p class="event-time">
-                                <i class="bi bi-clock"></i> 
-                                {% if evenement.heureDebut %}
+                            {% if evenement.dateDebut %}
+                                <p class="event-date">
+                                    <i class="bi bi-calendar-event"></i> 
+                                    {{ evenement.dateDebut|date('l d F Y')|capitalize }}
+                                </p>
+                            {% endif %}
+                            {% if evenement.heureDebut %}
+                                <p class="event-time">
+                                    <i class="bi bi-clock"></i> 
                                     {{ evenement.heureDebut|date('H:i') }}
-                                {% endif %}
-                                {% if evenement.dureeMinutes %}
-                                    <span class="duration">({{ evenement.dureeMinutes }} min)</span>
-                                {% endif %}
-                            </p>
+                                    {% if evenement.dureeMinutes %}
+                                        <span class="duration">({{ evenement.dureeMinutes }} min)</span>
+                                    {% endif %}
+                                </p>
+                            {% endif %}
                             {% if evenement.lieu %}
                                 <p class="event-location">
                                     <i class="bi bi-geo-alt"></i> 
