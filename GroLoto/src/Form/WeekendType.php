@@ -46,6 +46,15 @@ class WeekendType extends AbstractType
                 'help' => 'Sélectionnez la date de fin du weekend (minimum 2 jours au total)'
 
             ])
+            ->add('description', TextareaType::class, [
+                'label' => 'Description',
+                'required' => false,
+                'attr' => [
+                    'class' => 'w-full p-3 border rounded-lg',
+                    'rows' => 4,
+                    'placeholder' => 'Description du weekend...'
+                ]
+            ])
             ->add('cover_image', FileType::class, [
                 'label' => 'Image de couverture (optionnelle)',
                 'mapped' => false,

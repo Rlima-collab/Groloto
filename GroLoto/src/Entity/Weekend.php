@@ -86,6 +86,23 @@ class Weekend
     public function getDateFin(): ?\DateTimeInterface { return $this->date_fin; }
     public function setDateFin(\DateTimeInterface $date_fin): self { $this->date_fin = $date_fin; return $this; }
 
+    // Alias pour compatibilité avec le formulaire
+    public function getDateVendredi(): ?\DateTimeInterface { return $this->date_debut; }
+    public function setDateVendredi(\DateTimeInterface $date_vendredi): self { $this->date_debut = $date_vendredi; return $this; }
+
+    public function getDateDimanche(): ?\DateTimeInterface { return $this->date_fin; }
+    public function setDateDimanche(\DateTimeInterface $date_dimanche): self { $this->date_fin = $date_dimanche; return $this; }
+
+    public function getDateSamedi(): ?\DateTimeInterface 
+    { 
+        if (!$this->date_debut || !$this->date_fin) {
+            return null;
+        }
+        $samedi = clone $this->date_debut;
+        $samedi->modify('+1 day');
+        return $samedi;
+    }
+
     public function getDateCreation(): ?\DateTimeInterface { return $this->date_creation; }
 
     public function getCoverImage(): ?string
@@ -133,18 +150,18 @@ class Weekend
     }
     
     /**
-     * Retourne tous les jours du weekend (de date_vendredi à date_dimanche)
+     * Retourne tous les jours du weekend (de date_debut à date_fin)
      * @return array<\DateTimeInterface>
      */
     public function getAllDays(): array
     {
         $days = [];
-        if (!$this->date_vendredi || !$this->date_dimanche) {
+        if (!$this->date_debut || !$this->date_fin) {
             return $days;
         }
         
-        $current = clone $this->date_vendredi;
-        $end = $this->date_dimanche;
+        $current = clone $this->date_debut;
+        $end = $this->date_fin;
         
         while ($current <= $end) {
             $days[] = clone $current;
