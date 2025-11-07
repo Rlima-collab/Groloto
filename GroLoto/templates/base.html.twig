@@ -26,7 +26,11 @@
             {% if app.user %}
                 <div class="user-info">
                     <div class="user-avatar">
-                        {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
+                        {% if app.user.profileImage %}
+                            <img src="{{ asset('uploads/profiles/' ~ app.user.profileImage) }}" alt="Photo de profil">
+                        {% else %}
+                            {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
+                        {% endif %}
                     </div>
                     <div class="user-role">
                         {{ app.user.role.nom|capitalize }}

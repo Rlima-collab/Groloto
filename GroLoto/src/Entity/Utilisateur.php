@@ -45,6 +45,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private ?\DateTimeInterface $date_modification = null;
 
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $profile_image = null;
+
     public function __construct()
     {
         $this->date_creation = new \DateTime();
@@ -85,6 +88,10 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function getDateModification(): ?\DateTimeInterface { return $this->date_modification; }
     public function setDateModification(\DateTimeInterface $date_modification): self 
     { $this->date_modification = $date_modification; return $this; }
+
+    public function getProfileImage(): ?string { return $this->profile_image; }
+    public function setProfileImage(?string $profile_image): self 
+    { $this->profile_image = $profile_image; return $this; }
 
     // UserInterface
     public function getUserIdentifier(): string { return (string) $this->email; }

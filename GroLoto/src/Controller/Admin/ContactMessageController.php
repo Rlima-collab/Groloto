@@ -58,6 +58,7 @@ class ContactMessageController extends AbstractController
             // Déterminer le rôle de l'interlocuteur
             $otherEmail = ($msg->getEmail() === $adminEmail) ? $msg->getDestinataire() : $msg->getEmail();
             $msg->otherUserRole = $this->getUserRole($otherEmail);
+            $msg->otherUserProfileImage = $this->getUserProfileImage($otherEmail);
         }
 
         return $this->render('admin/message/messages.html.twig', [
@@ -83,6 +84,21 @@ class ContactMessageController extends AbstractController
         if (in_array('ROLE_BENEVOLE', $roles)) return 'Bénévole';
         
         return 'Utilisateur';
+    }
+
+    /**
+     * Récupère l'image de profil d'un utilisateur par son email
+     */
+    private function getUserProfileImage(?string $email): ?string
+    {
+        if (!$email) return null;
+        
+        $user = $this->em->getRepository(\App\Entity\Utilisateur::class)
+            ->findOneBy(['email' => $email]);
+        
+        if (!$user) return null;
+        
+        return $user->getProfileImage();
     }
 
     /**

@@ -53,9 +53,10 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 .message-wrapper.sent { align-self: flex-end; }
 .message-wrapper.received { align-self: flex-start; }
 .message-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 0 5px; }
-.message-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: linear-gradient(135deg, #0b1220 0%, #0f1a35 100%); color: white; }
+.message-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: linear-gradient(135deg, #0b1220 0%, #0f1a35 100%); color: white; overflow: hidden; }
+.message-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .message-wrapper.received .message-avatar { background: linear-gradient(135deg, #0b1220 0%, #0f1a35 100%); }
-.message-sender { font-size: 13px; font-weight: 600; color: #1f2937; }
+.message-sender { font-size: 13px; font-weight: 600; color: #000000; }
 .message-number { font-size: 11px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
 .message-bubble { padding: 16px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
 
@@ -344,7 +345,7 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 'isDeleted': reply.message starts with '[SUPPRIMÉ]'
 }]) %}
 {% endfor %}
-<div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %}" data-id="{{ msg.id }}" data-subject="{{ subject|e('html_attr') }}" data-conversation="{{ conversationArray|json_encode|e('html_attr') }}" data-sender="{{ msg.nom }}" data-email="{{ msg.email }}" data-message="{{ body|e('html_attr') }}" data-date="{{ msg.createdAt|date('d/m/Y à H:i') }}" data-closed="{{ msg.cloturee ? 'true' : 'false' }}">
+<div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %}" data-id="{{ msg.id }}" data-subject="{{ subject|e('html_attr') }}" data-conversation="{{ conversationArray|json_encode|e('html_attr') }}" data-sender="{{ msg.nom }}" data-email="{{ msg.email }}" data-message="{{ body|e('html_attr') }}" data-date="{{ msg.createdAt|date('d/m/Y à H:i') }}" data-closed="{{ msg.cloturee ? 'true' : 'false' }}" data-profile-image="{{ msg.otherUserProfileImage|default('') }}">
 	<div class="conversation-item-content">
 		<div class="conversation-name">
 			{{ subject }}
@@ -489,12 +490,14 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 <script>
 const adminEmail = '{{ adminEmail|default('admin@groloto.local') }}';
 const currentUserName = '{{ app.user ? (app.user.prenom ~ ' ' ~ app.user.nom)|e('js') : 'Admin' }}';
+const currentUserProfileImage = '{{ app.user.profileImage|default('')|e('js') }}';
 let currentConversationId = null;
 let currentSubject = '';
 let currentRecipient = '';
 let currentRecipientEmail = '';
 let currentRecipientName = ''; // Nom complet du destinataire
 let currentRecipientRole = ''; // Rôle du destinataire
+let currentRecipientProfileImage = ''; // Image de profil du destinataire
 
 // Système de confirmation modal
 let confirmCallback = null;
@@ -950,6 +953,7 @@ items.forEach(item => {
 		this.classList.add('active');
 		currentConversationId = this.dataset.id;
 		currentSubject = this.dataset.subject || 'Sans sujet';
+		currentRecipientProfileImage = this.dataset.profileImage || '';
 
 		// Vider le champ de saisie quand on change de conversation
 		chatInput.value = '';
@@ -1082,7 +1086,7 @@ cleanMessage = cleanMessage.replace(/^\[[^\]]+\]\s*/, '');
 wrapper.dataset.messageContent = cleanMessage;
 
 const displayName = isAdmin ? 'Admin' : msg.nom;
-const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+const avatarHtml = isAdmin ? createAvatarHtml(currentUserName, currentUserProfileImage) : createAvatarHtml(displayName, currentRecipientProfileImage);
 
 let notificationHtml = '';
 if (msg.isEdited) {
@@ -1107,7 +1111,7 @@ displayMessage = displayMessage.replace(/^\[[^\]]+\]\s*/, '');
 
 const messageText = msg.isDeleted ? '<em style="opacity: 0.6;">Ce message a été supprimé</em>' : escapeHtml(displayMessage).replace(/\n/g, '<br>');
 
-wrapper.innerHTML = notificationHtml + '<div class="message-header"><div class="message-avatar">' + initials + '</div><span class="message-sender">' + escapeHtml(displayName) + '</span><span class="message-number">#' + (index + 1) + '</span>' + actionsHtml + '</div><div class="message-bubble"><div class="message-content">' + messageText + '</div><div class="message-time">' + msg.date + '</div></div>';
+wrapper.innerHTML = notificationHtml + '<div class="message-header"><div class="message-avatar">' + avatarHtml + '</div><span class="message-sender">' + escapeHtml(displayName) + '</span><span class="message-number">#' + (index + 1) + '</span>' + actionsHtml + '</div><div class="message-bubble"><div class="message-content">' + messageText + '</div><div class="message-time">' + msg.date + '</div></div>';
 chatMessages.appendChild(wrapper);
 });
 }
@@ -1166,13 +1170,13 @@ try {
 		wrapper.className = 'message-wrapper sent';
 		wrapper.dataset.messageId = messageId;
 		wrapper.dataset.messageContent = message;
-		const initials = currentUserName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+		const avatarHtml = createAvatarHtml(currentUserName, currentUserProfileImage);
 		const messageCount = chatMessages.querySelectorAll('.message-wrapper').length + 1;
 		
 		// Ajouter les boutons d'action (3 points)
 		const actionsHtml = '<div class="message-actions"><button class="message-menu-btn" onclick="toggleMessageMenu(event, ' + messageId + ')">⋮</button><div class="message-actions-dropdown" id="msgMenu' + messageId + '"><button class="message-action-item" onclick="editMessage(event, ' + messageId + ')">Modifier</button><button class="message-action-item delete" onclick="deleteMessage(event, ' + messageId + ')">Supprimer</button></div></div>';
 		
-		wrapper.innerHTML = '<div class="message-header"><div class="message-avatar">' + initials + '</div><span class="message-sender">' + escapeHtml(currentUserName) + '</span><span class="message-number">#' + messageCount + '</span>' + actionsHtml + '</div><div class="message-bubble"><div class="message-content">' + escapeHtml(message).replace(/\n/g, '<br>') + '</div><div class="message-time">' + dateNow + '</div></div>';
+		wrapper.innerHTML = '<div class="message-header"><div class="message-avatar">' + avatarHtml + '</div><span class="message-sender">' + escapeHtml(currentUserName) + '</span><span class="message-number">#' + messageCount + '</span>' + actionsHtml + '</div><div class="message-bubble"><div class="message-content">' + escapeHtml(message).replace(/\n/g, '<br>') + '</div><div class="message-time">' + dateNow + '</div></div>';
 		chatMessages.appendChild(wrapper);
 		scrollToBottom();
 		// Remettre le focus sur le textarea
@@ -1533,6 +1537,15 @@ window.deleteMessage = async function(event, messageId) {
 }
 
 function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+
+function createAvatarHtml(name, profileImage) {
+	if (profileImage && profileImage.trim() !== '') {
+		return '<img src="/uploads/profiles/' + escapeHtml(profileImage) + '" alt="Photo de profil">';
+	} else {
+		const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+		return initials;
+	}
+}
 });
 </script>
 {% endblock %}

@@ -56,6 +56,7 @@ CREATE TABLE UTILISATEUR (
     prenom TEXT,
     nom TEXT,
     telephone TEXT,
+    profile_image TEXT,
     date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
     date_modification DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_role) REFERENCES ROLE(id)
