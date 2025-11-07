@@ -1,0 +1,174 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Weekend créé avec succès{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-create.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section weekend-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Confirmation de création</h1>
+        <p class="hero-description">Votre weekend a été enregistré dans le système.</p>
+    </div>
+</div>
+
+<div class="weekend-create-container">
+    <div class="weekend-form-card">
+        <div class="success-header">
+            <svg class="success-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M8 12.5L10.5 15L16 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h2>Weekend créé avec succès</h2>
+            <p class="weekend-name">{{ weekend.nom }}</p>
+            <div class="weekend-dates">
+                Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}
+            </div>
+            {% if weekend.description %}
+                <div class="weekend-description-box">
+                    {{ weekend.description }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="next-steps">
+            <h3>Prochaine étape</h3>
+            <p class="step-description">
+                Vous pouvez maintenant ajouter des événements pour ce weekend.
+            </p>
+            
+            <a href="{{ path('app_evenement_create', {'preselect_weekend': weekend.id}) }}" 
+               class="btn-primary">
+                Créer un événement pour ce weekend
+            </a>
+        </div>
+
+        <div class="actions">
+            <a href="{{ path('app_weekends') }}" class="btn-secondary">
+                Voir tous les weekends
+            </a>
+            <a href="{{ path('app_weekend_create') }}" class="btn-secondary">
+                Créer un autre weekend
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.success-header {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.success-icon {
+    width: 80px;
+    height: 80px;
+    color: #10b981;
+    margin-bottom: 1.5rem;
+}
+
+.success-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #065f46;
+    margin-bottom: 0.75rem;
+}
+
+.weekend-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #047857;
+    margin-bottom: 0.5rem;
+}
+
+.weekend-dates {
+    font-size: 1rem;
+    color: #059669;
+    font-weight: 500;
+}
+
+.weekend-description-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #047857;
+    line-height: 1.6;
+    border-left: 3px solid #10b981;
+}
+
+.next-steps {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.next-steps h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+}
+
+.step-description {
+    color: #475569;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.btn-primary {
+    display: inline-block;
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b2d45 100%);
+    color: #fff;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.05rem;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(13, 27, 42, 0.3);
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #0d1b2a;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.btn-secondary:hover {
+    background: #f1f5f9;
+    border-color: #0d1b2a;
+}
+</style>
+{% endblock %}

@@ -60,11 +60,11 @@ class WeekendController extends AbstractController
 
         // Weekends pour le calendrier
         $weekendsData = array_map(function ($w) {
-            $end = $w->getDateDimanche() ? (clone $w->getDateDimanche())->modify('+1 day')->format('Y-m-d') : null;
+            $end = $w->getDateFin() ? (clone $w->getDateFin())->modify('+1 day')->format('Y-m-d') : null;
             $evenementsNoms = array_map(fn($e) => $e->getNom(), $w->getEvenements()->toArray());
             return [
-                'title' => 'Weekend du ' . $w->getDateVendredi()->format('d/m'),
-                'start' => $w->getDateVendredi()->format('Y-m-d'),
+                'title' => $w->getNom(),
+                'start' => $w->getDateDebut()->format('Y-m-d'),
                 'end' => $end,
                 'type' => 'weekend',
                 'backgroundColor' => '#10b981',
@@ -82,7 +82,7 @@ class WeekendController extends AbstractController
 
             $nomWeekend   = $weekend?->getNom()               ?? 'Weekend non défini';
             $datesWeekend = $weekend
-                ? $weekend->getDateVendredi()->format('d/m') . ' → ' . $weekend->getDateDimanche()->format('d/m/Y')
+                ? $weekend->getDateDebut()->format('d/m') . ' → ' . $weekend->getDateFin()->format('d/m/Y')
                 : 'Dates inconnues';
 
             return [
@@ -106,15 +106,18 @@ class WeekendController extends AbstractController
         $weekendsForJs = array_map(function($w) {
             return [
                 'id' => $w->getId(),
-                'dateVendredi' => $w->getDateVendredi()->format('Y-m-d'),
-                'dateSamedi' => $w->getDateSamedi()->format('Y-m-d'),
-                'dateDimanche' => $w->getDateDimanche()->format('Y-m-d'),
+                'nom' => $w->getNom(),
+                'dateDebut' => $w->getDateDebut()->format('Y-m-d'),
+                'dateFin' => $w->getDateFin()->format('Y-m-d'),
                 'coverImage' => $w->getCoverImage(),
+                'description' => $w->getDescription(),
                 'evenements' => array_map(fn($e) => [
                     'id' => $e->getId(),
                     'nom' => $e->getNom(),
                     'dateDebut' => $e->getDateDebut()->format('Y-m-d'),
                     'dateFin' => $e->getDateFin() ? $e->getDateFin()->format('Y-m-d') : null,
+                    'heureDebut' => $e->getHeureDebut() ? $e->getHeureDebut()->format('H:i:s') : null,
+                    'dureeMinutes' => $e->getDureeMinutes(),
                     'lieu' => $e->getLieu(),
                     'description' => $e->getDescription(),
                 ], $w->getEvenements()->toArray()),
@@ -156,22 +159,8 @@ class WeekendController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Récupérer le nombre de jours du formulaire
-            $nombreJours = $form->get('nombre_jours')->getData() ?? 3;
-            
-            // Calculer automatiquement samedi et dimanche à partir du vendredi
-            $dateVendredi = $weekend->getDateVendredi();
-            if ($dateVendredi) {
-                // Samedi = vendredi + 1 jour
-                $dateSamedi = (clone $dateVendredi)->modify('+1 day');
-                $weekend->setDateSamedi($dateSamedi);
-                
-                // Dimanche = vendredi + 2 jours (ou selon le nombre de jours)
-                if ($nombreJours >= 3) {
-                    $dateDimanche = (clone $dateVendredi)->modify('+2 days');
-                    $weekend->setDateDimanche($dateDimanche);
-                }
-            }
+            // Les dates sont déjà définies via le formulaire (date_debut et date_fin)
+            // Pas besoin de calcul automatique
             
             // Gestion de l'upload de l'image de couverture (optionnel)
             /** @var UploadedFile|null $coverFile */
@@ -198,12 +187,25 @@ class WeekendController extends AbstractController
             $em->persist($weekend);
             $em->flush();
 
+            // Stocker l'ID du weekend dans la session pour le pré-sélectionner
+            $request->getSession()->set('last_created_weekend_id', $weekend->getId());
+
             $this->addFlash('success', 'Weekend créé avec succès !');
-            return $this->redirectToRoute('app_weekends');
+            
+            // Rediriger vers une page de confirmation qui propose d'ajouter un événement
+            return $this->redirectToRoute('app_weekend_created', ['id' => $weekend->getId()]);
         }
 
         return $this->render('weekend/create.html.twig', [
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/created/{id}', name: 'app_weekend_created')]
+    public function created(Weekend $weekend): Response
+    {
+        return $this->render('weekend/created.html.twig', [
+            'weekend' => $weekend,
         ]);
     }
 }

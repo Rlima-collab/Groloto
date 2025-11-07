@@ -93,7 +93,8 @@ class EvenementController extends AbstractController
     }
 
     #[Route('/evenements/create', name: 'app_evenements_create')]
-    public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
+    #[Route('/evenements/create/{preselect_weekend}', name: 'app_evenement_create')]
+    public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger, ?int $preselect_weekend = null): Response
     {
         $evenement = new Evenement();
         
@@ -136,6 +137,7 @@ class EvenementController extends AbstractController
 
         return $this->render('evenement/create.html.twig', [
             'form' => $form->createView(),
+            'preselect_weekend' => $preselect_weekend,
         ]);
     }
 }
