@@ -11,10 +11,9 @@
 {% block body %}
 <div class="page-header">
     <h1 class="page-title">Tâches disponibles</h1>
-    <a href="{{ path('dashboard') }}" class="btn btn-secondary">Retour au tableau de bord</a>
 </div>
 
-<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+<div class="container" style="padding: 2rem 0;">
     
     {% for message in app.flashes('success') %}
         <div class="alert alert-success">{{ message }}</div>
@@ -23,7 +22,7 @@
         <div class="alert alert-danger">{{ message }}</div>
     {% endfor %}
 
-    <div class="tabs" style="margin-bottom: 2rem;">
+    <div class="tabs" style="margin-bottom: 1.5rem;">
         <a href="#" class="tab selected" id="tab-disponibles" onclick="showTab('disponibles')">
             <span class="tab-text">Tâches disponibles</span>
         </a>
@@ -35,58 +34,46 @@
     <div id="content-disponibles" class="tab-content">
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Tâches disponibles</h2>
-                <p class="card-description">Vous pouvez demander à rejoindre ces tâches. L'administrateur validera votre demande.</p>
+                <div class="header-left">
+                    <h2 class="card-title">Tâches disponibles</h2>
+                    <p class="card-description">Vous pouvez demander à rejoindre ces tâches. L'administrateur validera votre demande.</p>
+                </div>
+                <div class="header-right"></div>
             </div>
             <div class="card-content">
                 {% if taches_disponibles|length > 0 %}
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Tâche</th>
-                                    <th>Événement</th>
-                                    <th>Date et heure</th>
-                                    <th>Poste</th>
-                                    <th>Places</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in taches_disponibles %}
-                                    {% set tache = item.tache %}
-                                    <tr>
-                                        <td><strong>{{ tache.titre }}</strong></td>
-                                        <td>
-                                            {% if tache.weekend %}
-                                                    {{ tache.weekend.nom }}
-                                            {% else %}
-                                                <span style="color: #999;">Aucun weekend</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <div>{{ tache.debut|date('d/m/Y H:i') }}</div>
-                                            <div style="font-size: 0.9em; color: #666;">au {{ tache.fin|date('d/m/Y H:i') }}</div>
-                                        </td>
-                                        <td>{{ tache.posteRequis ?: '-' }}</td>
-                                        <td>
-                                            <span class="badge {% if item.nbAffectations >= tache.maxPersonnes %}badge-danger{% elseif item.nbAffectations >= (tache.maxPersonnes * 0.8) %}badge-warning{% else %}badge-success{% endif %}">
-                                                {{ item.nbAffectations }} / {{ tache.maxPersonnes }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button type="button" 
-                                                    class="btn btn-small btn-primary" 
-                                                    data-csrf-tache="{{ tache.id }}"
-                                                    data-csrf-token="{{ csrf_token('demander_tache_' ~ tache.id) }}"
-                                                    onclick="openDemandeModal({{ tache.id }}, '{{ tache.titre|escape('js') }}')">
-                                                Demander
-                                            </button>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div class="taches-grid">
+                        {% for item in taches_disponibles %}
+                            {% set tache = item.tache %}
+                            <div class="tache-card">
+                                <div class="tache-body">
+                                    <div class="tache-head">
+                                        <div>
+                                            <div class="tache-title">{{ tache.titre }}</div>
+                                            <div class="tache-meta">{{ tache.weekend ? tache.weekend.nom : 'Aucun weekend' }}</div>
+                                        </div>
+                                        <div class="tache-meta" style="text-align:right">{{ tache.debut|date('d/m/Y H:i') }}</div>
+                                    </div>
+                                    <div class="tache-meta">Au {{ tache.fin|date('d/m/Y H:i') }}</div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+                                        <div>
+                                            <div class="post-label">{{ tache.posteRequis ?: '-' }}</div>
+                                            <div class="tache-meta">Poste requis</div>
+                                        </div>
+                                        <div style="text-align:right">
+                                            <div class="spots">{{ item.nbAffectations }} / {{ tache.maxPersonnes }}</div>
+                                            <div class="tache-meta">Places</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tache-footer">
+                                    <div class="tache-meta small">Disponible</div>
+                                    <div>
+                                        <button type="button" class="btn btn-primary btn-small" data-csrf-tache="{{ tache.id }}" data-csrf-token="{{ csrf_token('demander_tache_' ~ tache.id) }}" onclick="openDemandeModal({{ tache.id }}, '{{ tache.titre|escape('js') }}')">Demander</button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 {% else %}
                     <div class="alert alert-info">
@@ -100,61 +87,48 @@
     <div id="content-mes-demandes" class="tab-content" style="display: none;">
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Mes demandes</h2>
-                <p class="card-description">Historique de vos demandes d'affectation</p>
+                <div class="header-left">
+                    <h2 class="card-title">Mes demandes</h2>
+                    <p class="card-description">Historique de vos demandes d'affectation</p>
+                </div>
+                <div class="header-right">
+                    <!-- actions -->
+                </div>
             </div>
             <div class="card-content">
                 {% if mes_demandes|length > 0 %}
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Tâche</th>
-                                    <th>Date demande</th>
-                                    <th>Statut</th>
-                                    <th>Message</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for demande in mes_demandes %}
-                                    <tr class="{% if demande.statut == 'acceptee' %}row-success{% elseif demande.statut == 'refusee' %}row-muted{% endif %}">
-                                        <td>
-                                            <strong>{{ demande.tache.titre }}</strong>
-                                            <div style="font-size: 0.9em; color: #666;">{{ demande.tache.debut|date('d/m/Y H:i') }}</div>
-                                        </td>
-                                        <td>{{ demande.dateDemande|date('d/m/Y H:i') }}</td>
-                                        <td>
-                                            {% if demande.statut == 'en_attente' %}
-                                                <span class="badge badge-warning">En attente</span>
-                                            {% elseif demande.statut == 'acceptee' %}
-                                                <span class="badge badge-success">Acceptée</span>
-                                            {% else %}
-                                                <span class="badge badge-danger">Refusée</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if demande.messageBenevole %}
-                                                <div style="font-size: 0.9em; margin-bottom: 5px;"><strong>Votre message:</strong> {{ demande.messageBenevole }}</div>
-                                            {% endif %}
-                                            {% if demande.messageAdmin %}
-                                                <div style="font-size: 0.9em; color: #2563eb;"><strong>Réponse admin:</strong> {{ demande.messageAdmin }}</div>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if demande.statut == 'en_attente' %}
-                                                <form method="POST" action="{{ path('benevole_annuler_demande', {'id': demande.id}) }}" style="display: inline;">
-                                                    <input type="hidden" name="_token" value="{{ csrf_token('annuler_demande_' ~ demande.id) }}">
-                                                    <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette demande ?')">
-                                                        Annuler
-                                                    </button>
-                                                </form>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div class="demandes-list">
+                        {% for demande in mes_demandes %}
+                            <div class="demande-card {% if demande.statut == 'acceptee' %}row-success{% elseif demande.statut == 'refusee' %}row-muted{% endif %}">
+                                <div class="demande-info">
+                                    <div><strong>{{ demande.tache.titre }}</strong> <span class="tache-meta">— {{ demande.tache.debut|date('d/m/Y H:i') }}</span></div>
+                                    <div class="small">Demande envoyée le {{ demande.dateDemande|date('d/m/Y H:i') }}</div>
+                                    <div>
+                                        {% if demande.messageBenevole %}<div class="small"><strong>Votre message:</strong> {{ demande.messageBenevole }}</div>{% endif %}
+                                        {% if demande.messageAdmin %}<div class="small" style="color:#2563eb;"><strong>Réponse admin:</strong> {{ demande.messageAdmin }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="demande-actions">
+                                    <div>
+                                        {% if demande.statut == 'en_attente' %}
+                                            <span class="badge badge-warning">En attente</span>
+                                        {% elseif demande.statut == 'acceptee' %}
+                                            <span class="badge badge-success">Acceptée</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Refusée</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        {% if demande.statut == 'en_attente' %}
+                                            <form method="POST" action="{{ path('benevole_annuler_demande', {'id': demande.id}) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('annuler_demande_' ~ demande.id) }}">
+                                                <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette demande ?')">Annuler</button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 {% else %}
                     <div class="alert alert-info">
@@ -167,9 +141,9 @@
 </div>
 
 <!-- Modal pour faire une demande -->
-<div id="demandeModal" class="modal" style="display: none;">
-    <div class="modal-content" style="max-width: 500px;">
-        <span class="close" onclick="closeDemandeModal()">&times;</span>
+<div id="demandeModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+        <button type="button" class="close" onclick="closeDemandeModal()" aria-label="Fermer">&times;</button>
         <h2 style="margin-top: 0;">Demander à rejoindre la tâche</h2>
         <p id="tacheNom" style="font-weight: bold; color: #2563eb;"></p>
         <form id="demandeForm" method="POST">
@@ -185,50 +159,6 @@
         </form>
     </div>
 </div>
-
-<style>
-.modal {
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 10% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    border-radius: 8px;
-    width: 80%;
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-}
-
-.row-success {
-    background-color: #f0fdf4;
-}
-
-.row-muted {
-    background-color: #f9fafb;
-    color: #6b7280;
-}
-</style>
 
 <script>
 function showTab(tabName) {
@@ -261,7 +191,11 @@ function openDemandeModal(tacheId, tacheNom) {
     tokenInput.name = '_token';
     tokenInput.value = generateCsrfToken(tacheId);
     
-    document.getElementById('demandeModal').style.display = 'block';
+    const modal = document.getElementById('demandeModal');
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    // focus the message textarea for accessibility
+    setTimeout(() => document.getElementById('message').focus(), 50);
 }
 
 // Fonction pour générer le token - on utilise une astuce avec les attributs data
@@ -276,14 +210,16 @@ function generateCsrfToken(tacheId) {
 }
 
 function closeDemandeModal() {
-    document.getElementById('demandeModal').style.display = 'none';
+    const modal = document.getElementById('demandeModal');
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
     document.getElementById('message').value = '';
 }
 
 // Fermer le modal si on clique en dehors
 window.onclick = function(event) {
     const modal = document.getElementById('demandeModal');
-    if (event.target == modal) {
+    if (event.target === modal) {
         closeDemandeModal();
     }
 }

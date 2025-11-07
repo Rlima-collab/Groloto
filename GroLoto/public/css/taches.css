@@ -140,6 +140,74 @@
     background: #f0fdf4;
 }
 
+/* Badges states */
+.badge-success { background: #10b981; color: white; }
+.badge-warning { background: #f59e0b; color: white; }
+.badge-danger { background: #ef4444; color: white; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0.5rem; }
+.tab { cursor: pointer; padding: 0.5rem 0.75rem; border-radius: 0.5rem; background: transparent; color: #374151; border: 1px solid transparent; transition: all .15s; text-decoration: none; }
+.tab:hover { background: #f8fafc; }
+.tab.selected { background: #1a3c5a; color: white; border-color: #1a3c5a; }
+.tab .tab-text { font-weight: 600; }
+
+/* Modal (consistent with site) */
+.modal { position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(2,6,23,0.5); display: none; align-items: center; justify-content: center; }
+.modal.open { display: flex; }
+.modal-content { background-color: #ffffff; padding: 1.25rem; border-radius: 0.75rem; width: 100%; max-width: 520px; box-shadow: 0 10px 30px rgba(2,6,23,0.12); }
+.modal .close { float: right; font-size: 1.5rem; color: #6b7280; cursor: pointer; }
+.modal .close:hover { color: #111827; }
+
+/* Row helpers */
+.row-success { background-color: #f0fdf4; }
+.row-muted { background-color: #f9fafb; color: #6b7280; }
+
+/* Small helpers */
+.card .card-header { display: flex; justify-content: space-between; align-items: center; }
+.card .card-header .header-left { flex: 1; }
+.card .card-header .header-right { margin-left: 1rem; }
+
+/* Grid of task cards */
+.taches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.tache-card {
+    background: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform .15s, box-shadow .15s;
+}
+.tache-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(2,6,23,0.09); }
+
+.tache-card .tache-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.tache-card .tache-head { display: flex; justify-content: space-between; align-items: center; }
+.tache-card .tache-title { font-size: 1.05rem; font-weight: 700; color: #0f172a; }
+.tache-card .tache-meta { font-size: 0.9rem; color: #6b7280; }
+.tache-card .tache-footer { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-top: 1px solid #f1f5f9; background: #fbfdff; }
+
+.tache-card .post-label { font-weight: 600; color: #374151; }
+.tache-card .spots { font-weight: 700; }
+
+/* Demandes list as cards */
+.demandes-list { display: grid; gap: 0.75rem; margin-top: 1rem; }
+.demande-card { background: #fff; border-radius: 0.5rem; padding: 1rem; box-shadow: 0 4px 12px rgba(2,6,23,0.04); display: flex; justify-content: space-between; align-items: center; }
+.demande-card .demande-info { display: flex; flex-direction: column; gap: 0.25rem; }
+.demande-card .demande-actions { min-width: 140px; display:flex; gap:0.5rem; justify-content: flex-end; }
+
+/* Page header centered title */
+.page-header { display: flex; align-items: center; justify-content: flex-start; gap: 1rem; }
+.page-header .page-title { margin: 0; flex: 1; text-align: left; font-size: 2rem; }
+.page-header .header-spacer { width: 140px; }
+.page-header .btn-back { min-width: 140px; text-align: right; }
+
 /* =============== BADGES =============== */
 .badge {
     display: inline-block;

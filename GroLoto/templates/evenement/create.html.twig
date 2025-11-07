@@ -277,6 +277,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (weekendSelect) {
         weekendSelect.addEventListener('change', onWeekendChange);
         setTimeout(onWeekendChange, 100);
+        
+        {% if preselect_weekend is defined and preselect_weekend %}
+        // Pré-sélectionner le weekend spécifié
+        weekendSelect.value = {{ preselect_weekend }};
+        weekendSelect.dispatchEvent(new Event('change'));
+        {% endif %}
     }
 });
 </script>
