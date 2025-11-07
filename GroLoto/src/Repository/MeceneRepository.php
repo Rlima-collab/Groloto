@@ -53,4 +53,24 @@ class MeceneRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Retourne tous les mécènes ayant des lots pour un week-end spécifique
+     * @return Mecene[]
+     */
+    public function findByWeekend($weekend): array
+    {
+        return $this->createQueryBuilder('m')
+            ->leftJoin('m.utilisateur', 'u')
+            ->leftJoin('m.lots', 'l')
+            ->leftJoin('l.evenement', 'e')
+            ->addSelect('u', 'l', 'e')
+            ->where('e.weekend = :weekend')
+            ->setParameter('weekend', $weekend)
+            ->groupBy('m.id')
+            ->orderBy('m.organisation', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }
+
