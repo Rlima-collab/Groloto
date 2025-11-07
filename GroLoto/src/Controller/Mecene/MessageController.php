@@ -381,10 +381,68 @@ class MessageController extends AbstractController
         }
 
         if ($isAjax) {
-            return $this->json(['success' => true, 'message' => 'Réponse envoyée !']);
+            return $this->json([
+                'success' => true,
+                'message' => 'Réponse envoyée !',
+                'messageId' => $newMessage->getId()
+            ]);
         }
 
         $this->addFlash('success', 'Réponse envoyée.');
         return $this->redirectToRoute('mecene_messages');
+    }
+
+    #[Route('/{id}/edit', name: 'mecene_message_edit', methods: ['POST'])]
+    public function edit(Request $request, ContactMessage $message): JsonResponse
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return $this->json(['success' => false, 'error' => 'Requête non autorisée'], 403);
+        }
+
+        $user = $this->getUser();
+        
+        // Vérifier que l'utilisateur est bien l'auteur du message
+        if ($message->getEmail() !== $user->getEmail()) {
+            return $this->json(['success' => false, 'error' => 'Non autorisé'], 403);
+        }
+
+        $newContent = $request->request->get('message');
+        if (!$newContent) {
+            return $this->json(['success' => false, 'error' => 'Message vide'], 400);
+        }
+
+        // Mettre à jour le message
+        $originalMessage = $message->getMessage();
+        $message->setMessage($newContent);
+        
+        // Ajouter un marqueur d'édition si ce n'est pas déjà fait
+        if (!str_contains($originalMessage, '[MODIFIÉ]')) {
+            $message->setMessage('[MODIFIÉ] ' . $newContent);
+        }
+        
+        $this->em->flush();
+
+        return $this->json(['success' => true, 'message' => 'Message modifié']);
+    }
+
+    #[Route('/{id}/delete', name: 'mecene_message_delete', methods: ['POST'])]
+    public function deleteMessage(Request $request, ContactMessage $message): JsonResponse
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return $this->json(['success' => false, 'error' => 'Requête non autorisée'], 403);
+        }
+
+        $user = $this->getUser();
+        
+        // Vérifier que l'utilisateur est bien l'auteur du message
+        if ($message->getEmail() !== $user->getEmail()) {
+            return $this->json(['success' => false, 'error' => 'Non autorisé'], 403);
+        }
+
+        // Remplacer le contenu au lieu de supprimer l'enregistrement
+        $message->setMessage('[SUPPRIMÉ] Ce message a été supprimé par son auteur');
+        $this->em->flush();
+
+        return $this->json(['success' => true, 'message' => 'Message supprimé']);
     }
 }

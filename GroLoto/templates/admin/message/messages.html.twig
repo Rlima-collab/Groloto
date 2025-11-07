@@ -32,9 +32,6 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 .conversation-dropdown-item svg { width: 14px; height: 14px; flex-shrink: 0; }
 .conversation-item:hover { background: #2d3748; border-left-color: #3b82f6; }
 .conversation-item.active { background: #2d3748; border-left-color: #3b82f6; }
-.conversation-item.to-admin { border-left-color: #8b5cf6; background: rgba(139, 92, 246, 0.15); padding: 10px; }
-.conversation-item.to-admin .conversation-name { color: #c4b5fd; font-size: 13px; }
-.conversation-item.to-admin .conversation-sender { color: #a78bfa; font-size: 11px; }
 .conversation-name { font-weight: 600; font-size: 14px; margin-bottom: 5px; color: #e8eaed; }
 .conversation-preview { font-size: 13px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .conversation-time { font-size: 11px; color: #6b7280; margin-top: 5px; }
@@ -56,20 +53,39 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 .message-wrapper.sent { align-self: flex-end; }
 .message-wrapper.received { align-self: flex-start; }
 .message-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 0 5px; }
-.message-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
-.message-wrapper.received .message-avatar { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-.message-sender { font-size: 13px; font-weight: 600; color: #1e3a8a; }
+.message-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: linear-gradient(135deg, #0b1220 0%, #0f1a35 100%); color: white; }
+.message-wrapper.received .message-avatar { background: linear-gradient(135deg, #0b1220 0%, #0f1a35 100%); }
+.message-sender { font-size: 13px; font-weight: 600; color: #1f2937; }
 .message-number { font-size: 11px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
 .message-bubble { padding: 16px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
-.message-wrapper.sent .message-bubble { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; border-bottom-right-radius: 6px; }
-.message-wrapper.received .message-bubble { background: #f1f5f9; color: #0f1724; border: 1px solid #e2e8f0; border-bottom-left-radius: 6px; }
+
+/* ACTIONS DE MESSAGE (3 POINTS) */
+.message-menu-btn { padding: 4px 8px; background: transparent; border: none; cursor: pointer; color: #6b7280; font-size: 16px; margin-left: auto; transition: all 0.2s; }
+.message-menu-btn:hover { color: #3b82f6; }
+.message-actions { position: relative; margin-left: auto; }
+.message-actions-dropdown { display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 100; overflow: hidden; margin-top: 5px; }
+.message-actions-dropdown.active { display: block; }
+.message-action-item { width: 100%; padding: 10px 16px; background: transparent; border: none; text-align: left; font-size: 13px; color: #374151; cursor: pointer; transition: background 0.2s; display: block; }
+.message-action-item:hover { background: #f3f4f6; }
+.message-action-item.delete { color: #ef4444; }
+.message-action-item.delete:hover { background: #fee2e2; }
+
+/* NOTIFICATIONS DE MESSAGE */
+.message-notification { font-size: 11px; padding: 6px 12px; margin-bottom: 6px; border-radius: 6px; font-style: italic; opacity: 0.9; font-weight: 500; display: inline-block; }
+.message-notification.edited { background: rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3); }
+.message-notification.deleted { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+.message-wrapper.sent .message-bubble { background: linear-gradient(135deg, #0b1220 0%, #0f1a35 100%); color: white; border-bottom-right-radius: 6px; }
+.message-wrapper.received .message-bubble { background: linear-gradient(135deg, #0b1220 0%, #0f1a35 100%); color: white; border: none; border-bottom-left-radius: 6px; }
 .message-content { font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
-.message-time { font-size: 11px; color: rgba(255, 255, 255, 0.6); margin-top: 8px; }
-.message-wrapper.received .message-time { color: #64748b; }
+.message-time { font-size: 11px; color: rgba(255, 255, 255, 0.65); margin-top: 8px; }
+.message-wrapper.received .message-time { color: rgba(255, 255, 255, 0.65); }
 .chat-input-container { padding: 12px 18px; background: transparent; border-top: 1px solid #e6edf8; }
 .chat-input-wrapper { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
 .chat-input { flex: 1; background: #f8fafc; border: 1px solid #c7def8; border-radius: 10px; padding: 10px 12px; color: #0f1724; font-size: 14px; font-family: 'Inter', sans-serif; resize: none; max-height: 120px; min-height: 44px; transition: all 0.2s; }
 .chat-input:focus { outline: none; border-color: #3b82f6; background: #ffffff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+.chat-input::placeholder { color: #9ca3af; opacity: 1; }
+.chat-input:focus::placeholder { opacity: 0.5; }
 .chat-send-btn { padding: 10px 18px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 .chat-send-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); }
 .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -102,6 +118,27 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 .modal-btn-confirm { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
 .modal-btn-confirm:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
 
+/* AUTOCOMPLETION */
+.autocomplete-item {
+	padding: 10px 15px;
+	cursor: pointer;
+	border-bottom: 1px solid #f3f4f6;
+	color: #374151;
+	transition: background-color 0.2s;
+}
+.autocomplete-item:hover, .autocomplete-item.selected {
+	background-color: #e0e7ff;
+}
+.autocomplete-item-email {
+	font-weight: 500;
+	color: #1f2937;
+}
+.autocomplete-item-name {
+	font-size: 12px;
+	color: #6b7280;
+	margin-top: 2px;
+}
+
 /* RESPONSIVE MOBILE */
 @media (max-width: 768px) {
   .chat-container { flex-direction: column; }
@@ -109,7 +146,6 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
   .chat-main { height: 60vh; }
   .conversations-list { padding: 5px; }
   .conversation-item { padding: 10px; }
-  .conversation-item.to-admin { padding: 8px; }
   .chat-messages { padding: 15px; }
   .chat-header { padding: 15px 20px; }
   .chat-input-container { padding: 10px 15px; }
@@ -146,7 +182,9 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 'nom': reply.nom,
 'email': reply.email,
 'message': reply.message,
-'date': reply.createdAt|date('d/m/Y à H:i')
+'date': reply.createdAt|date('d/m/Y à H:i'),
+'isEdited': reply.message starts with '[MODIFIÉ]',
+'isDeleted': reply.message starts with '[SUPPRIMÉ]'
 }]) %}
 {% endfor %}
 <div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %}" data-id="{{ msg.id }}" data-subject="{{ subject|e('html_attr') }}" data-conversation="{{ conversationArray|json_encode|e('html_attr') }}" data-sender="{{ msg.nom }}" data-email="{{ msg.email }}" data-message="{{ body|e('html_attr') }}" data-date="{{ msg.createdAt|date('d/m/Y à H:i') }}" data-closed="{{ msg.cloturee ? 'true' : 'false' }}">
@@ -208,7 +246,10 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 <div class="modal-overlay" id="newMessageModal">
 	<div class="modal-content">
 		<div class="modal-header">✉️ Nouveau message Admin</div>
-		<input type="email" id="modalRecipient" class="modal-input" placeholder="Email du destinataire" autocomplete="off">
+		<div style="position: relative;">
+			<input type="email" id="modalRecipient" class="modal-input" placeholder="Email du destinataire" autocomplete="off">
+			<div id="autocompleteList" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #d1d5db; border-top: none; max-height: 200px; overflow-y: auto; z-index: 1000; display: none;"></div>
+		</div>
 		<input type="text" id="modalSubject" class="modal-input" placeholder="Sujet de la conversation" autocomplete="off">
 		<div class="modal-actions">
 			<button class="modal-btn modal-btn-cancel" id="modalCancel">Annuler</button>
@@ -225,6 +266,18 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 		<div class="modal-actions">
 			<button class="modal-btn modal-btn-cancel" id="confirmCancel">Annuler</button>
 			<button class="modal-btn modal-btn-confirm" id="confirmOk">Confirmer</button>
+		</div>
+	</div>
+</div>
+
+<!-- MODAL D'ÉDITION DE MESSAGE -->
+<div class="modal-overlay" id="editMessageModal">
+	<div class="modal-content">
+		<div class="modal-header">Modifier le message</div>
+		<textarea id="editMessageInput" class="modal-input" rows="4" style="resize: vertical; min-height: 80px;" placeholder="Écrivez votre message..."></textarea>
+		<div class="modal-actions">
+			<button class="modal-btn modal-btn-cancel" id="editMessageCancel">Annuler</button>
+			<button class="modal-btn modal-btn-confirm" id="editMessageConfirm">Modifier</button>
 		</div>
 	</div>
 </div>
@@ -277,6 +330,8 @@ let currentConversationId = null;
 let currentSubject = '';
 let currentRecipient = '';
 let currentRecipientEmail = '';
+let currentRecipientName = ''; // Nom complet du destinataire
+let currentRecipientRole = ''; // Rôle du destinataire
 
 // Système de confirmation modal
 let confirmCallback = null;
@@ -334,6 +389,19 @@ const modalConfirm = document.getElementById('modalConfirm');
 const confirmModal = document.getElementById('confirmModal');
 const confirmCancel = document.getElementById('confirmCancel');
 const confirmOk = document.getElementById('confirmOk');
+
+// Modal d'édition de message
+const editMessageModal = document.getElementById('editMessageModal');
+const editMessageInput = document.getElementById('editMessageInput');
+const editMessageCancel = document.getElementById('editMessageCancel');
+const editMessageConfirm = document.getElementById('editMessageConfirm');
+let currentEditMessageId = null;
+
+editMessageCancel.addEventListener('click', () => {
+	editMessageModal.classList.remove('active');
+	editMessageInput.value = '';
+	currentEditMessageId = null;
+});
 
 confirmCancel.addEventListener('click', () => {
 	confirmModal.classList.remove('active');
@@ -458,13 +526,112 @@ newChatBtn.addEventListener('click', function() {
 	modalRecipient.focus();
 });
 
+// Autocomplétion pour le champ email
+const autocompleteList = document.getElementById('autocompleteList');
+let autocompleteTimeout;
+let selectedIndex = -1;
+
+// Navigation au clavier dans l'autocomplétion
+modalRecipient.addEventListener('keydown', function(e) {
+	const items = autocompleteList.querySelectorAll('.autocomplete-item');
+	
+	if (items.length === 0) return;
+	
+	if (e.key === 'ArrowDown') {
+		e.preventDefault();
+		selectedIndex = (selectedIndex + 1) % items.length;
+		updateSelectedItem(items);
+	} else if (e.key === 'ArrowUp') {
+		e.preventDefault();
+		selectedIndex = selectedIndex <= 0 ? items.length - 1 : selectedIndex - 1;
+		updateSelectedItem(items);
+	} else if (e.key === 'Enter' && selectedIndex >= 0) {
+		e.preventDefault();
+		items[selectedIndex].click();
+	} else if (e.key === 'Escape') {
+		autocompleteList.style.display = 'none';
+		selectedIndex = -1;
+	}
+});
+
+function updateSelectedItem(items) {
+	items.forEach((item, index) => {
+		if (index === selectedIndex) {
+			item.classList.add('selected');
+			item.scrollIntoView({ block: 'nearest' });
+		} else {
+			item.classList.remove('selected');
+		}
+	});
+}
+
+modalRecipient.addEventListener('input', function() {
+	const query = this.value.trim();
+	
+	clearTimeout(autocompleteTimeout);
+	selectedIndex = -1; // Réinitialiser la sélection
+	
+	if (query.length < 2) {
+		autocompleteList.style.display = 'none';
+		return;
+	}
+	
+	autocompleteTimeout = setTimeout(async () => {
+		try {
+			const response = await fetch('{{ path('admin_message_emails_list') }}?q=' + encodeURIComponent(query));
+			const users = await response.json();
+			
+			if (users.length > 0) {
+				autocompleteList.innerHTML = users.map(user => {
+					// Déterminer le rôle en français
+					let roleLabel = '';
+					if (user.role === 'ROLE_BENEVOLE') roleLabel = 'Bénévole';
+					else if (user.role === 'ROLE_MECENE') roleLabel = 'Mécène';
+					
+					return `
+						<div class="autocomplete-item" data-email="${user.email}" data-name="${user.prenom} ${user.nom}" data-role="${roleLabel}">
+							<div class="autocomplete-item-email">${user.email}</div>
+							<div class="autocomplete-item-name">${user.prenom} ${user.nom} ${roleLabel ? '(' + roleLabel + ')' : ''}</div>
+						</div>
+					`;
+				}).join('');
+				autocompleteList.style.display = 'block';
+				
+				// Gérer le clic sur un élément d'autocomplétion
+				autocompleteList.querySelectorAll('.autocomplete-item').forEach(item => {
+					item.addEventListener('click', function() {
+						modalRecipient.value = this.dataset.email;
+						currentRecipientName = this.dataset.name; // Stocker le nom
+						currentRecipientRole = this.dataset.role; // Stocker le rôle
+						autocompleteList.style.display = 'none';
+						selectedIndex = -1;
+						modalSubject.focus();
+					});
+				});
+			} else {
+				autocompleteList.style.display = 'none';
+			}
+		} catch (err) {
+			console.error('Erreur autocomplétion:', err);
+		}
+	}, 300);
+});
+
+// Fermer l'autocomplétion si on clique ailleurs
+document.addEventListener('click', (e) => {
+	if (!modalRecipient.contains(e.target) && !autocompleteList.contains(e.target)) {
+		autocompleteList.style.display = 'none';
+	}
+});
+
 // Fermer le modal (annuler)
 modalCancel.addEventListener('click', () => {
 	newMessageModal.classList.remove('active');
+	autocompleteList.style.display = 'none';
 });
 
 // Confirmer le modal - ouvrir la zone de composition
-modalConfirm.addEventListener('click', () => {
+modalConfirm.addEventListener('click', async () => {
 	const recipient = modalRecipient.value.trim();
 	const subject = modalSubject.value.trim();
 	
@@ -479,6 +646,34 @@ modalConfirm.addEventListener('click', () => {
 		modalSubject.focus();
 		return;
 	}
+	
+	// Vérifier que l'email existe dans la base de données
+	modalConfirm.disabled = true;
+	try {
+		const response = await fetch('{{ path('admin_message_emails_list') }}?q=' + encodeURIComponent(recipient));
+		const users = await response.json();
+		const exactMatch = users.find(u => u.email.toLowerCase() === recipient.toLowerCase());
+		
+		if (!exactMatch) {
+			showToast('L\'adresse email n\'est pas enregistrée dans l\'application', 'error');
+			modalRecipient.focus();
+			modalConfirm.disabled = false;
+			return;
+		}
+		
+		// Stocker le nom complet du destinataire et son rôle
+		currentRecipientName = `${exactMatch.prenom} ${exactMatch.nom}`;
+		// Déterminer le rôle en français
+		if (exactMatch.role === 'ROLE_BENEVOLE') currentRecipientRole = 'Bénévole';
+		else if (exactMatch.role === 'ROLE_MECENE') currentRecipientRole = 'Mécène';
+		else currentRecipientRole = '';
+	} catch (err) {
+		console.error('Erreur validation email:', err);
+		showToast('Erreur lors de la vérification de l\'email', 'error');
+		modalConfirm.disabled = false;
+		return;
+	}
+	modalConfirm.disabled = false;
 	
 	// Stocker les valeurs
 	currentRecipient = recipient;
@@ -582,7 +777,19 @@ items.forEach(item => {
 		}
 
 		const conversation = conversationData ? JSON.parse(conversationData) : [];
-		const allMessages = [{nom: sender, email: email, message: message, date: date}, ...conversation];
+		const allMessages = [{
+			id: currentConversationId,
+			nom: sender,
+			email: email,
+			message: message,
+			date: date,
+			isEdited: message.includes('[MODIFIÉ]'),
+			isDeleted: message.includes('[SUPPRIMÉ]')
+		}, ...conversation.map(msg => ({
+			...msg,
+			isEdited: msg.isEdited || (msg.message && msg.message.includes('[MODIFIÉ]')),
+			isDeleted: msg.isDeleted || (msg.message && msg.message.includes('[SUPPRIMÉ]'))
+		}))];
 		renderMessages(allMessages);
 		scrollToBottom();
 	});
@@ -601,6 +808,39 @@ if (convId) {
 	}
 }
 
+// Fonction pour recharger une conversation
+async function loadConversation(conversationId) {
+	// Simuler un clic sur la conversation pour la recharger
+	const targetItem = Array.from(items).find(item => item.dataset.id === conversationId);
+	if (targetItem) {
+		// Récupérer les données de la conversation
+		const conversationData = targetItem.dataset.conversation;
+		const sender = targetItem.dataset.sender;
+		const email = targetItem.dataset.email;
+		const message = targetItem.dataset.message;
+		const date = targetItem.dataset.date;
+		const isClosed = targetItem.dataset.closed === 'true';
+		
+		// Mettre à jour l'affichage
+		const conversation = conversationData ? JSON.parse(conversationData) : [];
+		const allMessages = [{
+			id: conversationId,
+			nom: sender,
+			email: email,
+			message: message,
+			date: date,
+			isEdited: message.includes('[MODIFIÉ]'),
+			isDeleted: message.includes('[SUPPRIMÉ]')
+		}, ...conversation.map(msg => ({
+			...msg,
+			isEdited: msg.isEdited || (msg.message && msg.message.includes('[MODIFIÉ]')),
+			isDeleted: msg.isDeleted || (msg.message && msg.message.includes('[SUPPRIMÉ]'))
+		}))];
+		renderMessages(allMessages);
+		scrollToBottom();
+	}
+}
+
 function renderMessages(messages) {
 chatMessages.innerHTML = '';
 messages.forEach((msg, index) => {
@@ -609,9 +849,47 @@ const isAdmin = msg.email && (msg.email.includes('admin') || msg.email.includes(
 const isSent = msg.email === userEmail;
 const wrapper = document.createElement('div');
 wrapper.className = 'message-wrapper ' + (isSent ? 'sent' : 'received');
+wrapper.dataset.messageId = msg.id;
+
+// Nettoyer le message des préfixes [MODIFIÉ], [SUPPRIMÉ] pour le data-attribute
+let cleanMessage = msg.message;
+if (msg.isEdited) {
+	cleanMessage = msg.message.replace(/^\[MODIFIÉ\]\s*/, '');
+}
+if (msg.isDeleted) {
+	cleanMessage = msg.message.replace(/^\[SUPPRIMÉ\]\s*/, '');
+}
+// Retirer également le sujet
+cleanMessage = cleanMessage.replace(/^\[[^\]]+\]\s*/, '');
+wrapper.dataset.messageContent = cleanMessage;
+
 const displayName = isAdmin ? 'Admin' : msg.nom;
 const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-wrapper.innerHTML = '<div class="message-header"><div class="message-avatar">' + initials + '</div><span class="message-sender">' + escapeHtml(displayName) + '</span><span class="message-number">#' + (index + 1) + '</span></div><div class="message-bubble"><div class="message-content">' + escapeHtml(msg.message).replace(/\n/g, '<br>') + '</div><div class="message-time">' + msg.date + '</div></div>';
+
+let notificationHtml = '';
+if (msg.isEdited) {
+	notificationHtml = '<div class="message-notification edited">Modifié</div>';
+}
+
+let actionsHtml = '';
+if (isSent && !msg.isDeleted && msg.id) {
+	actionsHtml = '<div class="message-actions"><button class="message-menu-btn" onclick="toggleMessageMenu(event, ' + msg.id + ')">⋮</button><div class="message-actions-dropdown" id="msgMenu' + msg.id + '"><button class="message-action-item" onclick="editMessage(event, ' + msg.id + ')">Modifier</button><button class="message-action-item delete" onclick="deleteMessage(event, ' + msg.id + ')">Supprimer</button></div></div>';
+}
+
+// Nettoyer le texte du message à afficher (retirer les préfixes)
+let displayMessage = msg.message;
+if (msg.isEdited) {
+	displayMessage = displayMessage.replace(/^\[MODIFIÉ\]\s*/, '');
+}
+if (msg.isDeleted) {
+	displayMessage = displayMessage.replace(/^\[SUPPRIMÉ\]\s*/, '');
+}
+// Retirer le sujet pour l'affichage
+displayMessage = displayMessage.replace(/^\[[^\]]+\]\s*/, '');
+
+const messageText = msg.isDeleted ? '<em style="opacity: 0.6;">Ce message a été supprimé</em>' : escapeHtml(displayMessage).replace(/\n/g, '<br>');
+
+wrapper.innerHTML = notificationHtml + '<div class="message-header"><div class="message-avatar">' + initials + '</div><span class="message-sender">' + escapeHtml(displayName) + '</span><span class="message-number">#' + (index + 1) + '</span>' + actionsHtml + '</div><div class="message-bubble"><div class="message-content">' + messageText + '</div><div class="message-time">' + msg.date + '</div></div>';
 chatMessages.appendChild(wrapper);
 });
 }
@@ -662,55 +940,90 @@ try {
 		chatInput.value = '';
 		chatInput.style.height = 'auto';
 
-		// append message to DOM so it stays visible in the conversation
+	// Pour les conversations existantes, ajouter le message au DOM
+	if (currentConversationId !== 'new') {
 		const dateNow = (new Date()).toLocaleString();
+		const messageId = data.messageId || currentConversationId; // Utiliser l'ID du message si disponible
 		const wrapper = document.createElement('div');
 		wrapper.className = 'message-wrapper sent';
+		wrapper.dataset.messageId = messageId;
+		wrapper.dataset.messageContent = message;
 		const initials = currentUserName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
-		wrapper.innerHTML = '<div class="message-header"><div class="message-avatar">' + initials + '</div><span class="message-sender">' + escapeHtml(currentUserName) + '</span><span class="message-number">#</span></div><div class="message-bubble"><div class="message-content">' + escapeHtml(message).replace(/\n/g, '<br>') + '</div><div class="message-time">' + dateNow + '</div></div>';
+		const messageCount = chatMessages.querySelectorAll('.message-wrapper').length + 1;
+		
+		// Ajouter les boutons d'action (3 points)
+		const actionsHtml = '<div class="message-actions"><button class="message-menu-btn" onclick="toggleMessageMenu(event, ' + messageId + ')">⋮</button><div class="message-actions-dropdown" id="msgMenu' + messageId + '"><button class="message-action-item" onclick="editMessage(event, ' + messageId + ')">Modifier</button><button class="message-action-item delete" onclick="deleteMessage(event, ' + messageId + ')">Supprimer</button></div></div>';
+		
+		wrapper.innerHTML = '<div class="message-header"><div class="message-avatar">' + initials + '</div><span class="message-sender">' + escapeHtml(currentUserName) + '</span><span class="message-number">#' + messageCount + '</span>' + actionsHtml + '</div><div class="message-bubble"><div class="message-content">' + escapeHtml(message).replace(/\n/g, '<br>') + '</div><div class="message-time">' + dateNow + '</div></div>';
 		chatMessages.appendChild(wrapper);
 		scrollToBottom();
+		// Remettre le focus sur le textarea
+		chatInput.focus();
 		
 		// Mettre à jour l'aperçu de la conversation à gauche avec le dernier message
-		if (currentConversationId && currentConversationId !== 'new') {
-			const convItem = document.querySelector(`.conversation-item[data-id="${currentConversationId}"]`);
-			if (convItem) {
-				// Mettre à jour l'aperçu
-				const preview = convItem.querySelector('.conversation-preview');
-				if (preview) {
-					preview.textContent = message.slice(0, 50) + (message.length > 50 ? '...' : '');
-				}
-				// Mettre à jour l'heure
-				const timeEl = convItem.querySelector('.conversation-time');
-				if (timeEl) {
-					timeEl.textContent = new Date().toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
-				}
+		const convItem = document.querySelector(`.conversation-item[data-id="${currentConversationId}"]`);
+		if (convItem) {
+			// Nettoyer le message des préfixes avant de l'afficher dans l'aperçu
+			let cleanPreview = message.replace(/^\[MODIFIÉ\]\s*/, '').replace(/^\[SUPPRIMÉ\]\s*/, '').replace(/^\[[^\]]+\]\s*/, '');
+			
+			// Mettre à jour l'aperçu
+			const preview = convItem.querySelector('.conversation-preview');
+			if (preview) {
+				preview.textContent = cleanPreview.slice(0, 50) + (cleanPreview.length > 50 ? '...' : '');
 			}
+			// Mettre à jour l'heure
+			const timeEl = convItem.querySelector('.conversation-time');
+			if (timeEl) {
+				timeEl.textContent = new Date().toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+			}
+			
+			// Déplacer la conversation en haut de la liste
+			conversationsList.insertBefore(convItem, conversationsList.firstChild);
 		}
+	}
 		
 		// Si c'était un nouveau message, basculer vers la conversation créée et afficher les actions
 		if (currentConversationId === 'new') {
 			currentConversationId = data.conversationId || null;
-			chatTitle.textContent = 'Conversation avec ' + currentRecipient;
+			chatTitle.textContent = 'Conversation avec ' + (currentRecipientName || currentRecipient);
 			
 			// Créer l'élément de conversation dans la liste à gauche
 			if (data.conversationId) {
+				// Créer un objet message pour inclure dans la conversation
+				const firstMessage = {
+					id: data.conversationId,
+					nom: currentUserName,
+					email: '{{ app.user.email }}',
+					message: message,
+					date: new Date().toLocaleString('fr-FR'),
+					createdAt: new Date().toISOString(),
+					destinataire: currentRecipient,
+					isFromCurrentUser: true
+				};
+				
 				const newConvItem = document.createElement('div');
 				newConvItem.className = 'conversation-item active';
 				newConvItem.dataset.id = data.conversationId;
 				newConvItem.dataset.subject = escapeHtml(currentSubject);
-				newConvItem.dataset.conversation = '[]';
-				newConvItem.dataset.sender = escapeHtml(currentRecipient);
+				newConvItem.dataset.conversation = JSON.stringify([]);
+				newConvItem.dataset.sender = escapeHtml(currentRecipientName || currentRecipient); // Utiliser le nom complet
 				newConvItem.dataset.email = escapeHtml(currentRecipient);
-				newConvItem.dataset.message = escapeHtml(message);
+				newConvItem.dataset.message = escapeHtml(message); // Stocker le message sans le préfixe sujet
 				newConvItem.dataset.date = (new Date()).toLocaleString('fr-FR');
 				newConvItem.dataset.closed = 'false';
+				
+				// Nettoyer le message pour l'aperçu (sans préfixes)
+				let cleanPreview = message.replace(/^\[MODIFIÉ\]\s*/, '').replace(/^\[SUPPRIMÉ\]\s*/, '').replace(/^\[[^\]]+\]\s*/, '');
+				
+				// Construire le nom avec le rôle
+				const displayName = currentRecipientName || currentRecipient;
+				const nameWithRole = currentRecipientRole ? `${displayName} (${currentRecipientRole})` : displayName;
 				
 				newConvItem.innerHTML = `
 					<div class="conversation-item-content">
 						<div class="conversation-name">${escapeHtml(currentSubject)}</div>
-						<div class="conversation-sender">${escapeHtml(currentRecipient)}</div>
-						<div class="conversation-preview">${escapeHtml(message.slice(0, 50))}${message.length > 50 ? '...' : ''}</div>
+						<div class="conversation-sender">${escapeHtml(nameWithRole)}</div>
+						<div class="conversation-preview">${escapeHtml(cleanPreview.slice(0, 50))}${cleanPreview.length > 50 ? '...' : ''}</div>
 						<div class="conversation-time">${new Date().toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'})}</div>
 					</div>
 					<div class="conversation-item-menu">
@@ -730,7 +1043,13 @@ try {
 					</div>
 				`;
 				
-				// Désactiver les autres conversations
+				// Cacher le message "Aucune conversation"
+				const emptyConversations = document.getElementById('emptyConversations');
+				if (emptyConversations) {
+					emptyConversations.style.display = 'none';
+				}
+				
+				// Désactiver les autres conversations avant d'ajouter la nouvelle
 				document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
 				
 				// Ajouter en haut de la liste
@@ -738,7 +1057,7 @@ try {
 				
 				// Ajouter l'écouteur de clic
 				newConvItem.addEventListener('click', function() {
-					items.forEach(i => i.classList.remove('active'));
+					document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
 					this.classList.add('active');
 					currentConversationId = this.dataset.id;
 					currentSubject = this.dataset.subject;
@@ -746,10 +1065,65 @@ try {
 					chatInput.style.height = 'auto';
 					markConversationNotificationsAsRead(currentConversationId);
 					const conversationData = this.dataset.conversation;
-					const allMessages = conversationData ? JSON.parse(conversationData) : [];
+					const sender = this.dataset.sender;
+					const email = this.dataset.email;
+					const messageData = this.dataset.message;
+					const date = this.dataset.date;
+					const isClosed = this.dataset.closed === 'true';
+					
+					chatHeader.style.display = 'flex';
+					chatInputContainer.style.display = 'block';
+					chatTitle.textContent = sender;
+					
+					if (isClosed) {
+						closedIndicator.style.display = 'block';
+						chatInput.disabled = true;
+						sendBtn.disabled = true;
+						chatInput.placeholder = 'Cette conversation est clôturée';
+					} else {
+						closedIndicator.style.display = 'none';
+						chatInput.disabled = false;
+						sendBtn.disabled = false;
+						chatInput.placeholder = 'Écrivez votre message...';
+					}
+					
+					const conversation = conversationData ? JSON.parse(conversationData) : [];
+					const allMessages = [{
+						id: currentConversationId,
+						nom: sender,
+						email: email,
+						message: messageData,
+						date: date,
+						isEdited: messageData.includes('[MODIFIÉ]'),
+						isDeleted: messageData.includes('[SUPPRIMÉ]')
+					}, ...conversation.map(msg => ({
+						...msg,
+						isEdited: msg.isEdited || (msg.message && msg.message.includes('[MODIFIÉ]')),
+						isDeleted: msg.isDeleted || (msg.message && msg.message.includes('[SUPPRIMÉ]'))
+					}))];
 					renderMessages(allMessages);
 					scrollToBottom();
 				});
+				
+				// Afficher immédiatement le message dans la zone de chat
+				const displayMessage = {
+					id: data.conversationId,
+					nom: currentUserName,
+					email: '{{ app.user.email }}',
+					message: message,
+					date: new Date().toLocaleString('fr-FR'),
+					isEdited: false,
+					isDeleted: false
+				};
+				renderMessages([displayMessage]);
+				scrollToBottom();
+				
+				// Activer l'interface de chat
+				chatHeader.style.display = 'flex';
+				chatInputContainer.style.display = 'block';
+				chatInput.disabled = false;
+				sendBtn.disabled = false;
+				chatInput.focus();
 			}
 			
 			currentRecipient = '';
@@ -766,7 +1140,180 @@ showToast('Erreur réseau', 'error');
 sendBtn.disabled = false;
 }
 }
+
 function scrollToBottom() { chatMessages.scrollTop = chatMessages.scrollHeight; }
+
+// Gérer le menu des actions de message
+window.toggleMessageMenu = function(event, messageId) {
+	event.stopPropagation();
+	const menu = document.getElementById('msgMenu' + messageId);
+	const allMenus = document.querySelectorAll('.message-actions-dropdown');
+	
+	// Fermer tous les autres menus
+	allMenus.forEach(m => {
+		if (m !== menu) m.classList.remove('active');
+	});
+	
+	// Toggle le menu actuel
+	menu.classList.toggle('active');
+}
+
+// Fermer les menus quand on clique ailleurs
+document.addEventListener('click', (e) => {
+	if (!e.target.closest('.message-actions')) {
+		document.querySelectorAll('.message-actions-dropdown').forEach(m => m.classList.remove('active'));
+	}
+});
+
+// Modifier un message
+window.editMessage = async function(event, messageId) {
+	event.stopPropagation();
+	// Fermer le menu
+	document.querySelectorAll('.message-actions-dropdown').forEach(m => m.classList.remove('active'));
+	
+	const wrapper = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);
+	if (!wrapper) return;
+	
+	const originalContent = wrapper.dataset.messageContent;
+	
+	// Retirer les préfixes [MODIFIÉ], [SUPPRIMÉ] et [Sujet]
+	let cleanContent = originalContent
+		.replace(/^\[MODIFIÉ\]\s*/, '')
+		.replace(/^\[SUPPRIMÉ\]\s*/, '')
+		.replace(/^\[[^\]]+\]\s*/, ''); // Retire le sujet
+	
+	// Ouvrir le modal d'édition
+	editMessageInput.value = cleanContent;
+	currentEditMessageId = messageId;
+	editMessageModal.classList.add('active');
+	editMessageInput.focus();
+}
+
+// Gestionnaire de confirmation d'édition
+editMessageConfirm.addEventListener('click', async () => {
+	const newContent = editMessageInput.value.trim();
+	if (!newContent || !currentEditMessageId) return;
+	
+	try {
+		const response = await fetch('{{ path('admin_message_edit', {'id': 'PLACEHOLDER'}) }}'.replace('PLACEHOLDER', currentEditMessageId), {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'X-Requested-With': 'XMLHttpRequest'
+			},
+			body: 'message=' + encodeURIComponent(newContent)
+		});
+		
+		const data = await response.json();
+		
+		if (data.success) {
+			// Fermer le modal
+			editMessageModal.classList.remove('active');
+			editMessageInput.value = '';
+			
+			// Mettre à jour le message dans le DOM
+			const wrapper = document.querySelector(`.message-wrapper[data-message-id="${currentEditMessageId}"]`);
+			if (wrapper) {
+				const contentEl = wrapper.querySelector('.message-content');
+				if (contentEl) {
+					contentEl.innerHTML = escapeHtml(newContent).replace(/\n/g, '<br>');
+				}
+				// Stocker le contenu nettoyé dans data-attribute
+				wrapper.dataset.messageContent = newContent;
+				
+				// Ajouter la notification de modification
+				let notif = wrapper.querySelector('.message-notification');
+				if (!notif) {
+					notif = document.createElement('div');
+					notif.className = 'message-notification edited';
+					wrapper.insertBefore(notif, wrapper.firstChild);
+				}
+				notif.className = 'message-notification edited';
+				notif.textContent = 'Modifié';
+			}
+			
+			// Mettre à jour l'aperçu dans la liste des conversations à gauche
+			const convItem = document.querySelector(`.conversation-item[data-id="${currentConversationId}"]`);
+			if (convItem) {
+				const preview = convItem.querySelector('.conversation-preview');
+				if (preview) {
+					// Nettoyer le message des préfixes
+					let cleanPreview = newContent.replace(/^\[MODIFIÉ\]\s*/, '').replace(/^\[SUPPRIMÉ\]\s*/, '').replace(/^\[[^\]]+\]\s*/, '');
+					preview.textContent = cleanPreview.slice(0, 50) + (cleanPreview.length > 50 ? '...' : '');
+				}
+			}
+			
+			showToast('Message modifié', 'success');
+			currentEditMessageId = null;
+		} else {
+			showToast(data.error || 'Erreur lors de la modification', 'error');
+		}
+	} catch (error) {
+		console.error('Erreur:', error);
+		showToast('Erreur de connexion', 'error');
+	}
+});
+
+// Supprimer un message
+// Supprimer un message
+window.deleteMessage = async function(event, messageId) {
+	event.stopPropagation();
+	// Fermer le menu
+	document.querySelectorAll('.message-actions-dropdown').forEach(m => m.classList.remove('active'));
+	
+	// Utiliser le modal de confirmation
+	confirmMessage.textContent = 'Êtes-vous sûr de vouloir supprimer ce message ?';
+	confirmModal.classList.add('active');
+	
+	// Définir l'action de confirmation
+	confirmCallback = async () => {
+		try {
+			const response = await fetch('{{ path('admin_message_delete_msg', {'id': 'PLACEHOLDER'}) }}'.replace('PLACEHOLDER', messageId), {
+				method: 'POST',
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest'
+				}
+			});
+			
+			const data = await response.json();
+			
+			if (data.success) {
+				// Mettre à jour le message dans le DOM
+				const wrapper = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);
+				if (wrapper) {
+					const contentEl = wrapper.querySelector('.message-content');
+					if (contentEl) {
+						contentEl.innerHTML = '<em style="opacity: 0.6;">Ce message a été supprimé</em>';
+					}
+					wrapper.dataset.messageContent = 'Ce message a été supprimé par son auteur';
+					
+					// Retirer les boutons d'actions
+					const actionsContainer = wrapper.querySelector('.message-actions');
+					if (actionsContainer) {
+						actionsContainer.remove();
+					}
+				}
+				
+				// Mettre à jour l'aperçu dans la liste des conversations à gauche
+				const convItem = document.querySelector(`.conversation-item[data-id="${currentConversationId}"]`);
+				if (convItem) {
+					const preview = convItem.querySelector('.conversation-preview');
+					if (preview) {
+						preview.textContent = 'Ce message a été supprimé';
+					}
+				}
+				
+				showToast('Message supprimé', 'success');
+			} else {
+				showToast(data.error || 'Erreur lors de la suppression', 'error');
+			}
+		} catch (error) {
+			console.error('Erreur:', error);
+			showToast('Erreur de connexion', 'error');
+		}
+	};
+}
+
 function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 });
 </script>

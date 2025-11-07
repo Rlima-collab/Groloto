@@ -132,6 +132,14 @@ class ContactMessageController extends AbstractController
             return $this->json(['success' => false, 'error' => 'Destinataire et message requis'], 400);
         }
 
+        // Vérifier que le destinataire existe dans la base de données
+        $destinataire = $this->em->getRepository(\App\Entity\Utilisateur::class)
+            ->findOneBy(['email' => $to]);
+        
+        if (!$destinataire) {
+            return $this->json(['success' => false, 'error' => 'Le destinataire n\'est pas enregistré sur le site'], 400);
+        }
+
         // Enregistrer le message dans la base
         $user = $this->getUser();
         $fullMessage = $subject ? "[{$subject}] {$message}" : $message;
@@ -180,7 +188,11 @@ class ContactMessageController extends AbstractController
                 // ignore notification failures
             }
 
-            return $this->json(['success' => true, 'message' => 'Message envoyé !']);
+            return $this->json([
+                'success' => true, 
+                'message' => 'Message envoyé !',
+                'conversationId' => $cm->getId()
+            ]);
         } catch (\Exception $e) {
             return $this->json(['success' => false, 'error' => 'Échec d\'envoi'], 500);
         }
@@ -277,7 +289,7 @@ class ContactMessageController extends AbstractController
         // 4. Créer un message destiné à l'utilisateur pour qu'il apparaisse dans sa boîte de réception
         try {
             $admin = $this->getUser();
-            $replyFull = '[Reponse admin] ' . $reponse;
+            $replyFull = $reponse; // Retirer le préfixe [Reponse admin]
             
             // Déterminer le parent_id : si le message actuel a déjà un parent, on utilise ce parent, sinon on utilise l'ID du message actuel
             $rootParentId = $message->getParentId() ?? $message->getId();
@@ -316,7 +328,11 @@ class ContactMessageController extends AbstractController
         }
 
         if ($isAjax) {
-            return $this->json(['success' => true, 'message' => 'Réponse envoyée !']);
+            return $this->json([
+                'success' => true,
+                'message' => 'Réponse envoyée !',
+                'messageId' => $cmReply->getId()
+            ]);
         }
 
         $this->addFlash('success', 'Réponse envoyée !');
@@ -324,7 +340,7 @@ class ContactMessageController extends AbstractController
         return $this->redirectToRoute('admin_messages');
     }
 
-    #[Route('/{id}/delete', name: 'admin_message_delete', methods: ['POST'])]
+    #[Route('/{id}/delete-conversation', name: 'admin_message_delete', methods: ['POST'])]
     public function delete(ContactMessage $message, EntityManagerInterface $em, Request $request): Response
     {
         $isAjax = $request->isXmlHttpRequest();
@@ -353,6 +369,91 @@ class ContactMessageController extends AbstractController
         $this->em->flush();
 
         return $this->json(['success' => true, 'message' => 'Conversation clôturée']);
+    }
+
+    #[Route('/emails-list', name: 'admin_message_emails_list', methods: ['GET'])]
+    public function emailsList(Request $request): JsonResponse
+    {
+        $query = $request->query->get('q', '');
+        
+        $qb = $this->em->getRepository(\App\Entity\Utilisateur::class)
+            ->createQueryBuilder('u')
+            ->select('u.email', 'u.prenom', 'u.nom');
+        
+        if ($query) {
+            $qb->where('u.email LIKE :query')
+               ->setParameter('query', '%' . $query . '%');
+        }
+        
+        $users = $qb->setMaxResults(10)
+                   ->getQuery()
+                   ->getResult();
+        
+        return $this->json($users);
+    }
+
+    #[Route('/{id}/edit', name: 'admin_message_edit', methods: ['POST'])]
+    public function edit(
+        ContactMessage $message,
+        Request $request,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        // Vérifier que c'est bien le message de l'admin
+        $currentUser = $this->getUser();
+        if ($message->getEmail() !== $currentUser->getEmail()) {
+            return $this->json(['success' => false, 'error' => 'Vous ne pouvez modifier que vos propres messages'], 403);
+        }
+
+        $newContent = trim($request->request->get('message'));
+        if (!$newContent) {
+            return $this->json(['success' => false, 'error' => 'Le message ne peut pas être vide'], 400);
+        }
+
+        // Ajouter un indicateur de modification dans le message
+        $originalMessage = $message->getMessage();
+        
+        // Extraire le sujet s'il existe (format [Sujet])
+        $subject = '';
+        if (preg_match('/^\[([^\]]+)\]\s*(.*)$/s', $originalMessage, $matches)) {
+            $subject = '[' . $matches[1] . '] ';
+        }
+        
+        // Vérifier si le message était déjà modifié
+        if (!str_starts_with($originalMessage, '[MODIFIÉ]')) {
+            $message->setMessage('[MODIFIÉ] ' . $subject . $newContent);
+        } else {
+            // Le message était déjà modifié, on remplace juste le contenu
+            $message->setMessage('[MODIFIÉ] ' . $subject . $newContent);
+        }
+
+        $em->flush();
+
+        return $this->json([
+            'success' => true,
+            'message' => 'Message modifié'
+        ]);
+    }
+
+    #[Route('/{id}/delete', name: 'admin_message_delete_msg', methods: ['POST'])]
+    public function deleteMessage(
+        ContactMessage $message,
+        Request $request,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        // Vérifier que c'est bien le message de l'admin
+        $currentUser = $this->getUser();
+        if ($message->getEmail() !== $currentUser->getEmail()) {
+            return $this->json(['success' => false, 'error' => 'Vous ne pouvez supprimer que vos propres messages'], 403);
+        }
+
+        // Marquer le message comme supprimé au lieu de le supprimer réellement
+        $message->setMessage('[SUPPRIMÉ] Ce message a été supprimé par son auteur');
+        $em->flush();
+
+        return $this->json([
+            'success' => true,
+            'message' => 'Message supprimé'
+        ]);
     }
 
     private function extractSubject(string $message): string
