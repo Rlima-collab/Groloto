@@ -159,8 +159,39 @@ class WeekendController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Les dates sont déjà définies via le formulaire (date_debut et date_fin)
-            // Pas besoin de calcul automatique
+
+            $dateDebut = $weekend->getDateVendredi(); // Date de début
+            $dateFin = $weekend->getDateDimanche();   // Date de fin
+            
+            // Validation : minimum 2 jours
+            if ($dateDebut && $dateFin) {
+                $interval = $dateDebut->diff($dateFin);
+                $nombreJours = $interval->days + 1; // +1 pour inclure le jour de fin
+                
+                if ($nombreJours < 2) {
+                    $this->addFlash('error', 'Le weekend doit durer au minimum 2 jours.');
+                    return $this->render('weekend/create.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
+                }
+                
+                if ($dateFin < $dateDebut) {
+                    $this->addFlash('error', 'La date de fin doit être après la date de début.');
+                    return $this->render('weekend/create.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
+                }
+                
+                // Calculer le samedi (jour du milieu si 3 jours ou plus)
+                if ($nombreJours >= 3) {
+                    $dateSamedi = (clone $dateDebut)->modify('+1 day');
+                    $weekend->setDateSamedi($dateSamedi);
+                } else {
+                    // Si seulement 2 jours, samedi = fin
+                    $weekend->setDateSamedi($dateFin);
+                }
+            }
+
             
             // Gestion de l'upload de l'image de couverture (optionnel)
             /** @var UploadedFile|null $coverFile */

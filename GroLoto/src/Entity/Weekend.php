@@ -131,4 +131,26 @@ class Weekend
         }
         return $this;
     }
+    
+    /**
+     * Retourne tous les jours du weekend (de date_vendredi à date_dimanche)
+     * @return array<\DateTimeInterface>
+     */
+    public function getAllDays(): array
+    {
+        $days = [];
+        if (!$this->date_vendredi || !$this->date_dimanche) {
+            return $days;
+        }
+        
+        $current = clone $this->date_vendredi;
+        $end = $this->date_dimanche;
+        
+        while ($current <= $end) {
+            $days[] = clone $current;
+            $current->modify('+1 day');
+        }
+        
+        return $days;
+    }
 }

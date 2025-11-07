@@ -33,23 +33,18 @@ class WeekendType extends AbstractType
                 ],
                 'help' => 'Sélectionnez la date de début du weekend'
             ])
-            ->add('date_fin', DateType::class, [
+
+            ->add('date_dimanche', DateType::class, [
+
                 'widget' => 'single_text',
                 'label' => 'Date de fin',
                 'attr' => [
                     'class' => 'w-full p-3 border rounded-lg',
-                    'placeholder' => 'Date de fin'
+
+                    'placeholder' => 'Date de fin du weekend'
                 ],
-                'help' => 'Sélectionnez la date de fin du weekend'
-            ])
-            ->add('description', TextareaType::class, [
-                'label' => 'Description',
-                'required' => false,
-                'attr' => [
-                    'class' => 'w-full p-3 border rounded-lg',
-                    'rows' => 4,
-                    'placeholder' => 'Description du weekend (optionnelle)'
-                ]
+                'help' => 'Sélectionnez la date de fin du weekend (minimum 2 jours au total)'
+
             ])
             ->add('cover_image', FileType::class, [
                 'label' => 'Image de couverture (optionnelle)',
