@@ -83,7 +83,7 @@
                                 </div>
                                 {% endif %}
                                 <div class="info-item">
-                                    <span class="info-icon">📅</span>
+                                    <span class="info-icon"></span>
                                     <span class="info-text">Inscrit le {{ benevole.utilisateur.dateCreation|date('d/m/Y') }}</span>
                                 </div>
                                 <div class="info-item">
@@ -113,7 +113,7 @@
                 </div>
             {% else %}
                 <div class="empty-state">
-                    <div class="empty-icon">👥</div>
+                    <div class="empty-icon"></div>
                     <h3>Aucun bénévole trouvé</h3>
                     <p>Commencez par ajouter des bénévoles à votre base de données.</p>
                     {% if is_granted('ROLE_ADMIN') %}

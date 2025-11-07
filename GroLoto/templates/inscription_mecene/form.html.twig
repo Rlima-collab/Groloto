@@ -13,7 +13,7 @@
     <div class="hero-content">
         <h1 class="hero-title">Inscription à un Événement</h1>
         <p class="hero-description">Participez à nos événements en tant que mécène et soutenez nos actions.</p>
-        <a href="{{ path('app_evenements') }}" class="hero-btn yellow">← Retour aux événements</a>
+        <a href="{{ path('app_evenements') }}" class="hero-btn yellow">Retour aux événements</a>
     </div>
 </div>
 
@@ -23,13 +23,13 @@
 
 {% for message in app.flashes('error') %}
     <div class="alert alert-danger">
-        <strong>❌ Erreur :</strong> {{ message }}
+        <strong>Erreur :</strong> {{ message }}
     </div>
 {% endfor %}
 
 {% for message in app.flashes('success') %}
     <div class="alert alert-success">
-        <strong>✓ Succès :</strong> {{ message }}
+        <strong>Succès :</strong> {{ message }}
     </div>
 {% endfor %}
 
@@ -65,7 +65,7 @@
     <!-- Formulaire d'inscription -->
     <div class="card">
         <div class="card-header">
-            <h2 class="card-title">📝 Formulaire d'inscription</h2>
+            <h2 class="card-title">Formulaire d'inscription</h2>
             <p class="card-description">Complétez les informations ci-dessous pour soumettre votre don</p>
         </div>
         <div class="card-content">
@@ -92,7 +92,7 @@
             <!-- Section 2 : Informations sur le don -->
             <div class="form-section">
                 <div class="section-header">
-                    <h3 class="section-title">📦 Informations sur votre don</h3>
+                    <h3 class="section-title">Informations sur votre don</h3>
                     <p class="section-description">Ces informations seront utilisées pour ajouter votre don au stock si votre demande est acceptée</p>
                 </div>
 
@@ -170,7 +170,7 @@
                     <span>✕</span> Annuler
                 </a>
                 <button type="submit" class="btn btn-primary">
-                    <span>✓</span> Soumettre ma demande
+                    <span></span> Soumettre ma demande
                 </button>
             </div>
 

@@ -442,7 +442,7 @@
                     
                     if (props.type === 'evenement') {
                         if (props.description) msg += `\n\n${props.description}`;
-                        if (props.lieu) msg += `\n📍 ${props.lieu}`;
+                        if (props.lieu) msg += `\nLieu: ${props.lieu}`;
                     } else if (props.type === 'tache') {
                         if (props.posteRequis) msg += `\n\nPoste: ${props.posteRequis}`;
                         if (props.maxPersonnes) msg += `\nCapacité: ${props.maxPersonnes} personne(s)`;
