@@ -16,7 +16,7 @@
         </a>
         <ul class="submenu">
             <li><a href="{{ path('app_weekend_create') }}">Créer weekend</a></li>
-            <li><a href="{{ path('app_weekends') }}">Modifier weekend</a></li>
+            <li><a href="{{ path('app_weekend_liste') }}">Liste des weekends</a></li>
             <li><a href="{{ path('app_weekends') }}">Voir le planning</a></li>
         </ul>
     </li>
@@ -33,6 +33,7 @@
             <li><a href="{{ path('app_evenements') }}">Voir les événements</a></li>
         </ul>
     </li>
+
     <li class="nav-item">
         <a href="{{ path('benevoles') }}" class="nav-link">
             <span class="nav-icon">
@@ -40,13 +41,22 @@
             </span>
             <span class="nav-text">Bénévoles</span>
         </a>
+    </li>
+
+    <li class="nav-item">
+        <a href="{{ path('benevoles') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_tache.png') }}" alt="Bénévoles">
+            </span>
+            <span class="nav-text">Tâches</span>
+        </a>
         <ul class="submenu">
-            <li><a href="{{ path('benevoles') }}">Gérer bénévoles</a></li>
             <li><a href="{{ path('tache_index') }}">Gérer les tâches</a></li>
             <li><a href="{{ path('admin_demandes_taches') }}">Demandes de tâches</a></li>
             <li><a href="{{ path('admin_demandes_annulations') }}">Demandes d'annulation</a></li>
         </ul>
     </li>
+
     <li class="nav-item">
         <a href="{{ path('mecenes') }}" class="nav-link">
             <span class="nav-icon">

@@ -20,13 +20,10 @@ class Weekend
     private ?string $nom = null;
 
     #[ORM\Column(type: "date")]
-    private ?\DateTimeInterface $date_vendredi = null;
+    private ?\DateTimeInterface $date_debut = null;
 
     #[ORM\Column(type: "date")]
-    private ?\DateTimeInterface $date_samedi = null;
-
-    #[ORM\Column(type: "date")]
-    private ?\DateTimeInterface $date_dimanche = null;
+    private ?\DateTimeInterface $date_fin = null;
 
     #[ORM\Column(type: "datetime")]
     private ?\DateTimeInterface $date_creation = null;
@@ -34,10 +31,13 @@ class Weekend
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $cover_image = null;
 
-    #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Evenement::class, orphanRemoval: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description = null;
+
+    #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Evenement::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $evenements;
 
-    #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Tache::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Tache::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $taches;
 
     public function __construct()
@@ -80,14 +80,28 @@ class Weekend
     public function getNom(): ?string { return $this->nom; }
     public function setNom(string $nom): self { $this->nom = $nom; return $this; }
 
-    public function getDateVendredi(): ?\DateTimeInterface { return $this->date_vendredi; }
-    public function setDateVendredi(\DateTimeInterface $date_vendredi): self { $this->date_vendredi = $date_vendredi; return $this; }
+    public function getDateDebut(): ?\DateTimeInterface { return $this->date_debut; }
+    public function setDateDebut(\DateTimeInterface $date_debut): self { $this->date_debut = $date_debut; return $this; }
 
-    public function getDateSamedi(): ?\DateTimeInterface { return $this->date_samedi; }
-    public function setDateSamedi(\DateTimeInterface $date_samedi): self { $this->date_samedi = $date_samedi; return $this; }
+    public function getDateFin(): ?\DateTimeInterface { return $this->date_fin; }
+    public function setDateFin(\DateTimeInterface $date_fin): self { $this->date_fin = $date_fin; return $this; }
 
-    public function getDateDimanche(): ?\DateTimeInterface { return $this->date_dimanche; }
-    public function setDateDimanche(\DateTimeInterface $date_dimanche): self { $this->date_dimanche = $date_dimanche; return $this; }
+    // Alias pour compatibilité avec le formulaire
+    public function getDateVendredi(): ?\DateTimeInterface { return $this->date_debut; }
+    public function setDateVendredi(\DateTimeInterface $date_vendredi): self { $this->date_debut = $date_vendredi; return $this; }
+
+    public function getDateDimanche(): ?\DateTimeInterface { return $this->date_fin; }
+    public function setDateDimanche(\DateTimeInterface $date_dimanche): self { $this->date_fin = $date_dimanche; return $this; }
+
+    public function getDateSamedi(): ?\DateTimeInterface 
+    { 
+        if (!$this->date_debut || !$this->date_fin) {
+            return null;
+        }
+        $samedi = clone $this->date_debut;
+        $samedi->modify('+1 day');
+        return $samedi;
+    }
 
     public function getDateCreation(): ?\DateTimeInterface { return $this->date_creation; }
 
@@ -99,6 +113,17 @@ class Weekend
     public function setCoverImage(?string $cover_image): self
     {
         $this->cover_image = $cover_image;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
         return $this;
     }
 
@@ -122,5 +147,27 @@ class Weekend
             $evenement->setWeekend(null);
         }
         return $this;
+    }
+    
+    /**
+     * Retourne tous les jours du weekend (de date_debut à date_fin)
+     * @return array<\DateTimeInterface>
+     */
+    public function getAllDays(): array
+    {
+        $days = [];
+        if (!$this->date_debut || !$this->date_fin) {
+            return $days;
+        }
+        
+        $current = clone $this->date_debut;
+        $end = $this->date_fin;
+        
+        while ($current <= $end) {
+            $days[] = clone $current;
+            $current->modify('+1 day');
+        }
+        
+        return $days;
     }
 }

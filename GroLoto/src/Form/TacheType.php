@@ -69,14 +69,14 @@ class TacheType extends AbstractType
             ->add('weekend', EntityType::class, [
                 'class' => Weekend::class,
                 'query_builder' => fn(WeekendRepository $wr) => $wr->createQueryBuilder('w')
-                    ->where('w.date_dimanche >= :today')
+                    ->where('w.date_fin >= :today')
                     ->setParameter('today', new \DateTime())
-                    ->orderBy('w.date_vendredi', 'ASC'),
+                    ->orderBy('w.date_debut', 'ASC'),
                 'choice_label' => fn(Weekend $w) => sprintf(
                     '%s (du %s au %s)',
                     $w->getNom(),
-                    $w->getDateVendredi()->format('d/m/Y'),
-                    $w->getDateDimanche()->format('d/m/Y')
+                    $w->getDateDebut()->format('d/m/Y'),
+                    $w->getDateFin()->format('d/m/Y')
                 ),
                 'label' => 'Weekend associé',
                 'placeholder' => 'Choisir un weekend',

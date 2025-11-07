@@ -145,28 +145,10 @@ class DemandeTacheController extends AbstractController
         $demande->setMessageBenevole($request->request->get('message', ''));
 
         $entityManager->persist($demande);
-        
-        // Créer une notification pour tous les admins
-        $admins = $utilisateurRepository->findByRoleName('admin');
-        $benevoleNom = $benevole->getUtilisateur()->getPrenom() . ' ' . $benevole->getUtilisateur()->getNom();
-        
-        foreach ($admins as $admin) {
-            $notification = new Notification();
-            $notification->setDestinataire($admin);
-            $notification->setMessage("{$benevoleNom} a demandé à rejoindre la tâche \"{$tache->getTitre()}\"");
-            $notification->setType('demande_tache');
-            $notification->setLien($this->generateUrl('admin_demandes_taches'));
-            $notification->setCreatedAt(new \DateTime());
-            $notification->setLue(false);
-            
-            $entityManager->persist($notification);
-        }
-        
         $entityManager->flush();
 
-        // Notifications: informer tous les admins de la nouvelle demande
         $admins = $utilisateurRepository->findByRoleName('admin');
-        $benevoleNom = trim(($benevole->getUtilisateur()->getPrenom() ?? '') . ' ' . ($benevole->getUtilisateur()->getNom() ?? ''));
+        $benevoleNom = trim((($benevole->getUtilisateur()->getPrenom() ?? '') . ' ' . ($benevole->getUtilisateur()->getNom() ?? '')));
         $tacheNom = $tache->getTitre() ?? 'Tâche #' . $tache->getId();
 
         foreach ($admins as $admin) {
@@ -305,20 +287,10 @@ class DemandeTacheController extends AbstractController
         $demande->setMessageAdmin($request->request->get('message_admin', ''));
 
         $entityManager->persist($affectation);
-        
-        // Créer une notification pour le bénévole
-        $notification = new Notification();
-        $notification->setDestinataire($demande->getBenevole()->getUtilisateur());
-        $notification->setMessage("Votre demande pour la tâche \"{$tache->getTitre()}\" a été acceptée ✅");
-        $notification->setType('demande_acceptee');
-        $notification->setLien($this->generateUrl('benevole_taches_disponibles'));
-        $notification->setCreatedAt(new \DateTime());
-        $notification->setLue(false);
-        
-        $entityManager->persist($notification);
+        // Persist et flush des changements (affectation + mise à jour de la demande)
         $entityManager->flush();
 
-        // Notifier le bénévole que sa demande a été acceptée
+        // Notifier le bénévole que sa demande a été acceptée via le service centralisé
         $tacheNom = $tache->getTitre() ?? 'Tâche #' . $tache->getId();
         $notificationService->notifyBenevoleDemandeAcceptee(
             $demande->getBenevole()->getUtilisateur(),
@@ -366,20 +338,10 @@ class DemandeTacheController extends AbstractController
         $demande->setAdminReponse($this->getUser());
         $demande->setMessageAdmin($request->request->get('message_admin', ''));
 
-        // Créer une notification pour le bénévole
-        $notification = new Notification();
-        $notification->setDestinataire($demande->getBenevole()->getUtilisateur());
-        $tacheNom = $demande->getTache()->getTitre();
-        $notification->setMessage("Votre demande pour la tâche \"{$tacheNom}\" a été refusée ❌");
-        $notification->setType('demande_refusee');
-        $notification->setLien($this->generateUrl('benevole_taches_disponibles'));
-        $notification->setCreatedAt(new \DateTime());
-        $notification->setLue(false);
-        
-        $entityManager->persist($notification);
+        // Sauvegarder les modifications de la demande
         $entityManager->flush();
 
-        // Notifier le bénévole que sa demande a été refusée
+        // Notifier le bénévole que sa demande a été refusée via le service centralisé
         $tacheNom = $demande->getTache()->getTitre() ?? 'Tâche #' . $demande->getTache()->getId();
         $messageAdmin = $request->request->get('message_admin', '');
         $notificationService->notifyBenevoleDemandeRefusee(

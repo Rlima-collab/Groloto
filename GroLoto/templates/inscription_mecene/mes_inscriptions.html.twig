@@ -4,323 +4,185 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-list.css') }}">
 {% endblock %}
 
 {% block body %}
-<div class="hero-section">
+<!-- Hero Section -->
+<div class="hero-section stocks-hero">
     <div class="shine"></div>
     <div class="hero-content">
         <h1 class="hero-title">Mes Inscriptions</h1>
-        <p class="hero-description">Suivez l'état de vos participations aux événements caritatifs.</p>
-        <a href="{{ path('mecene_inscription') }}" class="hero-btn yellow">+ Nouvelle inscription</a>
+        <p class="hero-description">Suivez l'état de vos participations aux événements caritatifs</p>
+        <a href="{{ path('mecene_inscription') }}" class="btn-login">+ Nouvelle inscription</a>
     </div>
 </div>
 
-<div class="page-header">
-    <h1 class="page-title">📋 Liste de mes inscriptions</h1>
-    <div style="display: flex; gap: 0.75rem;">
-        <a href="{{ path('mecene_inscription') }}" class="btn btn-primary">
-            <span>+</span> Nouvelle inscription
-        </a>
-        <a href="{{ path('app_evenements') }}" class="btn btn-secondary">← Événements</a>
-    </div>
-</div>
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
 
-<!-- Métriques -->
-<div class="metrics-grid" style="max-width: 1200px; margin: 0 auto 2rem; padding: 0 2rem;">
-    <div class="card metric-card">
-        <div class="card-header">
-            <span class="metric-title">Total inscriptions</span>
+    <!-- Cartes de statistiques -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>Total inscriptions</h3>
+            <p class="metric-value">{{ inscriptions|length }}</p>
+            <p class="metric-detail">Demandes soumises</p>
         </div>
-        <div class="card-content">
-            <div class="metric-value">{{ inscriptions|length }}</div>
-            <p class="metric-change positive">Demandes soumises</p>
-        </div>
-    </div>
-    <div class="card metric-card">
-        <div class="card-header">
-            <span class="metric-title">En attente</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ inscriptions|filter(i => i.statut == 'en_attente')|length }}</div>
-            <p class="metric-change warning">À valider</p>
-        </div>
-    </div>
-    <div class="card metric-card">
-        <div class="card-header">
-            <span class="metric-title">Acceptées</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ inscriptions|filter(i => i.statut == 'accepte')|length }}</div>
-            <p class="metric-change positive">Validées</p>
-        </div>
-    </div>
-</div>
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem 2rem;">
-    {% if inscriptions|length > 0 %}
-        <div class="inscriptions-grid">
-            {% for inscription in inscriptions %}
-                <div class="card inscription-card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem;">
-                        <div style="flex: 1;">
-                            <h3 class="card-title" style="margin-bottom: 0.5rem;">{{ inscription.evenement.nom }}</h3>
-                            <div class="event-meta">
-                                <span class="meta-item">📅 {{ inscription.evenement.dateDebut|date('d/m/Y') }}</span>
-                                {% if inscription.evenement.lieu %}
-                                    <span class="meta-item">📍 {{ inscription.evenement.lieu }}</span>
+        <div class="metric-card">
+            <h3>En attente</h3>
+            <p class="metric-value">{{ inscriptions|filter(i => i.statut == 'en_attente')|length }}</p>
+            <p class="metric-detail">À valider</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Acceptées</h3>
+            <p class="metric-value">{{ inscriptions|filter(i => i.statut == 'accepte')|length }}</p>
+            <p class="metric-detail">Validées</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Refusées</h3>
+            <p class="metric-value">{{ inscriptions|filter(i => i.statut == 'refuse')|length }}</p>
+            <p class="metric-detail">Non retenues</p>
+        </div>
+    </div>
+
+    <!-- Liste des inscriptions -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="mb-0" style="color: #0d1b2a; font-weight: 600;">
+                    <i class="bi bi-calendar-check me-2"></i>Liste de mes inscriptions
+                </h3>
+                <a href="{{ path('mecene_inscription') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Nouvelle inscription
+                </a>
+            </div>
+
+            {% if inscriptions|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Événement</th>
+                                <th style="width: 10%;">Date</th>
+                                <th style="width: 15%;">Lieu</th>
+                                <th style="width: 20%;">Description du don</th>
+                                <th style="width: 10%; text-align: right;">Montant</th>
+                                <th style="width: 10%; text-align: center;">Statut</th>
+                                <th style="width: 10%; text-align: center;">Date demande</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for inscription in inscriptions %}
+                                <tr>
+                                    <td class="name">{{ inscription.evenement.nom }}</td>
+                                    <td>{{ inscription.evenement.dateDebut|date('d/m/Y') }}</td>
+                                    <td>
+                                        {% if inscription.evenement.lieu %}
+                                            <span class="text-muted">{{ inscription.evenement.lieu }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ inscription.descriptionDon }}">
+                                            {{ inscription.descriptionDon }}
+                                        </div>
+                                    </td>
+                                    <td class="text-right">
+                                        {% if inscription.montantEstime %}
+                                            <strong class="value">{{ inscription.montantEstime|number_format(2, ',', ' ') }} €</strong>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align: center;">
+                                        {% if inscription.statut == 'accepte' %}
+                                            <span class="badge status success">
+                                                <i class="bi bi-check-circle me-1"></i>Acceptée
+                                            </span>
+                                        {% elseif inscription.statut == 'refuse' %}
+                                            <span class="badge status danger">
+                                                <i class="bi bi-x-circle me-1"></i>Refusée
+                                            </span>
+                                        {% else %}
+                                            <span class="badge status warning">
+                                                <i class="bi bi-clock me-1"></i>En attente
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <small class="text-muted">{{ inscription.dateInscription|date('d/m/Y') }}</small>
+                                    </td>
+                                </tr>
+                                {% if inscription.statut == 'refuse' and inscription.remarqueRefus %}
+                                <tr class="refus-details">
+                                    <td colspan="7">
+                                        <div class="alert alert-danger mb-0" style="background: linear-gradient(135deg, #fef2f2, #fee2e2); border-left: 4px solid #dc2626;">
+                                            <strong><i class="bi bi-exclamation-triangle me-2"></i>Raison du refus :</strong> {{ inscription.remarqueRefus }}
+                                        </div>
+                                    </td>
+                                </tr>
                                 {% endif %}
-                            </div>
-                        </div>
-                        <span class="badge status-badge 
-                            {% if inscription.statut == 'accepte' %}status-success
-                            {% elseif inscription.statut == 'refuse' %}status-danger
-                            {% else %}status-warning{% endif %}">
-                            {% if inscription.statut == 'accepte' %}
-                                <span class="badge-icon">✓</span> Acceptée
-                            {% elseif inscription.statut == 'refuse' %}
-                                <span class="badge-icon">✗</span> Refusée
-                            {% else %}
-                                <span class="badge-icon">⏳</span> En attente
-                            {% endif %}
-                        </span>
-                    </div>
-                    <div class="card-content">
-                        <div class="inscription-details">
-                            <div class="detail-item">
-                                <label class="detail-label">💝 Description du don</label>
-                                <p class="detail-value">{{ inscription.descriptionDon }}</p>
-                            </div>
-
-                            {% if inscription.montantEstime %}
-                            <div class="detail-item">
-                                <label class="detail-label">💰 Valeur estimée</label>
-                                <p class="detail-value amount">{{ inscription.montantEstime|number_format(2, ',', ' ') }} €</p>
-                            </div>
-                            {% endif %}
-
-                            {% if inscription.remarques %}
-                            <div class="detail-item">
-                                <label class="detail-label">📝 Remarques</label>
-                                <p class="detail-value">{{ inscription.remarques }}</p>
-                            </div>
-                            {% endif %}
-
-                            {% if inscription.statut == 'refuse' and inscription.remarqueRefus %}
-                            <div class="detail-item refus-alert">
-                                <label class="detail-label">❌ Raison du refus</label>
-                                <p class="detail-value">{{ inscription.remarqueRefus }}</p>
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="inscription-footer">
-                            <small class="inscription-date">
-                                Demande soumise le {{ inscription.dateInscription|date('d/m/Y à H:i') }}
-                            </small>
-                        </div>
-                    </div>
+                                {% if inscription.remarques %}
+                                <tr class="remarques-details">
+                                    <td colspan="7">
+                                        <div class="alert alert-info mb-0" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border-left: 4px solid #3b82f6;">
+                                            <strong><i class="bi bi-info-circle me-2"></i>Remarques :</strong> {{ inscription.remarques }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="card empty-state-card">
-            <div class="card-content">
+            {% else %}
                 <div class="empty-state">
-                    <div class="empty-icon">📋</div>
-                    <h3 class="empty-title">Aucune inscription</h3>
-                    <p class="empty-description">Vous n'avez pas encore d'inscription à un événement.</p>
-                    <a href="{{ path('mecene_inscription') }}" class="btn btn-primary" style="margin-top: 1.5rem;">
-                        <span>+</span> S'inscrire à un événement
+                    <i class="bi bi-inbox"></i>
+                    <h3>Aucune inscription</h3>
+                    <p>Vous n'avez pas encore d'inscription à un événement.</p>
+                    <a href="{{ path('mecene_inscription') }}" class="btn btn-primary mt-3">
+                        <i class="bi bi-plus-circle me-2"></i>S'inscrire à un événement
                     </a>
                 </div>
-            </div>
+            {% endif %}
         </div>
-    {% endif %}
+    </div>
 </div>
 
 <style>
-.inscriptions-grid {
-    display: grid;
-    gap: 1.5rem;
+.refus-details td,
+.remarques-details td {
+    padding: 0 !important;
+    border-top: none !important;
 }
 
-.inscription-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.inscription-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.event-meta {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    font-size: 0.875rem;
-    color: #6b7280;
-}
-
-.meta-item {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.status-badge {
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    white-space: nowrap;
-}
-
-.badge-icon {
-    font-size: 1rem;
-}
-
-.status-success {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.status-danger {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.status-warning {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.inscription-details {
-    display: grid;
-    gap: 1.25rem;
-}
-
-.detail-item {
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #f3f4f6;
-}
-
-.detail-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.detail-item.refus-alert {
-    background: linear-gradient(135deg, #fef2f2, #fee2e2);
-    padding: 1rem;
-    border-radius: 8px;
-    border: 2px solid #fca5a5;
-    border-bottom: 2px solid #fca5a5;
-}
-
-.detail-item.refus-alert .detail-label {
-    color: #991b1b;
-}
-
-.detail-item.refus-alert .detail-value {
-    color: #7f1d1d;
-    font-weight: 500;
-}
-
-.detail-label {
-    display: block;
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.875rem;
-    margin-bottom: 0.5rem;
-}
-
-.detail-value {
-    color: #6b7280;
-    margin: 0;
-    line-height: 1.6;
-}
-
-.detail-value.amount {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #059669;
-}
-
-.inscription-footer {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e5e7eb;
-}
-
-.inscription-date {
-    color: #9ca3af;
-    font-size: 0.875rem;
-}
-
-.empty-state-card {
-    margin-top: 2rem;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 3rem 2rem;
-}
-
-.empty-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-
-.empty-title {
-    color: #374151;
-    margin-bottom: 0.5rem;
-    font-size: 1.5rem;
-}
-
-.empty-description {
-    color: #6b7280;
-    margin-bottom: 0;
-}
-
-.btn {
-    padding: 0.625rem 1.25rem;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+.refus-details .alert,
+.remarques-details .alert {
+    margin: 0.5rem 1rem 1rem 1rem;
 }
 
 .btn-primary {
     background: linear-gradient(135deg, #006909, #005207);
     color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
 }
 
 .btn-primary:hover {
     background: linear-gradient(135deg, #005207, #003304);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 105, 9, 0.3);
-}
-
-.btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
-}
-
-.btn-secondary:hover {
-    background: #e5e7eb;
+    color: white;
 }
 </style>
 {% endblock %}

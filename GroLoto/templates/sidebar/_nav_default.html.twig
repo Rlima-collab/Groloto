@@ -16,27 +16,14 @@
             <span class="nav-text">Tableau de bord</span>
         </a>
     </li>
+
     <li class="nav-item">
-        <a href="#" class="nav-link">
+        <a href="{{ path('public_festivals') }}" class="nav-link">
             <span class="nav-icon">
                 <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="Evenement">
             </span>
             <span class="nav-text">Festivals</span>
         </a>
-        <ul class="submenu">
-            <li>
-            <a href="{{ path('app_weekends') }}"
-               class="{% if app.request.attributes.get('_route') == 'app_weekends' %}active{% endif %}">
-               Voir les Weekends
-            </a>
-        </li>
-            <li>
-                <a href="{{ path('app_evenements') }}"
-                   class="{% if app.request.attributes.get('_route') == 'app_evenements' %}active{% endif %}">
-                   Voir les Évènements
-                </a>
-            </li>
-        </ul>
     </li>
     <li class="nav-item">
         <a href="#" class="nav-link">

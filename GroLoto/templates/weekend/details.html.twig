@@ -1,0 +1,506 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ weekend.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section avec image de fond -->
+<div class="hero-section stocks-hero weekend-detail-hero" {% if weekend.coverImage %}style="background-image: linear-gradient(rgba(26, 31, 58, 0.85), rgba(45, 53, 97, 0.85)), url('{{ asset(weekend.coverImage) }}'); background-size: cover; background-position: center;"{% endif %}>
+    <div class="shine"></div>
+    <div class="hero-content">
+        <div class="hero-breadcrumb">
+            <a href="{{ path('app_weekend_liste') }}">Weekends</a>
+            <span>/</span>
+            <span>{{ weekend.nom }}</span>
+        </div>
+        <h1 class="hero-title">{{ weekend.nom }}</h1>
+        <p class="hero-description">
+            <svg style="width: 20px; height: 20px; display: inline; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}
+        </p>
+        <div class="hero-actions">
+            <a href="{{ path('app_weekend_liste') }}" class="btn-secondary-outline">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Retour à la liste
+            </a>
+            {% if isAdmin %}
+            <a href="{{ path('app_weekend_edit', {'id': weekend.id}) }}" class="btn-login">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Modifier
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="details-container">
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% if weekend.description %}
+    <!-- Description en pleine largeur -->
+    <div class="description-card">
+        <div class="card-header">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+            </svg>
+            <h2>Description</h2>
+        </div>
+        <div class="card-content">
+            <div class="description-content">
+                {{ weekend.description|nl2br }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="details-grid">
+        <!-- Informations principales -->
+        <div class="details-card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h2>Informations</h2>
+            </div>
+            <div class="card-content">
+                <div class="info-row">
+                    <span class="info-label">Nom du weekend :</span>
+                    <span class="info-value">{{ weekend.nom }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date de début :</span>
+                    <span class="info-value">{{ weekend.dateDebut|date('d/m/Y') }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date de fin :</span>
+                    <span class="info-value">{{ weekend.dateFin|date('d/m/Y') }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Créé le :</span>
+                    <span class="info-value">{{ weekend.dateCreation|date('d/m/Y à H:i') }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Événements -->
+        <div class="details-card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <h2>Événements ({{ weekend.evenements|length }})</h2>
+            </div>
+            <div class="card-content">
+                {% if weekend.evenements is empty %}
+                    <p class="empty-message">Aucun événement pour ce weekend.</p>
+                    {% if isAdmin %}
+                    <a href="{{ path('app_evenement_create', {'preselect_weekend': weekend.id}) }}" class="btn-add">
+                        + Ajouter un événement
+                    </a>
+                    {% endif %}
+                {% else %}
+                    <div class="list-items">
+                        {% for evenement in weekend.evenements %}
+                        <div class="list-item">
+                            <div class="item-icon event-icon">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                            </div>
+                            <div class="item-content">
+                                <h4>{{ evenement.nom }}</h4>
+                                <div class="item-meta">
+                                    <span>{{ evenement.dateDebut|date('d/m/Y') }}</span>
+                                    {% if evenement.heureDebut %}
+                                        <span>{{ evenement.heureDebut|date('H:i') }}</span>
+                                    {% endif %}
+                                    {% if evenement.lieu %}
+                                        <span>{{ evenement.lieu }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if isAdmin %}
+                    <a href="{{ path('app_evenement_create', {'preselect_weekend': weekend.id}) }}" class="btn-add">
+                        + Ajouter un événement
+                    </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tâches -->
+        <div class="details-card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                </svg>
+                <h2>Tâches ({{ weekend.taches|length }})</h2>
+            </div>
+            <div class="card-content">
+                {% if weekend.taches is empty %}
+                    <p class="empty-message">Aucune tâche pour ce weekend.</p>
+                {% else %}
+                    <div class="list-items">
+                        {% for tache in weekend.taches %}
+                        <div class="list-item">
+                            <div class="item-icon task-icon">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="item-content">
+                                <h4>{{ tache.titre }}</h4>
+                                <div class="item-meta">
+                                    <span>{{ tache.debut|date('d/m/Y H:i') }} - {{ tache.fin|date('H:i') }}</span>
+                                    {% if tache.posteRequis %}
+                                        <span>{{ tache.posteRequis }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if isAdmin %}
+    <div class="danger-zone">
+        <h3>Zone de danger</h3>
+        <p>La suppression du weekend est irréversible et supprimera également tous les événements et tâches associés.</p>
+        <form method="post" action="{{ path('app_weekend_delete', {'id': weekend.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce weekend ? Cette action est irréversible.');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ weekend.id) }}">
+            <button type="submit" class="btn-danger">Supprimer le weekend</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.weekend-detail-hero {
+    min-height: 350px;
+}
+
+.hero-breadcrumb {
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.hero-breadcrumb a {
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.hero-breadcrumb a:hover {
+    color: white;
+}
+
+.hero-breadcrumb span {
+    color: #cbd5e1;
+    margin: 0 0.5rem;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.hero-actions svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 0.5rem;
+}
+
+.btn-secondary-outline {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+    transform: translateY(-2px);
+}
+
+.btn-login svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 0.5rem;
+}
+
+.details-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+.alert svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.alert-success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #10b981;
+}
+
+.description-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.description-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.description-content {
+    color: #334155;
+    line-height: 1.8;
+    font-size: 1rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.details-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.details-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.card-header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b2d45 100%);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.card-header svg {
+    width: 24px;
+    height: 24px;
+}
+
+.card-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #475569;
+}
+
+.info-value {
+    color: #0d1b2a;
+    font-weight: 500;
+}
+
+.empty-message {
+    color: #94a3b8;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.btn-add {
+    display: inline-block;
+    background: #10b981;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    background: #059669;
+}
+
+.list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.list-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.list-item:hover {
+    background: #f1f5f9;
+}
+
+.item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.event-icon {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.task-icon {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.item-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.item-content {
+    flex: 1;
+}
+
+.item-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0d1b2a;
+    margin-bottom: 0.25rem;
+}
+
+.item-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.danger-zone {
+    background: #fef2f2;
+    border: 2px solid #fecaca;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.danger-zone h3 {
+    color: #991b1b;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.danger-zone p {
+    color: #b91c1c;
+    margin-bottom: 1.5rem;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+@media (max-width: 768px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

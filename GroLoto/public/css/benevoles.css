@@ -507,10 +507,73 @@
   margin-bottom: 2rem;
 }
 
+/* === BARRE DE RECHERCHE === */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1.5rem !important;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.header-left,
+.header-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.header-right {
+    min-width: 250px;
+}
+
+.search-container {
+    position: relative;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #3b82f6;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: #9ca3af;
+    pointer-events: none;
+}
+
 @media (max-width: 768px) {
   .page-title {
     font-size: 1.75rem;
   }
+
+  .card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .header-right {
+        min-width: auto;
+    }
   
   .metrics-grid {
     grid-template-columns: 1fr;

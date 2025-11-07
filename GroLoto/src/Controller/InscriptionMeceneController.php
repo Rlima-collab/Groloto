@@ -31,6 +31,7 @@ class InscriptionMeceneController extends AbstractController
 
         $inscription = new InscriptionMecene();
         $inscription->setMecene($mecene);
+        $inscription->setDateInscription(new \DateTime());
 
         $form = $this->createForm(InscriptionMeceneType::class, $inscription);
         $form->handleRequest($request);

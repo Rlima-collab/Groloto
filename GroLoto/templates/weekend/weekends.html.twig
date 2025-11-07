@@ -6,35 +6,30 @@
     {{ parent() }}
     <link href="{{ asset('css/modele.css') }}" rel="stylesheet">
     <link href="{{ asset('css/weekends_cards.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
-<div class="hero-section weekend-hero">
+<!-- Hero Section -->
+<div class="hero-section stocks-hero">
     <div class="shine"></div>
     <div class="hero-content">
-        <h1 class="hero-title">
-            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-                Gestion des Weekends
-            {% else %}
-                Voir les Weekends
-            {% endif %}
-        </h1>
-        <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité.</p>
+        <h1 class="hero-title">Gestion des Weekends</h1>
+        <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité</p>
         {% if isAdmin %}
-            <a href="{{ path('app_weekend_create') }}" class="btn-login">
-                <i class="bi bi-plus-circle"></i> Créer un Weekend
-            </a>
+            <a href="{{ path('app_weekend_create') }}" class="btn-login">Créer un weekend</a>
         {% endif %}
     </div>
 </div>
 
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
 <div class="weekends-container">
     {% if weekends|length > 0 %}
         <div class="weekends-grid">
             {% for weekend in weekends %}
                 {% set now = date() %}
-                {% set isPast = weekend.dateDimanche < now %}
+                {% set isPast = weekend.dateFin < now %}
                 {% set nbEvenements = weekend.evenements|length %}
                 {% set nbTaches = weekend.taches|length %}
                 
@@ -52,8 +47,12 @@
                         
                         <div class="weekend-card-dates">
                             <i class="bi bi-calendar-range"></i>
-                            <span>{{ weekend.dateVendredi|date('d/m') }} → {{ weekend.dateDimanche|date('d/m') }}</span>
+                            <span>{{ weekend.dateDebut|date('d/m') }} → {{ weekend.dateFin|date('d/m') }}</span>
                         </div>
+                        
+                        {% if weekend.description %}
+                            <p class="weekend-card-description">{{ weekend.description|length > 100 ? weekend.description|slice(0, 100) ~ '...' : weekend.description }}</p>
+                        {% endif %}
                         
                         <div class="weekend-card-info">
                             <div class="weekend-info-item">
@@ -88,14 +87,9 @@
             <i class="bi bi-calendar-x"></i>
             <h3>Aucun weekend planifié</h3>
             <p>Commencez par créer votre premier weekend</p>
-            {% if isAdmin %}
-                <br>
-                <a href="{{ path('app_weekend_create') }}" class="btn-login">
-                    <i class="bi bi-plus-circle"></i> Créer un Weekend
-                </a>
-            {% endif %}
         </div>
     {% endif %}
+</div>
 </div>
 
 <!-- Modal détail weekend -->
@@ -139,11 +133,16 @@
                     <button class="weekend-detail-close" onclick="closeWeekendDetail()">
                         <i class="bi bi-x"></i>
                     </button>
-                    <h2 class="weekend-detail-title">Weekend du ${formatDate(weekend.dateVendredi)}</h2>
+                    <h2 class="weekend-detail-title">${weekend.nom}</h2>
                     <div class="weekend-detail-dates">
                         <i class="bi bi-calendar-range"></i>
-                        ${formatDate(weekend.dateVendredi)} → ${formatDate(weekend.dateDimanche)}
+                        ${formatDate(weekend.dateDebut)} → ${formatDate(weekend.dateFin)}
                     </div>
+                    ${weekend.description ? `
+                        <div class="weekend-description-modal">
+                            ${weekend.description}
+                        </div>
+                    ` : ''}
                     ${weekend.coverImage ? `
                         <div class="weekend-cover" style="margin-top:1rem;">
                             <img src="/${weekend.coverImage}" alt="Cover" style="width:100%; max-height:260px; object-fit:cover; border-radius:8px;" />
@@ -273,55 +272,62 @@
             // Ajouter les événements
             if (weekend.evenements && weekend.evenements.length > 0) {
                 weekend.evenements.forEach(event => {
-                    events.push({
-                        title: '📅 ' + event.nom,
-                        start: event.dateDebut,
-                        end: event.dateFin ? new Date(new Date(event.dateFin).getTime() + 86400000).toISOString().split('T')[0] : null,
-                        backgroundColor: '#0d1b2a',
-                        borderColor: '#1e3a5f',
-                        textColor: '#ffffff',
-                        classNames: ['event-evenement'],
-                        extendedProps: {
-                            type: 'evenement',
-                            description: event.description,
-                            lieu: event.lieu
-                        }
-                    });
+                    // Si on a une heure de début et une durée, créer un événement avec heure
+                    if (event.heureDebut && event.dureeMinutes) {
+                        // Créer la date/heure de début
+                        const startDateTime = event.dateDebut + 'T' + event.heureDebut;
+                        
+                        // Calculer la date/heure de fin
+                        const startDate = new Date(startDateTime);
+                        const endDate = new Date(startDate.getTime() + event.dureeMinutes * 60000);
+                        const endDateTime = endDate.toISOString();
+                        
+                        events.push({
+                            title: event.nom,
+                            start: startDateTime,
+                            end: endDateTime,
+                            backgroundColor: '#0d1b2a',
+                            borderColor: '#0d1b2a',
+                            textColor: '#ffffff',
+                            classNames: ['event-evenement'],
+                            extendedProps: {
+                                type: 'evenement',
+                                description: event.description,
+                                lieu: event.lieu
+                            }
+                        });
+                    } else {
+                        // Sinon, événement affiché sur une plage horaire par défaut (8h-18h)
+                        const startDateTime = event.dateDebut + 'T08:00:00';
+                        const endDateTime = event.dateDebut + 'T18:00:00';
+                        
+                        events.push({
+                            title: event.nom,
+                            start: startDateTime,
+                            end: endDateTime,
+                            backgroundColor: '#0d1b2a',
+                            borderColor: '#0d1b2a',
+                            textColor: '#ffffff',
+                            classNames: ['event-evenement'],
+                            extendedProps: {
+                                type: 'evenement',
+                                description: event.description,
+                                lieu: event.lieu
+                            }
+                        });
+                    }
                 });
             }
             
-            // Ajouter les tâches avec des couleurs différentes selon le poste
+            // Ajouter les tâches avec une couleur uniforme
             if (weekend.taches && weekend.taches.length > 0) {
                 weekend.taches.forEach(tache => {
-                    // Couleurs par type de poste
-                    let color = '#fbbf24'; // jaune par défaut
-                    let borderColor = '#f59e0b';
-                    let icon = '📋';
-                    
-                    if (tache.posteRequis === 'accueil') {
-                        color = '#3b82f6';
-                        borderColor = '#2563eb';
-                        icon = '👋';
-                    } else if (tache.posteRequis === 'bar') {
-                        color = '#8b5cf6';
-                        borderColor = '#7c3aed';
-                        icon = '🍹';
-                    } else if (tache.posteRequis === 'technique') {
-                        color = '#ef4444';
-                        borderColor = '#dc2626';
-                        icon = '🔧';
-                    } else if (tache.posteRequis === 'cuisine') {
-                        color = '#10b981';
-                        borderColor = '#059669';
-                        icon = '👨‍🍳';
-                    }
-                    
                     events.push({
-                        title: icon + ' ' + tache.titre,
+                        title: tache.titre,
                         start: tache.debut,
                         end: tache.fin,
-                        backgroundColor: color,
-                        borderColor: borderColor,
+                        backgroundColor: '#6b7280',
+                        borderColor: '#4b5563',
                         textColor: '#ffffff',
                         classNames: ['event-tache'],
                         extendedProps: {
@@ -333,54 +339,113 @@
                 });
             }
             
+            // Trouver la date la plus ancienne (événements ou tâches)
+            let earliestDate = new Date(weekend.dateDebut);
+            
+            // Vérifier les événements
+            if (weekend.evenements && weekend.evenements.length > 0) {
+                weekend.evenements.forEach(event => {
+                    const eventDate = new Date(event.dateDebut);
+                    if (eventDate < earliestDate) {
+                        earliestDate = eventDate;
+                    }
+                });
+            }
+            
+            // Vérifier les tâches
+            if (weekend.taches && weekend.taches.length > 0) {
+                weekend.taches.forEach(tache => {
+                    const tacheDate = new Date(tache.debut);
+                    if (tacheDate < earliestDate) {
+                        earliestDate = tacheDate;
+                    }
+                });
+            }
+            
+            // Formater la date pour FullCalendar (YYYY-MM-DD)
+            const initialDateStr = earliestDate.toISOString().split('T')[0];
+            
+            // Déterminer le premier jour de la semaine en fonction de la date la plus ancienne
+            const dayOfWeek = earliestDate.getDay(); // 0 = dimanche, 1 = lundi, etc.
+            
             // Créer le calendrier
             weekendCalendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
-                initialDate: weekend.dateVendredi,
+                initialDate: initialDateStr,
                 locale: 'fr',
                 height: 'auto',
                 headerToolbar: {
                     left: 'prev,next',
                     center: 'title',
-                    right: 'timeGridWeek,timeGridDay'
+                    right: 'timeGridWeek,timeGridDay,listWeek'
                 },
                 buttonText: {
                     week: 'Semaine',
-                    day: 'Jour'
+                    day: 'Jour',
+                    list: 'Liste'
                 },
                 slotMinTime: '06:00:00',
                 slotMaxTime: '23:00:00',
-                slotDuration: '00:30:00',
+                slotDuration: '01:00:00',
                 slotLabelInterval: '01:00',
-                allDaySlot: true,
+                allDaySlot: false,
                 weekends: true,
-                firstDay: 5, // Commence le vendredi
+                firstDay: dayOfWeek, // Commence au jour de la première tâche
                 expandRows: true,
-                eventMinHeight: 40,
-                eventShortHeight: 35,
+                eventMinHeight: 50,
+                slotEventOverlap: false,
                 events: events,
                 eventContent: function(arg) {
-                    return {
-                        html: `<div style="padding: 4px 6px; font-weight: 600; font-size: 0.85rem; line-height: 1.3;">
-                                ${arg.event.title}
-                                ${arg.event.extendedProps.posteRequis ? `<br><small style="opacity: 0.9;">👤 ${arg.event.extendedProps.maxPersonnes || '∞'} pers.</small>` : ''}
-                               </div>`
-                    };
+                    const props = arg.event.extendedProps;
+                    const isEvent = props.type === 'evenement';
+                    
+                    let iconHtml = '';
+                    if (isEvent) {
+                        iconHtml = '<i class="bi bi-calendar-event me-1"></i>';
+                    } else if (props.posteRequis) {
+                        const iconMap = {
+                            'accueil': 'bi-door-open',
+                            'bar': 'bi-cup-straw',
+                            'technique': 'bi-tools',
+                            'cuisine': 'bi-egg-fried'
+                        };
+                        const icon = iconMap[props.posteRequis.toLowerCase()] || 'bi-check-circle';
+                        iconHtml = `<i class="bi ${icon} me-1"></i>`;
+                    }
+                    
+                    let content = `<div class="fc-event-content-custom">
+                        <div class="fc-event-title-custom">${iconHtml}${arg.event.title}</div>`;
+                    
+                    if (props.type === 'tache' && props.posteRequis) {
+                        content += `<div class="fc-event-meta"><span class="badge-poste">${props.posteRequis}</span>`;
+                        if (props.maxPersonnes) {
+                            content += ` <span class="badge-personnes"><i class="bi bi-people-fill"></i> ${props.maxPersonnes}</span>`;
+                        }
+                        content += `</div>`;
+                    }
+                    
+                    if (props.type === 'evenement' && props.lieu) {
+                        content += `<div class="fc-event-meta"><i class="bi bi-geo-alt-fill"></i> ${props.lieu}</div>`;
+                    }
+                    
+                    content += `</div>`;
+                    
+                    return { html: content };
                 },
                 eventClick: function(info) {
                     const event = info.event;
                     const props = event.extendedProps;
                     
                     let msg = `${event.title}\n`;
-                    msg += `Du ${event.start.toLocaleString('fr-FR')}`;
-                    if (event.end) msg += `\nAu ${event.end.toLocaleString('fr-FR')}`;
+                    msg += `De ${event.start.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}`;
+                    if (event.end) msg += ` à ${event.end.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}`;
                     
                     if (props.type === 'evenement') {
                         if (props.description) msg += `\n\n${props.description}`;
                         if (props.lieu) msg += `\nLieu: ${props.lieu}`;
                     } else if (props.type === 'tache') {
-                        if (props.posteRequis) msg += `\nPoste: ${props.posteRequis}`;
-                        if (props.maxPersonnes) msg += `\nMax: ${props.maxPersonnes} personne(s)`;
+                        if (props.posteRequis) msg += `\n\nPoste: ${props.posteRequis}`;
+                        if (props.maxPersonnes) msg += `\nCapacité: ${props.maxPersonnes} personne(s)`;
                     }
                     
                     alert(msg);

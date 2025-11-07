@@ -1,15 +1,13 @@
 {% extends 'base.html.twig' %}
-
 {% block title %}Gestion des Bénévoles{% endblock %}
-
 {% block stylesheets %}
-    {{ parent() }}
+{{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
     <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/search.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 {% endblock %}
-
-
 
 {% block body %}
 <div class="hero-section benevoles-hero">
@@ -29,13 +27,11 @@
         <p class="metric-value">{{ metriques.total }}</p>
         <p class="metric-detail">Bénévoles actifs</p>
     </div>
-
     <div class="metric-card">
         <h3>Nouveaux ce mois</h3>
         <p class="metric-value">{{ metriques.nouveaux }}</p>
         <p class="metric-detail">Inscriptions récentes</p>
     </div>
-
     <div class="metric-card">
         <h3>Disponibles</h3>
         <p class="metric-value">{{ metriques.disponibles }}</p>
@@ -46,102 +42,145 @@
 <div class="container">
     <div class="card main-card" id="liste-benevoles">
         <div class="card-header">
-            <h2 class="card-title">Liste des Bénévoles</h2>
-            <p class="card-description">Gestion des bénévoles inscrits</p>
-        </div>
-        <div class="card-content">
-                {% if benevoles|length > 0 %}
-                    <div class="benevoles-grid">
-                        {% for item in benevoles %}
-                            {% set benevole = item.benevole %}
-                            <div class="benevole-card">
-                                <div class="benevole-header">
-                                    <h3 class="benevole-name">
-                                        {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}
-                                    </h3>
-                                    <span class="badge status success">Actif</span>
-                                </div>
-                                
-                                <div class="benevole-info">
-                                    <div class="info-item">
-                                        <span class="info-icon">✉️</span>
-                                        <span class="info-text">{{ benevole.utilisateur.email }}</span>
-                                    </div>
-                                    {% if benevole.utilisateur.telephone %}
-                                    <div class="info-item">
-                                        <span class="info-icon">📞</span>
-                                        <span class="info-text">{{ benevole.utilisateur.telephone }}</span>
-                                    </div>
-                                    {% endif %}
-                                    <div class="info-item">
-                                        <span class="info-icon">📅</span>
-                                        <span class="info-text">Inscrit le {{ benevole.utilisateur.dateCreation|date('d/m/Y') }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-icon"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i></span>
-                                        <span class="info-text"><strong>{{ item.nb_taches_realisees }}</strong> tâche{% if item.nb_taches_realisees > 1 %}s{% endif %} réalisée{% if item.nb_taches_realisees > 1 %}s{% endif %}</span>
-                                    </div>
-                                </div>
-
-                                {% if benevole.remarque %}
-                                <div class="benevole-notes">
-                                    <strong>Notes:</strong> {{ benevole.remarque|slice(0, 50) }}{% if benevole.remarque|length > 50 %}...{% endif %}
-                                </div>
-                                {% endif %}
-                                
-                                {% if is_granted('ROLE_ADMIN') %}
-                                <div class="benevole-actions">
-                                    <a href="{{ path('benevole_edit', {'id': benevole.id}) }}" class="btn btn-small btn-primary">Modifier</a>
-                                    <a href="{{ path('benevole_planning', {'id': benevole.id}) }}" class="btn btn-small btn-secondary">Voir planning</a>
-                                    <button type="button" 
-                                            class="btn btn-small btn-danger" 
-                                            data-benevole-id="{{ benevole.id }}"
-                                            data-benevole-nom="{{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}"
-                                            data-csrf-token="{{ csrf_token('delete_benevole_' ~ benevole.id) }}"
-                                            onclick="confirmDelete(this)">Supprimer</button>
-                                </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="empty-state">
-                        <div class="empty-icon">👥</div>
-                        <h3>Aucun bénévole trouvé</h3>
-                        <p>Commencez par ajouter des bénévoles à votre base de données.</p>
-                        {% if is_granted('ROLE_ADMIN') %}
-                        <a href="#" class="btn btn-primary">Ajouter un bénévole</a>
-                        {% endif %}
-                    </div>
-                {% endif %}
+            <div class="header-left">
+                <h2 class="card-title">Liste des Bénévoles</h2>
+                <p class="card-description">Gestion des bénévoles inscrits</p>
             </div>
+            <div class="header-right">
+                <div class="search-container">
+                    <input type="text" id="searchBenevole" class="search-input" placeholder="Rechercher un bénévole..." autocomplete="off">
+                    <span class="search-icon">
+                        <i class="bi bi-search"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-content">
+            {% if benevoles|length > 0 %}
+                <div class="benevoles-grid" id="benevolesGrid">
+                    {% for item in benevoles %}
+                        {% set benevole = item.benevole %}
+                        <div class="benevole-card" 
+                             data-nom="{{ benevole.utilisateur.nom|lower }}" 
+                             data-prenom="{{ benevole.utilisateur.prenom|lower }}" 
+                             data-email="{{ benevole.utilisateur.email|lower }}">
+                            <div class="benevole-header">
+                                <h3 class="benevole-name">
+                                    {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}
+                                </h3>
+                                <span class="badge status success">Actif</span>
+                            </div>
+                            <div class="benevole-info">
+                                <div class="info-item">
+                                    <span class="info-icon">✉️</span>
+                                    <span class="info-text">{{ benevole.utilisateur.email }}</span>
+                                </div>
+                                {% if benevole.utilisateur.telephone %}
+                                <div class="info-item">
+                                    <span class="info-icon">📞</span>
+                                    <span class="info-text">{{ benevole.utilisateur.telephone }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="info-item">
+                                    <span class="info-icon"></span>
+                                    <span class="info-text">Inscrit le {{ benevole.utilisateur.dateCreation|date('d/m/Y') }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-icon"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i></span>
+                                    <span class="info-text"><strong>{{ item.nb_taches_realisees }}</strong> tâche{% if item.nb_taches_realisees > 1 %}s{% endif %} réalisée{% if item.nb_taches_realisees > 1 %}s{% endif %}</span>
+                                </div>
+                            </div>
+                            {% if benevole.remarque %}
+                            <div class="benevole-notes">
+                                <strong>Notes:</strong> {{ benevole.remarque|slice(0, 50) }}{% if benevole.remarque|length > 50 %}...{% endif %}
+                            </div>
+                            {% endif %}
+                            {% if is_granted('ROLE_ADMIN') %}
+                            <div class="benevole-actions">
+                                <a href="{{ path('benevole_edit', {'id': benevole.id}) }}" class="btn btn-small btn-primary">Modifier</a>
+                                <a href="{{ path('benevole_planning', {'id': benevole.id}) }}" class="btn btn-small btn-secondary">Voir planning</a>
+                                <button type="button"
+                                        class="btn btn-small btn-danger"
+                                        data-benevole-id="{{ benevole.id }}"
+                                        data-benevole-nom="{{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}"
+                                        data-csrf-token="{{ csrf_token('delete_benevole_' ~ benevole.id) }}"
+                                        onclick="confirmDelete(this)">Supprimer</button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon"></div>
+                    <h3>Aucun bénévole trouvé</h3>
+                    <p>Commencez par ajouter des bénévoles à votre base de données.</p>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="#" class="btn btn-primary">Ajouter un bénévole</a>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
-    <script>
+{{ parent() }}
+<script>
 function confirmDelete(button) {
     const benevoleId = button.getAttribute('data-benevole-id');
     const benevoleNom = button.getAttribute('data-benevole-nom');
     const csrfToken = button.getAttribute('data-csrf-token');
-    
     if (confirm(`Êtes-vous sûr de vouloir supprimer le bénévole "${benevoleNom}" ?\n\nCette action est irréversible et supprimera toutes les données associées.`)) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/benevoles/${benevoleId}/delete`;
-        
         const csrfInput = document.createElement('input');
         csrfInput.type = 'hidden';
         csrfInput.name = '_token';
         csrfInput.value = csrfToken;
         form.appendChild(csrfInput);
-        
         document.body.appendChild(form);
         form.submit();
     }
 }
+
+// === RECHERCHE EN TEMPS RÉEL ===
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchBenevole');
+    const grid = document.getElementById('benevolesGrid');
+    const cards = grid ? grid.querySelectorAll('.benevole-card') : [];
+
+    if (!searchInput || !grid) return;
+
+    searchInput.addEventListener('input', function () {
+        const query = this.value.trim().toLowerCase();
+
+        cards.forEach(card => {
+            const nom = card.getAttribute('data-nom');
+            const prenom = card.getAttribute('data-prenom');
+            const email = card.getAttribute('data-email');
+
+            const match = nom.includes(query) || prenom.includes(query) || email.includes(query);
+            card.style.display = match ? '' : 'none';
+        });
+
+        // Optionnel : afficher un message si aucun résultat
+        const visibleCards = Array.from(cards).filter(c => c.style.display !== 'none');
+        let noResult = grid.querySelector('.no-result');
+        if (!noResult && visibleCards.length === 0 && query !== '') {
+            noResult = document.createElement('div');
+            noResult.className = 'no-result';
+            noResult.innerHTML = `<p style="text-align:center; color:#6b7280; padding:2rem; grid-column:1/-1;">Aucun bénévole trouvé pour "<strong>${query}</strong>"</p>`;
+            grid.appendChild(noResult);
+        } else if (noResult && visibleCards.length > 0) {
+            noResult.remove();
+        } else if (noResult && query === '') {
+            noResult.remove();
+        }
+    });
+});
 </script>
 {% endblock %}
