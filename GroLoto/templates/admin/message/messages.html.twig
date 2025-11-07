@@ -126,6 +126,9 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 <div class="chat-sidebar-header">
 <h2>💬 Messagerie</h2>
 <button class="new-chat-btn" id="newChatBtn">✉️ Nouveau message</button>
+<div class="search-box" style="margin-top: 15px;">
+<input type="text" id="searchConversations" placeholder="Rechercher une conversation..." style="width: 100%; padding: 10px 15px; border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; background: rgba(255,255,255,0.1); color: white; font-size: 14px; transition: all 0.3s;">
+</div>
 </div>
 <div class="conversations-list" id="conversationsList">
 {% if messages|length == 0 %}
@@ -320,8 +323,46 @@ const chatInputContainer = document.getElementById('chatInputContainer');
 const chatTitle = document.getElementById('chatTitle');
 const conversationsList = document.getElementById('conversationsList');
 const closedIndicator = document.getElementById('closedIndicator');
+const searchInput = document.getElementById('searchConversations');
 
 console.log('Elements trouves:', items.length, chatMessages, sendBtn);
+
+// Fonction de recherche des conversations
+searchInput.addEventListener('input', function() {
+	const searchTerm = this.value.toLowerCase().trim();
+	const conversations = document.querySelectorAll('.conversation-item');
+	
+	conversations.forEach(conv => {
+		const name = conv.querySelector('.conversation-name')?.textContent.toLowerCase() || '';
+		const sender = conv.querySelector('.conversation-sender')?.textContent.toLowerCase() || '';
+		const preview = conv.querySelector('.conversation-preview')?.textContent.toLowerCase() || '';
+		
+		// Recherche dans le nom, l'expéditeur et l'aperçu du message
+		if (name.includes(searchTerm) || sender.includes(searchTerm) || preview.includes(searchTerm)) {
+			conv.style.display = '';
+		} else {
+			conv.style.display = 'none';
+		}
+	});
+	
+	// Afficher/masquer le message "Aucune conversation"
+	const visibleConvs = Array.from(conversations).filter(c => c.style.display !== 'none');
+	const emptyMessage = document.getElementById('emptyConversations');
+	if (emptyMessage) {
+		emptyMessage.style.display = visibleConvs.length === 0 ? 'block' : 'none';
+	}
+});
+
+// Style du champ de recherche au focus
+searchInput.addEventListener('focus', function() {
+	this.style.background = 'rgba(255,255,255,0.15)';
+	this.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+});
+
+searchInput.addEventListener('blur', function() {
+	this.style.background = 'rgba(255,255,255,0.1)';
+	this.style.borderColor = 'rgba(255,255,255,0.2)';
+});
 
 // Modal
 const newMessageModal = document.getElementById('newMessageModal');
