@@ -156,20 +156,35 @@ class WeekendController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Récupérer le nombre de jours du formulaire
-            $nombreJours = $form->get('nombre_jours')->getData() ?? 3;
+            $dateDebut = $weekend->getDateVendredi(); // Date de début
+            $dateFin = $weekend->getDateDimanche();   // Date de fin
             
-            // Calculer automatiquement samedi et dimanche à partir du vendredi
-            $dateVendredi = $weekend->getDateVendredi();
-            if ($dateVendredi) {
-                // Samedi = vendredi + 1 jour
-                $dateSamedi = (clone $dateVendredi)->modify('+1 day');
-                $weekend->setDateSamedi($dateSamedi);
+            // Validation : minimum 2 jours
+            if ($dateDebut && $dateFin) {
+                $interval = $dateDebut->diff($dateFin);
+                $nombreJours = $interval->days + 1; // +1 pour inclure le jour de fin
                 
-                // Dimanche = vendredi + 2 jours (ou selon le nombre de jours)
+                if ($nombreJours < 2) {
+                    $this->addFlash('error', 'Le weekend doit durer au minimum 2 jours.');
+                    return $this->render('weekend/create.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
+                }
+                
+                if ($dateFin < $dateDebut) {
+                    $this->addFlash('error', 'La date de fin doit être après la date de début.');
+                    return $this->render('weekend/create.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
+                }
+                
+                // Calculer le samedi (jour du milieu si 3 jours ou plus)
                 if ($nombreJours >= 3) {
-                    $dateDimanche = (clone $dateVendredi)->modify('+2 days');
-                    $weekend->setDateDimanche($dateDimanche);
+                    $dateSamedi = (clone $dateDebut)->modify('+1 day');
+                    $weekend->setDateSamedi($dateSamedi);
+                } else {
+                    // Si seulement 2 jours, samedi = fin
+                    $weekend->setDateSamedi($dateFin);
                 }
             }
             

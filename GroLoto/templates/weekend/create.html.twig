@@ -33,11 +33,11 @@
 
             <div class="grid-2 mb-4">
                 {{ form_row(form.date_vendredi, {'attr': {'class': 'form-control'}}) }}
-                {{ form_row(form.nombre_jours, {'attr': {'class': 'form-control'}}) }}
+                {{ form_row(form.date_dimanche, {'attr': {'class': 'form-control'}}) }}
             </div>
             
             <div class="alert alert-info mb-4" style="background: #e0f2fe; border-left: 4px solid #0ea5e9; padding: 1rem; border-radius: 8px;">
-                <strong>Info :</strong> Les dates du samedi et dimanche seront calculées automatiquement à partir de la date de départ et du nombre de jours.
+                <strong>Info :</strong> Le weekend doit durer au minimum 2 jours. La date du samedi (jour du milieu) sera calculée automatiquement.
             </div>
 
             <div class="mb-4">
