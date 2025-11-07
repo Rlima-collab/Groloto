@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,6 +23,68 @@ class ContactController extends AbstractController
         private EntityManagerInterface $em,
         private UrlGeneratorInterface $urlGenerator
     ) {}
+
+    #[Route('/contact/message/{id}/reply', name: 'app_contact_message_reply_user', methods: ['POST'])]
+    public function replyToMessage(ContactMessage $message, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user || $user->getEmail() !== $message->getEmail()) {
+            return $this->json(['success' => false, 'error' => 'Accès refusé'], 403);
+        }
+
+        $content = trim($request->request->get('message') ?? $request->request->get('reponse') ?? '');
+        if (!$content) {
+            return $this->json(['success' => false, 'error' => 'Message vide'], 400);
+        }
+
+        // Create a new ContactMessage representing the user's reply
+        $reply = new ContactMessage();
+        $reply->setNom($user->getNom() ?? $user->getUserIdentifier())
+            ->setEmail($user->getEmail())
+            ->setMessage($content)
+            ->setCreatedAt(new \DateTime());
+
+        $em->persist($reply);
+
+        // Notify admins about the reply
+        $admins = $em->getRepository(\App\Entity\Utilisateur::class)->findByRoleName('admin');
+        foreach ($admins as $admin) {
+            $notif = new Notification();
+            $notif->setDestinataire($admin)
+                ->setType('contact')
+                ->setMessage($user->getNom() . " a répondu à votre message")
+                ->setLien('/admin/messages')
+                ->setLue(false)
+                ->setCreatedAt(new \DateTime());
+            $em->persist($notif);
+        }
+
+        $em->flush();
+
+        return $this->json(['success' => true]);
+    }
+
+    #[Route('/contact/message/{id}', name: 'app_contact_message_view', methods: ['GET'])]
+    public function viewMessage(ContactMessage $message): JsonResponse
+    {
+        $user = $this->getUser();
+
+        // Security: allow admin or the message owner (by email)
+        if ($this->isGranted('ROLE_ADMIN') || ($user && $user->getEmail() === $message->getEmail())) {
+            return $this->json([
+                'id' => $message->getId(),
+                'nom' => $message->getNom(),
+                'email' => $message->getEmail(),
+                'message' => $message->getMessage(),
+                'createdAt' => $message->getCreatedAt()->format('d/m/Y H:i'),
+                'reponse' => $message->getReponse(),
+                'reponduLe' => $message->getReponduLe() ? $message->getReponduLe()->format('d/m/Y H:i') : null,
+                'reponduPar' => $message->getReponduPar() ? $message->getReponduPar()->getNom() : null,
+            ]);
+        }
+
+        return $this->json(['error' => 'Accès refusé'], 403);
+    }
 
     #[Route('/contact', name: 'app_contact', methods: ['GET', 'POST'])]
     public function index(Request $request, MailerInterface $mailer): Response
@@ -38,6 +101,9 @@ class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Si c'est une requête AJAX (réponse depuis la modal)
+            $isAjax = $request->isXmlHttpRequest();
+
             try {
                 // 1. Envoi de l'email
                 $email = (new Email())
@@ -57,42 +123,50 @@ class ContactController extends AbstractController
                     ->setCreatedAt(new \DateTime());
                 $this->em->persist($contactMessage);
 
-                // 3. Création de la notification pour l'admin (COMME LES DEMANDES DE TÂCHE)
-                $admin = $this->em->getRepository(\App\Entity\Utilisateur::class)
-                    ->findOneBy(['email' => $this->appContactEmail]);
+                // 3. Déterminer s'il s'agit d'une nouvelle conversation ou d'une réponse
+                $isReponse = $this->em->getRepository(ContactMessage::class)
+                    ->count(['email' => $contactDto->getEmail()]) > 0;
 
-                // If admin by configured email not found, try to find any user with role 'admin', then fallback to id=1
-                if (!$admin) {
-                    $users = $this->em->getRepository(\App\Entity\Utilisateur::class)->findByRoleName('admin');
-                    if (!empty($users)) {
-                        $admin = $users[0];
-                    } else {
-                        $admin = $this->em->getRepository(\App\Entity\Utilisateur::class)->find(1);
+                // 4. Création de la notification pour l'admin
+                $users = $this->em->getRepository(\App\Entity\Utilisateur::class)->findByRoleName('admin');
+                if (!empty($users)) {
+                    // Envoi de la notification à tous les admins
+                    foreach ($users as $admin) {
+                        $notification = new Notification();
+                        $notification
+                            ->setDestinataire($admin)
+                            ->setType('contact')
+                            ->setMessage($isReponse 
+                                ? "{$contactDto->getNom()} a répondu à votre message" 
+                                : "Nouveau message de {$contactDto->getNom()}")
+                            ->setLien('/admin/messages')
+                            ->setLue(false)
+                            ->setCreatedAt(new \DateTime());
+
+                        $this->em->persist($notification);
                     }
-                }
-
-                if ($admin) {
-                    $notification = new Notification();
-                    $notification
-                        ->setDestinataire($admin)
-                        ->setType('contact')
-                        ->setMessage("Nouveau message de {$contactDto->getNom()}")
-                        ->setLien('/admin/messages')
-                        ->setLue(false)
-                        ->setCreatedAt(new \DateTime());
-
-                    $this->em->persist($notification);
                 }
 
                 // Sauvegarde tout (COMME LES DEMANDES DE TÂCHE)
                 $this->em->flush();
 
-                $this->addFlash('success', 'Votre message a été envoyé avec succès !');
-                return $this->redirectToRoute('app_contact');
+                if ($isAjax) {
+                    return $this->json(['success' => true]);
+                } else {
+                    $this->addFlash('success', 'Votre message a été envoyé avec succès !');
+                    return $this->redirectToRoute('app_contact');
+                }
             } catch (\Exception $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors de l\'envoi du message.');
-                if ($this->getParameter('kernel.environment') === 'dev') {
-                    $this->addFlash('debug', 'Erreur: ' . $e->getMessage());
+                if ($isAjax) {
+                    return $this->json([
+                        'success' => false,
+                        'error' => $this->getParameter('kernel.environment') === 'dev' ? $e->getMessage() : 'Une erreur est survenue'
+                    ], 500);
+                } else {
+                    $this->addFlash('error', 'Une erreur est survenue lors de l\'envoi du message.');
+                    if ($this->getParameter('kernel.environment') === 'dev') {
+                        $this->addFlash('debug', 'Erreur: ' . $e->getMessage());
+                    }
                 }
             }
         }

@@ -68,4 +68,30 @@ class NotificationController extends AbstractController
         $em->flush();
         return new JsonResponse(['success' => true]);
     }
+
+    #[Route('/notifications/mark-conversation-read/{conversationId}', name: 'app_notification_mark_conversation_read', methods: ['POST'])]
+    public function markConversationAsRead(int $conversationId, NotificationRepository $notificationRepo, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        
+        // Marquer toutes les notifications de type contact qui contiennent cet ID de conversation dans le lien
+        $notifications = $notificationRepo->createQueryBuilder('n')
+            ->where('n.destinataire = :user')
+            ->andWhere('n.lue = false')
+            ->andWhere('n.type IN (:types)')
+            ->andWhere('n.lien LIKE :convId')
+            ->setParameter('user', $user)
+            ->setParameter('types', ['contact', 'reponse_contact'])
+            ->setParameter('convId', '%conv=' . $conversationId . '%')
+            ->getQuery()
+            ->getResult();
+        
+        foreach ($notifications as $notification) {
+            $notification->setLue(true);
+        }
+        
+        $em->flush();
+        
+        return new JsonResponse(['success' => true, 'marked' => count($notifications)]);
+    }
 }
