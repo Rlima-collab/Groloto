@@ -1,38 +1,62 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Festivals{% endblock %}
+{% block title %}Festivals - Groloto{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="{{ asset('css/weekends.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}
 
 {% block body %}
-<div class="festivals-list">
-    <h1>Festivals</h1>
-    <div class="weekends-grid">
-        {% for weekend in weekends %}
-            <a href="{{ path('public_festival_detail', {'id': weekend.id}) }}" class="weekend-card">
-                <div class="weekend-image">
-                    {% if weekend.coverImage %}
-                        <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}">
-                    {% else %}
-                        <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="{{ weekend.nom }}">
-                    {% endif %}
-                </div>
-                <div class="weekend-info">
-                    <h2>{{ weekend.nom }}</h2>
-                    <p>{{ weekend.description|default('') }}</p>
-                </div>
-            </a>
-        {% else %}
-            <p>Aucun festival disponible.</p>
-        {% endfor %}
+<div class="hero-section weekend-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Nos Festivals</h1>
+        <p class="hero-description">Plongez dans l'univers de nos festivals exceptionnels. Découvrez des événements uniques, des moments de partage et des expériences inoubliables tout au long de l'année.</p>
     </div>
 </div>
 
-<style>
-    .festivals-list { max-width: 900px; margin: 0 auto; }
-    .weekends-grid { display: flex; flex-wrap: wrap; gap: 2rem; }
-    .weekend-card { display: block; background: #fff; border-radius: 16px; box-shadow: 0 2px 8px #0002; text-decoration: none; color: inherit; width: 100%; max-width: 350px; transition: box-shadow .2s; }
-    .weekend-card:hover { box-shadow: 0 4px 16px #0003; }
-    .weekend-image img { width: 100%; height: 180px; object-fit: cover; border-top-left-radius: 16px; border-top-right-radius: 16px; }
-    .weekend-info { padding: 1rem; }
-    .weekend-info h2 { margin: 0 0 .5rem 0; font-size: 1.5rem; }
-</style>
+<div class="weekends-grid">
+    {% for weekend in weekends %}
+        <a href="{{ path('public_festival_detail', {'id': weekend.id}) }}" class="weekend-card">
+            <div class="image">
+                {% if weekend.coverImage %}
+                    {# handle both stored filenames and full paths that may already include 'uploads/' #}
+                    {% if weekend.coverImage matches('/^uploads\\//') or weekend.coverImage matches('/^images\\//') %}
+                        <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}">
+                    {% else %}
+                        <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}">
+                    {% endif %}
+                {% else %}
+                    <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="{{ weekend.nom }}">
+                {% endif %}
+            </div>
+            <div class="content">
+                <div class="card-header">
+                    <h3>{{ weekend.nom }}</h3>
+                    {% if weekend.dateDebut %}
+                        <div class="dates">
+                            <i class="bi bi-calendar-event"></i>
+                            Du {{ weekend.dateDebut|date('d/m/Y') }}
+                            {% if weekend.dateFin %}
+                                au {{ weekend.dateFin|date('d/m/Y') }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+                <p>{{ weekend.description|slice(0, 150) }}{% if weekend.description|length > 150 %}...{% endif %}</p>
+                <div class="card-footer">
+                    <span class="read-more">En savoir plus <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </div>
+        </a>
+    {% else %}
+        <div class="alert alert-info" style="text-align: center; padding: 3rem; grid-column: 1/-1;">
+            <i class="bi bi-calendar-x" style="font-size: 2.5rem; display: block; margin-bottom: 1.5rem;"></i>
+            <h3>Aucun festival disponible</h3>
+            <p>Les prochains festivals seront bientôt annoncés. Revenez nous voir prochainement !</p>
+        </div>
+    {% endfor %}
+</div>
 {% endblock %}

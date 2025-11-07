@@ -1,48 +1,77 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Festival : {{ weekend.nom }}{% endblock %}
+{% block title %}{{ weekend.nom }} - Groloto{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="{{ asset('css/weekends.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}
 
 {% block body %}
-<div class="weekend-detail">
-    <h1>{{ weekend.nom }}</h1>
-    <div class="weekend-image">
-        {% if weekend.coverImage %}
-            <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}">
+<div class="weekend-banner">
+    {% if weekend.coverImage %}
+        {% if weekend.coverImage matches('/^uploads\\//') or weekend.coverImage matches('/^images\\//') %}
+            <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}" class="banner-image">
         {% else %}
-            <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="{{ weekend.nom }}">
+            <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}" class="banner-image">
         {% endif %}
-    </div>
-    <p>{{ weekend.description|default('Aucune description disponible.') }}</p>
-
-    <h2>Événements</h2>
-    <div class="evenements-list">
-        {% for evenement in evenements %}
-            <div class="evenement-card">
-                <div class="evenement-image">
-                    {% if evenement.image %}
-                        <img src="{{ asset('uploads/evenements/' ~ evenement.image) }}" alt="{{ evenement.nom }}">
-                    {% else %}
-                        <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="{{ evenement.nom }}">
-                    {% endif %}
-                </div>
-                <div class="evenement-info">
-                    <h3>{{ evenement.nom }}</h3>
-                    <p>{{ evenement.description }}</p>
-                </div>
-            </div>
-        {% else %}
-            <p>Aucun événement pour ce festival.</p>
-        {% endfor %}
+    {% else %}
+        <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="{{ weekend.nom }}" class="banner-image">
+    {% endif %}
+    <div class="banner-overlay"></div>
+    <div class="banner-content">
+        <div class="content-box">
+            <h1>{{ weekend.nom }}</h1>
+            <p>{{ weekend.description }}</p>
+        </div>
     </div>
 </div>
 
-<style>
-    .weekend-detail { max-width: 900px; margin: 0 auto; }
-    .weekend-image img { width: 100%; max-width: 400px; height: 220px; object-fit: cover; border-radius: 16px; margin-bottom: 1rem; }
-    .evenements-list { display: flex; flex-wrap: wrap; gap: 2rem; }
-    .evenement-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 8px #0002; width: 100%; max-width: 350px; display: flex; flex-direction: column; }
-    .evenement-image img { width: 100%; height: 140px; object-fit: cover; border-top-left-radius: 16px; border-top-right-radius: 16px; }
-    .evenement-info { padding: 1rem; }
-    .evenement-info h3 { margin: 0 0 .5rem 0; font-size: 1.2rem; }
-</style>
+<div class="weekend-content">
+    {% if evenements|length > 0 %}
+        <div class="events-timeline">
+            {% for evenement in evenements|sort((a, b) => a.dateDebut <=> b.dateDebut) %}
+                <div class="event-row {% if loop.index is odd %}left-image{% else %}right-image{% endif %}">
+                    <div class="event-image">
+                        {% if evenement.image %}
+                            <img src="{{ asset('images/evenements/' ~ evenement.image) }}" alt="{{ evenement.nom }}">
+                        {% else %}
+                            <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="{{ evenement.nom }}">
+                        {% endif %}
+                    </div>
+                    <div class="event-details">
+                        <h2>{{ evenement.nom }}</h2>
+                        <div class="event-info">
+                            <p class="event-time">
+                                <i class="bi bi-clock"></i> 
+                                {% if evenement.heureDebut %}
+                                    {{ evenement.heureDebut|date('H:i') }}
+                                {% endif %}
+                                {% if evenement.dureeMinutes %}
+                                    <span class="duration">({{ evenement.dureeMinutes }} min)</span>
+                                {% endif %}
+                            </p>
+                            {% if evenement.lieu %}
+                                <p class="event-location">
+                                    <i class="bi bi-geo-alt"></i> 
+                                    {{ evenement.lieu }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <p class="event-description">
+                            {{ evenement.description|nl2br }}
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" style="text-align: center; padding: 3rem; margin: 2rem 0;">
+            <i class="bi bi-calendar-x" style="font-size: 2rem; display: block; margin-bottom: 1rem;"></i>
+            <h3>Aucun événement programmé</h3>
+            <p>Les événements de ce festival seront bientôt annoncés.</p>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}
