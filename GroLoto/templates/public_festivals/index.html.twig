@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Festivals{% endblock %}
+
+{% block body %}
+<div class="festivals-list">
+    <h1>Festivals</h1>
+    <div class="weekends-grid">
+        {% for weekend in weekends %}
+            <a href="{{ path('public_festival_detail', {'id': weekend.id}) }}" class="weekend-card">
+                <div class="weekend-image">
+                    {% if weekend.coverImage %}
+                        <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}">
+                    {% else %}
+                        <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="{{ weekend.nom }}">
+                    {% endif %}
+                </div>
+                <div class="weekend-info">
+                    <h2>{{ weekend.nom }}</h2>
+                    <p>{{ weekend.description|default('') }}</p>
+                </div>
+            </a>
+        {% else %}
+            <p>Aucun festival disponible.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .festivals-list { max-width: 900px; margin: 0 auto; }
+    .weekends-grid { display: flex; flex-wrap: wrap; gap: 2rem; }
+    .weekend-card { display: block; background: #fff; border-radius: 16px; box-shadow: 0 2px 8px #0002; text-decoration: none; color: inherit; width: 100%; max-width: 350px; transition: box-shadow .2s; }
+    .weekend-card:hover { box-shadow: 0 4px 16px #0003; }
+    .weekend-image img { width: 100%; height: 180px; object-fit: cover; border-top-left-radius: 16px; border-top-right-radius: 16px; }
+    .weekend-info { padding: 1rem; }
+    .weekend-info h2 { margin: 0 0 .5rem 0; font-size: 1.5rem; }
+</style>
+{% endblock %}

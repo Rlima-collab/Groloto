@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Festival : {{ weekend.nom }}{% endblock %}
+
+{% block body %}
+<div class="weekend-detail">
+    <h1>{{ weekend.nom }}</h1>
+    <div class="weekend-image">
+        {% if weekend.coverImage %}
+            <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}">
+        {% else %}
+            <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="{{ weekend.nom }}">
+        {% endif %}
+    </div>
+    <p>{{ weekend.description|default('Aucune description disponible.') }}</p>
+
+    <h2>Événements</h2>
+    <div class="evenements-list">
+        {% for evenement in evenements %}
+            <div class="evenement-card">
+                <div class="evenement-image">
+                    {% if evenement.image %}
+                        <img src="{{ asset('uploads/evenements/' ~ evenement.image) }}" alt="{{ evenement.nom }}">
+                    {% else %}
+                        <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="{{ evenement.nom }}">
+                    {% endif %}
+                </div>
+                <div class="evenement-info">
+                    <h3>{{ evenement.nom }}</h3>
+                    <p>{{ evenement.description }}</p>
+                </div>
+            </div>
+        {% else %}
+            <p>Aucun événement pour ce festival.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .weekend-detail { max-width: 900px; margin: 0 auto; }
+    .weekend-image img { width: 100%; max-width: 400px; height: 220px; object-fit: cover; border-radius: 16px; margin-bottom: 1rem; }
+    .evenements-list { display: flex; flex-wrap: wrap; gap: 2rem; }
+    .evenement-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 8px #0002; width: 100%; max-width: 350px; display: flex; flex-direction: column; }
+    .evenement-image img { width: 100%; height: 140px; object-fit: cover; border-top-left-radius: 16px; border-top-right-radius: 16px; }
+    .evenement-info { padding: 1rem; }
+    .evenement-info h3 { margin: 0 0 .5rem 0; font-size: 1.2rem; }
+</style>
+{% endblock %}
