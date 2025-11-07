@@ -181,15 +181,6 @@ class WeekendController extends AbstractController
                         'form' => $form->createView(),
                     ]);
                 }
-                
-                // Calculer le samedi (jour du milieu si 3 jours ou plus)
-                if ($nombreJours >= 3) {
-                    $dateSamedi = (clone $dateDebut)->modify('+1 day');
-                    $weekend->setDateSamedi($dateSamedi);
-                } else {
-                    // Si seulement 2 jours, samedi = fin
-                    $weekend->setDateSamedi($dateFin);
-                }
             }
 
             
@@ -238,5 +229,98 @@ class WeekendController extends AbstractController
         return $this->render('weekend/created.html.twig', [
             'weekend' => $weekend,
         ]);
+    }
+
+    #[Route('/liste', name: 'app_weekend_liste')]
+    public function liste(WeekendRepository $weekendRepo): Response
+    {
+        return $this->render('weekend/liste.html.twig', [
+            'weekends' => $weekendRepo->findBy([], ['date_debut' => 'DESC']),
+            'isAdmin' => $this->isGranted('ROLE_ADMIN'),
+        ]);
+    }
+
+    #[Route('/{id}/details', name: 'app_weekend_details')]
+    public function details(Weekend $weekend): Response
+    {
+        return $this->render('weekend/details.html.twig', [
+            'weekend' => $weekend,
+            'isAdmin' => $this->isGranted('ROLE_ADMIN'),
+        ]);
+    }
+
+    #[Route('/{id}/edit', name: 'app_weekend_edit')]
+    public function edit(Request $request, Weekend $weekend, EntityManagerInterface $em): Response
+    {
+        // Vérifier que l'utilisateur est admin
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $form = $this->createForm(WeekendType::class, $weekend);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Gestion de l'upload de la nouvelle image de couverture
+            /** @var UploadedFile|null $coverFile */
+            $coverFile = $form->get('cover_image')->getData();
+            if ($coverFile) {
+                $projectDir = $this->getParameter('kernel.project_dir');
+                $uploadsDir = $projectDir . '/public/uploads/weekends';
+                if (!is_dir($uploadsDir)) {
+                    @mkdir($uploadsDir, 0755, true);
+                }
+
+                // Supprimer l'ancienne image si elle existe
+                if ($weekend->getCoverImage()) {
+                    $oldImagePath = $projectDir . '/public/' . $weekend->getCoverImage();
+                    if (file_exists($oldImagePath)) {
+                        @unlink($oldImagePath);
+                    }
+                }
+
+                $originalExtension = $coverFile->guessExtension() ?: 'jpg';
+                $safeName = uniqid('weekend_') . '.' . $originalExtension;
+                try {
+                    $coverFile->move($uploadsDir, $safeName);
+                    $weekend->setCoverImage('uploads/weekends/' . $safeName);
+                } catch (FileException $e) {
+                    $this->addFlash('warning', 'Impossible de modifier l\'image de couverture.');
+                }
+            }
+
+            $em->flush();
+
+            $this->addFlash('success', 'Weekend modifié avec succès !');
+            return $this->redirectToRoute('app_weekend_liste');
+        }
+
+        return $this->render('weekend/edit.html.twig', [
+            'form' => $form->createView(),
+            'weekend' => $weekend,
+        ]);
+    }
+
+    #[Route('/{id}/delete', name: 'app_weekend_delete', methods: ['POST'])]
+    public function delete(Request $request, Weekend $weekend, EntityManagerInterface $em): Response
+    {
+        // Vérifier que l'utilisateur est admin
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if ($this->isCsrfTokenValid('delete' . $weekend->getId(), $request->request->get('_token'))) {
+            // Supprimer l'image de couverture si elle existe
+            if ($weekend->getCoverImage()) {
+                $projectDir = $this->getParameter('kernel.project_dir');
+                $imagePath = $projectDir . '/public/' . $weekend->getCoverImage();
+                if (file_exists($imagePath)) {
+                    @unlink($imagePath);
+                }
+            }
+
+            $em->remove($weekend);
+            $em->flush();
+
+            $this->addFlash('success', 'Weekend supprimé avec succès !');
+        }
+
+        return $this->redirectToRoute('app_weekend_liste');
     }
 }
