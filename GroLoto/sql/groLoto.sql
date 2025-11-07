@@ -33,10 +33,10 @@ DROP TABLE IF EXISTS messenger_messages;
 CREATE TABLE WEEKEND (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT NOT NULL,
-    date_vendredi DATE NOT NULL,
-    date_samedi DATE NOT NULL,
-    date_dimanche DATE NOT NULL,
+    date_debut DATE NOT NULL,
+    date_fin DATE NOT NULL,
     cover_image TEXT,
+    description TEXT,
     date_creation DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -361,13 +361,13 @@ INSERT INTO BENEVOLE (id_utilisateur, remarque, actif) VALUES
 INSERT INTO MECENE (id_utilisateur, organisation, siret) VALUES
   (3, 'Boulangerie Martin', '12345678901234');
 
-INSERT INTO WEEKEND (nom, date_vendredi, date_samedi, date_dimanche) VALUES
-  ('Weekend Groloto 2025', '2025-11-14', '2025-11-15', '2025-11-16');
+INSERT INTO WEEKEND (nom, date_debut, date_fin) VALUES
+  ('Weekend Groloto 2025', '2025-11-14', '2025-11-16');
 
 INSERT INTO EVENEMENT (id_weekend, nom, description, date_debut, date_fin, lieu, heure_debut, duree_minutes) VALUES
   (NULL, 'Tournoi de belote 2025', 'Compétition amicale avec lots pour les gagnants', '2025-11-01', '2025-11-01', 'Maison des associations', '14:00:00', 240),
   (NULL, 'Soirée quizz caritative', 'Quiz généraliste pour récolter des fonds', '2025-11-02', '2025-11-02', 'Salle municipale', '19:00:00', 180),
-  (NULL, 'Concert solidaire', 'Concert avec groupes locaux au profit de l'association', '2025-11-03', '2025-11-03', 'Parc central', '18:00:00', 240),
+  (NULL, 'Concert solidaire', 'Concert avec groupes locaux au profit de l"association', '2025-11-03', '2025-11-03', 'Parc central', '18:00:00', 240),
   (NULL, 'Vide-grenier Groloto', 'Vide-grenier pour collecter des fonds pour les projets associatifs', '2025-11-04', '2025-11-04', 'Place du marché', '08:00:00', 360),
   (1, 'Groloto 2025', 'Loto caritatif annuel édition 2025', '2025-11-15', '2025-11-15', 'Salle des fêtes', '08:00:00', 600),
   (NULL, 'Groloto 2024', 'Loto caritatif annuel', '2024-11-15', '2024-11-15', 'Salle des fêtes', '14:00:00', 300);

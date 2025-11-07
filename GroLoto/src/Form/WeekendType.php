@@ -8,6 +8,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -23,28 +24,33 @@ class WeekendType extends AbstractType
                 'label' => 'Nom du weekend',
                 'attr' => ['class' => 'w-full p-3 border rounded-lg']
             ])
-            ->add('date_vendredi', DateType::class, [
+            ->add('date_debut', DateType::class, [
                 'widget' => 'single_text',
-                'label' => 'Date de départ (Vendredi)',
+                'label' => 'Date de début',
                 'attr' => [
                     'class' => 'w-full p-3 border rounded-lg',
-                    'placeholder' => 'Date de début du weekend'
+                    'placeholder' => 'Date de début'
                 ],
-                'help' => 'Sélectionnez la date du vendredi (premier jour du weekend)'
+                'help' => 'Sélectionnez la date de début du weekend'
             ])
-            ->add('nombre_jours', IntegerType::class, [
-                'label' => 'Nombre de jours',
-                'mapped' => false,
-                'data' => 3,
+            ->add('date_fin', DateType::class, [
+                'widget' => 'single_text',
+                'label' => 'Date de fin',
                 'attr' => [
                     'class' => 'w-full p-3 border rounded-lg',
-                    'min' => 1,
-                    'max' => 7,
-                    'placeholder' => '3'
+                    'placeholder' => 'Date de fin'
                 ],
-                'help' => 'Nombre de jours du weekend (par défaut: 3 jours - vendredi, samedi, dimanche)'
+                'help' => 'Sélectionnez la date de fin du weekend'
             ])
-
+            ->add('description', TextareaType::class, [
+                'label' => 'Description',
+                'required' => false,
+                'attr' => [
+                    'class' => 'w-full p-3 border rounded-lg',
+                    'rows' => 4,
+                    'placeholder' => 'Description du weekend (optionnelle)'
+                ]
+            ])
             ->add('cover_image', FileType::class, [
                 'label' => 'Image de couverture (optionnelle)',
                 'mapped' => false,
@@ -57,16 +63,6 @@ class WeekendType extends AbstractType
                     ])
                 ],
                 'attr' => ['class' => 'w-full']
-            ])
-            // ÉVÉNEMENTS IMBRIQUÉS
-            ->add('evenements', CollectionType::class, [
-                'entry_type' => EvenementType::class,
-                'entry_options' => ['label' => false],
-                'allow_add' => true,
-                'allow_delete' => true,
-                'by_reference' => false,
-                'prototype' => true,
-                'attr' => ['class' => 'space-y-4']
             ]);
     }
 

@@ -3,8 +3,6 @@
 namespace App\Form;
 
 use App\Entity\Evenement;
-use App\Entity\Weekend;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -17,7 +15,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Positive;
 
-class EvenementType extends AbstractType
+class EvenementEmbeddedType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -26,26 +24,7 @@ class EvenementType extends AbstractType
                 'label' => 'Nom de l\'événement',
                 'attr' => ['class' => 'w-full p-3 border rounded-lg']
             ])
-            ->add('weekend', EntityType::class, [
-                'class' => Weekend::class,
-                'choice_label' => function(Weekend $weekend) {
-                    return $weekend->getNom() . ' (' . 
-                           $weekend->getDateDebut()->format('d/m/Y') . ' - ' . 
-                           $weekend->getDateFin()->format('d/m/Y') . ')';
-                },
-                // expose the weekend dates in data- attributes on each <option>
-                'choice_attr' => function(?Weekend $weekend) {
-                    if (!$weekend) return [];
-                    return [
-                        'data-debut' => $weekend->getDateDebut()?->format('Y-m-d'),
-                        'data-fin' => $weekend->getDateFin()?->format('Y-m-d'),
-                    ];
-                },
-                'label' => 'Week-end associé',
-                'placeholder' => 'Sélectionnez un week-end',
-                'required' => false,
-                'attr' => ['class' => 'w-full p-3 border rounded-lg']
-            ])
+            // PAS de champ weekend ici - il sera automatiquement lié au weekend parent
             ->add('date_debut', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de l\'événement',
@@ -83,7 +62,7 @@ class EvenementType extends AbstractType
                 'label' => 'Image de l\'événement',
                 'mapped' => false,
                 'required' => false,
-                'attr' => ['class' => 'w-full p-3 border rounded-lg'],
+                'attr' => ['class' => 'w-full p-3 border rounded-lg', 'accept' => 'image/*'],
                 'constraints' => [
                     new File([
                         'maxSize' => '5M',
