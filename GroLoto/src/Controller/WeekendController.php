@@ -110,6 +110,7 @@ class WeekendController extends AbstractController
                 'dateDebut' => $w->getDateDebut()->format('Y-m-d'),
                 'dateFin' => $w->getDateFin()->format('Y-m-d'),
                 'coverImage' => $w->getCoverImage(),
+                'description' => $w->getDescription(),
                 'evenements' => array_map(fn($e) => [
                     'id' => $e->getId(),
                     'nom' => $e->getNom(),
@@ -186,12 +187,25 @@ class WeekendController extends AbstractController
             $em->persist($weekend);
             $em->flush();
 
+            // Stocker l'ID du weekend dans la session pour le pré-sélectionner
+            $request->getSession()->set('last_created_weekend_id', $weekend->getId());
+
             $this->addFlash('success', 'Weekend créé avec succès !');
-            return $this->redirectToRoute('app_weekends');
+            
+            // Rediriger vers une page de confirmation qui propose d'ajouter un événement
+            return $this->redirectToRoute('app_weekend_created', ['id' => $weekend->getId()]);
         }
 
         return $this->render('weekend/create.html.twig', [
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/created/{id}', name: 'app_weekend_created')]
+    public function created(Weekend $weekend): Response
+    {
+        return $this->render('weekend/created.html.twig', [
+            'weekend' => $weekend,
         ]);
     }
 }

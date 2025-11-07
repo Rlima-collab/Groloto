@@ -36,6 +36,7 @@ CREATE TABLE WEEKEND (
     date_debut DATE NOT NULL,
     date_fin DATE NOT NULL,
     cover_image TEXT,
+    description TEXT,
     date_creation DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

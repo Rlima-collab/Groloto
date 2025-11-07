@@ -8,6 +8,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -41,7 +42,15 @@ class WeekendType extends AbstractType
                 ],
                 'help' => 'Sélectionnez la date de fin du weekend'
             ])
-
+            ->add('description', TextareaType::class, [
+                'label' => 'Description',
+                'required' => false,
+                'attr' => [
+                    'class' => 'w-full p-3 border rounded-lg',
+                    'rows' => 4,
+                    'placeholder' => 'Description du weekend (optionnelle)'
+                ]
+            ])
             ->add('cover_image', FileType::class, [
                 'label' => 'Image de couverture (optionnelle)',
                 'mapped' => false,
@@ -54,16 +63,6 @@ class WeekendType extends AbstractType
                     ])
                 ],
                 'attr' => ['class' => 'w-full']
-            ])
-            // ÉVÉNEMENTS IMBRIQUÉS
-            ->add('evenements', CollectionType::class, [
-                'entry_type' => EvenementType::class,
-                'entry_options' => ['label' => false],
-                'allow_add' => true,
-                'allow_delete' => true,
-                'by_reference' => false,
-                'prototype' => true,
-                'attr' => ['class' => 'space-y-4']
             ]);
     }
 

@@ -31,10 +31,13 @@ class Weekend
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $cover_image = null;
 
-    #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Evenement::class, orphanRemoval: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description = null;
+
+    #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Evenement::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $evenements;
 
-    #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Tache::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Tache::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $taches;
 
     public function __construct()
@@ -93,6 +96,17 @@ class Weekend
     public function setCoverImage(?string $cover_image): self
     {
         $this->cover_image = $cover_image;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
         return $this;
     }
 
