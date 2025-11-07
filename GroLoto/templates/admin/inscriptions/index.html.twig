@@ -167,10 +167,7 @@
                             
                             {% if inscription.statut == 'en_attente' %}
                             <div class="benevole-actions">
-                                <form method="post" action="{{ path('admin_inscription_accepter', {'id': inscription.id}) }}" style="display: inline;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('accepter_inscription_' ~ inscription.id) }}">
-                                    <button type="submit" class="btn btn-small btn-primary">Accepter</button>
-                                </form>
+                                <button type="button" class="btn btn-small btn-primary" onclick="confirmAccepter({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('accepter_inscription_' ~ inscription.id) }}')">Accepter</button>
                                 <button type="button" class="btn btn-small btn-danger" onclick="confirmRefuser({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('refuser_inscription_' ~ inscription.id) }}')">Refuser</button>
                             </div>
                             {% elseif inscription.statut == 'accepte' %}
@@ -179,7 +176,7 @@
                             </div>
                             {% elseif inscription.statut == 'refuse' %}
                             <div class="benevole-actions">
-                                <button class="btn btn-small btn-secondary no-hover" type="button" onclick="openOptions(this, '{{ csrf_token('accepter_inscription_' ~ inscription.id) }}', '{{ path('admin_inscription_accepter', {'id': inscription.id}) }}')">Options</button>
+                                <button class="btn btn-small btn-secondary no-hover" type="button" onclick="openOptions(this, '{{ csrf_token('accepter_inscription_' ~ inscription.id) }}', '{{ path('admin_inscription_accepter', {'id': inscription.id}) }}', {{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}')">Options</button>
                             </div>
                             {% endif %}
                         </div>
@@ -217,6 +214,33 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModalRefus()">Annuler</button>
                 <button type="submit" class="btn btn-danger">Confirmer le refus</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal pour la remarque d'acceptation -->
+<div id="modalAcceptation" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="closeModalAcceptation()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Accepter l'inscription</h3>
+            <button type="button" class="modal-close" onclick="closeModalAcceptation()">✕</button>
+        </div>
+        <form id="formAcceptation" method="post" action="">
+            <div class="modal-body">
+                <p class="modal-description">Vous êtes sur le point d'accepter l'inscription de <strong id="orgaAcceptation"></strong>.</p>
+                <p class="modal-description">Vous pouvez optionnellement ajouter un message qui sera envoyé au mécène :</p>
+                
+                <input type="hidden" name="_token" id="tokenAcceptation" value="">
+                <div class="form-group">
+                    <label for="remarque_acceptation" class="form-label">Message d'acceptation (optionnel)</label>
+                    <textarea name="remarque_acceptation" id="remarque_acceptation" class="form-control" rows="4" placeholder="Ex: Merci pour votre don ! Nous vous contacterons prochainement pour organiser la livraison..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModalAcceptation()">Annuler</button>
+                <button type="submit" class="btn btn-primary">Confirmer l'acceptation</button>
             </div>
         </form>
     </div>
@@ -374,7 +398,7 @@
 </style>
 
 <script>
-function openOptions(btn, token, acceptUrl) {
+function openOptions(btn, token, acceptUrl, inscriptionId, organisation) {
     if (window.__currentOptionsMenu) {
         window.__currentOptionsMenu.remove();
         window.__currentOptionsMenu = null;
@@ -389,19 +413,8 @@ function openOptions(btn, token, acceptUrl) {
     menu.style.left = left + 'px';
     menu.style.top = top + 'px';
 
-    const form = document.createElement('form');
-    form.method = 'post';
-    form.action = acceptUrl;
-    form.style.margin = '0';
-
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = '_token';
-    input.value = token;
-    form.appendChild(input);
-
     const acceptBtn = document.createElement('button');
-    acceptBtn.type = 'submit';
+    acceptBtn.type = 'button';
     acceptBtn.className = 'btn btn-success';
     acceptBtn.style.width = '100%';
     acceptBtn.style.borderRadius = '0';
@@ -410,10 +423,14 @@ function openOptions(btn, token, acceptUrl) {
     acceptBtn.style.textAlign = 'left';
     acceptBtn.style.padding = '0.75rem 1rem';
     acceptBtn.style.fontWeight = '600';
+    acceptBtn.style.border = 'none';
     acceptBtn.textContent = '✓ Accepter';
-    form.appendChild(acceptBtn);
+    acceptBtn.onclick = function() {
+        closeOptions();
+        confirmAccepter(inscriptionId, organisation, token);
+    };
 
-    menu.appendChild(form);
+    menu.appendChild(acceptBtn);
     document.body.appendChild(menu);
     window.__currentOptionsMenu = menu;
 
@@ -518,6 +535,26 @@ function confirmRefuser(id, organisation, token) {
 
 function closeModalRefus() {
     const modal = document.getElementById('modalRefus');
+    modal.style.display = 'none';
+}
+
+function confirmAccepter(id, organisation, token) {
+    const modal = document.getElementById('modalAcceptation');
+    const form = document.getElementById('formAcceptation');
+    const orgaElement = document.getElementById('orgaAcceptation');
+    const tokenInput = document.getElementById('tokenAcceptation');
+    const remarqueTextarea = document.getElementById('remarque_acceptation');
+    
+    form.action = `/admin/inscriptions/${id}/accepter`;
+    orgaElement.textContent = organisation;
+    tokenInput.value = token;
+    remarqueTextarea.value = '';
+    
+    modal.style.display = 'block';
+}
+
+function closeModalAcceptation() {
+    const modal = document.getElementById('modalAcceptation');
     modal.style.display = 'none';
 }
 </script>

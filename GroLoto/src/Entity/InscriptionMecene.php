@@ -52,6 +52,9 @@ class InscriptionMecene
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $remarque_refus = null;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $remarque_acceptation = null;
+
     // --- GETTERS & SETTERS ---
 
     public function getId(): ?int
@@ -188,6 +191,17 @@ class InscriptionMecene
     public function setRemarqueRefus(?string $remarque_refus): self
     {
         $this->remarque_refus = $remarque_refus;
+        return $this;
+    }
+
+    public function getRemarqueAcceptation(): ?string
+    {
+        return $this->remarque_acceptation;
+    }
+
+    public function setRemarqueAcceptation(?string $remarque_acceptation): self
+    {
+        $this->remarque_acceptation = $remarque_acceptation;
         return $this;
     }
 }

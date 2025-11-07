@@ -126,6 +126,15 @@
                                     </td>
                                 </tr>
                                 {% endif %}
+                                {% if inscription.statut == 'accepte' and inscription.remarqueAcceptation %}
+                                <tr class="acceptation-details">
+                                    <td colspan="7">
+                                        <div class="alert alert-success mb-0" style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-left: 4px solid #16a34a;">
+                                            <strong><i class="bi bi-check-circle me-2"></i>Message de l'équipe :</strong> {{ inscription.remarqueAcceptation }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
                                 {% if inscription.remarques %}
                                 <tr class="remarques-details">
                                     <td colspan="7">
@@ -155,13 +164,15 @@
 
 <style>
 .refus-details td,
-.remarques-details td {
+.remarques-details td,
+.acceptation-details td {
     padding: 0 !important;
     border-top: none !important;
 }
 
 .refus-details .alert,
-.remarques-details .alert {
+.remarques-details .alert,
+.acceptation-details .alert {
     margin: 0.5rem 1rem 1rem 1rem;
 }
 

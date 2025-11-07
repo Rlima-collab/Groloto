@@ -26,7 +26,10 @@ class PublicFestivalController extends AbstractController
         if (!$weekend) {
             throw $this->createNotFoundException('Weekend non trouvé');
         }
-        $evenements = $em->getRepository(Evenement::class)->findBy(['weekend' => $weekend]);
+        $evenements = $em->getRepository(Evenement::class)->findBy(
+            ['weekend' => $weekend],
+            ['date_debut' => 'ASC', 'heure_debut' => 'ASC']
+        );
         return $this->render('public_festivals/detail.html.twig', [
             'weekend' => $weekend,
             'evenements' => $evenements,
