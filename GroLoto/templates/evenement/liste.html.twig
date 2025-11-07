@@ -1,0 +1,256 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des événements{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/weekends_cards.css') }}">
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Événements</h1>
+        <p class="hero-description">Consultez et gérez tous les événements GroLoto</p>
+        {% if isAdmin %}
+            <a href="{{ path('app_evenements_create') }}" class="btn-login">Créer un événement</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="weekends-container">
+    <!-- Filtres -->
+    <div class="filters-card">
+        <form method="get" action="{{ path('app_evenements_liste') }}" id="filter-form">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="weekend-filter" class="filter-label">
+                        <svg class="filter-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Week-end
+                    </label>
+                    <select name="weekend" id="weekend-filter" class="filter-select" onchange="document.getElementById('filter-form').submit()">
+                        <option value="all" {% if weekendFilter == 'all' %}selected{% endif %}>Tous les week-ends</option>
+                        {% for weekend in weekends %}
+                            <option value="{{ weekend.id }}" {% if weekendFilter == weekend.id ~ '' %}selected{% endif %}>
+                                {{ weekend.nom }} ({{ weekend.dateDebut|date('d/m/Y') }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="statut-filter" class="filter-label">
+                        <svg class="filter-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Statut
+                    </label>
+                    <select name="statut" id="statut-filter" class="filter-select" onchange="document.getElementById('filter-form').submit()">
+                        <option value="all" {% if statutFilter == 'all' %}selected{% endif %}>Tous</option>
+                        <option value="futurs" {% if statutFilter == 'futurs' %}selected{% endif %}>À venir</option>
+                        <option value="passes" {% if statutFilter == 'passes' %}selected{% endif %}>Passés</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Résumé des résultats -->
+    <div class="results-summary">
+        <svg class="summary-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        <span>{{ evenements|length }} événement{{ evenements|length > 1 ? 's' : '' }} trouvé{{ evenements|length > 1 ? 's' : '' }}</span>
+    </div>
+
+    <!-- Liste des événements -->
+    {% if evenements|length > 0 %}
+        <div class="weekends-grid">
+            {% for evenement in evenements %}
+                {% set isPasse = evenement.dateFin < date() %}
+                <div class="weekend-card">
+                    <!-- Image ou icône -->
+                    <div class="weekend-card-image">
+                        {% if evenement.image %}
+                            <img src="{{ asset('images/evenements/' ~ evenement.image) }}" alt="{{ evenement.nom }}">
+                        {% else %}
+                            <i class="fas fa-calendar-alt"></i>
+                        {% endif %}
+                    </div>
+
+                    <div class="weekend-card-body">
+                        <h3 class="weekend-card-title">{{ evenement.nom }}</h3>
+                        
+                        <div class="weekend-card-dates">
+                            <i class="far fa-calendar"></i>
+                            <span>Du {{ evenement.dateDebut|date('d/m/Y') }} au {{ evenement.dateFin|date('d/m/Y') }}</span>
+                        </div>
+
+                        <div class="weekend-card-info">
+                            <div class="weekend-info-item">
+                                <i class="far fa-calendar-check"></i>
+                                <div class="value">{{ evenement.dateDebut|date('H:i') }}</div>
+                                <div class="label">Début</div>
+                            </div>
+                            <div class="weekend-info-item">
+                                <i class="far fa-clock"></i>
+                                <div class="value">
+                                    {% if evenement.dateFin %}
+                                        {% set dureeMinutes = ((evenement.dateFin.timestamp - evenement.dateDebut.timestamp) / 60)|round %}
+                                        {% if dureeMinutes >= 60 %}
+                                            {{ (dureeMinutes / 60)|round }}h
+                                        {% else %}
+                                            {{ dureeMinutes }}m
+                                        {% endif %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                                <div class="label">Durée</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="weekend-card-footer">
+                        {% if isAdmin %}
+                        <a href="{{ path('app_evenement_edit', {id: evenement.id}) }}" class="weekend-view-btn" style="width: 100%; justify-content: center;">
+                            <i class="fas fa-edit"></i>
+                            Modifier
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <h3>Aucun événement trouvé</h3>
+            <p>Essayez de modifier les filtres ou créez un nouvel événement.</p>
+            {% if isAdmin %}
+            <a href="{{ path('app_evenements_create') }}" class="btn-login">
+                Créer un événement
+            </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.filters-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.filter-icon {
+    width: 20px;
+    height: 20px;
+    color: #3b82f6;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background: white;
+    color: #1f2937;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.filter-select:hover {
+    border-color: #cbd5e1;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.results-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 4px solid #3b82f6;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.summary-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    color: #cbd5e1;
+    margin: 0 auto 1.5rem;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

@@ -6,6 +6,7 @@ use App\Entity\Evenement;
 use App\Form\EvenementType;
 use App\Repository\EvenementRepository;
 use App\Repository\TacheRepository;
+use App\Repository\WeekendRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -138,6 +139,107 @@ class EvenementController extends AbstractController
         return $this->render('evenement/create.html.twig', [
             'form' => $form->createView(),
             'preselect_weekend' => $preselect_weekend,
+        ]);
+    }
+
+    #[Route('/evenements/edit/{id}', name: 'app_evenement_edit')]
+    public function edit(Request $request, Evenement $evenement, EntityManagerInterface $em, SluggerInterface $slugger): Response
+    {
+        $form = $this->createForm(EvenementType::class, $evenement);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Gestion de l'upload d'image
+            $imageFile = $form->get('imageFile')->getData();
+            if ($imageFile) {
+                // Supprimer l'ancienne image si elle existe
+                if ($evenement->getImage()) {
+                    $oldImagePath = $this->getParameter('kernel.project_dir').'/public/images/evenements/'.$evenement->getImage();
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+
+                try {
+                    $imageFile->move(
+                        $this->getParameter('kernel.project_dir').'/public/images/evenements',
+                        $newFilename
+                    );
+                    $evenement->setImage($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image');
+                }
+            }
+
+            // Si pas de date_fin définie, utiliser date_debut
+            if (!$evenement->getDateFin() && $evenement->getDateDebut()) {
+                $evenement->setDateFin($evenement->getDateDebut());
+            }
+
+            $em->flush();
+
+            $this->addFlash('success', 'Événement modifié avec succès !');
+            return $this->redirectToRoute('app_evenements');
+        }
+
+        return $this->render('evenement/edit.html.twig', [
+            'form' => $form->createView(),
+            'evenement' => $evenement,
+        ]);
+    }
+
+    #[Route('/evenements/liste', name: 'app_evenements_liste')]
+    public function liste(Request $request, EvenementRepository $evenementRepo, WeekendRepository $weekendRepo): Response
+    {
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+        
+        // Récupérer tous les weekends pour le filtre
+        $weekends = $weekendRepo->findAll();
+        
+        // Récupérer le filtre depuis la requête
+        $weekendFilter = $request->query->get('weekend', 'all');
+        $statutFilter = $request->query->get('statut', 'all');
+        
+        // Récupérer tous les événements
+        $evenements = $evenementRepo->findAll();
+        
+        // Filtrer par weekend si nécessaire
+        if ($weekendFilter !== 'all') {
+            $evenements = array_filter($evenements, function($evenement) use ($weekendFilter) {
+                return $evenement->getWeekend() && $evenement->getWeekend()->getId() == $weekendFilter;
+            });
+        }
+        
+        // Filtrer par statut (futur/passé)
+        $now = new \DateTime();
+        if ($statutFilter === 'futurs') {
+            $evenements = array_filter($evenements, function($evenement) use ($now) {
+                return $evenement->getDateFin() >= $now;
+            });
+        } elseif ($statutFilter === 'passes') {
+            $evenements = array_filter($evenements, function($evenement) use ($now) {
+                return $evenement->getDateFin() < $now;
+            });
+        }
+        
+        // Trier par date (plus récents en premier pour futurs, plus anciens en premier pour passés)
+        usort($evenements, function($a, $b) use ($now, $statutFilter) {
+            if ($statutFilter === 'passes') {
+                return $b->getDateDebut() <=> $a->getDateDebut();
+            }
+            return $a->getDateDebut() <=> $b->getDateDebut();
+        });
+        
+        return $this->render('evenement/liste.html.twig', [
+            'evenements' => $evenements,
+            'weekends' => $weekends,
+            'weekendFilter' => $weekendFilter,
+            'statutFilter' => $statutFilter,
+            'isAdmin' => $isAdmin,
         ]);
     }
 }
