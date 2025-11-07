@@ -340,7 +340,7 @@ CREATE TABLE messenger_messages (
 );
 
 -- =============================================
--- INSERTIONS DE DONNÉES
+-- INSERTIONS DE DONNÉES COMBINÉES ET CORRIGÉES
 -- =============================================
 
 INSERT INTO ROLE (nom, description) VALUES
@@ -413,8 +413,7 @@ INSERT INTO AFFECTATION_TACHE (id_tache, id_benevole, id_utilisateur, statut, re
   (3, 1, 1, 'confirme', 'Affecté à la mise en place de la scène (benevole1)'),
   (4, 2, 1, 'assigne', 'Affecté à l''accueil billetterie (benevole2)');
 
-INSERT INTO DEMANDE_TACHE (id_tache, id_benevole, statut, message_benevole, date_demande)
-VALUES
+INSERT INTO DEMANDE_TACHE (id_tache, id_benevole, statut, message_benevole, date_demande) VALUES
   (2, 1, 'en_attente', 'Je souhaite participer au service bar', '2024-11-10 10:00:00'),
   (3, 2, 'acceptee', 'Disponible pour le montage', '2025-11-01 14:00:00'),
   (4, 1, 'refusee', 'Intéressé par l''accueil', '2025-11-02 09:00:00');
