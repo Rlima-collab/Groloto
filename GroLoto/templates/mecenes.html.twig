@@ -116,6 +116,42 @@
             font-size: 1.1rem;
         }
 
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        .pagination-button {
+            padding: 0.5rem 1rem;
+            background: #1a3c5a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-button:hover:not(:disabled) {
+            background: #0d1b2a;
+            transform: translateY(-2px);
+        }
+
+        .pagination-button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .pagination-info {
+            font-weight: 600;
+            color: #1a3c5a;
+        }
+
         @media (max-width: 768px) {
             .filters-container {
                 flex-direction: column;
@@ -174,7 +210,7 @@
         <!-- Barre de recherche et filtres -->
         <div class="search-filter-section">
             <div class="search-bar-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Rechercher par nom, organisation, email...">
+                <input type="text" id="searchInput" class="search-input" placeholder="Rechercher par nom, organisation, email...">
             </div>
             
             <div class="filters-container">
@@ -195,13 +231,26 @@
                 <div class="filter-group">
                     <label for="sortBy" class="filter-label">Trier par :</label>
                     <select id="sortBy" class="filter-select">
-                        <option value="nom">Nom (A-Z)</option>
-                        <option value="organisation">Organisation (A-Z)</option>
-                        <option value="date">Date d'inscription</option>
+                        <option value="nom-asc">Nom (A-Z)</option>
+                        <option value="nom-desc">Nom (Z-A)</option>
+                        <option value="organisation-asc">Organisation (A-Z)</option>
+                        <option value="organisation-desc">Organisation (Z-A)</option>
+                        <option value="date-desc">Date (Plus récent)</option>
+                        <option value="date-asc">Date (Plus ancien)</option>
                     </select>
                 </div>
 
-                <button id="resetFilters" class="btn-reset-filters">🔄 Réinitialiser</button>
+                <div class="filter-group">
+                    <label for="itemsPerPage" class="filter-label">Afficher :</label>
+                    <select id="itemsPerPage" class="filter-select">
+                        <option value="10">10 par page</option>
+                        <option value="20">20 par page</option>
+                        <option value="50">50 par page</option>
+                        <option value="all">Tous</option>
+                    </select>
+                </div>
+
+                <button id="resetFilters" class="btn-reset-filters">Réinitialiser</button>
             </div>
 
             <div id="resultsCount" class="results-count">
@@ -256,6 +305,15 @@
                         </div>
                     {% endfor %}
                 </div>
+                
+                <!-- Pagination -->
+                <div class="pagination-container" id="paginationContainer">
+                    <button id="prevPage" class="pagination-button">Précédent</button>
+                    <span class="pagination-info">
+                        Page <span id="currentPage">1</span> sur <span id="totalPages">1</span>
+                    </span>
+                    <button id="nextPage" class="pagination-button">Suivant</button>
+                </div>
             {% else %}
                 <div class="empty-state">
                     <h3>Aucun mécène trouvé</h3>
@@ -277,18 +335,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const filterWeekend = document.getElementById('filterWeekend');
     const sortBy = document.getElementById('sortBy');
+    const itemsPerPage = document.getElementById('itemsPerPage');
     const resetButton = document.getElementById('resetFilters');
-    const meceneCards = document.querySelectorAll('.benevole-card');
+    const meceneCards = Array.from(document.querySelectorAll('.benevole-card'));
     const gridContainer = document.querySelector('.benevoles-grid');
     const countCurrent = document.getElementById('countCurrent');
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+    const currentPageSpan = document.getElementById('currentPage');
+    const totalPagesSpan = document.getElementById('totalPages');
+    const paginationContainer = document.getElementById('paginationContainer');
+    
+    let currentPage = 1;
+    let filteredCards = [];
 
     // Fonction de recherche et filtrage
     function filterAndSort() {
         const searchTerm = searchInput.value.toLowerCase();
         const weekendId = filterWeekend ? filterWeekend.value : '';
         const sortOption = sortBy.value;
+        const [sortField, sortOrder] = sortOption.split('-');
         
-        let visibleCards = [];
+        filteredCards = [];
         
         meceneCards.forEach(card => {
             const name = card.querySelector('.benevole-name').textContent.toLowerCase();
@@ -301,28 +369,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 organisation.includes(searchTerm) || 
                 email.includes(searchTerm);
             
-            // Filtre par weekend (si implémenté côté serveur)
+            // Filtre par weekend
             let matchesWeekend = true;
             if (weekendId) {
-                // Pour l'instant, on affiche tous les mécènes
-                // Dans une vraie implémentation, vous ajouteriez un attribut data-weekend-id sur chaque carte
                 matchesWeekend = true;
             }
             
             if (matchesSearch && matchesWeekend) {
-                card.classList.remove('hidden');
-                visibleCards.push(card);
-            } else {
-                card.classList.add('hidden');
+                filteredCards.push(card);
             }
         });
         
         // Tri des cartes visibles
-        if (sortOption && visibleCards.length > 0) {
-            visibleCards.sort((a, b) => {
+        if (sortOption && filteredCards.length > 0) {
+            filteredCards.sort((a, b) => {
                 let valA, valB;
                 
-                switch(sortOption) {
+                switch(sortField) {
                     case 'nom':
                         valA = a.querySelector('.benevole-name').textContent.trim();
                         valB = b.querySelector('.benevole-name').textContent.trim();
@@ -334,32 +397,63 @@ document.addEventListener('DOMContentLoaded', function() {
                     case 'date':
                         valA = a.querySelector('.info-item:last-child .info-text').textContent.split(':')[1].trim();
                         valB = b.querySelector('.info-item:last-child .info-text').textContent.split(':')[1].trim();
-                        // Inverser l'ordre pour avoir les plus récents en premier
-                        return valB.localeCompare(valA);
+                        break;
                 }
                 
-                return valA.localeCompare(valB);
-            });
-            
-            // Réorganiser le DOM
-            visibleCards.forEach(card => {
-                gridContainer.appendChild(card);
+                const comparison = valA.localeCompare(valB);
+                return sortOrder === 'asc' ? comparison : -comparison;
             });
         }
         
+        // Réinitialiser à la page 1 après filtrage
+        currentPage = 1;
+        displayPage();
+    }
+    
+    // Fonction d'affichage de la page
+    function displayPage() {
+        const perPage = itemsPerPage.value === 'all' ? filteredCards.length : parseInt(itemsPerPage.value);
+        const totalPages = Math.ceil(filteredCards.length / perPage);
+        
+        // Masquer toutes les cartes
+        meceneCards.forEach(card => card.classList.add('hidden'));
+        
+        // Afficher les cartes de la page courante
+        const start = (currentPage - 1) * perPage;
+        const end = itemsPerPage.value === 'all' ? filteredCards.length : start + perPage;
+        
+        for (let i = start; i < end && i < filteredCards.length; i++) {
+            filteredCards[i].classList.remove('hidden');
+            gridContainer.appendChild(filteredCards[i]);
+        }
+        
         // Mettre à jour le compteur
-        countCurrent.textContent = visibleCards.length;
+        countCurrent.textContent = filteredCards.length;
+        
+        // Mettre à jour la pagination
+        currentPageSpan.textContent = totalPages === 0 ? 0 : currentPage;
+        totalPagesSpan.textContent = totalPages;
+        prevPageBtn.disabled = currentPage <= 1;
+        nextPageBtn.disabled = currentPage >= totalPages || totalPages === 0;
+        
+        // Masquer la pagination si "Tous" est sélectionné
+        if (itemsPerPage.value === 'all') {
+            paginationContainer.style.display = 'none';
+        } else {
+            paginationContainer.style.display = 'flex';
+        }
         
         // Afficher un message si aucun résultat
         let noResultsMsg = document.querySelector('.no-results-message');
-        if (visibleCards.length === 0) {
+        if (filteredCards.length === 0) {
             if (!noResultsMsg) {
                 noResultsMsg = document.createElement('div');
                 noResultsMsg.className = 'no-results-message';
-                noResultsMsg.innerHTML = '🔍 Aucun mécène ne correspond à votre recherche';
+                noResultsMsg.innerHTML = 'Aucun mécène ne correspond à votre recherche';
                 gridContainer.parentElement.insertBefore(noResultsMsg, gridContainer);
             }
             gridContainer.style.display = 'none';
+            paginationContainer.style.display = 'none';
         } else {
             if (noResultsMsg) {
                 noResultsMsg.remove();
@@ -372,7 +466,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetFilters() {
         searchInput.value = '';
         if (filterWeekend) filterWeekend.value = '';
-        sortBy.value = 'nom';
+        sortBy.value = 'nom-asc';
+        itemsPerPage.value = '10';
+        currentPage = 1;
         filterAndSort();
     }
     
@@ -390,7 +486,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     sortBy.addEventListener('change', filterAndSort);
+    itemsPerPage.addEventListener('change', function() {
+        currentPage = 1;
+        displayPage();
+    });
     resetButton.addEventListener('click', resetFilters);
+    
+    prevPageBtn.addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            displayPage();
+        }
+    });
+    
+    nextPageBtn.addEventListener('click', function() {
+        const perPage = itemsPerPage.value === 'all' ? filteredCards.length : parseInt(itemsPerPage.value);
+        const totalPages = Math.ceil(filteredCards.length / perPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayPage();
+        }
+    });
     
     // Appliquer le tri initial
     filterAndSort();
@@ -418,3 +534,4 @@ function confirmDeleteMecene(button) {
 }
 </script>
 {% endblock %}
+

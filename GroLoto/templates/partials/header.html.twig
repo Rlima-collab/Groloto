@@ -30,7 +30,8 @@
                             <p class="no-notifications">Aucune notification</p>
                         </div>
                         <div class="notification-footer">
-                            <a href="{{ path('app_notifications') }}">Voir toutes les notifications</a>
+                            {# Toujours proposer d'aller voir les notifications (pas la messagerie) #}
+                            <a href="{{ path('app_notifications') }}">Voir les notifications</a>
                         </div>
                     </div>
                 </div>

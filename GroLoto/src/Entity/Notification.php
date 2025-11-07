@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Entity;
 
 use App\Repository\NotificationRepository;
@@ -32,28 +33,95 @@ class Notification
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $createdAt = null;
 
+    // AJOUT DU CHAMP RÉPONSE
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $reponse = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
     }
 
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
-    public function getDestinataire(): ?Utilisateur { return $this->destinataire; }
-    public function setDestinataire(?Utilisateur $destinataire): self { $this->destinataire = $destinataire; return $this; }
+    public function getDestinataire(): ?Utilisateur
+    {
+        return $this->destinataire;
+    }
 
-    public function getType(): ?string { return $this->type; }
-    public function setType(string $type): self { $this->type = $type; return $this; }
+    public function setDestinataire(?Utilisateur $destinataire): self
+    {
+        $this->destinataire = $destinataire;
+        return $this;
+    }
 
-    public function getMessage(): ?string { return $this->message; }
-    public function setMessage(string $message): self { $this->message = $message; return $this; }
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
 
-    public function getLien(): ?string { return $this->lien; }
-    public function setLien(?string $lien): self { $this->lien = $lien; return $this; }
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+        return $this;
+    }
 
-    public function isLue(): bool { return $this->lue; }
-    public function setLue(bool $lue): self { $this->lue = $lue; return $this; }
+    public function getMessage(): ?string
+    {
+        return $this->message;
+    }
 
-    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
-    public function setCreatedAt(\DateTimeInterface $createdAt): self { $this->createdAt = $createdAt; return $this; }
+    public function setMessage(string $message): self
+    {
+        $this->message = $message;
+        return $this;
+    }
+
+    public function getLien(): ?string
+    {
+        return $this->lien;
+    }
+
+    public function setLien(?string $lien): self
+    {
+        $this->lien = $lien;
+        return $this;
+    }
+
+    public function isLue(): bool
+    {
+        return $this->lue;
+    }
+
+    public function setLue(bool $lue): self
+    {
+        $this->lue = $lue;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    // GETTER & SETTER POUR LA RÉPONSE ADMIN
+    public function getReponse(): ?string
+    {
+        return $this->reponse;
+    }
+
+    public function setReponse(?string $reponse): self
+    {
+        $this->reponse = $reponse;
+        return $this;
+    }
 }
