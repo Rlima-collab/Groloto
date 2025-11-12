@@ -14,3 +14,34 @@ main {
     padding: 20px;
     flex: 1;
 }
+
+/* Theme variables */
+:root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --muted: #f8f9fa;
+    --text: #111827;
+    --muted-text: #6b7280;
+    --accent: #006909;
+    --danger: #dc3545;
+}
+
+/* Dark theme overrides */
+.dark {
+    --bg: #0b1020;
+    --surface: #0f1724;
+    --muted: #0b1220;
+    --text: #e6eef8;
+    --muted-text: #9aa6b2;
+    --accent: #1fbf5a;
+    --danger: #ef4444;
+}
+
+/* Apply base colors */
+body {
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+a { color: var(--accent); }
+
