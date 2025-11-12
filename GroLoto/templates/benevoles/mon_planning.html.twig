@@ -4,153 +4,249 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-list.css') }}">
+
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
-<div class="dashboard-container">
-    <div class="dashboard-header">
-        <h1>Mon Planning</h1>
-        <p>{{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}</p>
-    </div>
-
-    <!-- Informations du bénévole -->
-    <section class="role-specific-section">
-        <div class="card">
-            <h3>Mes informations</h3>
-            <div class="info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                <div class="info-item">
-                    <span style="font-weight: 600; color: #6b7280;">Email:</span>
-                    <span style="color: #1a3c5a;">{{ benevole.utilisateur.email }}</span>
-                </div>
-                {% if benevole.utilisateur.telephone %}
-                <div class="info-item">
-                    <span style="font-weight: 600; color: #6b7280;">Téléphone:</span>
-                    <span style="color: #1a3c5a;">{{ benevole.utilisateur.telephone }}</span>
-                </div>
-                {% endif %}
-                <div class="info-item">
-                    <span style="font-weight: 600; color: #6b7280;">Inscrit le:</span>
-                    <span style="color: #1a3c5a;">{{ benevole.utilisateur.dateCreation|date('d/m/Y') }}</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Calendrier -->
-    <section class="role-specific-section">
-        <h2>Calendrier de mes tâches</h2>
-        <div class="card">
-            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                <!-- Calendrier -->
-                <div style="flex: 2; min-width: 300px;">
-                    <div style="margin-bottom: 1em;">
-                        <button class="btn btn-secondary active" id="btn-month" onclick="changeCalendarView('dayGridMonth')">Mois</button>
-                        <button class="btn btn-secondary" id="btn-week" onclick="changeCalendarView('timeGridWeek')">Semaine</button>
-                    </div>
-                    <div id="calendar"></div>
-                </div>
-                
-                <!-- Tâches à venir -->
-                <div style="flex: 1; min-width: 250px;">
-                    <div class="card" style="margin-bottom: 15px;">
-                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Tâches à venir</h3>
-                        {% if taches_proches is not empty %}
-                            {% for tache in taches_proches %}
-                                <div class="event-item" style="padding: 10px; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb;">
-                                    <h4 style="font-size: 0.95rem; color: #1a3c5a; margin: 0 0 5px 0;">{{ tache.titre }}</h4>
-                                    <p style="font-size: 0.85em; margin: 0; color: #6b7280;">
-                                        📅 {{ tache.debut|date('d/m/Y H:i') }}
-                                        {% if tache.poste_requis %}
-                                            <br>💼 {{ tache.poste_requis }}
-                                        {% endif %}
-                                    </p>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <p style="text-align: center; padding: 20px; color: #666;">Aucune tâche planifiée.</p>
-                        {% endif %}
-                    </div>
-
-                    <div class="card">
-                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Tâches réalisées</h3>
-                        {% if taches_realisees is not empty %}
-                            {% for tache in taches_realisees %}
-                                <div class="event-item" style="padding: 10px; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb; background: #fafafa;">
-                                    <h4 style="font-size: 0.9rem; color: #1a3c5a; margin: 0 0 5px 0;">{{ tache.titre }}</h4>
-                                    <p style="font-size: 0.8em; margin: 0; color: #666;">
-                                        ✅ {{ tache.debut|date('d/m/Y H:i') }}
-                                    </p>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <p style="text-align: center; padding: 20px; color: #666;">Aucune tâche réalisée.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Bouton retour -->
-    <div style="margin-top: 2rem;">
-        <a href="{{ path('dashboard') }}" class="btn btn-secondary">Retour au tableau de bord</a>
+<div class="hero-section benevoles-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Mon Planning</h1>
+        <p class="hero-description">Vue d'ensemble des tâches assignées et du calendrier.</p>
+        <a href="{{ path('dashboard') }}" class="btn-login">Retour aux bénévoles</a>
     </div>
 </div>
-{% endblock %}
+<br>
 
-{% block javascripts %}
-    {{ parent() }}
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'fr',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: ''
-                },
-                buttonText: {
-                    today: "Aujourd'hui",
-                    month: 'Mois',
-                    week: 'Semaine',
-                    day: 'Jour'
-                },
-                events: {{ taches|json_encode|raw }},
-                eventClick: function(info) {
-                    var props = info.event.extendedProps;
-                    var details = 'Événement: ' + (props.evenement || 'Non défini') + '\n';
-                    details += 'Poste: ' + (props.poste_requis || 'Non défini') + '\n';
-                    details += 'Début: ' + info.event.start.toLocaleString('fr-FR') + '\n';
-                    details += 'Fin: ' + info.event.end.toLocaleString('fr-FR');
-                    if (props.remarques) {
-                        details += '\nRemarques: ' + props.remarques;
-                    }
-                    alert(details);
-                }
-            });
-            calendar.render();
+ 
+<div class="metrics-grid">
+    <div class="metric-card">
+        <h3>Total tâches</h3>
+        <p class="metric-value">{{ total_taches }}</p>
+        <p class="metric-detail">Toutes les tâches</p>
+    </div>
 
-            // Fonction pour changer la vue
-            window.changeCalendarView = function(viewType) {
-                calendar.changeView(viewType);
-                
-                // Mettre à jour les boutons actifs
-                document.querySelectorAll('.btn-secondary').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                
-                if (viewType === 'dayGridMonth') {
-                    document.getElementById('btn-month').classList.add('active');
-                } else if (viewType === 'timeGridWeek') {
-                    document.getElementById('btn-week').classList.add('active');
+    <div class="metric-card">
+        <h3>Tâches futures</h3>
+        <p class="metric-value">{{ total_futures }}</p>
+        <p class="metric-detail">À venir</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Tâches réalisées</h3>
+        <p class="metric-value">{{ total_realisees }}</p>
+        <p class="metric-detail">Complétées</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="dashboard-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Calendrier des tâches</h5>
+            </div>
+            <div class="card-content">
+                <div style="margin-bottom: 1rem; text-align: center;">
+                    <button class="btn-outline-night-blue active" id="btn-month" onclick="changeCalendarView('dayGridMonth')">Mois</button>
+                    <button class="btn-outline-night-blue" id="btn-week" onclick="changeCalendarView('timeGridWeek')">Semaine</button>
+                </div>
+                <div id="calendar"></div>
+            </div>
+        </div>
+        
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Tâches à venir</h5>
+                </div>
+                <div class="card-content">
+                    <div class="events-list" style="max-height: 300px; overflow-y: auto;">
+                        {% if taches_proches is defined and taches_proches is not empty %}
+                            {% for tache in taches_proches %}
+                                <div class="event-item blue-night-accent animate-fade-in">
+                                    <div class="event-date">
+                                        <div class="event-month">{{ tache.debut|date('M')|upper }}</div>
+                                        <div class="event-day">{{ tache.debut|date('d') }}</div>
+                                    </div>
+                                    <div class="event-details">
+                                        <h4 class="event-title">{{ tache.titre }}</h4>
+                                        <p class="event-time">{{ tache.debut|date('H\\hi') }}{% if tache.poste_requis %} - {{ tache.poste_requis }}{% endif %}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="text-align: center; color: #64748b; padding: 2rem;">Aucune tâche à venir.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 1rem;">
+                <div class="card-header">
+                    <h5 class="card-title">Tâches réalisées</h5>
+                </div>
+                <div class="card-content">
+                    <div class="events-list" style="max-height: 300px; overflow-y: auto;">
+                        {% if taches_realisees is defined and taches_realisees is not empty %}
+                            {% for tache in taches_realisees|slice(0, 5) %}
+                                <div class="history-item blue-night-accent animate-fade-in">
+                                    <div class="history-date">
+                                        <div class="history-day">{{ tache.debut|date('d') }}</div>
+                                        <div class="history-month">{{ tache.debut|date('M')|upper }}</div>
+                                    </div>
+                                    <div class="history-details">
+                                        <h4 class="history-title">{{ tache.titre }}</h4>
+                                        <p class="history-description">
+                                            {{ tache.debut|date('d/m/Y H\\hi') }}{% if tache.poste_requis %} - {{ tache.poste_requis }}{% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="text-align: center; color: #64748b; padding: 2rem;">Aucune tâche réalisée.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.calendarInstance = null;
+
+function loadFullCalendarScript() {
+    return new Promise((resolve, reject) => {
+        if (typeof FullCalendar !== 'undefined') {
+            console.log('FullCalendar déjà disponible');
+            resolve();
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = '{{ asset('js/fullcalendar/index.global.min.js') }}';
+        console.log('Chargement de FullCalendar depuis asset local:', script.src);
+        
+        script.onload = function() {
+            console.log('Script FullCalendar chargé');
+            setTimeout(() => {
+                if (typeof FullCalendar !== 'undefined') {
+                    console.log('FullCalendar disponible !');
+                    resolve();
+                } else {
+                    console.error('FullCalendar non trouvé après chargement');
+                    reject(new Error('FullCalendar non disponible après chargement'));
                 }
-            };
+            }, 100);
+        };
+        
+        script.onerror = function(error) {
+            console.error('Échec du chargement de FullCalendar:', error);
+            reject(new Error('Impossible de charger FullCalendar'));
+        };
+        
+        document.head.appendChild(script);
+    });
+}
+
+function initializeCalendar(viewType = 'dayGridMonth') {
+    console.log('Tentative d\'initialisation du calendrier...');
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) {
+        console.error('Element #calendar non trouvé dans le DOM');
+        return;
+    }
+    if (typeof FullCalendar === 'undefined') {
+        loadFullCalendarScript().then(() => {
+            setTimeout(() => {
+                initializeCalendar(viewType);
+            }, 100);
+        }).catch(error => {
+            loadFullCalendarAlternative();
         });
-    </script>
+        return;
+    }
+    if (window.calendarInstance) {
+        window.calendarInstance.destroy();
+        window.calendarInstance = null;
+    }
+    const events = {{ taches|raw }};
+    console.log('Events chargés:', events);
+    try {
+        window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
+            initialView: viewType,
+            locale: 'fr',
+            height: 'auto',
+            hiddenDays: [],
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+            },
+            buttonText: {
+                today: 'Aujourd\'hui',
+                month: 'Mois',
+                week: 'Semaine',
+                day: 'Jour',
+            },
+            events: events,
+            eventClick: function(info) {
+                const event = info.event;
+                const props = event.extendedProps;
+                let details = 'Titre: ' + event.title + '\n';
+                details += 'Début: ' + event.start.toLocaleString() + '\n';
+                details += 'Fin: ' + event.end.toLocaleString() + '\n';
+                if (props.evenement) details += 'Événement: ' + props.evenement + '\n';
+                if (props.poste_requis) details += 'Poste: ' + props.poste_requis + '\n';
+                if (props.max_personnes) details += 'Max personnes: ' + props.max_personnes + '\n';
+                if (props.remarques) details += 'Remarques: ' + props.remarques + '\n';
+                alert(details);
+            },
+            eventDisplay: 'block',
+            nowIndicator: true,
+            slotMinTime: '07:00:00',
+            slotMaxTime: '22:00:00',
+            allDaySlot: false,
+            firstDay: 1
+        });
+        window.calendarInstance.render();
+    } catch (error) {
+        loadFullCalendarAlternative();
+    }
+}
+
+function changeCalendarView(viewType) {
+    if (window.calendarInstance) {
+        window.calendarInstance.changeView(viewType);
+    } else {
+        initializeCalendar(viewType);
+    }
+    document.getElementById('btn-month').classList.toggle('active', viewType === 'dayGridMonth');
+    document.getElementById('btn-week').classList.toggle('active', viewType === 'timeGridWeek');
+}
+
+function loadFullCalendarAlternative() {
+    console.log('Tentative de chargement alternatif de FullCalendar...');
+    const calendarEl = document.getElementById('calendar');
+    if (calendarEl) {
+        calendarEl.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">' +
+            '<p>⚠️ Impossible de charger le calendrier</p>' +
+            '<p>Vérifiez votre connexion internet</p>' +
+            '</div>';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Initialisation du calendrier');
+    setTimeout(() => {
+        initializeCalendar();
+    }, 200);
+});
+</script>
+
 {% endblock %}

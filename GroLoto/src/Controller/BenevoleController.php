@@ -192,11 +192,19 @@ class BenevoleController extends AbstractController
             ];
         }
 
+        // Calcul des statistiques
+        $totalTaches = count($tachesBrutes);
+        $totalFutures = count($tachesProchesData);
+        $totalRealisees = count($tachesRealiseesData);
+
         return $this->render('benevoles/mon_planning.html.twig', [
             'benevole' => $benevole,
-            'taches' => $taches,
+            'taches' => json_encode($taches),
             'taches_proches' => $tachesProchesData,
-            'taches_realisees' => $tachesRealiseesData
+            'taches_realisees' => $tachesRealiseesData,
+            'total_taches' => $totalTaches,
+            'total_futures' => $totalFutures,
+            'total_realisees' => $totalRealisees
         ]);
     }
 
