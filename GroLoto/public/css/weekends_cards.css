@@ -8,6 +8,27 @@
     padding: 2rem;
 }
 
+/* Hero style (blue "épée" effect) — ensure admin events list uses same theme */
+.hero-section.weekend-hero {
+    position: relative;
+    background: linear-gradient(145deg, #1a3c5a, #2563eb 60%, #1e2749 100%);
+    color: #fff;
+    padding: 2rem 3rem 3rem;
+    padding-top: calc(2rem + 71px);
+    margin: -20px 0 1.5rem 0;
+    text-align: center;
+    overflow: hidden;
+}
+.hero-section.weekend-hero .shine {
+    position: absolute;
+    top: -100%; left: -50%; width: 200%; height: 200%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.0) 60%);
+    transform: rotate(30deg);
+    animation: shine 8s infinite linear;
+    pointer-events: none;
+}
+@keyframes shine { 0% { transform: translateX(-100%) rotate(30deg);} 100% { transform: translateX(100%) rotate(30deg);} }
+
 .weekends-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -191,14 +212,19 @@
 }
 
 .weekend-view-btn:hover {
-    background: #1e3a5f;
+    /* On hover switch to white background with dark blue text for contrast */
+    background: #ffffff;
+    color: #0d1b2a;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(13, 27, 42, 0.3);
+    box-shadow: 0 6px 18px rgba(13, 27, 42, 0.08);
+    border: 1px solid rgba(13,27,42,0.08);
 }
 
 .weekend-view-btn i {
     font-size: 0.9rem;
 }
+
+.weekend-view-btn i { color: inherit; }
 
 /* =============================================
    WEEKEND DETAIL MODAL

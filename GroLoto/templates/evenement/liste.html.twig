@@ -10,7 +10,7 @@
 
 {% block body %}
 <!-- Hero Section -->
-<div class="hero-section stocks-hero">
+<div class="hero-section weekend-hero">
     <div class="shine"></div>
     <div class="hero-content">
         <h1 class="hero-title">Gestion des Événements</h1>
@@ -85,11 +85,23 @@
 
                     <div class="weekend-card-body">
                         <h3 class="weekend-card-title">{{ evenement.nom }}</h3>
+                        {% if evenement.description %}
+                        <div class="weekend-card-description" style="margin-top:0.5rem;">
+                            {{ evenement.description|striptags|slice(0,120) }}{% if evenement.description|length > 120 %}...{% endif %}
+                        </div>
+                        {% endif %}
                         
                         <div class="weekend-card-dates">
                             <i class="far fa-calendar"></i>
                             <span>Du {{ evenement.dateDebut|date('d/m/Y') }} au {{ evenement.dateFin|date('d/m/Y') }}</span>
                         </div>
+
+                        {% if evenement.lieu %}
+                        <div class="weekend-card-location" style="margin-bottom:0.75rem; color:#4b5563; font-weight:600;">
+                            <i class="fas fa-map-marker-alt" style="margin-right:0.5rem;color:#1e3a5f;"></i>
+                            {{ evenement.lieu }}
+                        </div>
+                        {% endif %}
 
                         <div class="weekend-card-info">
                             <div class="weekend-info-item">
@@ -117,12 +129,21 @@
                     </div>
 
                     <div class="weekend-card-footer">
-                        {% if isAdmin %}
-                        <a href="{{ path('app_evenement_edit', {id: evenement.id}) }}" class="weekend-view-btn" style="width: 100%; justify-content: center;">
-                            <i class="fas fa-edit"></i>
-                            Modifier
-                        </a>
-                        {% endif %}
+                        <div>
+                            {% if isPasse %}
+                                <span class="weekend-status past">Passé</span>
+                            {% else %}
+                                <span class="weekend-status upcoming">À venir</span>
+                            {% endif %}
+                        </div>
+                        <div style="flex:1; display:flex; justify-content:flex-end;">
+                            {% if isAdmin %}
+                            <a href="{{ path('app_evenement_edit', {id: evenement.id}) }}" class="weekend-view-btn" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                                Modifier
+                            </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             {% endfor %}
