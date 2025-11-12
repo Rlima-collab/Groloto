@@ -1,228 +1,621 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Tâches disponibles{% endblock %}
+{% block title %}S'inscrire à une tâche{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/taches.css') }}">
+    <style>
+        /* Hero Section Bleu Nocturne */
+        .hero-section-taches {
+            background: linear-gradient(135deg, #0d1b2a 0%, #1b2838 50%, #0d1b2a 100%);
+            padding: 4rem 2rem;
+            margin: -20px -20px 2rem -20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section-taches::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 50%);
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.9);
+            max-width: 600px;
+        }
+
+        .taches-tabs { margin-bottom: 1.5rem; }
+        
+        .tabs-container {
+            background: white;
+            border-radius: 8px;
+            padding: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            flex-wrap: wrap;
+            border: 1px solid #e5e7eb;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 200px;
+            background: transparent;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-button.active {
+            background: #0d1b2a;
+            color: white;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #f9fafb;
+            color: #374151;
+        }        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .taches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 2rem;
+        }
+        
+        .tache-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+            border-left: 3px solid #0d1b2a;
+        }
+
+        .tache-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-left-width: 4px;
+        }        .tache-header { 
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .tache-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0d1b2a;
+            margin-bottom: 8px;
+        }
+        
+        .tache-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        
+        .info-row i { color: #0d1b2a; width: 18px; }
+        
+        .disponibilite-bar {
+            margin: 16px 0;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        
+        .disponibilite-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+        
+        .disponibilite-progress {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .disponibilite-fill {
+            height: 100%;
+            background: #10b981;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .disponibilite-fill.warning { background: #f59e0b; }
+        .disponibilite-fill.danger { background: #ef4444; }        .tache-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .demandes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .demande-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+            border-left: 3px solid #6b7280;
+        }
+
+        .demande-card.success {
+            border-left-color: #10b981;
+            background: white;
+        }
+
+        .demande-card.pending {
+            border-left-color: #f59e0b;
+            background: white;
+        }
+
+        .demande-card.refused {
+            border-left-color: #ef4444;
+            background: white;
+        }        .demande-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .demande-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0d1b2a;
+            margin-bottom: 8px;
+        }
+        
+        .demande-date { font-size: 14px; color: #6b7280; }
+        
+        .demande-messages {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        
+        .demande-message {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        
+        .demande-message:last-child { margin-bottom: 0; }
+        .demande-message strong { color: #0d1b2a; }
+        
+        .demande-actions {
+            margin-top: 16px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+                .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0d1b2a;
+        }
+        
+                .modal-close {
+            background: transparent;
+            border: 1px solid #e5e7eb;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: #6b7280;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: #f9fafb;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+        
+        .modal-body { margin-bottom: 24px; }
+        
+        .tache-name-display {
+            font-size: 16px;
+            color: #0d1b2a;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #0d1b2a;
+            font-size: 14px;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.2s ease;
+        }
+        
+        .form-textarea:focus {
+            outline: none;
+            border-color: #0d1b2a;
+            box-shadow: 0 0 0 3px rgba(13, 27, 42, 0.1);
+        }
+        
+        .modal-actions { 
+            display: flex; 
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }        .empty-state i {
+            font-size: 48px;
+            color: #d1d5db;
+            margin-bottom: 16px;
+        }
+        
+        .empty-state h3 {
+            font-size: 20px;
+            color: #6b7280;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .empty-state p { 
+            color: #9ca3af; 
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .taches-grid { grid-template-columns: 1fr; }
+            .tabs-container { flex-direction: column; }
+            .tab-button { min-width: auto; }
+            .container-custom { padding: 1rem; }
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
-<div class="page-header">
-    <h1 class="page-title">Tâches disponibles</h1>
+<div class="hero-section-taches">
+    <div class="hero-content">
+        <h1 class="hero-title">Tâches Bénévoles</h1>
+        <p class="hero-description">Découvrez les missions disponibles et rejoignez notre équipe pour participer aux événements caritatifs.</p>
+    </div>
 </div>
 
-<div class="container" style="padding: 2rem 0;">
-    
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">{{ message }}</div>
-    {% endfor %}
+<div class="container-custom">
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success" style="margin-bottom: 1.5rem;">{{ message }}</div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger" style="margin-bottom: 1.5rem;">{{ message }}</div>
+        {% endfor %}
 
-    <div class="tabs" style="margin-bottom: 1.5rem;">
-        <a href="#" class="tab selected" id="tab-disponibles" onclick="showTab('disponibles')">
-            <span class="tab-text">Tâches disponibles</span>
-        </a>
-        <a href="#" class="tab" id="tab-mes-demandes" onclick="showTab('mes-demandes')">
-            <span class="tab-text">Mes demandes</span>
-        </a>
-    </div>
+        <div class="taches-tabs">
+            <div class="tabs-container">
+                <button class="tab-button active" onclick="switchTab('disponibles')" id="tab-disponibles">
+                    <i class="bi bi-clipboard-check"></i>
+                    <span>Tâches disponibles ({{ taches_disponibles|length }})</span>
+                </button>
+                <button class="tab-button" onclick="switchTab('mes-demandes')" id="tab-mes-demandes">
+                    <i class="bi bi-inbox"></i>
+                    <span>Mes demandes ({{ mes_demandes|length }})</span>
+                </button>
+            </div>
+        </div>
 
-    <div id="content-disponibles" class="tab-content">
-        <div class="card">
-            <div class="card-header">
-                <div class="header-left">
+        <div id="content-disponibles" class="tab-content active">
+            <div class="card main-card">
+                <div class="card-header">
                     <h2 class="card-title">Tâches disponibles</h2>
-                    <p class="card-description">Vous pouvez demander à rejoindre ces tâches. L'administrateur validera votre demande.</p>
+                    <p class="card-description">Parcourez les tâches et envoyez votre candidature</p>
                 </div>
-                <div class="header-right"></div>
-            </div>
-            <div class="card-content">
-                {% if taches_disponibles|length > 0 %}
-                    <div class="taches-grid">
-                        {% for item in taches_disponibles %}
-                            {% set tache = item.tache %}
-                            <div class="tache-card">
-                                <div class="tache-body">
-                                    <div class="tache-head">
-                                        <div>
-                                            <div class="tache-title">{{ tache.titre }}</div>
-                                            <div class="tache-meta">{{ tache.weekend ? tache.weekend.nom : 'Aucun weekend' }}</div>
-                                        </div>
-                                        <div class="tache-meta" style="text-align:right">{{ tache.debut|date('d/m/Y H:i') }}</div>
+                <div class="card-content">
+                    {% if taches_disponibles|length > 0 %}
+                        <div class="taches-grid">
+                            {% for item in taches_disponibles %}
+                                {% set tache = item.tache %}
+                                {% set pourcentage = (item.nbAffectations / tache.maxPersonnes * 100)|round %}
+                                <div class="tache-card">
+                                    <div class="tache-header">
+                                        <h3 class="tache-title">{{ tache.titre }}</h3>
+                                        {% if tache.weekend %}
+                                            <span class="badge" style="background: #6b7280; color: white; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500;">{{ tache.weekend.nom }}</span>
+                                        {% endif %}
                                     </div>
-                                    <div class="tache-meta">Au {{ tache.fin|date('d/m/Y H:i') }}</div>
-                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
-                                        <div>
-                                            <div class="post-label">{{ tache.posteRequis ?: '-' }}</div>
-                                            <div class="tache-meta">Poste requis</div>
+                                    <div class="tache-info">
+                                        <div class="info-row">
+                                            <i class="bi bi-calendar3"></i>
+                                            <span><strong>Début :</strong> {{ tache.debut|date('d/m/Y à H:i') }}</span>
                                         </div>
-                                        <div style="text-align:right">
-                                            <div class="spots">{{ item.nbAffectations }} / {{ tache.maxPersonnes }}</div>
-                                            <div class="tache-meta">Places</div>
+                                        <div class="info-row">
+                                            <i class="bi bi-calendar3"></i>
+                                            <span><strong>Fin :</strong> {{ tache.fin|date('d/m/Y à H:i') }}</span>
                                         </div>
+                                        {% if tache.posteRequis %}
+                                            <div class="info-row">
+                                                <i class="bi bi-person-badge"></i>
+                                                <span><strong>Poste :</strong> {{ tache.posteRequis }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="disponibilite-bar">
+                                        <div class="disponibilite-label">
+                                            <span>Places disponibles</span>
+                                            <span>{{ item.nbAffectations }} / {{ tache.maxPersonnes }}</span>
+                                        </div>
+                                        <div class="disponibilite-progress">
+                                            <div class="disponibilite-fill {% if pourcentage >= 80 %}danger{% elseif pourcentage >= 50 %}warning{% endif %}" 
+                                                 style="width: {{ pourcentage }}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="tache-footer">
+                                        <span class="badge" style="background: #10b981; color: white; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500;">Disponible</span>
+                                        <button type="button" class="btn btn-small"
+                                                style="background: #0d1b2a; color: white; border: none; padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: all 0.2s;"
+                                                onmouseover="this.style.background='#1b2838'"
+                                                onmouseout="this.style.background='#0d1b2a'"
+                                                data-csrf-tache="{{ tache.id }}"
+                                                data-csrf-token="{{ csrf_token('demander_tache_' ~ tache.id) }}"
+                                                onclick="openDemandeModal({{ tache.id }}, '{{ tache.titre|escape('js') }}')">
+                                            Postuler
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="tache-footer">
-                                    <div class="tache-meta small">Disponible</div>
-                                    <div>
-                                        <button type="button" class="btn btn-primary btn-small" data-csrf-tache="{{ tache.id }}" data-csrf-token="{{ csrf_token('demander_tache_' ~ tache.id) }}" onclick="openDemandeModal({{ tache.id }}, '{{ tache.titre|escape('js') }}')">Demander</button>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        Aucune tâche disponible pour le moment. Toutes les tâches futures sont soit complètes, soit vous y êtes déjà affecté.
-                    </div>
-                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-clipboard-x"></i>
+                            <h3>Aucune tâche disponible</h3>
+                            <p>Revenez bientôt pour découvrir de nouvelles missions !</p>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="content-mes-demandes" class="tab-content" style="display: none;">
-        <div class="card">
-            <div class="card-header">
-                <div class="header-left">
+        <div id="content-mes-demandes" class="tab-content">
+            <div class="card main-card">
+                <div class="card-header">
                     <h2 class="card-title">Mes demandes</h2>
-                    <p class="card-description">Historique de vos demandes d'affectation</p>
+                    <p class="card-description">Consultez le statut de vos candidatures</p>
                 </div>
-                <div class="header-right">
-                    <!-- actions -->
-                </div>
-            </div>
-            <div class="card-content">
-                {% if mes_demandes|length > 0 %}
-                    <div class="demandes-list">
-                        {% for demande in mes_demandes %}
-                            <div class="demande-card {% if demande.statut == 'acceptee' %}row-success{% elseif demande.statut == 'refusee' %}row-muted{% endif %}">
-                                <div class="demande-info">
-                                    <div><strong>{{ demande.tache.titre }}</strong> <span class="tache-meta">— {{ demande.tache.debut|date('d/m/Y H:i') }}</span></div>
-                                    <div class="small">Demande envoyée le {{ demande.dateDemande|date('d/m/Y H:i') }}</div>
-                                    <div>
-                                        {% if demande.messageBenevole %}<div class="small"><strong>Votre message:</strong> {{ demande.messageBenevole }}</div>{% endif %}
-                                        {% if demande.messageAdmin %}<div class="small" style="color:#2563eb;"><strong>Réponse admin:</strong> {{ demande.messageAdmin }}</div>{% endif %}
+                <div class="card-content">
+                    {% if mes_demandes|length > 0 %}
+                        <div class="demandes-list">
+                            {% for demande in mes_demandes %}
+                                <div class="demande-card {% if demande.statut == 'acceptee' %}success{% elseif demande.statut == 'refusee' %}refused{% else %}pending{% endif %}">
+                                    <div class="demande-header">
+                                        <div>
+                                            <div class="demande-title">{{ demande.tache.titre }}</div>
+                                            <div class="demande-date">
+                                                <i class="bi bi-calendar3"></i> {{ demande.tache.debut|date('d/m/Y à H:i') }}
+                                            </div>
+                                            <div class="demande-date" style="margin-top: 0.25rem;">
+                                                <i class="bi bi-clock"></i> Demande envoyée le {{ demande.dateDemande|date('d/m/Y à H:i') }}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            {% if demande.statut == 'en_attente' %}
+                                                <span class="badge" style="background: #f59e0b; color: white; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500;">En attente</span>
+                                            {% elseif demande.statut == 'acceptee' %}
+                                                <span class="badge" style="background: #10b981; color: white; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500;">Acceptée</span>
+                                            {% else %}
+                                                <span class="badge" style="background: #ef4444; color: white; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500;">Refusée</span>
+                                            {% endif %}
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="demande-actions">
-                                    <div>
-                                        {% if demande.statut == 'en_attente' %}
-                                            <span class="badge badge-warning">En attente</span>
-                                        {% elseif demande.statut == 'acceptee' %}
-                                            <span class="badge badge-success">Acceptée</span>
-                                        {% else %}
-                                            <span class="badge badge-danger">Refusée</span>
-                                        {% endif %}
-                                    </div>
-                                    <div>
-                                        {% if demande.statut == 'en_attente' %}
-                                            <form method="POST" action="{{ path('benevole_annuler_demande', {'id': demande.id}) }}">
+                                    {% if demande.messageBenevole or demande.messageAdmin %}
+                                        <div class="demande-messages">
+                                            {% if demande.messageBenevole %}
+                                                <div class="demande-message">
+                                                    <strong>Votre message :</strong><br>{{ demande.messageBenevole }}
+                                                </div>
+                                            {% endif %}
+                                            {% if demande.messageAdmin %}
+                                                <div class="demande-message">
+                                                    <strong>Réponse :</strong><br>{{ demande.messageAdmin }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    {% if demande.statut == 'en_attente' %}
+                                        <div class="demande-actions">
+                                            <form method="POST" action="{{ path('benevole_annuler_demande', {'id': demande.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette demande ?')">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('annuler_demande_' ~ demande.id) }}">
-                                                <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette demande ?')">Annuler</button>
+                                                <button type="submit" class="btn btn-small"
+                                                        style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: all 0.2s;"
+                                                        onmouseover="this.style.background='#ef4444'; this.style.color='white'"
+                                                        onmouseout="this.style.background='transparent'; this.style.color='#ef4444'">
+                                                    Annuler
+                                                </button>
                                             </form>
-                                        {% endif %}
-                                    </div>
+                                        </div>
+                                    {% endif %}
                                 </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        Vous n'avez fait aucune demande pour le moment.
-                    </div>
-                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <h3>Aucune demande</h3>
+                            <p>Explorez les tâches disponibles et postulez !</p>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
+</div>
 
-<!-- Modal pour faire une demande -->
-<div id="demandeModal" class="modal" aria-hidden="true">
+<div id="demandeModal" class="modal-overlay">
     <div class="modal-content">
-        <button type="button" class="close" onclick="closeDemandeModal()" aria-label="Fermer">&times;</button>
-        <h2 style="margin-top: 0;">Demander à rejoindre la tâche</h2>
-        <p id="tacheNom" style="font-weight: bold; color: #2563eb;"></p>
-        <form id="demandeForm" method="POST">
-            <input type="hidden" name="_token" id="csrfToken">
-            <div class="form-group">
-                <label for="message">Message (optionnel)</label>
-                <textarea name="message" id="message" class="form-control" rows="4" placeholder="Expliquez pourquoi vous souhaitez rejoindre cette tâche..."></textarea>
-            </div>
-            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
-                <button type="button" class="btn btn-secondary" onclick="closeDemandeModal()">Annuler</button>
-                <button type="submit" class="btn btn-primary">Envoyer la demande</button>
-            </div>
-        </form>
+        <div class="modal-header">
+            <h2 class="modal-title">Postuler à la tâche</h2>
+            <button class="modal-close" onclick="closeDemandeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="tacheNom" class="tache-name-display"></div>
+            <form id="demandeForm" method="POST">
+                <input type="hidden" name="_token" id="csrfToken">
+                <div class="form-group">
+                    <label for="message" class="form-label">Message de motivation (optionnel)</label>
+                    <textarea name="message" id="message" class="form-textarea" rows="5" 
+                              placeholder="Expliquez pourquoi vous souhaitez participer..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn"
+                            style="background: transparent; color: #6b7280; border: 1px solid #d1d5db; padding: 0.625rem 1.5rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#f9fafb'; this.style.borderColor='#9ca3af'"
+                            onmouseout="this.style.background='transparent'; this.style.borderColor='#d1d5db'"
+                            onclick="closeDemandeModal()">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn"
+                            style="background: #0d1b2a; color: white; border: none; padding: 0.625rem 1.5rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#1b2838'"
+                            onmouseout="this.style.background='#0d1b2a'">
+                        Envoyer ma candidature
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <script>
-function showTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.style.display = 'none';
-    });
-    
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('selected');
-    });
-    
-    const contentEl = document.getElementById('content-' + tabName);
-    if (contentEl) {
-        contentEl.style.display = 'block';
-    }
-    
-    const tabEl = document.getElementById('tab-' + tabName);
-    if (tabEl) {
-        tabEl.classList.add('selected');
-    }
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    document.getElementById('content-' + tabName)?.classList.add('active');
+    document.getElementById('tab-' + tabName)?.classList.add('active');
 }
 
 function openDemandeModal(tacheId, tacheNom) {
     document.getElementById('tacheNom').textContent = tacheNom;
-    const form = document.getElementById('demandeForm');
-    form.action = `/benevole/demander-tache/${tacheId}`;
-    
-    // Générer le token CSRF côté template
-    const tokenInput = document.getElementById('csrfToken');
-    tokenInput.name = '_token';
-    tokenInput.value = generateCsrfToken(tacheId);
-    
-    const modal = document.getElementById('demandeModal');
-    modal.classList.add('open');
-    modal.setAttribute('aria-hidden', 'false');
-    // focus the message textarea for accessibility
-    setTimeout(() => document.getElementById('message').focus(), 50);
-}
-
-// Fonction pour générer le token - on utilise une astuce avec les attributs data
-function generateCsrfToken(tacheId) {
-    // Le token est généré par Twig et stocké dans un attribut data
-    const tokenElement = document.querySelector(`[data-csrf-tache="${tacheId}"]`);
-    if (tokenElement) {
-        return tokenElement.getAttribute('data-csrf-token');
-    }
-    // Fallback - utiliser un token générique
-    return document.querySelector('[data-csrf-generic]')?.getAttribute('data-csrf-generic') || '';
+    document.getElementById('demandeForm').action = '/benevole/demander-tache/' + tacheId;
+    document.getElementById('csrfToken').value = document.querySelector('[data-csrf-tache="' + tacheId + '"]')?.getAttribute('data-csrf-token') || '';
+    document.getElementById('demandeModal').classList.add('active');
+    setTimeout(() => document.getElementById('message').focus(), 100);
 }
 
 function closeDemandeModal() {
-    const modal = document.getElementById('demandeModal');
-    modal.classList.remove('open');
-    modal.setAttribute('aria-hidden', 'true');
+    document.getElementById('demandeModal').classList.remove('active');
     document.getElementById('message').value = '';
 }
 
-// Fermer le modal si on clique en dehors
-window.onclick = function(event) {
-    const modal = document.getElementById('demandeModal');
-    if (event.target === modal) {
-        closeDemandeModal();
-    }
-}
-</script>
+document.getElementById('demandeModal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeDemandeModal();
+});
 
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDemandeModal();
+});
+</script>
 {% endblock %}
