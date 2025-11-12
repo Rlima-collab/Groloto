@@ -1,0 +1,646 @@
+/* =============================================
+   WEEKENDS CARDS LAYOUT
+   ============================================= */
+
+.weekends-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.weekends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* =============================================
+   WEEKEND CARD
+   ============================================= */
+
+.weekend-card {
+    background: #ffffff !important;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #e5e7eb !important;
+    position: relative;
+    max-width: 320px;
+    padding: 0 !important;
+}
+
+.weekend-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-color: #0d1b2a;
+}
+
+.weekend-card-image {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    border-radius: 16px 16px 0 0;
+}
+
+.weekend-card-image::before {
+    display: none;
+}
+
+.weekend-card-image i {
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.95);
+    z-index: 1;
+}
+
+.weekend-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.weekend-card-body {
+    padding: 1rem !important;
+    background: #ffffff !important;
+}
+
+.weekend-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937 !important;
+    margin-bottom: 0.5rem;
+}
+
+.weekend-card-dates {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #0d1b2a;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.weekend-card-dates i {
+    font-size: 1rem;
+}
+
+.weekend-card-description {
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    border-left: 3px solid #0d1b2a;
+}
+
+.weekend-card-info {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0;
+}
+
+.weekend-info-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem 0.5rem;
+    background: #f9fafb !important;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb !important;
+}
+
+.weekend-info-item i {
+    color: #0d1b2a;
+    font-size: 1.25rem;
+    margin-bottom: 0.35rem;
+}
+
+.weekend-info-item .value {
+    color: #1f2937;
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.weekend-info-item .label {
+    color: #6b7280;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+.weekend-card-footer {
+    padding: 1rem !important;
+    background: #ffffff !important;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.weekend-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.weekend-status.upcoming {
+    background: #eff6ff;
+    color: #0d1b2a;
+}
+
+.weekend-status.past {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.weekend-view-btn {
+    padding: 0.5rem 1rem;
+    background: #0d1b2a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.weekend-view-btn:hover {
+    background: #1e3a5f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13, 27, 42, 0.3);
+}
+
+.weekend-view-btn i {
+    font-size: 0.9rem;
+}
+
+/* =============================================
+   WEEKEND DETAIL MODAL
+   ============================================= */
+
+.weekend-detail-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    padding: 2rem;
+    overflow-y: auto;
+    backdrop-filter: blur(4px);
+}
+
+.weekend-detail-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.weekend-detail-content {
+    background: #ffffff;
+    border-radius: 20px;
+    max-width: 1200px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid #e5e7eb;
+}
+
+.weekend-detail-header {
+    position: relative;
+    padding: 2rem;
+    background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+    border-bottom: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.weekend-detail-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.weekend-detail-close:hover {
+    background: rgba(0, 0, 0, 0.5);
+    transform: rotate(90deg);
+}
+
+.weekend-detail-title {
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.weekend-detail-dates {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.weekend-description-modal {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.weekend-detail-body {
+    padding: 2rem;
+    background: #ffffff;
+}
+
+.weekend-detail-section {
+    margin-bottom: 2rem;
+}
+
+.weekend-detail-section-title {
+    color: #0d1b2a;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #0d1b2a;
+}
+
+.weekend-detail-section-title i {
+    color: #0d1b2a;
+}
+
+/* Événements associés */
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.event-item-detail {
+    background: #f9fafb;
+    padding: 1rem;
+    border-radius: 12px;
+    border-left: 4px solid #0d1b2a;
+    transition: all 0.3s ease;
+}
+
+.event-item-detail:hover {
+    background: #f3f4f6;
+    transform: translateX(5px);
+}
+
+.event-item-detail h4 {
+    color: #0d1b2a;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.event-item-detail p {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 0.25rem 0;
+}
+
+/* Tâches */
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.task-item-detail {
+    background: #f9fafb;
+    padding: 1.25rem;
+    border-radius: 12px;
+    border-left: 4px solid #0d1b2a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.task-item-detail:hover {
+    background: #f3f4f6;
+}
+
+.task-item-info h4 {
+    color: #0d1b2a;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.task-item-meta {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.task-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.task-meta-item i {
+    color: #0d1b2a;
+}
+
+/* Planning Calendar in Modal */
+.weekend-planning-calendar {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+    border: 1px solid #e5e7eb;
+}
+
+#weekendCalendar {
+    background: transparent;
+}
+
+/* FullCalendar customization for modal */
+.weekend-detail-modal .fc {
+    background: transparent;
+}
+
+.weekend-detail-modal .fc-theme-standard td,
+.weekend-detail-modal .fc-theme-standard th {
+    border-color: #e5e7eb;
+}
+
+.weekend-detail-modal .fc-col-header-cell {
+    background: #f3f4f6;
+    color: #0d1b2a;
+    font-weight: 600;
+    padding: 12px 4px;
+}
+
+.weekend-detail-modal .fc-daygrid-day-number {
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.weekend-detail-modal .fc-day-today {
+    background: #eff6ff !important;
+}
+
+.weekend-detail-modal .fc-timegrid-slot {
+    height: 2.5em;
+}
+
+.weekend-detail-modal .fc-timegrid-slot-label {
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.weekend-detail-modal .fc-button {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+    border: none;
+    text-transform: capitalize;
+    padding: 8px 16px;
+    font-weight: 600;
+}
+
+.weekend-detail-modal .fc-button:hover {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+}
+
+.weekend-detail-modal .fc-button-primary:not(:disabled).fc-button-active {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+}
+
+.weekend-detail-modal .fc-toolbar-title {
+    color: #0d1b2a;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+/* Styles pour les événements */
+.weekend-detail-modal .fc-event {
+    border-width: 2px;
+    border-style: solid;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.weekend-detail-modal .fc-event:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    z-index: 100;
+}
+
+.weekend-detail-modal .fc-event-title {
+    font-weight: 600;
+}
+
+/* Événements de type "evenement" */
+.weekend-detail-modal .event-evenement {
+    border-left-width: 4px !important;
+}
+
+/* Événements de type "tache" */
+.weekend-detail-modal .event-tache {
+    border-left-width: 4px !important;
+}
+
+/* Custom event content styles */
+.fc-event-content-custom {
+    padding: 6px 8px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.fc-event-title-custom {
+    font-weight: 600;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    white-space: normal;
+    overflow: hidden;
+}
+
+.fc-event-title-custom i {
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.fc-event-meta {
+    font-size: 0.75rem;
+    opacity: 0.95;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.badge-poste {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.badge-personnes {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* Amélioration de la lisibilité des slots */
+.weekend-detail-modal .fc-timegrid-slot {
+    height: 3.5em !important;
+}
+
+.weekend-detail-modal .fc-timegrid-axis {
+    width: 60px !important;
+}
+
+.weekend-detail-modal .fc-timegrid-slot-label-cushion {
+    padding: 8px 4px;
+}
+
+/* Réduction du chevauchement */
+.weekend-detail-modal .fc-timegrid-event {
+    border-radius: 4px;
+    margin-bottom: 2px;
+}
+
+.weekend-detail-modal .fc-timegrid-event-harness {
+    margin-right: 2px;
+}
+
+/* Vue liste améliorée */
+.weekend-detail-modal .fc-list-event:hover td {
+    background-color: #f3f4f6;
+}
+
+.weekend-detail-modal .fc-list-event-title {
+    font-weight: 500;
+}
+
+.weekend-detail-modal .fc-list-event-time {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #6b7280;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+}
+
+/* No weekends */
+.no-weekends {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 2px dashed #d1d5db;
+}
+
+.no-weekends i {
+    font-size: 5rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.no-weekends h3 {
+    color: #0d1b2a;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.no-weekends p {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .weekends-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .weekend-detail-content {
+        margin: 1rem;
+    }
+    
+    .events-grid {
+        grid-template-columns: 1fr;
+    }
+}

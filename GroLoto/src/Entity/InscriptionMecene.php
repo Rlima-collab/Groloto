@@ -1,62 +1,61 @@
 <?php
+
 namespace App\Entity;
 
 use App\Repository\InscriptionMeceneRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: InscriptionMeceneRepository::class)]
-#[ORM\Table(name: "INSCRIPTION_MECENE")]
+#[ORM\Table(name: 'INSCRIPTION_MECENE')]
 class InscriptionMecene
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer")]
+    #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Mecene::class)]
-    #[ORM\JoinColumn(name: "id_mecene", referencedColumnName: "id", nullable: false)]
+    #[ORM\JoinColumn(name: 'id_mecene', referencedColumnName: 'id', nullable: false)]
     private ?Mecene $mecene = null;
 
     #[ORM\ManyToOne(targetEntity: Evenement::class)]
-    #[ORM\JoinColumn(name: "id_evenement", referencedColumnName: "id", nullable: false)]
+    #[ORM\JoinColumn(name: 'id_evenement', referencedColumnName: 'id', nullable: false)]
     private ?Evenement $evenement = null;
 
-    #[ORM\Column(type: "text", nullable: true)]
+    #[ORM\Column(type: 'text')]
     private ?string $description_don = null;
 
-    #[ORM\Column(type: "float", nullable: true)]
+    #[ORM\Column(type: 'float', nullable: true)]
     private ?float $montant_estime = null;
 
-    // Champs pour le stock
-    #[ORM\Column(type: "string", length: 255, nullable: true)]
-    private ?string $nom_don = null;
+    #[ORM\Column(length: 20)]
+    private ?string $statut = 'en_attente';
 
-    #[ORM\Column(type: "string", length: 50, nullable: true)]
-    private ?string $categorie = null;
-
-    #[ORM\Column(type: "integer", nullable: true)]
-    private ?int $quantite = 1;
-
-    #[ORM\Column(type: "float", nullable: true)]
-    private ?float $valeur_unitaire = null;
-
-    #[ORM\Column(type: "string", length: 50)]
-    private string $statut = 'en_attente';
-
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $date_inscription = null;
 
-    #[ORM\Column(type: "text", nullable: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $remarques = null;
 
-    #[ORM\Column(type: "text", nullable: true)]
+    #[ORM\Column(length: 255)]
+    private ?string $nom_don = null;
+
+    #[ORM\Column(length: 50)]
+    private ?string $categorie = null;
+
+    #[ORM\Column(type: 'integer')]
+    private ?int $quantite = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $valeur_unitaire = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $remarque_refus = null;
 
-    public function __construct()
-    {
-        $this->date_inscription = new \DateTime();
-        $this->statut = 'en_attente';
-    }
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $remarque_acceptation = null;
+
+    // --- GETTERS & SETTERS ---
 
     public function getId(): ?int
     {
@@ -90,7 +89,7 @@ class InscriptionMecene
         return $this->description_don;
     }
 
-    public function setDescriptionDon(?string $description_don): self
+    public function setDescriptionDon(string $description_don): self
     {
         $this->description_don = $description_don;
         return $this;
@@ -107,16 +106,13 @@ class InscriptionMecene
         return $this;
     }
 
-    public function getStatut(): string
+    public function getStatut(): ?string
     {
         return $this->statut;
     }
 
     public function setStatut(string $statut): self
     {
-        if (!in_array($statut, ['en_attente', 'accepte', 'refuse'])) {
-            throw new \InvalidArgumentException("Le statut doit être : en_attente, accepte ou refuse");
-        }
         $this->statut = $statut;
         return $this;
     }
@@ -148,7 +144,7 @@ class InscriptionMecene
         return $this->nom_don;
     }
 
-    public function setNomDon(?string $nom_don): self
+    public function setNomDon(string $nom_don): self
     {
         $this->nom_don = $nom_don;
         return $this;
@@ -159,11 +155,8 @@ class InscriptionMecene
         return $this->categorie;
     }
 
-    public function setCategorie(?string $categorie): self
+    public function setCategorie(string $categorie): self
     {
-        if ($categorie !== null && !in_array($categorie, ['bar', 'resto', 'deco', 'autre'])) {
-            throw new \InvalidArgumentException("La catégorie doit être : bar, resto, deco ou autre");
-        }
         $this->categorie = $categorie;
         return $this;
     }
@@ -173,7 +166,7 @@ class InscriptionMecene
         return $this->quantite;
     }
 
-    public function setQuantite(?int $quantite): self
+    public function setQuantite(int $quantite): self
     {
         $this->quantite = $quantite;
         return $this;
@@ -198,6 +191,17 @@ class InscriptionMecene
     public function setRemarqueRefus(?string $remarque_refus): self
     {
         $this->remarque_refus = $remarque_refus;
+        return $this;
+    }
+
+    public function getRemarqueAcceptation(): ?string
+    {
+        return $this->remarque_acceptation;
+    }
+
+    public function setRemarqueAcceptation(?string $remarque_acceptation): self
+    {
+        $this->remarque_acceptation = $remarque_acceptation;
         return $this;
     }
 }

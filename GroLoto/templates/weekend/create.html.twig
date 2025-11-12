@@ -1,0 +1,116 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un weekend{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-create.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section weekend-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Créer un Weekend</h1>
+        <p class="hero-description">Organisez un nouveau weekend d'événements caritatifs.</p>
+        <a href="{{ path('app_weekends') }}" class="btn-login">Voir tous les weekends</a>
+    </div>
+</div>
+
+<div class="weekend-create-container">
+    <div class="weekend-form-card">
+        <div class="weekend-form-header">
+            <h2>Informations du Weekend</h2>
+        </div>
+
+        {{ form_start(form, {'attr': {'class': 'form-night-blue'}}) }}
+
+            <div class="mb-4">
+                {{ form_row(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Weekend Groloto Novembre 2025'}}) }}
+            </div>
+
+            <div class="grid-2 mb-4">
+                {{ form_row(form.date_debut, {'attr': {'class': 'form-control'}}) }}
+                {{ form_row(form.date_dimanche, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            
+            <div class="alert alert-info mb-4" style="background: #e0f2fe; border-left: 4px solid #0ea5e9; padding: 1rem; border-radius: 8px;">
+                <strong>Info :</strong> Le weekend doit durer au minimum 2 jours. La date du samedi (jour du milieu) sera calculée automatiquement.
+
+            </div>
+
+            <div class="mb-4">
+                {{ form_row(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Description du weekend...'}}) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_row(form.cover_image, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="text-center mt-8">
+                <button type="submit" class="btn-night-blue">
+                    Créer le weekend
+                </button>
+                <a href="{{ path('app_weekends') }}" class="btn-outline-night-blue ml-3">
+                    Annuler
+                </a>
+            </div>
+
+            <div style="display: none;">
+                {{ form_rest(form) }}
+            </div>
+
+        {{ form_end(form, {'render_rest': false}) }}
+    </div>
+</div>
+
+<script>
+// Pas de JavaScript nécessaire pour ce formulaire simple
+</script>
+
+<style>
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+.ml-3 {
+    margin-left: 1rem;
+}
+
+.mt-8 {
+    margin-top: 2rem;
+}
+
+.text-muted { 
+    color: #6b7280; 
+    font-size: 0.875rem; 
+    margin-top: 0.25rem; 
+    display: block; 
+}
+
+.form-row { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 1rem; 
+}
+
+.form-col { 
+    flex: 1; 
+}
+
+@media (max-width: 768px) { 
+    .form-row { 
+        grid-template-columns: 1fr; 
+    } 
+}
+</style>
+{% endblock %}

@@ -1,0 +1,282 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% if is_granted('ROLE_ADMIN') %}Tous les Lots{% else %}Mes Lots{% endif %}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
+    <style>
+        .lot-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .lot-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #1a3c5a;
+            transform: translateY(-2px);
+        }
+
+        .lot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .lot-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1a3c5a;
+            margin: 0;
+            flex: 1;
+        }
+
+        .lot-value {
+            background: linear-gradient(135deg, #0d1b2a, #1a3c5a);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .lot-mecene {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 3px solid #0d1b2a;
+        }
+
+        .lot-mecene .info-icon {
+            font-size: 1.2rem;
+        }
+
+        .lot-mecene-name {
+            font-weight: 600;
+            color: #1a3c5a;
+            flex: 1;
+        }
+
+        .lot-description {
+            color: #6b7280;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .lot-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .detail-icon {
+            font-size: 1.3rem;
+        }
+
+        .detail-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a3c5a;
+        }
+
+        .search-box {
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1a3c5a;
+            box-shadow: 0 0 0 3px rgba(26, 60, 90, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .lot-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="hero-section benevoles-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">{% if is_granted('ROLE_ADMIN') %}Tous les Lots{% else %}Mes Lots{% endif %}</h1>
+        <p class="hero-description">Catalogue des lots et dotations {% if not is_granted('ROLE_ADMIN') %}de votre organisation{% endif %}</p>
+        <a href="#liste-lots" class="btn-login">Voir les lots</a>
+    </div>
+</div>
+
+<br>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <h3>Nombre de lots</h3>
+        <p class="metric-value">{{ metriques.total }}</p>
+        <p class="metric-detail">Lots disponibles</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Valeur totale</h3>
+        <p class="metric-value">{{ (metriques.valeur)|number_format(0, ',', ' ') }} €</p>
+        <p class="metric-detail">Dotations estimées</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>{% if is_granted('ROLE_ADMIN') %}Mécènes partenaires{% else %}Votre contribution{% endif %}</h3>
+        <p class="metric-value">{{ metriques.mecenes }}</p>
+        <p class="metric-detail">{% if is_granted('ROLE_ADMIN') %}Partenaires actifs{% else %}Organisation{% endif %}</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card main-card" id="liste-lots">
+        <div class="card-header">
+            <h2 class="card-title">{% if is_granted('ROLE_ADMIN') %}Catalogue des Lots{% else %}Mes Lots{% endif %}</h2>
+            <p class="card-description">{% if is_granted('ROLE_ADMIN') %}Tous les lots offerts par les mécènes{% else %}Vos contributions aux événements{% endif %}</p>
+        </div>
+        <div class="card-content">
+            {% if lots|length > 0 %}
+                <div class="search-box">
+                    <input type="text" 
+                           id="searchInput" 
+                           class="search-input" 
+                           placeholder="Rechercher un lot par nom ou mécène...">
+                </div>
+
+                <div class="benevoles-grid" id="lotsGrid">
+                    {% for lot in lots %}
+                        <div class="lot-card benevole-card" 
+                             data-lot-title="{{ lot.titre|lower }}" 
+                             data-mecene="{{ lot.mecene ? lot.mecene.organisation|lower : '' }}">
+                            <div class="lot-header">
+                                <h3 class="lot-title">{{ lot.titre }}</h3>
+                                <span class="lot-value">{{ lot.valeurEstimee|number_format(2, ',', ' ') }} €</span>
+                            </div>
+                            
+                            {% if lot.mecene and is_granted('ROLE_ADMIN') %}
+                            <div class="lot-mecene">
+                                <span class="lot-mecene-name"><strong>Mécène:</strong> {{ lot.mecene.organisation }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if lot.description %}
+                            <p class="lot-description">{{ lot.description }}</p>
+                            {% endif %}
+
+                            <div class="lot-details">
+                                <div class="detail-item">
+                                    <div class="detail-info">
+                                        <span class="detail-label">Quantité</span>
+                                        <span class="detail-value">{{ lot.quantite }}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-info">
+                                        <span class="detail-label">Valeur totale</span>
+                                        <span class="detail-value">{{ (lot.valeurEstimee * lot.quantite)|number_format(2, ',', ' ') }} €</span>
+                                    </div>
+                                </div>
+                                {% if lot.weekend %}
+                                <div class="detail-item" style="grid-column: 1 / -1; background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1px solid #3b82f6;">
+                                    <div class="detail-info">
+                                        <span class="detail-label" style="color: #1e40af;">Week-end associé</span>
+                                        <span class="detail-value" style="color: #1e40af;">{{ lot.weekend.nom }}</span>
+                                        <span style="font-size: 0.85rem; color: #3b82f6; margin-top: 0.25rem;">
+                                            📅 {{ lot.weekend.dateVendredi|date('d/m/Y') }} - {{ lot.weekend.dateDimanche|date('d/m/Y') }}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if lot.dateCreation %}
+                                <div class="detail-item" style="grid-column: 1 / -1;">
+                                    <div class="detail-info">
+                                        <span class="detail-label">Ajouté le</span>
+                                        <span class="detail-value">{{ lot.dateCreation|date('d/m/Y à H:i') }}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>Aucun lot disponible</h3>
+                    <p>{% if mecene %}Vous n'avez pas encore proposé de lots.{% else %}Aucun lot n'est actuellement disponible.{% endif %}</p>
+                    {% if mecene %}
+                    <a href="{{ path('mecene_inscription') }}" class="btn btn-primary">Proposer un lot</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Recherche en temps réel
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const lotCards = document.querySelectorAll('.lot-card');
+                
+                lotCards.forEach(card => {
+                    const title = card.getAttribute('data-lot-title');
+                    const mecene = card.getAttribute('data-mecene');
+                    
+                    if (title.includes(searchTerm) || mecene.includes(searchTerm)) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+    </script>
+{% endblock %}

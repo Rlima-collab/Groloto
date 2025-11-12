@@ -4,6 +4,10 @@
     padding: 40px 0;
     box-sizing: border-box;
     font-family: Arial, sans-serif;
+    margin-top: auto;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
 }
 .footer-container {
     max-width: 1200px;

@@ -252,6 +252,65 @@ class AuthController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Gérer l'upload de l'image de profil
+            $profileImageFile = $request->files->get('profileImage');
+            if ($profileImageFile) {
+                // Vérifier le type et la taille du fichier
+                $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                $maxFileSize = 2 * 1024 * 1024; // 2 Mo
+                
+                if (!in_array($profileImageFile->getMimeType(), $allowedMimeTypes)) {
+                    $this->addFlash('error', 'Le fichier doit être une image (JPG, PNG ou GIF).');
+                    return $this->render('auth/profile_edit.html.twig', [
+                        'form' => $form->createView(),
+                        'user' => $user,
+                    ]);
+                }
+                
+                if ($profileImageFile->getSize() > $maxFileSize) {
+                    $this->addFlash('error', 'L\'image est trop volumineuse (maximum 2 Mo).');
+                    return $this->render('auth/profile_edit.html.twig', [
+                        'form' => $form->createView(),
+                        'user' => $user,
+                    ]);
+                }
+                
+                // Supprimer l'ancienne image si elle existe
+                if ($user->getProfileImage()) {
+                    $oldImagePath = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $user->getProfileImage();
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+                
+                // Générer un nom unique pour le fichier
+                $newFilename = uniqid() . '.' . $profileImageFile->guessExtension();
+                
+                // Déplacer le fichier vers le dossier d'upload
+                $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles';
+                if (!is_dir($uploadsDirectory)) {
+                    mkdir($uploadsDirectory, 0777, true);
+                }
+                
+                try {
+                    $profileImageFile->move($uploadsDirectory, $newFilename);
+                    $user->setProfileImage($newFilename);
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
+                }
+            }
+            
+            // Gérer la suppression de l'image
+            if ($request->request->get('removeImage') === '1') {
+                if ($user->getProfileImage()) {
+                    $imagePath = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $user->getProfileImage();
+                    if (file_exists($imagePath)) {
+                        unlink($imagePath);
+                    }
+                    $user->setProfileImage(null);
+                }
+            }
+            
             // Récupérer les données du formulaire
             $currentPassword = $form->get('currentPassword')->getData();
             $newPassword = $form->get('newPassword')->getData();

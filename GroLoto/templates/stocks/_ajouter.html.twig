@@ -1,147 +1,100 @@
-<div class="ajouter-container">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title"><i class="bi bi-plus-circle me-2"></i>Mouvement de Stock</h3>
-            <p class="subtitle">Enregistrer une entrée ou sortie de stock</p>
-        </div>
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <h3 class="mb-3" style="color: #0d1b2a; font-weight: 600;">
+            <i class="bi bi-plus-circle me-2"></i>Ajouter un mouvement de stock
+        </h3>
+        <p class="text-muted mb-4">Enregistrer une entrée ou sortie de stock</p>
 
-        <div class="card-content">
-            <form method="post" action="{{ path('stock_ajouter_mouvement') }}" class="stock-form">
-                <div class="form-grid">
-                    <!-- Article -->
-                    <div class="form-group">
-                        <label for="article">Article *</label>
-                        <select id="article" name="article" required>
-                            <option value="" disabled selected style="color: #999;">Sélectionner un article</option>
-                            {% for item in stock_items %}
-                                <option value="{{ item.id }}" data-quantite="{{ item.quantite }}" data-unite="{{ item.unite }}">
-                                    {{ item.nom }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <div id="stock-info" class="stock-info" style="display: none;">
-                            <span class="stock-badge"> Stock actuel : <strong id="stock-quantite">0</strong> <span id="stock-unite"></span></span>
-                        </div>
-                    </div>
-
-                    <!-- Type de mouvement -->
-                    <div class="form-group">
-                        <label for="type">Type de mouvement *</label>
-                        <select id="type" name="type" required>
-                            <option value="" disabled selected style="color: #999;">Entrée ou sortie</option>
-                            <option value="entree">Entrée</option>
-                            <option value="sortie">Sortie</option>
-                        </select>
-                    </div>
-
-                    <!-- Quantité -->
-                    <div class="form-group">
-                        <label for="quantite">Quantité *</label>
-                        <input type="number" id="quantite" name="quantite" min="1" value="0" required>
-                    </div>
-
-                    <!-- Motif -->
-                    <div class="form-group">
-                        <label for="raison">Motif *</label>
-                        <input type="text" id="raison" name="raison" placeholder="Don, tirage au sort, etc." required>
-                    </div>
-
-                    <!-- Notes -->
-                    <div class="form-group full-width">
-                        <label for="notes">Notes</label>
-                        <input type="text" id="notes" name="notes" placeholder="Informations complémentaires">
+        <form method="post" action="{{ path('stock_ajouter_mouvement') }}">
+            <div class="row g-3">
+                <!-- Article -->
+                <div class="col-md-6">
+                    <label for="article" class="form-label fw-semibold">
+                        <i class="bi bi-box-seam me-1"></i>Article <span class="text-danger">*</span>
+                    </label>
+                    <select id="article" name="article" class="form-select" required>
+                        <option value="" selected>Sélectionner un article...</option>
+                        {% for item in stock_items %}
+                            <option value="{{ item.id }}" 
+                                    data-quantite="{{ item.quantite }}" 
+                                    data-unite="{{ item.unite }}">
+                                {{ item.nom }} (Stock: {{ item.quantite }} {{ item.unite }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div id="stock-info" class="alert alert-info mt-2" style="display: none;">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Stock actuel : <strong id="stock-quantite">0</strong> <span id="stock-unite"></span>
                     </div>
                 </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Enregistrer le mouvement</button>
-                    <button type="reset" class="btn btn-secondary">Annuler</button>
+                <!-- Type de mouvement -->
+                <div class="col-md-6">
+                    <label for="type" class="form-label fw-semibold">
+                        <i class="bi bi-arrow-left-right me-1"></i>Type de mouvement <span class="text-danger">*</span>
+                    </label>
+                    <select id="type" name="type" class="form-select" required>
+                        <option value="" selected>Choisir le type...</option>
+                        <option value="entree">➕ Entrée (ajout au stock)</option>
+                        <option value="sortie">➖ Sortie (retrait du stock)</option>
+                    </select>
                 </div>
-            </form>
-        </div>
+
+                <!-- Quantité -->
+                <div class="col-md-6">
+                    <label for="quantite" class="form-label fw-semibold">
+                        <i class="bi bi-calculator me-1"></i>Quantité <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" 
+                           id="quantite" 
+                           name="quantite" 
+                           class="form-control" 
+                           min="1" 
+                           value="1" 
+                           required
+                           placeholder="Ex: 10">
+                </div>
+
+                <!-- Raison -->
+                <div class="col-md-6">
+                    <label for="raison" class="form-label fw-semibold">
+                        <i class="bi bi-chat-left-text me-1"></i>Raison/Motif <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           id="raison" 
+                           name="raison" 
+                           class="form-control" 
+                           required
+                           placeholder="Ex: Don mécène, Événement du 15/11, Inventaire">
+                </div>
+
+                <!-- Notes (optionnel) -->
+                <div class="col-12">
+                    <label for="notes" class="form-label fw-semibold">
+                        <i class="bi bi-pencil me-1"></i>Notes complémentaires <small class="text-muted">(optionnel)</small>
+                    </label>
+                    <textarea id="notes" 
+                              name="notes" 
+                              class="form-control" 
+                              rows="3"
+                              placeholder="Informations supplémentaires..."></textarea>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="col-12">
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-night-blue">
+                            <i class="bi bi-check-lg me-1"></i>Enregistrer le mouvement
+                        </button>
+                        <button type="reset" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i>Réinitialiser
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
-
-<style>
-.ajouter-container {
-    margin-top: 1rem;
-}
-.subtitle {
-    font-size: 0.9rem;
-    color: #6c757d;
-    margin-top: 0.25rem;
-}
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-.form-group label {
-    font-weight: 600;
-    margin-bottom: 0.4rem;
-    display: block;
-}
-.form-group select,
-.form-group input {
-    width: 100%;
-    padding: 0.6rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 0.9rem;
-}
-.form-group select option:disabled {
-    color: #999;
-}
-.form-group.full-width {
-    grid-column: 1 / -1;
-}
-.stock-info {
-    margin-top: 0.5rem;
-    padding: 0.5rem;
-    background: #e7f3ff;
-    border-left: 3px solid #007bff;
-    border-radius: 4px;
-}
-.stock-badge {
-    font-size: 0.9rem;
-    color: #0056b3;
-}
-.stock-badge strong {
-    font-size: 1.1rem;
-    color: #003d82;
-}
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-start;
-}
-.btn {
-    padding: 0.6rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.3s ease;
-}
-.btn-primary {
-    background-color: #007bff;
-    color: white;
-}
-.btn-primary:hover {
-    background-color: #0056b3;
-}
-.btn-secondary {
-    background-color: #e9ecef;
-    color: #333;
-}
-.btn-secondary:hover {
-    background-color: #d6d8db;
-}
-.icon {
-    margin-right: 0.4rem;
-}
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

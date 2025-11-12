@@ -5,35 +5,88 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/taches.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-list.css') }}">
 {% endblock %}
 
 {% block body %}
 <div class="taches-page">
-<div class="hero-section">
+<div class="hero-section taches-hero">
     <div class="shine"></div>
     <div class="hero-content">
-        <h1 class="hero-title">Gestion des Taches</h1>
-        <p class="hero-description">Creez, modifiez et assignez des taches aux benevoles pour vos evenements.</p>
-        <a href="{{ path('tache_new') }}" class="hero-btn yellow">+ Creer une tache</a>
-    </div>
-</div>
-
-<div class="page-header">
-    <h1 class="page-title">Toutes les Taches</h1>
-    <div style="display: flex; gap: 1rem;">
-        <a href="{{ path('admin_demandes_taches') }}" class="btn btn-secondary">Demandes en attente</a>
-        <a href="{{ path('tache_new') }}" class="btn btn-primary">+ Nouvelle tache</a>
+        <h1 class="hero-title">Gestion des Tâches</h1>
+        <p class="hero-description">Créez, modifiez et assignez des tâches aux bénévoles pour vos événements.</p>
+        <a href="{{ path('tache_new') }}" class="btn-login">+ Créer une tâche</a>
     </div>
 </div>
 
 <div class="container">
-        <div class="card main-card">
-            <div class="card-header">
-                <h2 class="card-title">Liste des taches ({{ tachesData|length }})</h2>
-                <p class="card-description">Gerez toutes les taches de vos evenements</p>
+    <div class="page-header">
+        <h1 class="page-title">Toutes les Tâches</h1>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{{ path('admin_demandes_taches') }}" class="btn btn-secondary">Demandes en attente</a>
+            <a href="{{ path('tache_new') }}" class="btn btn-primary">+ Nouvelle tâche</a>
+        </div>
+    </div>
+
+    {# Filtres et Tri #}
+    <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-content" style="padding: 1.25rem;">
+            <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
+                {# Filtres par statut #}
+                <div style="flex: 1; min-width: 300px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #374151; font-size: 0.875rem;">
+                        Filtrer par statut
+                    </label>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="{{ path('tache_index', {filtre: 'toutes', tri: triActif}) }}" 
+                           class="btn btn-small {{ filtreActif == 'toutes' ? 'btn-night-blue' : 'btn-outline-secondary' }}">
+                            Toutes
+                        </a>
+                        <a href="{{ path('tache_index', {filtre: 'futures', tri: triActif}) }}" 
+                           class="btn btn-small {{ filtreActif == 'futures' ? 'btn-night-blue' : 'btn-outline-secondary' }}">
+                            À venir
+                        </a>
+                        <a href="{{ path('tache_index', {filtre: 'en_cours', tri: triActif}) }}" 
+                           class="btn btn-small {{ filtreActif == 'en_cours' ? 'btn-night-blue' : 'btn-outline-secondary' }}">
+                            En cours
+                        </a>
+                        <a href="{{ path('tache_index', {filtre: 'passees', tri: triActif}) }}" 
+                           class="btn btn-small {{ filtreActif == 'passees' ? 'btn-night-blue' : 'btn-outline-secondary' }}">
+                            Terminées
+                        </a>
+                    </div>
+                </div>
+
+                {# Tri #}
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #374151; font-size: 0.875rem;">
+                        Trier par
+                    </label>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="{{ path('tache_index', {filtre: filtreActif, tri: 'date_proche'}) }}" 
+                           class="btn btn-small {{ triActif == 'date_proche' ? 'btn-outline-night-blue active' : 'btn-outline-secondary' }}">
+                            Date croissante
+                        </a>
+                        <a href="{{ path('tache_index', {filtre: filtreActif, tri: 'date_eloignee'}) }}" 
+                           class="btn btn-small {{ triActif == 'date_eloignee' ? 'btn-outline-night-blue active' : 'btn-outline-secondary' }}">
+                            Date décroissante
+                        </a>
+                        <a href="{{ path('tache_index', {filtre: filtreActif, tri: 'titre'}) }}" 
+                           class="btn btn-small {{ triActif == 'titre' ? 'btn-outline-night-blue active' : 'btn-outline-secondary' }}">
+                            Titre (A-Z)
+                        </a>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <div class="card main-card">
+        <div class="card-header">
+            <h2 class="card-title">Liste des taches ({{ tachesData|length }})</h2>
+            <p class="card-description">Gerez toutes les taches de vos evenements</p>
+        </div>
             <div class="card-content">
                 {% if tachesData|length > 0 %}
                     <div class="table-responsive">
@@ -70,8 +123,8 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if tache.evenement %}
-                                                <span class="badge" style="background: #8b5cf6;">{{ tache.evenement.nom }}</span>
+                                                {% if tache.weekend %}
+                                                    <span class="badge" style="background: #8b5cf6;">{{ tache.weekend.nom }}</span>
                                             {% else %}
                                                 <span style="color: #9ca3af;">—</span>
                                             {% endif %}
@@ -128,7 +181,7 @@
                     </div>
                 {% else %}
                     <div class="empty-state">
-                        <div class="empty-icon">Taches</div>
+                        <div class="empty-icon"><i class="bi bi-clipboard-check-fill" style="font-size: 3rem;"></i></div>
                         <h3>Aucune tache trouvee</h3>
                         <p>Commencez par creer des taches pour vos evenements.</p>
                         <a href="{{ path('tache_new') }}" class="btn btn-primary">+ Creer une tache</a>
@@ -137,7 +190,6 @@
             </div>
         </div>
     </div>
-</div>
 </div>
 
 <script>

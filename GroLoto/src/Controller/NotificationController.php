@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller;
 
 use App\Entity\Notification;
@@ -19,7 +18,6 @@ class NotificationController extends AbstractController
     {
         $user = $this->getUser();
         $notifications = $notificationRepo->findByUser($user);
-
         return $this->render('notification/index.html.twig', [
             'notifications' => $notifications,
         ]);
@@ -30,7 +28,6 @@ class NotificationController extends AbstractController
     {
         $user = $this->getUser();
         $count = $notificationRepo->countUnreadByUser($user);
-
         return new JsonResponse(['count' => $count]);
     }
 
@@ -39,7 +36,6 @@ class NotificationController extends AbstractController
     {
         $user = $this->getUser();
         $notifications = $notificationRepo->findUnreadByUser($user);
-
         $data = [];
         foreach ($notifications as $notification) {
             $data[] = [
@@ -50,7 +46,6 @@ class NotificationController extends AbstractController
                 'createdAt' => $notification->getCreatedAt()->format('d/m/Y H:i'),
             ];
         }
-
         return new JsonResponse($data);
     }
 
@@ -60,10 +55,8 @@ class NotificationController extends AbstractController
         if ($notification->getDestinataire() !== $this->getUser()) {
             return new JsonResponse(['error' => 'Accès refusé'], 403);
         }
-
         $notification->setLue(true);
         $em->flush();
-
         return new JsonResponse(['success' => true]);
     }
 
@@ -73,7 +66,32 @@ class NotificationController extends AbstractController
         $user = $this->getUser();
         $notificationRepo->markAllAsReadByUser($user);
         $em->flush();
-
         return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/notifications/mark-conversation-read/{conversationId}', name: 'app_notification_mark_conversation_read', methods: ['POST'])]
+    public function markConversationAsRead(int $conversationId, NotificationRepository $notificationRepo, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        
+        // Marquer toutes les notifications de type contact qui contiennent cet ID de conversation dans le lien
+        $notifications = $notificationRepo->createQueryBuilder('n')
+            ->where('n.destinataire = :user')
+            ->andWhere('n.lue = false')
+            ->andWhere('n.type IN (:types)')
+            ->andWhere('n.lien LIKE :convId')
+            ->setParameter('user', $user)
+            ->setParameter('types', ['contact', 'reponse_contact'])
+            ->setParameter('convId', '%conv=' . $conversationId . '%')
+            ->getQuery()
+            ->getResult();
+        
+        foreach ($notifications as $notification) {
+            $notification->setLue(true);
+        }
+        
+        $em->flush();
+        
+        return new JsonResponse(['success' => true, 'marked' => count($notifications)]);
     }
 }

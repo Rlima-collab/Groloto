@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Participants - Gestion Public{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/public/public-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-list.css') }}">
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="hero-section public-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Participants</h1>
+        <p class="hero-description">Liste complète des participants inscrits</p>
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('public_import') }}" class="btn-login">Importer des données</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
+
+    <!-- Cartes de statistiques -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>Total Inscrits</h3>
+            <p class="metric-value">{{ total_inscrits }}</p>
+            <p class="metric-detail">Utilisateurs au total</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Revenus estimés</h3>
+            <p class="metric-value">{{ revenus|number_format(0, ',', ' ') }} €</p>
+            <p class="metric-detail">Recettes potentielles</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Nouveaux</h3>
+            <p class="metric-value">{{ nouveaux }}</p>
+            <p class="metric-detail">Ce mois-ci</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Fidèles</h3>
+            <p class="metric-value">{{ fideles }}</p>
+            <p class="metric-detail">Depuis 6+ mois</p>
+        </div>
+    </div>
+
+    <!-- Tableau des participants -->
+    <div class="card shadow-sm border-0 mt-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="mb-0" style="color: #0d1b2a; font-weight: 600;">
+                    <i class="bi bi-people me-2"></i>Liste des participants
+                </h3>
+            </div>
+
+            {% if participants is empty %}
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <h3>Aucun participant</h3>
+                    <p>Il n'y a aucun participant enregistré pour le moment.</p>
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Participant</th>
+                                <th style="width: 25%;">Contact</th>
+                                <th style="width: 15%;">Rôle</th>
+                                <th style="width: 15%;">Date inscription</th>
+                                <th style="width: 10%;">Statut</th>
+                                <th style="width: 10%;">Fidélité</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for participant in participants %}
+                                {% set fidele = date(participant.dateCreation).diff(date()).days > 180 %}
+                                <tr>
+                                    <td class="name">
+                                        <strong>{{ participant.nom }} {{ participant.prenom }}</strong>
+                                    </td>
+                                    <td>
+                                        <div style="font-size: 0.875rem;">
+                                            <div class="text-muted">
+                                                <i class="bi bi-envelope me-1"></i>{{ participant.email }}
+                                            </div>
+                                            {% if participant.telephone %}
+                                            <div class="text-muted mt-1">
+                                                <i class="bi bi-telephone me-1"></i>{{ participant.telephone }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge category">
+                                            {{ participant.role.nom|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td class="text-muted">{{ participant.dateCreation|date('d/m/Y') }}</td>
+                                    <td>
+                                        <span class="badge status success">
+                                            <i class="bi bi-check-circle me-1"></i>Actif
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if fidele %}
+                                            <span class="badge status info">
+                                                <i class="bi bi-star-fill me-1"></i>Fidèle
+                                            </span>
+                                        {% else %}
+                                            <span class="badge status warning">
+                                                <i class="bi bi-person-plus me-1"></i>Nouveau
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

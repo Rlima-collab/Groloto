@@ -19,7 +19,19 @@ class BenevoleController extends AbstractController
     #[Route('/benevoles', name: 'benevoles')]
     public function index(BenevoleRepository $benevoleRepository, TacheRepository $tacheRepository): Response
     {
+        // Récupération des bénévoles
         $benevoles = $benevoleRepository->findActiveWithUser();
+        
+        // Ajouter le nombre de tâches réalisées pour chaque bénévole
+        $benevolesAvecStats = [];
+        foreach ($benevoles as $benevole) {
+            $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
+            $benevolesAvecStats[] = [
+                'benevole' => $benevole,
+                'nb_taches_realisees' => count($tachesRealisees)
+            ];
+        }
+        
         $totalBenevoles = $benevoleRepository->countActive();
         $nouveauxBenevoles = count($benevoleRepository->findRecentlyRegistered());
 
@@ -60,7 +72,7 @@ class BenevoleController extends AbstractController
                 'backgroundColor' => '#3b82f6',
                 'borderColor' => '#2563eb',
                 'extendedProps' => [
-                    'evenement' => $tache->getEvenement() ? $tache->getEvenement()->getNom() : null,
+                    'weekend' => $tache->getWeekend()?->getNom(),
                     'poste_requis' => $tache->getPosteRequis(),
                     'max_personnes' => $tache->getMaxPersonnes(),
                     'remarques' => $tache->getRemarque()
@@ -105,10 +117,84 @@ class BenevoleController extends AbstractController
         }
 
         return $this->render('benevoles.html.twig', [
-            'benevoles' => $benevoles,
+            'benevoles' => $benevolesAvecStats,
             'metriques' => $metriques,
             'taches' => $taches,
             // fournir des tableaux simples pour le template
+            'taches_proches' => $tachesProchesData,
+            'taches_realisees' => $tachesRealiseesData
+        ]);
+    }
+
+    #[Route('/benevole/mon-planning', name: 'benevole_mon_planning')]
+    public function monPlanning(
+        BenevoleRepository $benevoleRepository,
+        TacheRepository $tacheRepository
+    ): Response {
+        $user = $this->getUser();
+        $benevole = $benevoleRepository->findOneBy(['utilisateur' => $user]);
+
+        if (!$benevole) {
+            $this->addFlash('error', 'Vous devez être un bénévole pour accéder à cette page.');
+            return $this->redirectToRoute('benevoles');
+        }
+
+        // Récupérer les tâches du bénévole
+        $tachesBrutes = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
+        if (empty($tachesBrutes)) {
+            $tachesBrutes = $tacheRepository->findTachesForBenevole($benevole->getId());
+        }
+
+        $taches = [];
+        foreach ($tachesBrutes as $tache) {
+            $taches[] = [
+                'id' => $tache->getId(),
+                'title' => $tache->getTitre(),
+                'start' => $tache->getDebut()->format('Y-m-d\TH:i:s'),
+                'end' => $tache->getFin()->format('Y-m-d\TH:i:s'),
+                'backgroundColor' => '#1a3c5a',
+                'borderColor' => '#2b5d8a',
+                'extendedProps' => [
+                    'weekend' => $tache->getWeekend()?->getNom(),
+                    'poste_requis' => $tache->getPosteRequis(),
+                    'max_personnes' => $tache->getMaxPersonnes(),
+                    'remarques' => $tache->getRemarque()
+                ]
+            ];
+        }
+
+        // Tâches à venir
+        $tachesProches = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
+        if (empty($tachesProches)) {
+            $tachesProches = $tacheRepository->findTachesForBenevole($benevole->getId());
+        }
+
+        $tachesProchesData = [];
+        foreach ($tachesProches as $tp) {
+            $tachesProchesData[] = [
+                'id' => $tp->getId(),
+                'titre' => $tp->getTitre(),
+                'debut' => $tp->getDebut(),
+                'poste_requis' => $tp->getPosteRequis(),
+            ];
+        }
+
+        // Tâches réalisées
+        $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
+        $tachesRealiseesData = [];
+        foreach ($tachesRealisees as $tr) {
+            $tachesRealiseesData[] = [
+                'id' => $tr->getId(),
+                'titre' => $tr->getTitre(),
+                'debut' => $tr->getDebut(),
+                'fin' => $tr->getFin(),
+                'poste_requis' => $tr->getPosteRequis(),
+            ];
+        }
+
+        return $this->render('benevoles/mon_planning.html.twig', [
+            'benevole' => $benevole,
+            'taches' => $taches,
             'taches_proches' => $tachesProchesData,
             'taches_realisees' => $tachesRealiseesData
         ]);
@@ -133,6 +219,7 @@ class BenevoleController extends AbstractController
 
         $form = $this->createForm(BenevoleEditType::class, $benevole);
         
+        // Pré-remplir les champs utilisateur
         $form->get('prenom')->setData($utilisateur->getPrenom());
         $form->get('nom')->setData($utilisateur->getNom());
         $form->get('email')->setData($utilisateur->getEmail());
@@ -197,5 +284,60 @@ class BenevoleController extends AbstractController
         }
 
         return $this->redirectToRoute('benevoles');
+    }
+
+    #[Route('/benevoles/{id}/planning', name: 'benevole_planning')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function planning(
+        int $id,
+        BenevoleRepository $benevoleRepository,
+        TacheRepository $tacheRepository
+    ): Response {
+        $benevole = $benevoleRepository->find($id);
+
+        if (!$benevole) {
+            $this->addFlash('error', 'Bénévole non trouvé.');
+            return $this->redirectToRoute('benevoles');
+        }
+
+        $utilisateur = $benevole->getUtilisateur();
+
+        // Récupérer les tâches du bénévole
+        $tachesBrutes = $tacheRepository->findTachesForBenevole($benevole->getId());
+
+        $taches = [];
+        foreach ($tachesBrutes as $tache) {
+            $taches[] = [
+                'id' => $tache->getId(),
+                'title' => $tache->getTitre(),
+                'start' => $tache->getDebut()->format('Y-m-d\TH:i:s'),
+                'end' => $tache->getFin()->format('Y-m-d\TH:i:s'),
+                'backgroundColor' => '#0d1b2a',
+                'borderColor' => '#1a3c5a',
+                'extendedProps' => [
+                    'weekend' => $tache->getWeekend()?->getNom(),
+                    'poste_requis' => $tache->getPosteRequis(),
+                    'max_personnes' => $tache->getMaxPersonnes(),
+                    'remarques' => $tache->getRemarque()
+                ]
+            ];
+        }
+
+        // Tâches futures
+        $tachesFutures = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
+        
+        // Tâches réalisées
+        $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
+
+        return $this->render('benevoles/planning.html.twig', [
+            'benevole' => $benevole,
+            'utilisateur' => $utilisateur,
+            'taches' => json_encode($taches),
+            'taches_futures' => $tachesFutures,
+            'taches_realisees' => $tachesRealisees,
+            'total_taches' => count($tachesBrutes),
+            'total_futures' => count($tachesFutures),
+            'total_realisees' => count($tachesRealisees)
+        ]);
     }
 }

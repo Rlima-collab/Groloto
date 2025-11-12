@@ -5,163 +5,533 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/mecenes.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
+    <style>
+        .search-filter-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .search-bar-container {
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1a3c5a;
+            box-shadow: 0 0 0 3px rgba(26, 60, 90, 0.1);
+        }
+
+        .filters-container {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .filter-select {
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #1a3c5a;
+        }
+
+        .btn-reset-filters {
+            padding: 0.75rem 1.25rem;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-reset-filters:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .results-count {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #1a3c5a;
+            border: 1px solid #d1d5db;
+        }
+
+        #countCurrent {
+            color: #059669;
+            font-size: 1.1rem;
+        }
+
+        .benevole-card.hidden {
+            display: none;
+        }
+
+        .no-results-message {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        .pagination-button {
+            padding: 0.5rem 1rem;
+            background: #1a3c5a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-button:hover:not(:disabled) {
+            background: #0d1b2a;
+            transform: translateY(-2px);
+        }
+
+        .pagination-button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .pagination-info {
+            font-weight: 600;
+            color: #1a3c5a;
+        }
+
+        @media (max-width: 768px) {
+            .filters-container {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .btn-reset-filters {
+                width: 100%;
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
-<div class="hero-section">
+<div class="hero-section benevoles-hero">
     <div class="shine"></div>
     <div class="hero-content">
         <h1 class="hero-title">Gestion des Mécènes</h1>
-        <p class="hero-description">Inscriptions, lots et conventions pour vos événements caritatifs.</p>
-        <a href="#liste-mecenes" class="hero-btn yellow">Voir les mécènes</a>
+        <p class="hero-description">Partenaires, lots et conventions pour vos événements caritatifs.</p>
+        <a href="#liste-mecenes" class="btn-login">Voir les mécènes</a>
     </div>
 </div>
 
-<div class="page-header">
-    <h1 class="page-title">Mécènes & Partenaires</h1>
+<br>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <h3>Total mécènes</h3>
+        <p class="metric-value">{{ metriques.total }}</p>
+        <p class="metric-detail">Mécènes actifs</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Nouveaux ce mois</h3>
+        <p class="metric-value">{{ metriques.nouveaux }}</p>
+        <p class="metric-detail">Inscriptions récentes</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Lots disponibles</h3>
+        <p class="metric-value">{{ metriques.disponibles }}</p>
+        <p class="metric-detail">Contributions offertes</p>
+    </div>
 </div>
 
-<div class="mecenes-page">
-    <!-- Key Metrics Cards -->
-    <div class="metrics-grid">
-        <div class="card metric-card">
-            <div class="card-header">
-                <span class="metric-title">Total mécènes</span>
-            </div>
-            <div class="card-content">
-                <div class="metric-value">{{ metriques.total }}</div>
-                <p class="metric-change positive">Mécènes actifs</p>
-            </div>
+<div class="container">
+    <div class="card main-card" id="liste-mecenes">
+        <div class="card-header">
+            <h2 class="card-title">Liste des Mécènes</h2>
+            <p class="card-description">Gestion des mécènes et partenaires</p>
         </div>
-        <div class="card metric-card">
-            <div class="card-header">
-                <span class="metric-title">Nouveaux ce mois</span>
+
+        <!-- Barre de recherche et filtres -->
+        <div class="search-filter-section">
+            <div class="search-bar-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Rechercher par nom, organisation, email...">
             </div>
-            <div class="card-content">
-                <div class="metric-value">{{ metriques.nouveaux }}</div>
-                <p class="metric-change positive">Inscriptions récentes</p>
-            </div>
-        </div>
-        <div class="card metric-card">
-            <div class="card-header">
-                <span class="metric-title">Lots disponibles</span>
-            </div>
-            <div class="card-content">
-                <div class="metric-value">{{ metriques.disponibles }}</div>
-                <p class="metric-change positive">Prêts à être utilisés</p>
-            </div>
-        </div>
-    </div>
-    <div class="container">
-        <div class="tabs">
-            <a href="{{ path('mecenes') }}" class="tab selected">
-                <span class="tab-icon">👥</span>
-                <span class="tab-text">Liste des mécènes</span>
-            </a>
-            <a href="{{ path('stocks') }}#inventaire" class="tab">
-                <span class="tab-icon">🎁</span>
-                <span class="tab-text">Lots</span>
-            </a>
-            <a href="#" class="tab">
-                <span class="tab-icon">📜</span>
-                <span class="tab-text">Conventions</span>
-            </a>
-        </div>
-        <!-- Liste des mécènes -->
-        <div class="main-content" id="liste-mecenes">
-            <div class="card main-card">
-                <div class="card-header">
-                    <h2 class="card-title">Liste des Mécènes</h2>
-                    <p class="card-description">Gestion des mécènes inscrits</p>
+            
+            <div class="filters-container">
+                {% if is_granted('ROLE_ADMIN') and weekends is defined %}
+                <div class="filter-group">
+                    <label for="filterWeekend" class="filter-label">Week-end :</label>
+                    <select id="filterWeekend" class="filter-select">
+                        <option value="">Tous les week-ends</option>
+                        {% for weekend in weekends %}
+                            <option value="{{ weekend.id }}" {% if weekend_filtre and weekend_filtre.id == weekend.id %}selected{% endif %}>
+                                {{ weekend.nom }} ({{ weekend.dateVendredi|date('d/m/Y') }})
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <div class="card-content">
-                    {% if mecenes|length > 0 %}
-                        <div class="mecenes-grid">
-                            {% for mecene in mecenes %}
-                                <div class="mecene-card">
-                                    <div class="mecene-header">
-                                        <h3 class="mecene-name">
-                                            {{ mecene.utilisateur.prenom }} {{ mecene.utilisateur.nom }} ({{ mecene.organisation }})
-                                        </h3>
-                                        <span class="badge status success">Actif</span>
-                                    </div>
-                                    <div class="mecene-info">
-                                        <div class="info-item">
-                                            <span class="info-icon">✉️</span>
-                                            <span class="info-text">{{ mecene.utilisateur.email }}</span>
-                                        </div>
-                                        {% if mecene.utilisateur.telephone %}
-                                            <div class="info-item">
-                                                <span class="info-icon">📞</span>
-                                                <span class="info-text">{{ mecene.utilisateur.telephone }}</span>
-                                            </div>
-                                        {% endif %}
-                                        <div class="info-item">
-                                            <span class="info-icon">🔍</span>
-                                            <span class="info-text">SIRET: {{ mecene.siret }}</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="info-icon">📅</span>
-                                            <span class="info-text">Inscrit le {{ mecene.utilisateur.dateCreation|date('d/m/Y') }}</span>
-                                        </div>
-                                    </div>
-                                    {% if is_granted('ROLE_ADMIN') %}
-                                    <div class="mecene-actions">
-                                        <a href="{{ path('mecene_edit', {'id': mecene.id}) }}" class="btn btn-small btn-primary">Modifier</a>
-                                        <a href="{{ path('stocks', {'mecene': mecene.id}) }}" class="btn btn-small btn-secondary">Lots</a>
-                                        <a href="#" class="btn btn-small btn-secondary">Conventions</a>
-                                        <button type="button" 
-                                                class="btn btn-small btn-danger" 
-                                                data-mecene-id="{{ mecene.id }}"
-                                                data-mecene-nom="{{ mecene.organisation }}"
-                                                data-csrf-token="{{ csrf_token('delete_mecene_' ~ mecene.id) }}"
-                                                onclick="confirmDeleteMecene(this)">🗑️</button>
-                                    </div>
-                                    {% endif %}
+                {% endif %}
+
+                <div class="filter-group">
+                    <label for="sortBy" class="filter-label">Trier par :</label>
+                    <select id="sortBy" class="filter-select">
+                        <option value="nom-asc">Nom (A-Z)</option>
+                        <option value="nom-desc">Nom (Z-A)</option>
+                        <option value="organisation-asc">Organisation (A-Z)</option>
+                        <option value="organisation-desc">Organisation (Z-A)</option>
+                        <option value="date-desc">Date (Plus récent)</option>
+                        <option value="date-asc">Date (Plus ancien)</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="itemsPerPage" class="filter-label">Afficher :</label>
+                    <select id="itemsPerPage" class="filter-select">
+                        <option value="10">10 par page</option>
+                        <option value="20">20 par page</option>
+                        <option value="50">50 par page</option>
+                        <option value="all">Tous</option>
+                    </select>
+                </div>
+
+                <button id="resetFilters" class="btn-reset-filters">Réinitialiser</button>
+            </div>
+
+            <div id="resultsCount" class="results-count">
+                Affichage de <span id="countCurrent">{{ mecenes|length }}</span> mécène(s)
+            </div>
+        </div>
+
+        <div class="card-content">
+            {% if mecenes|length > 0 %}
+                <div class="benevoles-grid">
+                    {% for mecene in mecenes %}
+                        <div class="benevole-card">
+                            <div class="benevole-header">
+                                <h3 class="benevole-name">
+                                    {{ mecene.utilisateur.prenom }} {{ mecene.utilisateur.nom }}
+                                </h3>
+                                <span class="badge status success">Actif</span>
+                            </div>
+                            
+                            <div class="benevole-info">
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Organisation:</strong> {{ mecene.organisation }}</span>
                                 </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="empty-state">
-                            <div class="empty-icon">👥</div>
-                            <h3>Aucun mécène trouvé</h3>
-                            <p>Commencez par ajouter des mécènes à votre base de données.</p>
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Email:</strong> {{ mecene.utilisateur.email }}</span>
+                                </div>
+                                {% if mecene.utilisateur.telephone %}
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Téléphone:</strong> {{ mecene.utilisateur.telephone }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="info-item">
+                                    <span class="info-text"><strong>SIRET:</strong> {{ mecene.siret }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Inscrit le:</strong> {{ mecene.utilisateur.dateCreation|date('d/m/Y') }}</span>
+                                </div>
+                            </div>
+                            
                             {% if is_granted('ROLE_ADMIN') %}
-                            <a href="#" class="btn btn-primary">Ajouter un mécène</a>
+                            <div class="benevole-actions">
+                                <a href="{{ path('mecene_voir_lots', {'id': mecene.id}) }}" class="btn btn-small btn-primary">Voir lots</a>
+                                <a href="{{ path('mecene_edit', {'id': mecene.id}) }}" class="btn btn-small btn-secondary">Modifier</a>
+                                <button type="button" 
+                                        class="btn btn-small btn-danger" 
+                                        data-mecene-id="{{ mecene.id }}"
+                                        data-mecene-nom="{{ mecene.organisation }}"
+                                        data-csrf-token="{{ csrf_token('delete_mecene_' ~ mecene.id) }}"
+                                        onclick="confirmDeleteMecene(this)">Supprimer</button>
+                            </div>
                             {% endif %}
                         </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination-container" id="paginationContainer">
+                    <button id="prevPage" class="pagination-button">Précédent</button>
+                    <span class="pagination-info">
+                        Page <span id="currentPage">1</span> sur <span id="totalPages">1</span>
+                    </span>
+                    <button id="nextPage" class="pagination-button">Suivant</button>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>Aucun mécène trouvé</h3>
+                    <p>Commencez par ajouter des mécènes à votre base de données.</p>
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <a href="#" class="btn btn-primary">Ajouter un mécène</a>
                     {% endif %}
                 </div>
-            </div>
-                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
+{% endblock %}
 
-<script>
-// Fonction de confirmation de suppression
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const filterWeekend = document.getElementById('filterWeekend');
+    const sortBy = document.getElementById('sortBy');
+    const itemsPerPage = document.getElementById('itemsPerPage');
+    const resetButton = document.getElementById('resetFilters');
+    const meceneCards = Array.from(document.querySelectorAll('.benevole-card'));
+    const gridContainer = document.querySelector('.benevoles-grid');
+    const countCurrent = document.getElementById('countCurrent');
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+    const currentPageSpan = document.getElementById('currentPage');
+    const totalPagesSpan = document.getElementById('totalPages');
+    const paginationContainer = document.getElementById('paginationContainer');
+    
+    let currentPage = 1;
+    let filteredCards = [];
+
+    // Fonction de recherche et filtrage
+    function filterAndSort() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const weekendId = filterWeekend ? filterWeekend.value : '';
+        const sortOption = sortBy.value;
+        const [sortField, sortOrder] = sortOption.split('-');
+        
+        filteredCards = [];
+        
+        meceneCards.forEach(card => {
+            const name = card.querySelector('.benevole-name').textContent.toLowerCase();
+            const organisation = card.querySelector('.info-text:first-child').textContent.toLowerCase();
+            const email = card.querySelectorAll('.info-text')[1].textContent.toLowerCase();
+            
+            // Recherche par texte
+            const matchesSearch = !searchTerm || 
+                name.includes(searchTerm) || 
+                organisation.includes(searchTerm) || 
+                email.includes(searchTerm);
+            
+            // Filtre par weekend
+            let matchesWeekend = true;
+            if (weekendId) {
+                matchesWeekend = true;
+            }
+            
+            if (matchesSearch && matchesWeekend) {
+                filteredCards.push(card);
+            }
+        });
+        
+        // Tri des cartes visibles
+        if (sortOption && filteredCards.length > 0) {
+            filteredCards.sort((a, b) => {
+                let valA, valB;
+                
+                switch(sortField) {
+                    case 'nom':
+                        valA = a.querySelector('.benevole-name').textContent.trim();
+                        valB = b.querySelector('.benevole-name').textContent.trim();
+                        break;
+                    case 'organisation':
+                        valA = a.querySelector('.info-text:first-child').textContent.split(':')[1].trim();
+                        valB = b.querySelector('.info-text:first-child').textContent.split(':')[1].trim();
+                        break;
+                    case 'date':
+                        valA = a.querySelector('.info-item:last-child .info-text').textContent.split(':')[1].trim();
+                        valB = b.querySelector('.info-item:last-child .info-text').textContent.split(':')[1].trim();
+                        break;
+                }
+                
+                const comparison = valA.localeCompare(valB);
+                return sortOrder === 'asc' ? comparison : -comparison;
+            });
+        }
+        
+        // Réinitialiser à la page 1 après filtrage
+        currentPage = 1;
+        displayPage();
+    }
+    
+    // Fonction d'affichage de la page
+    function displayPage() {
+        const perPage = itemsPerPage.value === 'all' ? filteredCards.length : parseInt(itemsPerPage.value);
+        const totalPages = Math.ceil(filteredCards.length / perPage);
+        
+        // Masquer toutes les cartes
+        meceneCards.forEach(card => card.classList.add('hidden'));
+        
+        // Afficher les cartes de la page courante
+        const start = (currentPage - 1) * perPage;
+        const end = itemsPerPage.value === 'all' ? filteredCards.length : start + perPage;
+        
+        for (let i = start; i < end && i < filteredCards.length; i++) {
+            filteredCards[i].classList.remove('hidden');
+            gridContainer.appendChild(filteredCards[i]);
+        }
+        
+        // Mettre à jour le compteur
+        countCurrent.textContent = filteredCards.length;
+        
+        // Mettre à jour la pagination
+        currentPageSpan.textContent = totalPages === 0 ? 0 : currentPage;
+        totalPagesSpan.textContent = totalPages;
+        prevPageBtn.disabled = currentPage <= 1;
+        nextPageBtn.disabled = currentPage >= totalPages || totalPages === 0;
+        
+        // Masquer la pagination si "Tous" est sélectionné
+        if (itemsPerPage.value === 'all') {
+            paginationContainer.style.display = 'none';
+        } else {
+            paginationContainer.style.display = 'flex';
+        }
+        
+        // Afficher un message si aucun résultat
+        let noResultsMsg = document.querySelector('.no-results-message');
+        if (filteredCards.length === 0) {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('div');
+                noResultsMsg.className = 'no-results-message';
+                noResultsMsg.innerHTML = 'Aucun mécène ne correspond à votre recherche';
+                gridContainer.parentElement.insertBefore(noResultsMsg, gridContainer);
+            }
+            gridContainer.style.display = 'none';
+            paginationContainer.style.display = 'none';
+        } else {
+            if (noResultsMsg) {
+                noResultsMsg.remove();
+            }
+            gridContainer.style.display = 'grid';
+        }
+    }
+    
+    // Fonction de réinitialisation
+    function resetFilters() {
+        searchInput.value = '';
+        if (filterWeekend) filterWeekend.value = '';
+        sortBy.value = 'nom-asc';
+        itemsPerPage.value = '10';
+        currentPage = 1;
+        filterAndSort();
+    }
+    
+    // Écouteurs d'événements
+    searchInput.addEventListener('input', filterAndSort);
+    
+    if (filterWeekend) {
+        filterWeekend.addEventListener('change', function() {
+            if (this.value) {
+                window.location.href = `?weekend=${this.value}`;
+            } else {
+                filterAndSort();
+            }
+        });
+    }
+    
+    sortBy.addEventListener('change', filterAndSort);
+    itemsPerPage.addEventListener('change', function() {
+        currentPage = 1;
+        displayPage();
+    });
+    resetButton.addEventListener('click', resetFilters);
+    
+    prevPageBtn.addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            displayPage();
+        }
+    });
+    
+    nextPageBtn.addEventListener('click', function() {
+        const perPage = itemsPerPage.value === 'all' ? filteredCards.length : parseInt(itemsPerPage.value);
+        const totalPages = Math.ceil(filteredCards.length / perPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayPage();
+        }
+    });
+    
+    // Appliquer le tri initial
+    filterAndSort();
+});
+
 function confirmDeleteMecene(button) {
     const meceneId = button.getAttribute('data-mecene-id');
     const meceneNom = button.getAttribute('data-mecene-nom');
     const csrfToken = button.getAttribute('data-csrf-token');
     
     if (confirm(`Êtes-vous sûr de vouloir supprimer le mécène "${meceneNom}" ?\n\nCette action est irréversible et supprimera toutes les données associées.`)) {
-        // Créer un formulaire pour la suppression
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/mecenes/${meceneId}/delete`;
         
-        // Ajouter le token CSRF
         const csrfInput = document.createElement('input');
         csrfInput.type = 'hidden';
         csrfInput.name = '_token';
         csrfInput.value = csrfToken;
         form.appendChild(csrfInput);
         
-        // Ajouter le formulaire au body et le soumettre
         document.body.appendChild(form);
         form.submit();
     }
 }
 </script>
 {% endblock %}
+

@@ -1,0 +1,60 @@
+.search-container {
+    position: relative;
+    max-width: 300px;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 40px 10px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: white;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    pointer-events: none;
+}
+
+/* Ajustements pour le header de la carte */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.header-left {
+    flex: 1;
+}
+
+.header-right {
+    padding-left: 1rem;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.card-description {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+}

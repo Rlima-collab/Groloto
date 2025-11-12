@@ -1,0 +1,276 @@
+/* Sidebar Styles */
+.sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, #0f2c3e 0%, #081b27 60%, #000000 90%);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.05);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1002;
+    transition: width 0.3s ease, background 0.5s ease;
+    padding-top: 0;
+    min-width: 60px;
+    justify-content: center;
+}
+
+.sidebar.collapsed {
+    width: 60px;
+}
+
+/* --- HEADER ET BURGER --- */
+.sidebar-header {
+    padding: 15px 15px 15px 3px; /* top right bottom left */
+    text-align: left; /* Aligné à gauche */
+}
+
+.burger-menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 25px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 10px; /* espace à gauche */
+}
+
+.burger-menu span {
+    width: 100%;
+    height: 3px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+/* --- CROIX PAR DÉFAUT (menu ouvert) --- */
+.burger-menu span:nth-child(2) {
+    opacity: 0;
+}
+
+.burger-menu span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.burger-menu span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* --- Quand le menu est fermé (sidebar.collapsed) → icône burger classique --- */
+.sidebar.collapsed .burger-menu span {
+    transform: none;
+    opacity: 1;
+}
+
+/* --- USER INFO --- */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #6c63ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-role {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: white;
+}
+
+.sidebar.collapsed .user-info .user-role,
+.sidebar.collapsed .nav-text {
+    display: none;
+}
+
+/* --- NAVIGATION --- */
+.sidebar-nav {
+    flex-grow: 1;
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.nav-item {
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+/* --- ALIGNEMENT LOGOS + TEXTE + FLÈCHE --- */
+.nav-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start;
+    position: relative;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    padding-left: 20px;
+    color: white;
+    text-decoration: none;
+    min-height: 50px;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-icon {
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.nav-icon img {
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+}
+
+.nav-text {
+    text-align: left;
+    font-size: 16px;
+    color: white;
+}
+
+/* --- Flèche de sous-menu --- */
+.nav-link .arrow {
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid white;
+    margin-left: 8px;
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+.nav-link.has-submenu .arrow {
+    display: inline-block;
+}
+
+.nav-link.active .arrow {
+    transform: rotate(90deg);
+}
+
+.sidebar.collapsed .nav-icon {
+    margin-right: 0;
+}
+
+.sidebar.collapsed .nav-icon img {
+    width: 24px;
+    height: 24px;
+}
+
+.sidebar.collapsed .nav-text {
+    display: none;
+}
+
+.submenu {
+    display: none;
+    list-style: none;
+    padding-left: 20px;
+    background: linear-gradient(180deg, rgba(15,44,62,0.8) 0%, rgba(8,27,39,0.9) 100%);
+    margin: 0;
+    width: 100%;
+    border-left: 3px solid rgba(108,99,255,0.7); /* Ligne violette plus visible */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3); /* Légère ombre pour détacher */
+    border-radius: 0 8px 8px 0; /* Coins arrondis côté droit pour l'effet esthétique */
+}
+
+.submenu.active {
+    display: block;
+}
+
+.submenu li a {
+    display: block;
+    padding: 10px 20px; /* un peu plus d'espace pour respirer */
+    color: #e0e0ff; /* texte légèrement plus clair pour ressortir */
+    text-decoration: none;
+    min-height: 36px;
+    text-align: left;
+    font-size: 14px;
+    width: 100%;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.submenu li a:hover {
+    background-color: rgba(108, 99, 255, 0.3); /* violet plus visible au hover */
+    color: #ffffff;
+}
+
+.submenu li a.active-page {
+    background-color: rgba(108, 99, 255, 0.5);
+    color: #ffffff;
+    font-weight: 600;
+    border-left: 3px solid #6c63ff;
+    padding-left: 17px;
+}
+
+
+
+/* --- CONTENU PRINCIPAL --- */
+.main-content {
+    margin-left: 250px;
+    flex-grow: 1;
+    transition: margin-left 0.3s ease;
+    padding: 0;
+}
+
+.sidebar.collapsed ~ .main-content {
+    margin-left: 60px;
+}
+
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+    }
+
+    .main-content {
+        margin-left: 60px;
+    }
+
+    .user-role,
+    .nav-text {
+        display: none;
+    }
+}
+
+.sidebar.collapsed .nav-link .arrow {
+    display: none;
+}

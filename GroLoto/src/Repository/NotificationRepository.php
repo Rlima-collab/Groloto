@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Repository;
 
 use App\Entity\Notification;
@@ -33,7 +32,7 @@ class NotificationRepository extends ServiceEntityRepository
      */
     public function countUnreadByUser(Utilisateur $user): int
     {
-        return $this->createQueryBuilder('n')
+        return (int) $this->createQueryBuilder('n')
             ->select('COUNT(n.id)')
             ->where('n.destinataire = :user')
             ->andWhere('n.lue = false')
@@ -63,7 +62,7 @@ class NotificationRepository extends ServiceEntityRepository
     {
         $this->createQueryBuilder('n')
             ->update()
-            ->set('n.lue', true)
+            ->set('n.lue', 'true')
             ->where('n.destinataire = :user')
             ->andWhere('n.lue = false')
             ->setParameter('user', $user)

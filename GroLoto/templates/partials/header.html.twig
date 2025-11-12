@@ -1,5 +1,4 @@
 <link rel="stylesheet" href="{{ asset('css/header.css') }}?v={{ 'now'|date('U') }}">
-
 <header class="site-header">
     <div class="container">
         <div class="logo">
@@ -13,31 +12,9 @@
             <span></span>
         </button>
         <nav class="nav-menu" id="navMenu">
-            <a href="/">Tableau de bord</a>
-            <a href="{{ path('app_evenements') }}">Événements</a>
-            {% if app.user %}
-                <a href="{{ path('benevoles') }}">Bénévoles</a>
-            {% endif %}
-            {% if is_granted('ROLE_MECENE') or is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('mecenes') }}">Mécènes & Lots</a>
-            {% endif %}
-            {% if is_granted('ROLE_MECENE') and not is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('mecene_mes_inscriptions') }}">Mes Inscriptions</a>
-            {% endif %}
-            {% if is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('admin_inscriptions') }}">Gestion Inscriptions</a>
-            {% endif %}
-            {% if app.user %}
-                <a class="nav-link" href="{{ path('stocks') }}">Stocks</a>
-            {% endif %}
-            <a href="#">Communication</a>
-            {% if app.user %}
-                <a class="nav-link" href="{{ path('public_index') }}">Public</a>
-            {% endif %}
-            <a class="nav-link" href="{{ path('app_contact') }}">Contact</a>
             {% if app.user %}
                 <div class="notification-icon-wrapper">
-                    <a href="#" onclick="toggleNotifications(event)" class="notification-bell">
+                    <a href="#" class="notification-bell" id="notificationBell">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -47,26 +24,23 @@
                     <div class="notification-dropdown" id="notificationDropdown" style="display: none;">
                         <div class="notification-header">
                             <h3>Notifications</h3>
-                            <button onclick="markAllAsRead(event)" class="mark-all-read">Tout marquer comme lu</button>
+                            <button id="markAllReadButton" class="mark-all-read">Tout marquer comme lu</button>
                         </div>
                         <div class="notification-list" id="notificationList">
                             <p class="no-notifications">Aucune notification</p>
                         </div>
                         <div class="notification-footer">
-                            <a href="{{ path('app_notifications') }}">Voir toutes les notifications</a>
+                            {# Toujours proposer d'aller voir les notifications (pas la messagerie) #}
+                            <a href="{{ path('app_notifications') }}">Voir les notifications</a>
                         </div>
                     </div>
                 </div>
                 <div class="settings-dropdown">
-                    <a href="#" onclick="toggleSettingsMenu(event)">
+                    <a href="#" id="settingsToggle">
                         <span class="settings-text">Paramètres</span>
                         <img src="{{ asset('images/settings.png') }}" alt="Paramètres" class="settings-icon">
                     </a>
-                    <div class="settings-menu" id="settingsMenu">
-                        <div class="theme-toggle">
-                            <label for="darkModeToggle">Mode sombre</label>
-                            <input type="checkbox" id="darkModeToggle" aria-label="Activer le mode sombre">
-                        </div>
+                    <div class="settings-menu" id="settingsMenu" style="display: none;">
                         <a href="{{ path('app_profile') }}">Mon profil</a>
                         <a href="{{ path('app_logout') }}">
                             Déconnexion <img src="{{ asset('images/logout.png') }}" alt="Déconnexion" class="logout-icon">
@@ -81,314 +55,167 @@
 </header>
 
 <script>
-// Gestion des notifications
-function loadNotifications() {
-    fetch('{{ path('app_notifications_unread') }}')
-        .then(response => response.json())
-        .then(data => {
-            const badge = document.getElementById('notificationBadge');
-            const list = document.getElementById('notificationList');
-            
-            if (data.length > 0) {
-                badge.textContent = data.length;
-                badge.style.display = 'block';
-                
-                list.innerHTML = '';
-                data.forEach(notif => {
-                    const item = document.createElement('div');
-                    item.className = 'notification-item';
-                    
-                    // Déterminer l'icône selon le type de notification
-                    let icon = '📢';
-                    let iconColor = '#6c757d';
-                    if (notif.type === 'nouvelle_inscription') {
-                        icon = '📝';
-                        iconColor = '#3b82f6';
-                    } else if (notif.type === 'inscription_acceptee') {
-                        icon = '✅';
-                        iconColor = '#10b981';
-                    } else if (notif.type === 'inscription_refusee') {
-                        icon = '❌';
-                        iconColor = '#ef4444';
-                    }
-                    
-                    item.innerHTML = `
-                        <div class="notification-icon-type" style="color: ${iconColor}; font-size: 24px; margin-right: 12px; flex-shrink: 0;">
-                            ${icon}
-                        </div>
-                        <div class="notification-content">
-                            <p class="notification-message">${notif.message}</p>
-                            <span class="notification-time">${notif.createdAt}</span>
-                        </div>
-                        <button onclick="markAsRead(event, ${notif.id}, '${notif.lien || '#'}')" class="notification-action" title="Marquer comme lu">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            <span>Lu</span>
-                        </button>
-                    `;
-                    list.appendChild(item);
-                });
-            } else {
-                badge.style.display = 'none';
-                list.innerHTML = '<p class="no-notifications">Aucune notification</p>';
-            }
-        });
-}
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const notificationBadge = document.getElementById('notificationBadge');
+        const notificationList = document.getElementById('notificationList');
+        const markAllReadButton = document.getElementById('markAllReadButton');
+        const settingsToggle = document.getElementById('settingsToggle');
+        const settingsMenu = document.getElementById('settingsMenu');
 
-function toggleNotifications(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const dropdown = document.getElementById('notificationDropdown');
-    const settingsMenu = document.getElementById('settingsMenu');
-    
-    // Fermer le menu paramètres si ouvert
-    if (settingsMenu) {
-        settingsMenu.style.display = 'none';
-    }
-    
-    if (dropdown.style.display === 'block') {
-        dropdown.style.display = 'none';
-        dropdown.classList.remove('show-animation');
-    } else {
-        dropdown.style.display = 'block';
-        dropdown.classList.add('show-animation');
-        loadNotifications();
-        
-        // Vérifier si la liste a du scroll
-        setTimeout(() => {
-            const list = document.getElementById('notificationList');
-            if (list && list.scrollHeight > list.clientHeight) {
-                list.classList.add('has-scroll');
-            }
-        }, 100);
-    }
-}
-
-function markAsRead(event, notifId, link) {
-    event.stopPropagation();
-    
-    // Animation de lecture
-    const button = event.currentTarget;
-    const item = button.closest('.notification-item');
-    if (item) {
-        item.classList.add('marking-read');
-    }
-    
-    fetch(`/notifications/${notifId}/marquer-lue`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            setTimeout(() => {
-                loadNotifications();
-                if (link && link !== '#') {
-                    window.location.href = link;
-                }
-            }, 300);
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        if (item) {
-            item.classList.remove('marking-read');
-        }
-    });
-}
-
-function markAllAsRead(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const button = event.currentTarget;
-    const originalText = button.innerHTML;
-    button.innerHTML = 'Chargement...';
-    button.disabled = true;
-    
-    fetch('{{ path('app_notifications_mark_all_read') }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            loadNotifications();
-            button.innerHTML = originalText;
-            button.disabled = false;
-            
-            // Fermer le dropdown après un court délai
-            setTimeout(() => {
-                const dropdown = document.getElementById('notificationDropdown');
-                if (dropdown) {
-                    dropdown.style.display = 'none';
-                }
-            }, 500);
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        button.innerHTML = originalText;
-        button.disabled = false;
-    });
-}
-
-// Variable pour suivre le nombre de notifications
-let previousNotificationCount = 0;
-
-// Charger les notifications au chargement de la page
-document.addEventListener('DOMContentLoaded', function() {
-    {% if app.user %}
-    loadNotifications();
-    // Rafraîchir toutes les 30 secondes
-    setInterval(checkForNewNotifications, 30000);
-    {% endif %}
-});
-
-// Vérifier les nouvelles notifications et animer si nécessaire
-function checkForNewNotifications() {
-    fetch('{{ path('app_notifications_count') }}')
-        .then(response => response.json())
-        .then(data => {
-            const currentCount = data.count;
-            const badge = document.getElementById('notificationBadge');
-            const bell = document.querySelector('.notification-bell');
-            
-            // Si on a plus de notifications qu'avant
-            if (currentCount > previousNotificationCount && previousNotificationCount > 0) {
-                // Animation de la cloche
-                bell.classList.add('has-new');
-                badge.classList.add('has-new');
-                
-                // Retirer l'animation après 2 secondes
-                setTimeout(() => {
-                    bell.classList.remove('has-new');
-                    badge.classList.remove('has-new');
-                }, 2000);
-                
-                // Jouer un son (optionnel - commenté par défaut)
-                // playNotificationSound();
-            }
-            
-            previousNotificationCount = currentCount;
-            
-            // Mettre à jour le badge
-            if (currentCount > 0) {
-                badge.textContent = currentCount;
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
-            }
-        });
-}
-
-// Fonction optionnelle pour jouer un son
-function playNotificationSound() {
-    // Créer un son simple avec Web Audio API
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.value = 800;
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.3);
-}
-
-function toggleSettingsMenu(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const menu = document.getElementById('settingsMenu');
-    const notificationDropdown = document.getElementById('notificationDropdown');
-    
-    // Fermer le dropdown de notifications si ouvert
-    if (notificationDropdown) {
-        notificationDropdown.style.display = 'none';
-    }
-    
-    if (menu.style.display === 'block') {
-        menu.style.display = 'none';
-    } else {
-        menu.style.display = 'block';
-    }
-}
-
-document.addEventListener('click', function(event) {
-    const menu = document.getElementById('settingsMenu');
-    const settingsDropdown = document.querySelector('.settings-dropdown');
-    const notificationDropdown = document.getElementById('notificationDropdown');
-    const notificationWrapper = document.querySelector('.notification-icon-wrapper');
-    
-    if (menu && settingsDropdown && !settingsDropdown.contains(event.target)) {
-        menu.style.display = 'none';
-    }
-    
-    if (notificationDropdown && notificationWrapper && !notificationWrapper.contains(event.target)) {
-        notificationDropdown.style.display = 'none';
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const burgerMenu = document.getElementById('burgerMenu');
-    const navMenu = document.getElementById('navMenu');
-
-    burgerMenu.addEventListener('click', function(event) {
-        event.stopPropagation();
-        burgerMenu.classList.toggle('active');
-        navMenu.classList.toggle('active');
-    });
-
-    document.addEventListener('click', function(event) {
-        if (!navMenu.contains(event.target) && !burgerMenu.contains(event.target)) {
-            navMenu.classList.remove('active');
-            burgerMenu.classList.remove('active');
-        }
-    });
-
-    navMenu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', function() {
-            navMenu.classList.remove('active');
-            burgerMenu.classList.remove('active');
-        });
-    });
-
-    // Dark mode toggle initialization
-    try {
-        const darkToggle = document.getElementById('darkModeToggle');
-        const saved = localStorage.getItem('darkMode');
-        const enabled = saved === '1';
-        if (enabled) {
-            document.documentElement.classList.add('dark');
-        }
-        if (darkToggle) {
-            darkToggle.checked = enabled;
-            darkToggle.addEventListener('change', function(e) {
-                if (e.target.checked) {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('darkMode', '1');
+        // Helper: fetch unread count and update badge
+        async function updateBadge() {
+            try {
+                const res = await fetch('{{ path('app_notifications_count') }}');
+                if (!res.ok) return;
+                const data = await res.json();
+                const count = data.count || 0;
+                if (count > 0) {
+                    notificationBadge.style.display = 'inline-block';
+                    notificationBadge.textContent = count;
                 } else {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('darkMode', '0');
+                    notificationBadge.style.display = 'none';
+                }
+            } catch (e) {
+                console.error('Failed to update notification badge', e);
+            }
+        }
+
+        // Helper: fetch unread notifications and render list
+        async function loadUnread() {
+            try {
+                const res = await fetch('{{ path('app_notifications_unread') }}');
+                if (!res.ok) return;
+                const items = await res.json();
+                notificationList.innerHTML = '';
+                if (!items || items.length === 0) {
+                    notificationList.innerHTML = '<p class="no-notifications">Aucune notification</p>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'notification-item';
+                    el.innerHTML = `
+                        <div class="notification-item-body">
+                            <div class="notification-text">${escapeHtml(item.message)}</div>
+                            <div class="notification-meta">${item.createdAt}</div>
+                        </div>
+                        <div class="notification-actions">
+                            <a href="#" class="btn-view" data-id="${item.id}" data-lien="${item.lien || ''}">Voir</a>
+                        </div>
+                    `;
+                    notificationList.appendChild(el);
+                });
+            } catch (e) {
+                console.error('Failed to load unread notifications', e);
+            }
+        }
+
+        // Mark a single notification as read and redirect
+        async function markReadAndRedirect(id, lien) {
+            try {
+                const res = await fetch('/notifications/' + id + '/marquer-lue', { method: 'POST', headers: {'X-Requested-With':'XMLHttpRequest', 'Content-Type':'application/json'} });
+                if (res.ok) {
+                    if (lien) {
+                        window.location.href = lien;
+                    } else {
+                        window.location.href = '{{ path('app_notifications') }}';
+                    }
+                } else {
+                    console.error('Failed to mark notification read', await res.text());
+                }
+            } catch (e) {
+                console.error('Error marking notification read', e);
+            }
+        }
+
+        // Escape helper to prevent XSS
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        if (notificationBell && notificationDropdown) {
+            notificationBell.addEventListener('click', async function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (notificationDropdown.style.display === 'block') {
+                    notificationDropdown.style.display = 'none';
+                    notificationDropdown.classList.remove('show-animation');
+                } else {
+                    // show dropdown and refresh list
+                    notificationDropdown.style.display = 'block';
+                    notificationDropdown.classList.add('show-animation');
+                    if (settingsMenu) settingsMenu.style.display = 'none';
+                    await loadUnread();
+                    // attach click handlers to view buttons
+                    notificationList.querySelectorAll('.btn-view').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const id = this.dataset.id;
+                            const lien = this.dataset.lien || '';
+                            markReadAndRedirect(id, lien);
+                        });
+                    });
+                    // after rendering, refresh badge count
+                    await updateBadge();
                 }
             });
         }
-    } catch (e) {
-        console.error('Dark mode init error', e);
-    }
-});
+
+        // Mark all as read
+        if (markAllReadButton) {
+            markAllReadButton.addEventListener('click', async function(e) {
+                e.preventDefault();
+                try {
+                    const res = await fetch('{{ path('app_notifications_mark_all_read') }}', { method: 'POST', headers: {'X-Requested-With':'XMLHttpRequest'} });
+                    if (res.ok) {
+                        await updateBadge();
+                        await loadUnread();
+                    }
+                } catch (err) {
+                    console.error('Failed to mark all read', err);
+                }
+            });
+        }
+
+        if (settingsToggle && settingsMenu) {
+            settingsToggle.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (settingsMenu.style.display === 'block') {
+                    settingsMenu.style.display = 'none';
+                } else {
+                    settingsMenu.style.display = 'block';
+                    if (notificationDropdown) {
+                        notificationDropdown.style.display = 'none';
+                        notificationDropdown.classList.remove('show-animation');
+                    }
+                }
+            });
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (notificationDropdown && !notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
+                notificationDropdown.style.display = 'none';
+                notificationDropdown.classList.remove('show-animation');
+            }
+            if (settingsMenu && !settingsToggle.contains(event.target) && !settingsMenu.contains(event.target)) {
+                settingsMenu.style.display = 'none';
+            }
+        });
+
+        // Initial badge load
+        updateBadge();
+        // Poll badge every 30s
+        setInterval(updateBadge, 30000);
+    });
+
 </script>

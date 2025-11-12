@@ -41,8 +41,14 @@ class AdminInscriptionController extends AbstractController
     public function accepter(InscriptionMecene $inscription, Request $request, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('accepter_inscription_' . $inscription->getId(), $request->request->get('_token'))) {
+            $remarqueAcceptation = $request->request->get('remarque_acceptation');
             $statutPrecedent = $inscription->getStatut();
             $inscription->setStatut('accepte');
+            
+            // Enregistrer la remarque d'acceptation si fournie
+            if ($remarqueAcceptation) {
+                $inscription->setRemarqueAcceptation($remarqueAcceptation);
+            }
             
             // Créer automatiquement l'entrée de stock
             $stock = new Stock();
@@ -71,11 +77,17 @@ class AdminInscriptionController extends AbstractController
             
             // Message personnalisé selon le statut précédent
             if ($statutPrecedent === 'refuse') {
-                $notificationMecene->setMessage('Mise à jour : Votre inscription pour l\'événement "' . $inscription->getEvenement()->getNom() . '" a été acceptée.');
+                $messageNotif = 'Mise à jour : Votre inscription pour l\'événement "' . $inscription->getEvenement()->getNom() . '" a été acceptée.';
             } else {
-                $notificationMecene->setMessage('Votre inscription pour l\'événement "' . $inscription->getEvenement()->getNom() . '" a été acceptée.');
+                $messageNotif = 'Votre inscription pour l\'événement "' . $inscription->getEvenement()->getNom() . '" a été acceptée.';
             }
             
+            // Ajouter la remarque d'acceptation au message si fournie
+            if ($remarqueAcceptation) {
+                $messageNotif .= ' Message : ' . $remarqueAcceptation;
+            }
+            
+            $notificationMecene->setMessage($messageNotif);
             $notificationMecene->setLien($this->generateUrl('mecene_mes_inscriptions'));
             $em->persist($notificationMecene);
             

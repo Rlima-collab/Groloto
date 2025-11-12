@@ -576,3 +576,38 @@
     }
 }
 
+/* =============== BOUTONS D'ACTION =============== */
+.event-actions,
+.history-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #3b82f6;
+    color: white;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-edit:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-edit svg {
+    width: 18px;
+    height: 18px;
+}
+
+

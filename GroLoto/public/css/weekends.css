@@ -1,0 +1,533 @@
+/* =============== WEEKENDS PUBLIC PAGE - HERO SECTION =============== */
+.hero-section.weekend-hero {
+    position: relative;
+    background: linear-gradient(145deg, #1a1f3a, #2d3561, #1e2749);
+    color: #fff;
+    padding: 2rem 3rem 4rem;
+    padding-top: calc(2rem + 71px);
+    margin: -20px;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    overflow: hidden;
+}
+
+.hero-section.weekend-hero::before {
+    content: "";
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.15), transparent 70%);
+    transform: rotate(25deg);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.hero-section.weekend-hero::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: repeating-linear-gradient(
+        135deg,
+        rgba(96, 165, 250, 0.08) 0px,
+        rgba(96, 165, 250, 0.08) 2px,
+        transparent 2px,
+        transparent 20px
+    );
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.hero-section.weekend-hero .shine {
+    position: absolute;
+    top: -100%; left: -50%;
+    width: 200%; height: 200%;
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0) 0%, rgba(96, 165, 250, 0.25) 50%, rgba(96, 165, 250, 0) 100%);
+    transform: rotate(30deg);
+    animation: shine 8s infinite linear;
+    pointer-events: none;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%) rotate(30deg); }
+    100% { transform: translateX(100%) rotate(30deg); }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Override Bootstrap/.container-fluid horizontal padding when showing weekends pages
+   Keeps other pages using .container-fluid untouched because the selector targets
+   container-fluid that contains weekends-specific elements only. */
+.container-fluid > .hero-section.weekend-hero,
+.container-fluid > .weekends-grid,
+.container-fluid > .weekend-banner,
+.container-fluid > .weekend-content {
+    padding-left: 0;
+    padding-right: 0;
+    max-width: 100%;
+}
+
+.hero-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+}
+
+.hero-description {
+    font-size: 1.2rem;
+    color: #cbd5e1;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* =============== WEEKENDS GRID & CARTES =============== */
+.weekends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 3rem;
+    /* remove horizontal padding inherited from global containers */
+    padding: 2rem 3rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.weekend-card {
+    position: relative;
+    background: #ffffff;
+    border-radius: 0; /* removed rounded corners for a flatter, professional look */
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+}
+
+/* remove translate/zoom on hover for a flatter, more consistent UI */
+.weekend-card:hover {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.09);
+}
+
+/* Image */
+.weekend-card .image {
+    width: 100%;
+    /* let the image determine height using aspect-ratio to adapt cards */
+    height: auto;
+    overflow: hidden;
+    position: relative;
+}
+
+.weekend-card .image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.15));
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.weekend-card:hover .image::after {
+    opacity: 0.7;
+}
+
+.weekend-card .image img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    height: auto;
+    object-fit: cover;
+    transition: none; /* remove hover zoom */
+    border-radius: 0; /* remove rounding on images */
+}
+
+
+/* Contenu */
+.weekend-card .content {
+    padding: 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #ffffff;
+    min-width: 0; /* prevent overflow of long content */
+    overflow: hidden; /* prevent content from overflowing the card */
+    width: 100%;
+}
+
+.weekend-card h3 {
+    font-size: 1.85rem;
+    margin: 0 0 1rem;
+    color: #1a1f3a;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    width: 100%;
+}
+
+.weekend-card p {
+    color: #4b5563;
+    margin: 0 0 1.5rem;
+    line-height: 1.75;
+    font-size: 1.05rem;
+    flex-grow: 1;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 100%;
+    width: 100%;
+    display: block;
+}
+
+/* Dates */
+.weekend-card .dates {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #1a3c5a; /* darker blue from hero */
+    font-size: 0.98rem;
+    font-weight: 600;
+    margin-bottom: 1.2rem;
+}
+
+.weekend-card .dates i {
+    font-size: 1.2rem;
+    color: #1a3c5a;
+}
+
+/* Bouton "Lire plus" - style inspiré du hero + effet connexion */
+.weekend-card .read-more {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: linear-gradient(135deg, #1a3c5a, #2563eb); /* darker hero blue -> bright */
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.35s ease;
+    align-self: flex-start;
+    box-shadow: 0 6px 18px rgba(26, 60, 90, 0.16);
+    margin-top: auto;
+    overflow: hidden;
+}
+
+.weekend-card .read-more::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -75%;
+    width: 50%; height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 100%);
+    transform: skewX(-20deg);
+    transition: left 0.9s ease;
+}
+
+.weekend-card .read-more:hover::before { left: 100%; }
+
+.weekend-card .read-more:hover {
+    gap: 0.9rem;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
+    background: linear-gradient(135deg, #16324a, #1d4ed8);
+}
+
+.weekend-card .read-more i {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.weekend-card:hover .read-more i {
+    transform: translateX(4px);
+}
+
+/* Clean up card header & footer to avoid large gray panels */
+.weekend-card .card-header {
+    background: transparent;
+    padding: 0 0 0.75rem 0;
+    text-align: left;
+}
+
+.weekend-card .card-header h3 {
+    margin: 0;
+    padding: 0;
+}
+
+.weekend-card .card-footer {
+    margin-top: 1.25rem;
+    padding-top: 0;
+    border-top: none;
+    display: flex;
+    justify-content: flex-start;
+    background: transparent;
+}
+
+/* =============== WEEKEND DETAIL PAGE =============== */
+.weekend-banner {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    overflow: hidden;
+    background-color: #1a1a1a;
+    padding-left: 0; /* neutralize global container padding */
+    padding-right: 0;
+}
+
+.weekend-banner .back-button {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 50%;
+    color: white;
+    font-size: 1.5rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+.weekend-banner .back-button:hover {
+    background: rgba(26, 60, 90, 0.8);
+    transform: translateX(-5px);
+    box-shadow: 0 6px 20px rgba(26, 60, 90, 0.5);
+}
+
+.weekend-banner .back-button i {
+    transition: transform 0.3s ease;
+}
+
+.weekend-banner .back-button:hover i {
+    transform: translateX(-3px);
+}
+
+.weekend-banner .banner-image {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    object-fit: cover;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.weekend-banner .banner-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to bottom,
+        rgba(0,0,0,0.2) 0%,
+        rgba(0,0,0,0.4) 50%,
+        rgba(0,0,0,0.8) 100%
+    );
+    pointer-events: none;
+}
+
+.weekend-banner .banner-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 4rem;
+    color: white;
+    z-index: 2;
+}
+
+.weekend-banner .content-box {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 0; /* remove rounding for banner content */
+    max-width: 800px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+.weekend-banner h1 {
+    font-size: 3.5rem;
+    margin: 0 0 1rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.weekend-banner p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin: 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    opacity: 0.9;
+}
+
+.weekend-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    /* remove horizontal padding so layout fits image widths better */
+    padding: 4rem 0;
+}
+
+.events-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+    margin-top: 2rem;
+}
+
+.event-row {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+    width: 100%;
+}
+
+.event-row.left-image {
+    /* larger image column for a more visual layout */
+    grid-template-columns: minmax(320px, 45%) 55%;
+}
+
+.event-row.right-image {
+    grid-template-columns: 55% minmax(320px, 45%);
+}
+
+.event-row.right-image .event-image { order: 2; }
+.event-row.right-image .event-details { 
+    order: 1; 
+    text-align: right; 
+}
+.event-row.right-image .event-info { justify-content: flex-end; }
+
+.event-image {
+    overflow: hidden;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.event-image img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    height: auto;
+    object-fit: cover;
+    transition: none; /* remove hover zoom */
+}
+
+.event-details h2 {
+    font-size: 2rem;
+    color: #1a1f3a;
+    margin: 0 0 1rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.event-info {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    color: #1a3c5a; /* darker to improve contrast */
+    flex-wrap: wrap;
+}
+
+.event-info i {
+    color: #1a3c5a;
+    margin-right: 0.5rem;
+}
+
+.event-date {
+    font-weight: 600;
+    color: #1a3c5a;
+    display: flex;
+    align-items: center;
+}
+
+.event-time {
+    display: flex;
+    align-items: center;
+}
+
+.event-time .duration {
+    color: #888;
+    font-size: 0.9em;
+    margin-left: 0.5rem;
+}
+
+.event-location {
+    display: flex;
+    align-items: center;
+}
+
+.event-description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #444;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+/* =============== RESPONSIVE =============== */
+@media (max-width: 992px) {
+    .weekend-banner { height: 500px; }
+    .weekend-banner h1 { font-size: 2.5rem; }
+    .event-row.left-image,
+    .event-row.right-image {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    .event-row.right-image .event-details { order: 2; text-align: left; }
+    .event-row.right-image .event-info { justify-content: flex-start; }
+    .event-image img { height: 300px; }
+}
+
+@media (max-width: 768px) {
+    .hero-title { font-size: 2.3rem; }
+    .hero-description { font-size: 1.1rem; }
+    .weekend-banner { height: 400px; }
+    .weekend-banner .banner-content { padding: 2rem; }
+    .weekend-banner h1 { font-size: 2rem; }
+    .weekend-content { padding: 2rem 1rem; }
+    .events-timeline { gap: 3rem; }
+    .weekends-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 1.5rem;
+    }
+    .weekend-card .image { height: 250px; }
+    .weekend-card .content { padding: 1.5rem; }
+    .weekend-card h3 { font-size: 1.6rem; }
+    .weekend-card p { font-size: 1rem; }
+    .weekend-card .read-more {
+        padding: 0.65rem 1.3rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .weekends-grid {
+        padding: 1rem;
+        gap: 1.5rem;
+    }
+    .weekend-card .image { height: 220px; }
+}

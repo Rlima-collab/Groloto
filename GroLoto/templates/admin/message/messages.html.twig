@@ -1,0 +1,1551 @@
+{% extends 'base.html.twig' %}
+{% block title %}Messagerie{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #ffffff; color: #0f1724; }
+main.content { padding: 0 !important; margin: 0 !important; height: calc(100vh - 70px); overflow: hidden; padding-top: 70px !important; }
+main.content .container-fluid { padding: 0 !important; height: 100%; }
+.chat-container { display: flex; height: 100%; padding: 0; gap: 0; background: #f8f9fa; margin: 0; }
+.chat-sidebar { width: 350px; background: linear-gradient(135deg, #07112a 0%, #0f2a5a 100%); border: none; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+.chat-sidebar-header { padding: 20px; background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); }
+.chat-sidebar-header h2 { font-size: 20px; font-weight: 600; color: white; margin-bottom: 8px; }
+.conversation-sender { font-size: 12px; color: rgba(255,255,255,0.9); margin-top: 6px; font-weight: 500; }
+.new-chat-btn { width: 100%; padding: 12px 20px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+.new-chat-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); }
+.conversations-list { flex: 1; overflow-y: auto; padding: 10px; }
+.conversation-item { padding: 15px; margin-bottom: 8px; background: rgba(37, 45, 61, 0.6); border-radius: 12px; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; position: relative; display: flex; justify-content: space-between; align-items: flex-start; }
+.conversation-item-content { flex: 1; min-width: 0; }
+.conversation-item-menu { opacity: 0; transition: opacity 0.2s; }
+.conversation-item:hover .conversation-item-menu { opacity: 1; }
+.conversation-menu-btn { padding: 4px 8px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.conversation-menu-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+.conversation-dropdown { position: absolute; right: 10px; top: 40px; background: white; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); min-width: 180px; z-index: 100; display: none; }
+.conversation-dropdown.show { display: block; }
+.conversation-dropdown-item { width: 100%; padding: 10px 14px; background: transparent; border: none; text-align: left; font-size: 13px; color: #1f2937; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+.conversation-dropdown-item:hover { background: #f3f4f6; }
+.conversation-dropdown-item.delete { color: #ef4444; }
+.conversation-dropdown-item.delete:hover { background: #fee2e2; }
+.conversation-dropdown-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+.conversation-item:hover { background: #2d3748; border-left-color: #3b82f6; }
+.conversation-item.active { background: #2d3748; border-left-color: #3b82f6; }
+.conversation-name { font-weight: 600; font-size: 14px; margin-bottom: 5px; color: #e8eaed; }
+.conversation-preview { font-size: 13px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.conversation-time { font-size: 11px; color: #6b7280; margin-top: 5px; }
+.chat-main { flex: 1; display: flex; flex-direction: column; background: #ffffff; overflow: hidden; }
+.chat-header { padding: 20px 30px; background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); border-bottom: none; display: none; justify-content: space-between; align-items: center; }
+.chat-header h3 { font-size: 18px; font-weight: 600; color: white; margin: 0; }
+.chat-actions { display: flex; gap: 10px; }
+.dropdown-menu-container { position: relative; }
+.menu-btn { padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.menu-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+.dropdown-menu { position: absolute; right: 0; top: calc(100% + 8px); background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 220px; z-index: 1000; overflow: hidden; }
+.dropdown-item { width: 100%; padding: 12px 16px; background: transparent; border: none; text-align: left; font-size: 14px; color: #1f2937; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+.dropdown-item:hover { background: #f3f4f6; }
+.dropdown-item.delete-item { color: #ef4444; }
+.dropdown-item.delete-item:hover { background: #fee2e2; }
+.dropdown-item svg { flex-shrink: 0; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
+.message-wrapper { display: flex; flex-direction: column; max-width: 70%; animation: fadeIn 0.3s; }
+.message-wrapper.sent { align-self: flex-end; }
+.message-wrapper.received { align-self: flex-start; }
+.message-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 0 5px; }
+.message-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: linear-gradient(135deg, #0b1220 0%, #0f1a35 100%); color: white; overflow: hidden; }
+.message-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.message-wrapper.received .message-avatar { background: linear-gradient(135deg, #0b1220 0%, #0f1a35 100%); }
+.message-sender { font-size: 13px; font-weight: 600; color: #000000; }
+.message-number { font-size: 11px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+.message-bubble { padding: 16px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+
+/* ACTIONS DE MESSAGE (3 POINTS) */
+.message-menu-btn { padding: 4px 8px; background: transparent; border: none; cursor: pointer; color: #6b7280; font-size: 16px; margin-left: auto; transition: all 0.2s; }
+.message-menu-btn:hover { color: #3b82f6; }
+.message-actions { position: relative; margin-left: auto; }
+.message-actions-dropdown { display: none; position: absolute; right: 0; top: 100%; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 100; overflow: hidden; margin-top: 5px; }
+.message-actions-dropdown.active { display: block; }
+.message-action-item { width: 100%; padding: 10px 16px; background: transparent; border: none; text-align: left; font-size: 13px; color: #374151; cursor: pointer; transition: background 0.2s; display: block; }
+.message-action-item:hover { background: #f3f4f6; }
+.message-action-item.delete { color: #ef4444; }
+.message-action-item.delete:hover { background: #fee2e2; }
+
+/* NOTIFICATIONS DE MESSAGE */
+.message-notification { font-size: 11px; padding: 6px 12px; margin-bottom: 6px; border-radius: 6px; font-style: italic; opacity: 0.9; font-weight: 500; display: inline-block; }
+.message-notification.edited { background: rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3); }
+.message-notification.deleted { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+.message-wrapper.sent .message-bubble { background: linear-gradient(135deg, #0b1220 0%, #0f1a35 100%); color: white; border-bottom-right-radius: 6px; }
+.message-wrapper.received .message-bubble { background: linear-gradient(135deg, #0b1220 0%, #0f1a35 100%); color: white; border: none; border-bottom-left-radius: 6px; }
+.message-content { font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
+.message-time { font-size: 11px; color: rgba(255, 255, 255, 0.65); margin-top: 8px; }
+.message-wrapper.received .message-time { color: rgba(255, 255, 255, 0.65); }
+.chat-input-container { padding: 12px 18px; background: transparent; border-top: 1px solid #e6edf8; }
+.chat-input-wrapper { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
+.chat-input { flex: 1; background: #f8fafc; border: 1px solid #c7def8; border-radius: 10px; padding: 10px 12px; color: #0f1724; font-size: 14px; font-family: 'Inter', sans-serif; resize: none; max-height: 120px; min-height: 44px; transition: all 0.2s; }
+.chat-input:focus { outline: none; border-color: #3b82f6; background: #ffffff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+.chat-input::placeholder { color: #9ca3af; opacity: 1; }
+.chat-input:focus::placeholder { opacity: 0.5; }
+.chat-send-btn { padding: 10px 18px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.chat-send-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); }
+.chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.chat-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #6b7280; gap: 15px; }
+.chat-empty svg { width: 80px; height: 80px; opacity: 0.3; }
+.chat-empty p { font-size: 16px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.chat-messages::-webkit-scrollbar, .conversations-list::-webkit-scrollbar { width: 8px; }
+.chat-messages::-webkit-scrollbar-track, .conversations-list::-webkit-scrollbar-track { background: #1a1f2e; }
+.chat-messages::-webkit-scrollbar-thumb, .conversations-list::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+
+/* CONVERSATIONS CLÔTURÉES */
+.conversation-item.conversation-closed { opacity: 0.7; }
+.closed-badge { display: inline-block; margin-left: 8px; font-size: 10px; padding: 3px 8px; background: rgba(251, 191, 36, 0.2); color: #fbbf24; border-radius: 10px; font-weight: 600; }
+.conversation-item.conversation-closed .conversation-name { color: #d1d5db; }
+.conversation-item.conversation-closed .conversation-sender, 
+.conversation-item.conversation-closed .conversation-preview { color: #9ca3af; }
+
+/* POPUP MODAL */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal-overlay.active { display: flex; }
+.modal-content { background: white; border-radius: 16px; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.modal-header { font-size: 20px; font-weight: 600; color: #1e3a8a; margin-bottom: 20px; }
+.modal-input { width: 100%; padding: 12px 16px; border: 2px solid #c7def8; border-radius: 10px; margin-bottom: 15px; font-size: 14px; font-family: 'Inter', sans-serif; }
+.modal-input:focus { outline: none; border-color: #3b82f6; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.modal-btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.modal-btn-cancel { background: #e5e7eb; color: #374151; }
+.modal-btn-cancel:hover { background: #d1d5db; }
+.modal-btn-confirm { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
+.modal-btn-confirm:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
+
+/* AUTOCOMPLETION */
+.autocomplete-item {
+	padding: 10px 15px;
+	cursor: pointer;
+	border-bottom: 1px solid #f3f4f6;
+	color: #374151;
+	transition: background-color 0.2s;
+}
+.autocomplete-item:hover, .autocomplete-item.selected {
+	background-color: #e0e7ff;
+}
+.autocomplete-item-email {
+	font-weight: 500;
+	color: #1f2937;
+}
+.autocomplete-item-name {
+	font-size: 12px;
+	color: #6b7280;
+	margin-top: 2px;
+}
+
+/* RESPONSIVE MOBILE */
+@media (max-width: 768px) {
+  .chat-container { 
+    flex-direction: row; 
+    position: relative;
+  }
+  
+  .chat-sidebar { 
+    width: 100%; 
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    transition: transform 0.3s ease;
+  }
+  
+  .chat-sidebar.hidden-mobile {
+    transform: translateX(-100%);
+  }
+  
+  .chat-main { 
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .chat-main.active-mobile {
+    transform: translateX(0);
+  }
+  
+  .chat-sidebar-header {
+    padding: 15px;
+  }
+  
+  .chat-sidebar-header h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .new-chat-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  
+  .search-box {
+    margin-top: 10px !important;
+  }
+  
+  #searchConversations {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+  
+  .conversations-list { 
+    padding: 8px; 
+  }
+  
+  .conversation-item { 
+    padding: 12px; 
+    margin-bottom: 6px;
+  }
+  
+  .conversation-item.to-admin { 
+    padding: 10px; 
+  }
+  
+  .conversation-name {
+    font-size: 13px;
+  }
+  
+  .conversation-preview {
+    font-size: 12px;
+  }
+  
+  .chat-header {
+    padding: 12px 15px;
+    display: flex !important;
+  }
+  
+  .chat-header h3 {
+    font-size: 16px;
+  }
+  
+  .back-btn-mobile {
+    display: flex !important;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .back-btn-mobile:hover {
+    background: rgba(255,255,255,0.2);
+  }
+  
+  .back-btn-mobile svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .chat-messages { 
+    padding: 12px; 
+    gap: 15px;
+  }
+  
+  .message-wrapper { 
+    max-width: 90%; 
+  }
+  
+  .message-bubble {
+    padding: 12px 16px;
+  }
+  
+  .message-content {
+    font-size: 13px;
+  }
+  
+  .chat-input-container { 
+    padding: 10px; 
+  }
+  
+  .chat-input {
+    padding: 8px 10px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+  
+  .chat-send-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  
+  .modal-content { 
+    width: 95%; 
+    padding: 20px; 
+  }
+  
+  .modal-header {
+    font-size: 18px;
+  }
+  
+  .modal-input {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .dropdown-menu {
+    min-width: 180px;
+  }
+}
+
+/* Style pour le bouton retour (caché par défaut sur desktop) */
+.back-btn-mobile {
+  display: none;
+}
+
+
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="chat-container">
+<div class="chat-sidebar">
+<div class="chat-sidebar-header">
+<h2>💬 Messagerie</h2>
+<button class="new-chat-btn" id="newChatBtn">✉️ Nouveau message</button>
+<div class="search-box" style="margin-top: 15px;">
+<input type="text" id="searchConversations" placeholder="Rechercher une conversation..." style="width: 100%; padding: 10px 15px; border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; background: rgba(255,255,255,0.1); color: white; font-size: 14px; transition: all 0.3s;">
+</div>
+</div>
+<div class="conversations-list" id="conversationsList">
+{% if messages|length == 0 %}
+<div class="empty-conversations" id="emptyConversations" style="text-align: center; padding: 40px 20px; color: #6b7280;"><p>Aucune conversation</p></div>
+{% else %}
+{% for msg in messages %}
+{% set parts = msg.message|split('] ', 2) %}
+{% set hasSubject = parts|length > 1 and parts[0]|slice(0,1) == '[' %}
+{% set subject = hasSubject ? parts[0]|slice(1) : 'Sans sujet' %}
+{% set body = hasSubject ? parts[1] : msg.message %}
+{% set lastMessageText = msg.lastMessage|default(body) %}
+{% set lastMessageParts = lastMessageText|split('] ', 2) %}
+{% set lastMessageBody = lastMessageParts|length > 1 and lastMessageParts[0]|slice(0,1) == '[' ? lastMessageParts[1] : lastMessageText %}
+{% set isToAdmin = msg.destinataire and 'admin' in msg.destinataire|lower %}
+{% set conversationArray = [] %}
+{% for reply in msg.conversation|default([]) %}
+{% set conversationArray = conversationArray|merge([{
+'nom': reply.nom,
+'email': reply.email,
+'message': reply.message,
+'date': reply.createdAt|date('d/m/Y à H:i'),
+'isEdited': reply.message starts with '[MODIFIÉ]',
+'isDeleted': reply.message starts with '[SUPPRIMÉ]'
+}]) %}
+{% endfor %}
+<div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %}" data-id="{{ msg.id }}" data-subject="{{ subject|e('html_attr') }}" data-conversation="{{ conversationArray|json_encode|e('html_attr') }}" data-sender="{{ msg.nom }}" data-email="{{ msg.email }}" data-message="{{ body|e('html_attr') }}" data-date="{{ msg.createdAt|date('d/m/Y à H:i') }}" data-closed="{{ msg.cloturee ? 'true' : 'false' }}" data-profile-image="{{ msg.otherUserProfileImage|default('') }}">
+	<div class="conversation-item-content">
+		<div class="conversation-name">
+			{{ subject }}
+			{% if msg.cloturee %}
+			<span class="closed-badge">🔒 Clôturée</span>
+			{% endif %}
+		</div>
+		<div class="conversation-sender">{{ msg.nom }} <span style="font-size: 11px; color: #9ca3af;">({{ msg.otherUserRole|default('Utilisateur') }})</span></div>
+		<div class="conversation-preview">{{ lastMessageBody|slice(0, 50) }}{% if lastMessageBody|length > 50 %}...{% endif %}</div>
+		<div class="conversation-time">{{ msg.lastMessageDate|default(msg.createdAt)|date('d/m H:i') }}</div>
+	</div>
+	<div class="conversation-item-menu">
+		<button class="conversation-menu-btn" onclick="toggleConversationMenu(event, {{ msg.id }})">
+			<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>
+		</button>
+		<div class="conversation-dropdown" id="convMenu{{ msg.id }}">
+			<button class="conversation-dropdown-item" onclick="closeConversation(event, {{ msg.id }})">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+				Clôturer
+			</button>
+			<button class="conversation-dropdown-item delete" onclick="deleteConversation(event, {{ msg.id }})">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+				Supprimer
+			</button>
+		</div>
+	</div>
+</div>
+{% endfor %}
+{% endif %}
+</div>
+</div>
+<div class="chat-main">
+<div class="chat-header" id="chatHeader" style="display: none;">
+	<button class="back-btn-mobile" id="backToListBtn">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+			<path d="M19 12H5M12 19l-7-7 7-7"/>
+		</svg>
+		Retour
+	</button>
+	<h3 id="chatTitle">Conversation</h3>
+	<span id="closedIndicator" style="display: none; font-size: 12px; padding: 6px 12px; background: rgba(251, 191, 36, 0.2); color: #fbbf24; border-radius: 20px; font-weight: 600;">🔒 Conversation clôturée</span>
+</div>
+<div class="chat-messages" id="chatMessages">
+<div class="chat-empty">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+<p>Sélectionnez une conversation</p>
+</div>
+</div>
+<div class="chat-input-container" id="chatInputContainer" style="display: none;">
+    <div class="chat-input-wrapper">
+        <input type="email" id="chatRecipient" class="chat-recipient" placeholder="Email destinataire" style="display:none;">
+        <input type="text" id="chatSubject" class="chat-subject" placeholder="Sujet de la conversation" style="display:none;">
+        <textarea class="chat-input" id="chatInput" placeholder="Écrivez votre message..." rows="1"></textarea>
+        <button class="chat-send-btn" id="sendBtn">Envoyer</button>
+    </div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- POPUP MODAL POUR DESTINATAIRE + SUJET -->
+<div class="modal-overlay" id="newMessageModal">
+	<div class="modal-content">
+		<div class="modal-header">✉️ Nouveau message Admin</div>
+		<div style="position: relative;">
+			<input type="email" id="modalRecipient" class="modal-input" placeholder="Email du destinataire" autocomplete="off">
+			<div id="autocompleteList" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #d1d5db; border-top: none; max-height: 200px; overflow-y: auto; z-index: 1000; display: none;"></div>
+		</div>
+		<input type="text" id="modalSubject" class="modal-input" placeholder="Sujet de la conversation" autocomplete="off">
+		<div class="modal-actions">
+			<button class="modal-btn modal-btn-cancel" id="modalCancel">Annuler</button>
+			<button class="modal-btn modal-btn-confirm" id="modalConfirm">Continuer</button>
+		</div>
+	</div>
+</div>
+
+<!-- MODAL DE CONFIRMATION -->
+<div class="modal-overlay" id="confirmModal">
+	<div class="modal-content">
+		<div class="modal-header" id="confirmTitle">Confirmation</div>
+		<p id="confirmMessage" style="padding: 20px; color: #374151; line-height: 1.6;"></p>
+		<div class="modal-actions">
+			<button class="modal-btn modal-btn-cancel" id="confirmCancel">Annuler</button>
+			<button class="modal-btn modal-btn-confirm" id="confirmOk">Confirmer</button>
+		</div>
+	</div>
+</div>
+
+<!-- MODAL D'ÉDITION DE MESSAGE -->
+<div class="modal-overlay" id="editMessageModal">
+	<div class="modal-content">
+		<div class="modal-header">Modifier le message</div>
+		<textarea id="editMessageInput" class="modal-input" rows="4" style="resize: vertical; min-height: 80px;" placeholder="Écrivez votre message..."></textarea>
+		<div class="modal-actions">
+			<button class="modal-btn modal-btn-cancel" id="editMessageCancel">Annuler</button>
+			<button class="modal-btn modal-btn-confirm" id="editMessageConfirm">Modifier</button>
+		</div>
+	</div>
+</div>
+
+<!-- TOAST NOTIFICATIONS -->
+<div id="toastContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px;"></div>
+
+<style>
+.toast {
+	padding: 16px 24px;
+	border-radius: 8px;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+	color: white;
+	font-weight: 500;
+	animation: slideIn 0.3s ease;
+	min-width: 250px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.toast.success {
+	background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.toast.error {
+	background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.toast.info {
+	background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+</style>
+
+<script>
+const adminEmail = '{{ adminEmail|default('admin@groloto.local') }}';
+const currentUserName = '{{ app.user ? (app.user.prenom ~ ' ' ~ app.user.nom)|e('js') : 'Admin' }}';
+const currentUserProfileImage = '{{ app.user.profileImage|default('')|e('js') }}';
+let currentConversationId = null;
+let currentSubject = '';
+let currentRecipient = '';
+let currentRecipientEmail = '';
+let currentRecipientName = ''; // Nom complet du destinataire
+let currentRecipientRole = ''; // Rôle du destinataire
+let currentRecipientProfileImage = ''; // Image de profil du destinataire
+
+// Système de confirmation modal
+let confirmCallback = null;
+
+function showConfirm(title, message, onConfirm) {
+	const modal = document.getElementById('confirmModal');
+	const titleEl = document.getElementById('confirmTitle');
+	const messageEl = document.getElementById('confirmMessage');
+	
+	titleEl.textContent = title;
+	messageEl.textContent = message;
+	confirmCallback = onConfirm;
+	modal.classList.add('active');
+}
+
+// Système de toast notifications
+function showToast(message, type = 'info') {
+	const container = document.getElementById('toastContainer');
+	const toast = document.createElement('div');
+	toast.className = `toast ${type}`;
+	
+	const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+	toast.innerHTML = `<span style="font-size: 20px;">${icon}</span><span>${message}</span>`;
+	
+	container.appendChild(toast);
+	
+	setTimeout(() => {
+		toast.style.animation = 'slideIn 0.3s ease reverse';
+		setTimeout(() => toast.remove(), 300);
+	}, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+const items = document.querySelectorAll('.conversation-item');
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+const newChatBtn = document.getElementById('newChatBtn');
+const chatHeader = document.getElementById('chatHeader');
+const chatInputContainer = document.getElementById('chatInputContainer');
+const chatTitle = document.getElementById('chatTitle');
+const conversationsList = document.getElementById('conversationsList');
+const closedIndicator = document.getElementById('closedIndicator');
+const searchInput = document.getElementById('searchConversations');
+const backToListBtn = document.getElementById('backToListBtn');
+
+console.log('Elements trouves:', items.length, chatMessages, sendBtn);
+
+// Bouton retour pour mobile
+if (backToListBtn) {
+	backToListBtn.addEventListener('click', function() {
+		document.querySelector('.chat-sidebar').classList.remove('hidden-mobile');
+		document.querySelector('.chat-main').classList.remove('active-mobile');
+		chatHeader.style.display = 'none';
+		chatInputContainer.style.display = 'none';
+	});
+}
+
+// Fonction de recherche des conversations
+searchInput.addEventListener('input', function() {
+	const searchTerm = this.value.toLowerCase().trim();
+	const conversations = document.querySelectorAll('.conversation-item');
+	
+	conversations.forEach(conv => {
+		const name = conv.querySelector('.conversation-name')?.textContent.toLowerCase() || '';
+		const sender = conv.querySelector('.conversation-sender')?.textContent.toLowerCase() || '';
+		const preview = conv.querySelector('.conversation-preview')?.textContent.toLowerCase() || '';
+		
+		// Recherche dans le nom, l'expéditeur et l'aperçu du message
+		if (name.includes(searchTerm) || sender.includes(searchTerm) || preview.includes(searchTerm)) {
+			conv.style.display = '';
+		} else {
+			conv.style.display = 'none';
+		}
+	});
+	
+	// Afficher/masquer le message "Aucune conversation"
+	const visibleConvs = Array.from(conversations).filter(c => c.style.display !== 'none');
+	const emptyMessage = document.getElementById('emptyConversations');
+	if (emptyMessage) {
+		emptyMessage.style.display = visibleConvs.length === 0 ? 'block' : 'none';
+	}
+});
+
+// Style du champ de recherche au focus
+searchInput.addEventListener('focus', function() {
+	this.style.background = 'rgba(255,255,255,0.15)';
+	this.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+});
+
+searchInput.addEventListener('blur', function() {
+	this.style.background = 'rgba(255,255,255,0.1)';
+	this.style.borderColor = 'rgba(255,255,255,0.2)';
+});
+
+// Modal
+const newMessageModal = document.getElementById('newMessageModal');
+const modalRecipient = document.getElementById('modalRecipient');
+const modalSubject = document.getElementById('modalSubject');
+const modalCancel = document.getElementById('modalCancel');
+const modalConfirm = document.getElementById('modalConfirm');
+
+// Modal de confirmation
+const confirmModal = document.getElementById('confirmModal');
+const confirmCancel = document.getElementById('confirmCancel');
+const confirmOk = document.getElementById('confirmOk');
+
+// Modal d'édition de message
+const editMessageModal = document.getElementById('editMessageModal');
+const editMessageInput = document.getElementById('editMessageInput');
+const editMessageCancel = document.getElementById('editMessageCancel');
+const editMessageConfirm = document.getElementById('editMessageConfirm');
+let currentEditMessageId = null;
+
+editMessageCancel.addEventListener('click', () => {
+	editMessageModal.classList.remove('active');
+	editMessageInput.value = '';
+	currentEditMessageId = null;
+});
+
+confirmCancel.addEventListener('click', () => {
+	confirmModal.classList.remove('active');
+	confirmCallback = null;
+});
+
+confirmOk.addEventListener('click', () => {
+	confirmModal.classList.remove('active');
+	if (confirmCallback) {
+		confirmCallback();
+		confirmCallback = null;
+	}
+});
+
+// Fonctions pour gérer les menus sur les conversation-items
+window.toggleConversationMenu = function(e, convId) {
+	e.stopPropagation();
+	// Fermer tous les autres menus
+	document.querySelectorAll('.conversation-dropdown').forEach(m => m.classList.remove('show'));
+	// Ouvrir celui-ci
+	document.getElementById('convMenu' + convId).classList.add('show');
+};
+
+window.closeConversation = async function(e, convId) {
+	e.stopPropagation();
+	
+	showConfirm(
+		'Clôturer la conversation',
+		'Les deux parties ne pourront plus envoyer de messages. Êtes-vous sûr ?',
+		async function() {
+			try {
+				const response = await fetch('{{ path('admin_message_close', {'id': 'PLACEHOLDER'}) }}'.replace('PLACEHOLDER', convId), {
+					method: 'POST',
+					headers: {'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json'}
+				});
+				const data = await response.json();
+				
+				if (data.success) {
+					document.getElementById('convMenu' + convId).classList.remove('show');
+					showToast('Conversation clôturée avec succès', 'success');
+					
+					// Mettre à jour l'attribut data-closed de la conversation
+					const convItem = document.querySelector(`.conversation-item[data-id="${convId}"]`);
+					if (convItem) {
+						convItem.dataset.closed = 'true';
+						convItem.classList.add('conversation-closed');
+						// Ajouter le badge dans le nom
+						const nameEl = convItem.querySelector('.conversation-name');
+						if (nameEl && !nameEl.querySelector('.closed-badge')) {
+							nameEl.innerHTML += ' <span class="closed-badge">🔒 Clôturée</span>';
+						}
+					}
+					
+					// Si c'est la conversation active, désactiver l'input et afficher l'indicateur
+					if (currentConversationId == convId) {
+						chatInput.disabled = true;
+						sendBtn.disabled = true;
+						chatInput.placeholder = 'Cette conversation est clôturée';
+						closedIndicator.style.display = 'block';
+					}
+				} else {
+					showToast(data.error || 'Erreur lors de la clôture', 'error');
+				}
+			} catch (err) {
+				console.error(err);
+				showToast('Erreur réseau', 'error');
+			}
+		}
+	);
+};
+
+window.deleteConversation = async function(e, convId) {
+	e.stopPropagation();
+	
+	showConfirm(
+		'Supprimer la conversation',
+		'Cette conversation sera supprimée de votre liste. Êtes-vous sûr ?',
+		async function() {
+			try {
+				const response = await fetch('{{ path('admin_message_delete', {'id': 'PLACEHOLDER'}) }}'.replace('PLACEHOLDER', convId), {
+					method: 'POST',
+					headers: {'X-Requested-With': 'XMLHttpRequest'}
+				});
+				const data = await response.json();
+				
+				if (data.success) {
+					document.getElementById('convMenu' + convId).classList.remove('show');
+					showToast('Conversation supprimée', 'success');
+					
+					const convItem = document.querySelector(`.conversation-item[data-id="${convId}"]`);
+					if (convItem) convItem.remove();
+					
+					if (currentConversationId == convId) {
+						chatHeader.style.display = 'none';
+						chatInputContainer.style.display = 'none';
+						chatMessages.innerHTML = '<div class="chat-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Sélectionnez une conversation</p></div>';
+						currentConversationId = null;
+					}
+				} else {
+					showToast(data.error || 'Erreur lors de la suppression', 'error');
+				}
+			} catch (err) {
+				console.error(err);
+				showToast('Erreur réseau', 'error');
+			}
+		}
+	);
+};
+
+// Fermer les menus si on clique ailleurs
+document.addEventListener('click', () => {
+	document.querySelectorAll('.conversation-dropdown').forEach(m => m.classList.remove('show'));
+});
+
+chatInput.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px'; });
+
+// Gérer le bouton "Nouveau message" - ouvrir le modal
+newChatBtn.addEventListener('click', function() {
+	newMessageModal.classList.add('active');
+	modalRecipient.value = '';
+	modalSubject.value = '';
+	modalRecipient.focus();
+});
+
+// Autocomplétion pour le champ email
+const autocompleteList = document.getElementById('autocompleteList');
+let autocompleteTimeout;
+let selectedIndex = -1;
+
+// Navigation au clavier dans l'autocomplétion
+modalRecipient.addEventListener('keydown', function(e) {
+	const items = autocompleteList.querySelectorAll('.autocomplete-item');
+	
+	if (items.length === 0) return;
+	
+	if (e.key === 'ArrowDown') {
+		e.preventDefault();
+		selectedIndex = (selectedIndex + 1) % items.length;
+		updateSelectedItem(items);
+	} else if (e.key === 'ArrowUp') {
+		e.preventDefault();
+		selectedIndex = selectedIndex <= 0 ? items.length - 1 : selectedIndex - 1;
+		updateSelectedItem(items);
+	} else if (e.key === 'Enter' && selectedIndex >= 0) {
+		e.preventDefault();
+		items[selectedIndex].click();
+	} else if (e.key === 'Escape') {
+		autocompleteList.style.display = 'none';
+		selectedIndex = -1;
+	}
+});
+
+function updateSelectedItem(items) {
+	items.forEach((item, index) => {
+		if (index === selectedIndex) {
+			item.classList.add('selected');
+			item.scrollIntoView({ block: 'nearest' });
+		} else {
+			item.classList.remove('selected');
+		}
+	});
+}
+
+modalRecipient.addEventListener('input', function() {
+	const query = this.value.trim();
+	
+	clearTimeout(autocompleteTimeout);
+	selectedIndex = -1; // Réinitialiser la sélection
+	
+	if (query.length < 2) {
+		autocompleteList.style.display = 'none';
+		return;
+	}
+	
+	autocompleteTimeout = setTimeout(async () => {
+		try {
+			const response = await fetch('{{ path('admin_message_emails_list') }}?q=' + encodeURIComponent(query));
+			const users = await response.json();
+			
+			if (users.length > 0) {
+				autocompleteList.innerHTML = users.map(user => {
+					// Déterminer le rôle en français
+					let roleLabel = '';
+					if (user.role === 'ROLE_BENEVOLE') roleLabel = 'Bénévole';
+					else if (user.role === 'ROLE_MECENE') roleLabel = 'Mécène';
+					
+					return `
+						<div class="autocomplete-item" data-email="${user.email}" data-name="${user.prenom} ${user.nom}" data-role="${roleLabel}">
+							<div class="autocomplete-item-email">${user.email}</div>
+							<div class="autocomplete-item-name">${user.prenom} ${user.nom} ${roleLabel ? '(' + roleLabel + ')' : ''}</div>
+						</div>
+					`;
+				}).join('');
+				autocompleteList.style.display = 'block';
+				
+				// Gérer le clic sur un élément d'autocomplétion
+				autocompleteList.querySelectorAll('.autocomplete-item').forEach(item => {
+					item.addEventListener('click', function() {
+						modalRecipient.value = this.dataset.email;
+						currentRecipientName = this.dataset.name; // Stocker le nom
+						currentRecipientRole = this.dataset.role; // Stocker le rôle
+						autocompleteList.style.display = 'none';
+						selectedIndex = -1;
+						modalSubject.focus();
+					});
+				});
+			} else {
+				autocompleteList.style.display = 'none';
+			}
+		} catch (err) {
+			console.error('Erreur autocomplétion:', err);
+		}
+	}, 300);
+});
+
+// Fermer l'autocomplétion si on clique ailleurs
+document.addEventListener('click', (e) => {
+	if (!modalRecipient.contains(e.target) && !autocompleteList.contains(e.target)) {
+		autocompleteList.style.display = 'none';
+	}
+});
+
+// Fermer le modal (annuler)
+modalCancel.addEventListener('click', () => {
+	newMessageModal.classList.remove('active');
+	autocompleteList.style.display = 'none';
+});
+
+// Confirmer le modal - ouvrir la zone de composition
+modalConfirm.addEventListener('click', async () => {
+	const recipient = modalRecipient.value.trim();
+	const subject = modalSubject.value.trim();
+	
+	if (!recipient) {
+		showToast('Veuillez saisir un destinataire', 'error');
+		modalRecipient.focus();
+		return;
+	}
+	
+	if (!subject) {
+		showToast('Veuillez saisir un sujet', 'error');
+		modalSubject.focus();
+		return;
+	}
+	
+	// Vérifier que l'email existe dans la base de données
+	modalConfirm.disabled = true;
+	try {
+		const response = await fetch('{{ path('admin_message_emails_list') }}?q=' + encodeURIComponent(recipient));
+		const users = await response.json();
+		const exactMatch = users.find(u => u.email.toLowerCase() === recipient.toLowerCase());
+		
+		if (!exactMatch) {
+			showToast('L\'adresse email n\'est pas enregistrée dans l\'application', 'error');
+			modalRecipient.focus();
+			modalConfirm.disabled = false;
+			return;
+		}
+		
+		// Stocker le nom complet du destinataire et son rôle
+		currentRecipientName = `${exactMatch.prenom} ${exactMatch.nom}`;
+		// Déterminer le rôle en français
+		if (exactMatch.role === 'ROLE_BENEVOLE') currentRecipientRole = 'Bénévole';
+		else if (exactMatch.role === 'ROLE_MECENE') currentRecipientRole = 'Mécène';
+		else currentRecipientRole = '';
+	} catch (err) {
+		console.error('Erreur validation email:', err);
+		showToast('Erreur lors de la vérification de l\'email', 'error');
+		modalConfirm.disabled = false;
+		return;
+	}
+	modalConfirm.disabled = false;
+	
+	// Stocker les valeurs
+	currentRecipient = recipient;
+	currentSubject = subject;
+	currentConversationId = 'new';
+	
+	// Afficher la zone de composition
+	chatHeader.style.display = 'block';
+	chatInputContainer.style.display = 'block';
+	chatTitle.textContent = 'Nouveau message - ' + recipient;
+	items.forEach(item => item.classList.remove('active'));
+
+	chatMessages.innerHTML = `
+		<div class="chat-empty">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+				<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+			</svg>
+			<p>Commencez votre nouveau message...</p>
+		</div>
+	`;
+	chatInput.value = '';
+	chatInput.disabled = false;
+	sendBtn.disabled = false;
+	chatInput.focus();
+	
+	// Fermer le modal
+	newMessageModal.classList.remove('active');
+});
+
+// Touche Entrée dans le modal
+modalRecipient.addEventListener('keypress', (e) => {
+	if (e.key === 'Enter') {
+		e.preventDefault();
+		modalSubject.focus();
+	}
+});
+
+modalSubject.addEventListener('keypress', (e) => {
+	if (e.key === 'Enter') {
+		e.preventDefault();
+		modalConfirm.click();
+	}
+});
+
+// Fonction pour marquer les notifications d'une conversation comme lues
+function markConversationNotificationsAsRead(conversationId) {
+	fetch('/notifications/mark-conversation-read/' + conversationId, {
+		method: 'POST',
+		headers: {
+			'X-Requested-With': 'XMLHttpRequest',
+			'Content-Type': 'application/json'
+		}
+	}).catch(err => console.log('Erreur marquage notification:', err));
+}
+
+// Gérer le clic sur les conversations
+console.log('Nombre de conversations trouvées:', items.length);
+items.forEach(item => {
+	item.addEventListener('click', function() {
+		console.log('Clic sur conversation:', this.dataset.id);
+		items.forEach(i => i.classList.remove('active'));
+		this.classList.add('active');
+		currentConversationId = this.dataset.id;
+		currentSubject = this.dataset.subject || 'Sans sujet';
+		currentRecipientProfileImage = this.dataset.profileImage || '';
+
+		// Vider le champ de saisie quand on change de conversation
+		chatInput.value = '';
+		chatInput.style.height = 'auto';
+
+		// Marquer les notifications de cette conversation comme lues
+		markConversationNotificationsAsRead(currentConversationId);
+
+		// Vérifier si la conversation est clôturée
+		const isClosed = this.dataset.closed === 'true';
+
+		const conversationData = this.dataset.conversation;
+		const sender = this.dataset.sender;
+		const email = this.dataset.email;
+		const message = this.dataset.message;
+		const date = this.dataset.date;
+		chatHeader.style.display = 'flex';
+		chatInputContainer.style.display = 'block';
+		chatTitle.textContent = sender;
+
+		// Afficher/masquer l'indicateur de clôture
+		if (isClosed) {
+			closedIndicator.style.display = 'block';
+		} else {
+			closedIndicator.style.display = 'none';
+		}
+
+		// Gérer l'état de l'input selon si la conversation est clôturée
+		if (isClosed) {
+			chatInput.disabled = true;
+			sendBtn.disabled = true;
+			chatInput.placeholder = 'Cette conversation est clôturée';
+		} else {
+			chatInput.disabled = false;
+			sendBtn.disabled = false;
+			chatInput.placeholder = 'Écrivez votre message...';
+		}
+
+		const conversation = conversationData ? JSON.parse(conversationData) : [];
+		const allMessages = [{
+			id: currentConversationId,
+			nom: sender,
+			email: email,
+			message: message,
+			date: date,
+			isEdited: message.includes('[MODIFIÉ]'),
+			isDeleted: message.includes('[SUPPRIMÉ]')
+		}, ...conversation.map(msg => ({
+			...msg,
+			isEdited: msg.isEdited || (msg.message && msg.message.includes('[MODIFIÉ]')),
+			isDeleted: msg.isDeleted || (msg.message && msg.message.includes('[SUPPRIMÉ]'))
+		}))];
+		renderMessages(allMessages);
+		scrollToBottom();
+		
+		// Responsive mobile: afficher le chat et cacher la sidebar
+		if (window.innerWidth <= 768) {
+			document.querySelector('.chat-sidebar').classList.add('hidden-mobile');
+			document.querySelector('.chat-main').classList.add('active-mobile');
+		}
+	});
+});
+
+// Vérifier si l'URL contient un paramètre ?conv=XXX
+const urlParams = new URLSearchParams(window.location.search);
+const convId = urlParams.get('conv');
+if (convId) {
+	// Trouver et cliquer sur la conversation correspondante
+	const targetItem = Array.from(items).find(item => item.dataset.id === convId);
+	if (targetItem) {
+		targetItem.click();
+		// Marquer les notifications de cette conversation comme lues
+		markConversationNotificationsAsRead(convId);
+	}
+}
+
+// Fonction pour recharger une conversation
+async function loadConversation(conversationId) {
+	// Simuler un clic sur la conversation pour la recharger
+	const targetItem = Array.from(items).find(item => item.dataset.id === conversationId);
+	if (targetItem) {
+		// Récupérer les données de la conversation
+		const conversationData = targetItem.dataset.conversation;
+		const sender = targetItem.dataset.sender;
+		const email = targetItem.dataset.email;
+		const message = targetItem.dataset.message;
+		const date = targetItem.dataset.date;
+		const isClosed = targetItem.dataset.closed === 'true';
+		
+		// Mettre à jour l'affichage
+		const conversation = conversationData ? JSON.parse(conversationData) : [];
+		const allMessages = [{
+			id: conversationId,
+			nom: sender,
+			email: email,
+			message: message,
+			date: date,
+			isEdited: message.includes('[MODIFIÉ]'),
+			isDeleted: message.includes('[SUPPRIMÉ]')
+		}, ...conversation.map(msg => ({
+			...msg,
+			isEdited: msg.isEdited || (msg.message && msg.message.includes('[MODIFIÉ]')),
+			isDeleted: msg.isDeleted || (msg.message && msg.message.includes('[SUPPRIMÉ]'))
+		}))];
+		renderMessages(allMessages);
+		scrollToBottom();
+	}
+}
+
+function renderMessages(messages) {
+chatMessages.innerHTML = '';
+messages.forEach((msg, index) => {
+const userEmail = '{{ app.user.email|e('js') }}';
+const isAdmin = msg.email && (msg.email.includes('admin') || msg.email.includes('contact@groloto'));
+const isSent = msg.email === userEmail;
+const wrapper = document.createElement('div');
+wrapper.className = 'message-wrapper ' + (isSent ? 'sent' : 'received');
+wrapper.dataset.messageId = msg.id;
+
+// Nettoyer le message des préfixes [MODIFIÉ], [SUPPRIMÉ] pour le data-attribute
+let cleanMessage = msg.message;
+if (msg.isEdited) {
+	cleanMessage = msg.message.replace(/^\[MODIFIÉ\]\s*/, '');
+}
+if (msg.isDeleted) {
+	cleanMessage = msg.message.replace(/^\[SUPPRIMÉ\]\s*/, '');
+}
+// Retirer également le sujet
+cleanMessage = cleanMessage.replace(/^\[[^\]]+\]\s*/, '');
+wrapper.dataset.messageContent = cleanMessage;
+
+const displayName = isAdmin ? 'Admin' : msg.nom;
+const avatarHtml = isAdmin ? createAvatarHtml(currentUserName, currentUserProfileImage) : createAvatarHtml(displayName, currentRecipientProfileImage);
+
+let notificationHtml = '';
+if (msg.isEdited) {
+	notificationHtml = '<div class="message-notification edited">Modifié</div>';
+}
+
+let actionsHtml = '';
+if (isSent && !msg.isDeleted && msg.id) {
+	actionsHtml = '<div class="message-actions"><button class="message-menu-btn" onclick="toggleMessageMenu(event, ' + msg.id + ')">⋮</button><div class="message-actions-dropdown" id="msgMenu' + msg.id + '"><button class="message-action-item" onclick="editMessage(event, ' + msg.id + ')">Modifier</button><button class="message-action-item delete" onclick="deleteMessage(event, ' + msg.id + ')">Supprimer</button></div></div>';
+}
+
+// Nettoyer le texte du message à afficher (retirer les préfixes)
+let displayMessage = msg.message;
+if (msg.isEdited) {
+	displayMessage = displayMessage.replace(/^\[MODIFIÉ\]\s*/, '');
+}
+if (msg.isDeleted) {
+	displayMessage = displayMessage.replace(/^\[SUPPRIMÉ\]\s*/, '');
+}
+// Retirer le sujet pour l'affichage
+displayMessage = displayMessage.replace(/^\[[^\]]+\]\s*/, '');
+
+const messageText = msg.isDeleted ? '<em style="opacity: 0.6;">Ce message a été supprimé</em>' : escapeHtml(displayMessage).replace(/\n/g, '<br>');
+
+wrapper.innerHTML = notificationHtml + '<div class="message-header"><div class="message-avatar">' + avatarHtml + '</div><span class="message-sender">' + escapeHtml(displayName) + '</span><span class="message-number">#' + (index + 1) + '</span>' + actionsHtml + '</div><div class="message-bubble"><div class="message-content">' + messageText + '</div><div class="message-time">' + msg.date + '</div></div>';
+chatMessages.appendChild(wrapper);
+});
+}
+sendBtn.addEventListener('click', sendMessage);
+chatInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+
+async function sendMessage() {
+console.log('sendMessage called', currentConversationId, currentRecipient);
+const message = chatInput.value.trim();
+if (!message || !currentConversationId) return;
+
+// Pour un nouveau message, on utilise currentRecipient et currentSubject (définis dans le modal)
+if (currentConversationId === 'new') {
+    if (!currentRecipient) {
+        showToast('Destinataire manquant', 'error');
+        return;
+    }
+    if (!currentSubject) {
+        showToast('Sujet manquant', 'error');
+        return;
+    }
+}
+
+sendBtn.disabled = true;
+try {
+	const formData = new FormData();
+	if (currentConversationId === 'new') {
+		formData.set('message', message);
+		formData.set('to', currentRecipient);
+		formData.set('subject', currentSubject);
+	} else {
+		formData.set('message', message);
+	}
+	
+	let url;
+	if (currentConversationId === 'new') {
+		url = '{{ path('admin_message_new') }}';
+	} else {
+		url = '{{ path('admin_message_reply', {'id': 'PLACEHOLDER'}) }}'.replace('PLACEHOLDER', currentConversationId);
+		formData.set('reponse', message);
+	}
+	
+	const response = await fetch(url, { method: 'POST', body: formData, headers: {'X-Requested-With': 'XMLHttpRequest'} });
+	const data = await response.json();
+	
+	if (data.success) {
+		// clear input
+		chatInput.value = '';
+		chatInput.style.height = 'auto';
+
+	// Pour les conversations existantes, ajouter le message au DOM
+	if (currentConversationId !== 'new') {
+		const dateNow = (new Date()).toLocaleString();
+		const messageId = data.messageId || currentConversationId; // Utiliser l'ID du message si disponible
+		const wrapper = document.createElement('div');
+		wrapper.className = 'message-wrapper sent';
+		wrapper.dataset.messageId = messageId;
+		wrapper.dataset.messageContent = message;
+		const avatarHtml = createAvatarHtml(currentUserName, currentUserProfileImage);
+		const messageCount = chatMessages.querySelectorAll('.message-wrapper').length + 1;
+		
+		// Ajouter les boutons d'action (3 points)
+		const actionsHtml = '<div class="message-actions"><button class="message-menu-btn" onclick="toggleMessageMenu(event, ' + messageId + ')">⋮</button><div class="message-actions-dropdown" id="msgMenu' + messageId + '"><button class="message-action-item" onclick="editMessage(event, ' + messageId + ')">Modifier</button><button class="message-action-item delete" onclick="deleteMessage(event, ' + messageId + ')">Supprimer</button></div></div>';
+		
+		wrapper.innerHTML = '<div class="message-header"><div class="message-avatar">' + avatarHtml + '</div><span class="message-sender">' + escapeHtml(currentUserName) + '</span><span class="message-number">#' + messageCount + '</span>' + actionsHtml + '</div><div class="message-bubble"><div class="message-content">' + escapeHtml(message).replace(/\n/g, '<br>') + '</div><div class="message-time">' + dateNow + '</div></div>';
+		chatMessages.appendChild(wrapper);
+		scrollToBottom();
+		// Remettre le focus sur le textarea
+		chatInput.focus();
+		
+		// Mettre à jour l'aperçu de la conversation à gauche avec le dernier message
+		const convItem = document.querySelector(`.conversation-item[data-id="${currentConversationId}"]`);
+		if (convItem) {
+			// Nettoyer le message des préfixes avant de l'afficher dans l'aperçu
+			let cleanPreview = message.replace(/^\[MODIFIÉ\]\s*/, '').replace(/^\[SUPPRIMÉ\]\s*/, '').replace(/^\[[^\]]+\]\s*/, '');
+			
+			// Mettre à jour l'aperçu
+			const preview = convItem.querySelector('.conversation-preview');
+			if (preview) {
+				preview.textContent = cleanPreview.slice(0, 50) + (cleanPreview.length > 50 ? '...' : '');
+			}
+			// Mettre à jour l'heure
+			const timeEl = convItem.querySelector('.conversation-time');
+			if (timeEl) {
+				timeEl.textContent = new Date().toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+			}
+			
+			// Déplacer la conversation en haut de la liste
+			conversationsList.insertBefore(convItem, conversationsList.firstChild);
+		}
+	}
+		
+		// Si c'était un nouveau message, basculer vers la conversation créée et afficher les actions
+		if (currentConversationId === 'new') {
+			currentConversationId = data.conversationId || null;
+			chatTitle.textContent = 'Conversation avec ' + (currentRecipientName || currentRecipient);
+			
+			// Créer l'élément de conversation dans la liste à gauche
+			if (data.conversationId) {
+				// Créer un objet message pour inclure dans la conversation
+				const firstMessage = {
+					id: data.conversationId,
+					nom: currentUserName,
+					email: '{{ app.user.email }}',
+					message: message,
+					date: new Date().toLocaleString('fr-FR'),
+					createdAt: new Date().toISOString(),
+					destinataire: currentRecipient,
+					isFromCurrentUser: true
+				};
+				
+				const newConvItem = document.createElement('div');
+				newConvItem.className = 'conversation-item active';
+				newConvItem.dataset.id = data.conversationId;
+				newConvItem.dataset.subject = escapeHtml(currentSubject);
+				newConvItem.dataset.conversation = JSON.stringify([]);
+				newConvItem.dataset.sender = escapeHtml(currentRecipientName || currentRecipient); // Utiliser le nom complet
+				newConvItem.dataset.email = escapeHtml(currentRecipient);
+				newConvItem.dataset.message = escapeHtml(message); // Stocker le message sans le préfixe sujet
+				newConvItem.dataset.date = (new Date()).toLocaleString('fr-FR');
+				newConvItem.dataset.closed = 'false';
+				
+				// Nettoyer le message pour l'aperçu (sans préfixes)
+				let cleanPreview = message.replace(/^\[MODIFIÉ\]\s*/, '').replace(/^\[SUPPRIMÉ\]\s*/, '').replace(/^\[[^\]]+\]\s*/, '');
+				
+				// Construire le nom avec le rôle
+				const displayName = currentRecipientName || currentRecipient;
+				const nameWithRole = currentRecipientRole ? `${displayName} (${currentRecipientRole})` : displayName;
+				
+				newConvItem.innerHTML = `
+					<div class="conversation-item-content">
+						<div class="conversation-name">${escapeHtml(currentSubject)}</div>
+						<div class="conversation-sender">${escapeHtml(nameWithRole)}</div>
+						<div class="conversation-preview">${escapeHtml(cleanPreview.slice(0, 50))}${cleanPreview.length > 50 ? '...' : ''}</div>
+						<div class="conversation-time">${new Date().toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'})}</div>
+					</div>
+					<div class="conversation-item-menu">
+						<button class="conversation-menu-btn" onclick="toggleConversationMenu(event, ${data.conversationId})">
+							<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>
+						</button>
+						<div class="conversation-dropdown" id="convMenu${data.conversationId}">
+							<button class="conversation-dropdown-item" onclick="closeConversation(event, ${data.conversationId})">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+								Clôturer
+							</button>
+							<button class="conversation-dropdown-item delete" onclick="deleteConversation(event, ${data.conversationId})">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+								Supprimer
+							</button>
+						</div>
+					</div>
+				`;
+				
+				// Cacher le message "Aucune conversation"
+				const emptyConversations = document.getElementById('emptyConversations');
+				if (emptyConversations) {
+					emptyConversations.style.display = 'none';
+				}
+				
+				// Désactiver les autres conversations avant d'ajouter la nouvelle
+				document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
+				
+				// Ajouter en haut de la liste
+				conversationsList.insertBefore(newConvItem, conversationsList.firstChild);
+				
+				// Ajouter l'écouteur de clic
+				newConvItem.addEventListener('click', function() {
+					document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
+					this.classList.add('active');
+					currentConversationId = this.dataset.id;
+					currentSubject = this.dataset.subject;
+					chatInput.value = '';
+					chatInput.style.height = 'auto';
+					markConversationNotificationsAsRead(currentConversationId);
+					const conversationData = this.dataset.conversation;
+					const sender = this.dataset.sender;
+					const email = this.dataset.email;
+					const messageData = this.dataset.message;
+					const date = this.dataset.date;
+					const isClosed = this.dataset.closed === 'true';
+					
+					chatHeader.style.display = 'flex';
+					chatInputContainer.style.display = 'block';
+					chatTitle.textContent = sender;
+					
+					if (isClosed) {
+						closedIndicator.style.display = 'block';
+						chatInput.disabled = true;
+						sendBtn.disabled = true;
+						chatInput.placeholder = 'Cette conversation est clôturée';
+					} else {
+						closedIndicator.style.display = 'none';
+						chatInput.disabled = false;
+						sendBtn.disabled = false;
+						chatInput.placeholder = 'Écrivez votre message...';
+					}
+					
+					const conversation = conversationData ? JSON.parse(conversationData) : [];
+					const allMessages = [{
+						id: currentConversationId,
+						nom: sender,
+						email: email,
+						message: messageData,
+						date: date,
+						isEdited: messageData.includes('[MODIFIÉ]'),
+						isDeleted: messageData.includes('[SUPPRIMÉ]')
+					}, ...conversation.map(msg => ({
+						...msg,
+						isEdited: msg.isEdited || (msg.message && msg.message.includes('[MODIFIÉ]')),
+						isDeleted: msg.isDeleted || (msg.message && msg.message.includes('[SUPPRIMÉ]'))
+					}))];
+					renderMessages(allMessages);
+					scrollToBottom();
+				});
+				
+				// Afficher immédiatement le message dans la zone de chat
+				const displayMessage = {
+					id: data.conversationId,
+					nom: currentUserName,
+					email: '{{ app.user.email }}',
+					message: message,
+					date: new Date().toLocaleString('fr-FR'),
+					isEdited: false,
+					isDeleted: false
+				};
+				renderMessages([displayMessage]);
+				scrollToBottom();
+				
+				// Activer l'interface de chat
+				chatHeader.style.display = 'flex';
+				chatInputContainer.style.display = 'block';
+				chatInput.disabled = false;
+				sendBtn.disabled = false;
+				chatInput.focus();
+			}
+			
+			currentRecipient = '';
+			currentSubject = '';
+		}
+	} else {
+		// Afficher le message d'erreur avec un toast
+		showToast(data.error || 'Erreur lors de envoi du message', 'error');
+	}
+} catch (err) {
+console.error(err);
+showToast('Erreur réseau', 'error');
+} finally {
+sendBtn.disabled = false;
+}
+}
+
+function scrollToBottom() { chatMessages.scrollTop = chatMessages.scrollHeight; }
+
+// Gérer le menu des actions de message
+window.toggleMessageMenu = function(event, messageId) {
+	event.stopPropagation();
+	const menu = document.getElementById('msgMenu' + messageId);
+	const allMenus = document.querySelectorAll('.message-actions-dropdown');
+	
+	// Fermer tous les autres menus
+	allMenus.forEach(m => {
+		if (m !== menu) m.classList.remove('active');
+	});
+	
+	// Toggle le menu actuel
+	menu.classList.toggle('active');
+}
+
+// Fermer les menus quand on clique ailleurs
+document.addEventListener('click', (e) => {
+	if (!e.target.closest('.message-actions')) {
+		document.querySelectorAll('.message-actions-dropdown').forEach(m => m.classList.remove('active'));
+	}
+});
+
+// Modifier un message
+window.editMessage = async function(event, messageId) {
+	event.stopPropagation();
+	// Fermer le menu
+	document.querySelectorAll('.message-actions-dropdown').forEach(m => m.classList.remove('active'));
+	
+	const wrapper = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);
+	if (!wrapper) return;
+	
+	const originalContent = wrapper.dataset.messageContent;
+	
+	// Retirer les préfixes [MODIFIÉ], [SUPPRIMÉ] et [Sujet]
+	let cleanContent = originalContent
+		.replace(/^\[MODIFIÉ\]\s*/, '')
+		.replace(/^\[SUPPRIMÉ\]\s*/, '')
+		.replace(/^\[[^\]]+\]\s*/, ''); // Retire le sujet
+	
+	// Ouvrir le modal d'édition
+	editMessageInput.value = cleanContent;
+	currentEditMessageId = messageId;
+	editMessageModal.classList.add('active');
+	editMessageInput.focus();
+}
+
+// Gestionnaire de confirmation d'édition
+editMessageConfirm.addEventListener('click', async () => {
+	const newContent = editMessageInput.value.trim();
+	if (!newContent || !currentEditMessageId) return;
+	
+	try {
+		const response = await fetch('{{ path('admin_message_edit', {'id': 'PLACEHOLDER'}) }}'.replace('PLACEHOLDER', currentEditMessageId), {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'X-Requested-With': 'XMLHttpRequest'
+			},
+			body: 'message=' + encodeURIComponent(newContent)
+		});
+		
+		const data = await response.json();
+		
+		if (data.success) {
+			// Fermer le modal
+			editMessageModal.classList.remove('active');
+			editMessageInput.value = '';
+			
+			// Mettre à jour le message dans le DOM
+			const wrapper = document.querySelector(`.message-wrapper[data-message-id="${currentEditMessageId}"]`);
+			if (wrapper) {
+				const contentEl = wrapper.querySelector('.message-content');
+				if (contentEl) {
+					contentEl.innerHTML = escapeHtml(newContent).replace(/\n/g, '<br>');
+				}
+				// Stocker le contenu nettoyé dans data-attribute
+				wrapper.dataset.messageContent = newContent;
+				
+				// Ajouter la notification de modification
+				let notif = wrapper.querySelector('.message-notification');
+				if (!notif) {
+					notif = document.createElement('div');
+					notif.className = 'message-notification edited';
+					wrapper.insertBefore(notif, wrapper.firstChild);
+				}
+				notif.className = 'message-notification edited';
+				notif.textContent = 'Modifié';
+			}
+			
+			// Mettre à jour l'aperçu dans la liste des conversations à gauche
+			const convItem = document.querySelector(`.conversation-item[data-id="${currentConversationId}"]`);
+			if (convItem) {
+				const preview = convItem.querySelector('.conversation-preview');
+				if (preview) {
+					// Nettoyer le message des préfixes
+					let cleanPreview = newContent.replace(/^\[MODIFIÉ\]\s*/, '').replace(/^\[SUPPRIMÉ\]\s*/, '').replace(/^\[[^\]]+\]\s*/, '');
+					preview.textContent = cleanPreview.slice(0, 50) + (cleanPreview.length > 50 ? '...' : '');
+				}
+			}
+			
+			showToast('Message modifié', 'success');
+			currentEditMessageId = null;
+		} else {
+			showToast(data.error || 'Erreur lors de la modification', 'error');
+		}
+	} catch (error) {
+		console.error('Erreur:', error);
+		showToast('Erreur de connexion', 'error');
+	}
+});
+
+// Supprimer un message
+// Supprimer un message
+window.deleteMessage = async function(event, messageId) {
+	event.stopPropagation();
+	// Fermer le menu
+	document.querySelectorAll('.message-actions-dropdown').forEach(m => m.classList.remove('active'));
+	
+	// Utiliser le modal de confirmation
+	confirmMessage.textContent = 'Êtes-vous sûr de vouloir supprimer ce message ?';
+	confirmModal.classList.add('active');
+	
+	// Définir l'action de confirmation
+	confirmCallback = async () => {
+		try {
+			const response = await fetch('{{ path('admin_message_delete_msg', {'id': 'PLACEHOLDER'}) }}'.replace('PLACEHOLDER', messageId), {
+				method: 'POST',
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest'
+				}
+			});
+			
+			const data = await response.json();
+			
+			if (data.success) {
+				// Mettre à jour le message dans le DOM
+				const wrapper = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);
+				if (wrapper) {
+					const contentEl = wrapper.querySelector('.message-content');
+					if (contentEl) {
+						contentEl.innerHTML = '<em style="opacity: 0.6;">Ce message a été supprimé</em>';
+					}
+					wrapper.dataset.messageContent = 'Ce message a été supprimé par son auteur';
+					
+					// Retirer les boutons d'actions
+					const actionsContainer = wrapper.querySelector('.message-actions');
+					if (actionsContainer) {
+						actionsContainer.remove();
+					}
+				}
+				
+				// Mettre à jour l'aperçu dans la liste des conversations à gauche
+				const convItem = document.querySelector(`.conversation-item[data-id="${currentConversationId}"]`);
+				if (convItem) {
+					const preview = convItem.querySelector('.conversation-preview');
+					if (preview) {
+						preview.textContent = 'Ce message a été supprimé';
+					}
+				}
+				
+				showToast('Message supprimé', 'success');
+			} else {
+				showToast(data.error || 'Erreur lors de la suppression', 'error');
+			}
+		} catch (error) {
+			console.error('Erreur:', error);
+			showToast('Erreur de connexion', 'error');
+		}
+	};
+}
+
+function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+
+function createAvatarHtml(name, profileImage) {
+	if (profileImage && profileImage.trim() !== '') {
+		return '<img src="/uploads/profiles/' + escapeHtml(profileImage) + '" alt="Photo de profil">';
+	} else {
+		const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+		return initials;
+	}
+}
+});
+</script>
+{% endblock %}

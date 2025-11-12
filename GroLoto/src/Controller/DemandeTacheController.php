@@ -4,10 +4,13 @@ namespace App\Controller;
 
 use App\Entity\DemandeTache;
 use App\Entity\AffectationTache;
+use App\Entity\Notification;
 use App\Repository\DemandeTacheRepository;
 use App\Repository\TacheRepository;
 use App\Repository\BenevoleRepository;
 use App\Repository\AffectationTacheRepository;
+use App\Repository\UtilisateurRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -89,6 +92,8 @@ class DemandeTacheController extends AbstractController
         BenevoleRepository $benevoleRepository,
         DemandeTacheRepository $demandeRepository,
         AffectationTacheRepository $affectationRepository,
+        UtilisateurRepository $utilisateurRepository,
+        NotificationService $notificationService,
         EntityManagerInterface $entityManager
     ): Response {
         $user = $this->getUser();
@@ -142,6 +147,14 @@ class DemandeTacheController extends AbstractController
         $entityManager->persist($demande);
         $entityManager->flush();
 
+        $admins = $utilisateurRepository->findByRoleName('admin');
+        $benevoleNom = trim((($benevole->getUtilisateur()->getPrenom() ?? '') . ' ' . ($benevole->getUtilisateur()->getNom() ?? '')));
+        $tacheNom = $tache->getTitre() ?? 'Tâche #' . $tache->getId();
+
+        foreach ($admins as $admin) {
+            $notificationService->notifyAdminDemandeTache($admin, $benevoleNom, $tacheNom);
+        }
+
         $this->addFlash('success', 'Votre demande a été envoyée à l\'administrateur.');
         return $this->redirectToRoute('benevole_taches_disponibles');
     }
@@ -190,14 +203,33 @@ class DemandeTacheController extends AbstractController
      */
     #[Route('/admin/demandes-taches', name: 'admin_demandes_taches')]
     #[IsGranted('ROLE_ADMIN')]
-    public function listeDemandes(DemandeTacheRepository $demandeRepository): Response
+
+    public function listeDemandes(
+        DemandeTacheRepository $demandeRepository,
+        AffectationTacheRepository $affectationRepository
+    ): Response
+
     {
         $demandesEnAttente = $demandeRepository->findEnAttente();
         $toutesLesDemandes = $demandeRepository->findBy([], ['date_demande' => 'DESC']);
 
+
+        // Calculer le nombre d'affectations pour chaque tâche
+        $affectationsParTache = [];
+        foreach (array_merge($demandesEnAttente, $toutesLesDemandes) as $demande) {
+            $tacheId = $demande->getTache()->getId();
+            if (!isset($affectationsParTache[$tacheId])) {
+                $affectationsParTache[$tacheId] = $affectationRepository->countBenevolesByTache($demande->getTache());
+
+            }
+        }
+
         return $this->render('demande_tache/admin_liste.html.twig', [
             'demandes_en_attente' => $demandesEnAttente,
-            'toutes_demandes' => $toutesLesDemandes
+            'toutes_demandes' => $toutesLesDemandes,
+
+            'affectations_par_tache' => $affectationsParTache
+
         ]);
     }
 
@@ -211,6 +243,7 @@ class DemandeTacheController extends AbstractController
         Request $request,
         DemandeTacheRepository $demandeRepository,
         AffectationTacheRepository $affectationRepository,
+        NotificationService $notificationService,
         EntityManagerInterface $entityManager
     ): Response {
         $demande = $demandeRepository->find($id);
@@ -254,7 +287,15 @@ class DemandeTacheController extends AbstractController
         $demande->setMessageAdmin($request->request->get('message_admin', ''));
 
         $entityManager->persist($affectation);
+        // Persist et flush des changements (affectation + mise à jour de la demande)
         $entityManager->flush();
+
+        // Notifier le bénévole que sa demande a été acceptée via le service centralisé
+        $tacheNom = $tache->getTitre() ?? 'Tâche #' . $tache->getId();
+        $notificationService->notifyBenevoleDemandeAcceptee(
+            $demande->getBenevole()->getUtilisateur(),
+            $tacheNom
+        );
 
         $benevoleNom = $demande->getBenevole()->getUtilisateur()->getPrenom() . ' ' . 
                        $demande->getBenevole()->getUtilisateur()->getNom();
@@ -271,6 +312,7 @@ class DemandeTacheController extends AbstractController
         int $id,
         Request $request,
         DemandeTacheRepository $demandeRepository,
+        NotificationService $notificationService,
         EntityManagerInterface $entityManager
     ): Response {
         $demande = $demandeRepository->find($id);
@@ -296,7 +338,17 @@ class DemandeTacheController extends AbstractController
         $demande->setAdminReponse($this->getUser());
         $demande->setMessageAdmin($request->request->get('message_admin', ''));
 
+        // Sauvegarder les modifications de la demande
         $entityManager->flush();
+
+        // Notifier le bénévole que sa demande a été refusée via le service centralisé
+        $tacheNom = $demande->getTache()->getTitre() ?? 'Tâche #' . $demande->getTache()->getId();
+        $messageAdmin = $request->request->get('message_admin', '');
+        $notificationService->notifyBenevoleDemandeRefusee(
+            $demande->getBenevole()->getUtilisateur(),
+            $tacheNom,
+            $messageAdmin ?: null
+        );
 
         $benevoleNom = $demande->getBenevole()->getUtilisateur()->getPrenom() . ' ' . 
                        $demande->getBenevole()->getUtilisateur()->getNom();
