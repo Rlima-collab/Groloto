@@ -15,7 +15,7 @@
     <div class="hero-content">
         <h1 class="hero-title">Mes Inscriptions</h1>
         <p class="hero-description">Suivez l'état de vos participations aux événements caritatifs</p>
-        <a href="{{ path('mecene_inscription') }}" class="btn-login">+ Nouvelle inscription</a>
+        {# Bouton principal placé dans l'en-tête de la liste; suppression du doublon ici. #}
     </div>
 </div>
 
@@ -153,9 +153,9 @@
                     <i class="bi bi-inbox"></i>
                     <h3>Aucune inscription</h3>
                     <p>Vous n'avez pas encore d'inscription à un événement.</p>
-                    <a href="{{ path('mecene_inscription') }}" class="btn btn-primary mt-3">
-                        <i class="bi bi-plus-circle me-2"></i>S'inscrire à un événement
-                    </a>
+                    {# Le bouton d'inscription dans l'état vide a été retiré pour ne
+                       garder que le bouton principal « Nouvelle inscription »
+                       situé en haut à droite de la page. #}
                 </div>
             {% endif %}
         </div>
@@ -177,7 +177,7 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #006909, #005207);
+    background: linear-gradient(135deg, #0b3d91, #07204f);
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -190,9 +190,9 @@
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #005207, #003304);
+    background: linear-gradient(135deg, #07204f, #051233);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 105, 9, 0.3);
+    box-shadow: 0 6px 18px rgba(7, 32, 79, 0.28);
     color: white;
 }
 </style>

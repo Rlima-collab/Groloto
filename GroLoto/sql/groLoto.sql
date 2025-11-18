@@ -83,13 +83,15 @@ CREATE TABLE MECENE (
 -- LOT
 CREATE TABLE LOT (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_weekend INTEGER,
     id_mecene INTEGER,
     titre TEXT NOT NULL,
     description TEXT,
     quantite INTEGER DEFAULT 1,
     valeur_estimee REAL DEFAULT 0.0,
     date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_mecene) REFERENCES MECENE(id)
+  FOREIGN KEY (id_mecene) REFERENCES MECENE(id),
+  FOREIGN KEY (id_weekend) REFERENCES WEEKEND(id)
 );
 
 -- CONVENTION
@@ -131,6 +133,7 @@ CREATE TABLE INSCRIPTION_MECENE (
     statut TEXT DEFAULT 'en_attente',
     date_inscription DATETIME DEFAULT CURRENT_TIMESTAMP,
     remarques TEXT,
+  remarque_acceptation TEXT,
     nom_don TEXT NOT NULL,
     categorie TEXT NOT NULL,
     quantite INTEGER NOT NULL,
