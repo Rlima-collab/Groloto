@@ -49,6 +49,19 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 .dropdown-item.delete-item { color: #ef4444; }
 .dropdown-item.delete-item:hover { background: #fee2e2; }
 .dropdown-item svg { flex-shrink: 0; }
+
+/* Message Actions Menu */
+.message-actions { position: relative; opacity: 0; transition: opacity 0.2s; margin-left: auto; }
+.message-wrapper:hover .message-actions { opacity: 1; }
+.message-menu-btn { background: transparent; border: none; color: #9ca3af; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 16px; line-height: 1; }
+.message-menu-btn:hover { background: rgba(0,0,0,0.05); color: #4b5563; }
+.message-actions-dropdown { position: absolute; right: 0; top: 24px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 120px; z-index: 100; display: none; overflow: hidden; border: 1px solid #e5e7eb; }
+.message-actions-dropdown.active { display: block; }
+.message-action-item { width: 100%; padding: 8px 12px; background: transparent; border: none; text-align: left; font-size: 13px; color: #374151; cursor: pointer; transition: all 0.2s; display: block; }
+.message-action-item:hover { background: #f3f4f6; }
+.message-action-item.delete { color: #ef4444; border-top: 1px solid #f3f4f6; }
+.message-action-item.delete:hover { background: #fee2e2; }
+
 .chat-action-btn { padding: 8px 14px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
 .chat-action-btn svg { width: 16px; height: 16px; }
 .chat-action-btn:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; transform: translateY(-1px); }
@@ -303,6 +316,7 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 {% set lastMessageParts = lastMessageText|split('] ', 2) %}
 {% set lastMessageBody = lastMessageParts|length > 1 and lastMessageParts[0]|slice(0,1) == '[' ? lastMessageParts[1] : lastMessageText %}
 {% set isToAdmin = msg.destinataire and 'admin' in msg.destinataire|lower %}
+{% set isGroupMessage = msg.destinataire == 'ALL_BENEVOLES' %}
 {% set conversationArray = [] %}
 {% for reply in msg.conversation|default([]) %}
 {% set isEdited = '[MODIFIÉ]' in reply.message %}
@@ -317,7 +331,7 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 'isDeleted': isDeleted
 }]) %}
 {% endfor %}
-<div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %}" data-id="{{ msg.id }}" data-subject="{{ subject|e('html_attr') }}" data-conversation='{{ conversationArray|json_encode|e('html_attr') }}' data-sender="{{ msg.nom }}" data-email="{{ msg.email }}" data-message="{{ body|e('html_attr') }}" data-date="{{ msg.createdAt|date('d/m/Y à H:i') }}" data-closed="{{ msg.cloturee ? 'true' : 'false' }}">
+<div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %}" data-id="{{ msg.id }}" data-subject="{{ subject|e('html_attr') }}" data-conversation='{{ conversationArray|json_encode|e('html_attr') }}' data-sender="{{ msg.nom }}" data-email="{{ msg.email }}" data-message="{{ body|e('html_attr') }}" data-date="{{ msg.createdAt|date('d/m/Y à H:i') }}" data-closed="{{ msg.cloturee ? 'true' : 'false' }}" data-is-group-message="{{ isGroupMessage ? 'true' : 'false' }}">
 	<div class="conversation-item-content">
 		<div class="conversation-name">
 			{{ subject }}
@@ -745,7 +759,7 @@ modalConfirm.addEventListener('click', () => {
 	chatInput.disabled = false;
 	sendBtn.disabled = false;
 	chatInput.placeholder = 'Écrivez votre message...';
-	items.forEach(item => item.classList.remove('active'));
+	document.querySelectorAll('.conversation-item').forEach(item => item.classList.remove('active'));
 	chatMessages.innerHTML = '<div class="chat-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 60px; height: 60px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Écrivez votre message</p></div>';
 	chatInput.focus();
 });
@@ -759,7 +773,7 @@ modalSubject.addEventListener('keydown', (e) => {
 
 items.forEach(item => {
 item.addEventListener('click', function() {
-items.forEach(i => i.classList.remove('active'));
+document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
 this.classList.add('active');
 currentConversationId = this.dataset.id;
 currentSubject = this.dataset.subject || 'Sans sujet';
@@ -773,6 +787,7 @@ markConversationNotificationsAsRead(currentConversationId);
 
 // Vérifier si la conversation est clôturée
 const isClosed = this.dataset.closed === 'true';
+const isGroupMessage = this.dataset.isGroupMessage === 'true';
 
 const conversationData = this.dataset.conversation;
 					const sender = this.dataset.sender;
@@ -786,15 +801,19 @@ const conversationData = this.dataset.conversation;
 					// Afficher/masquer l'indicateur de clôture
 					if (isClosed) {
 						closedIndicator.style.display = 'block';
+						closedIndicator.textContent = '🔒 Conversation clôturée';
+					} else if (isGroupMessage) {
+						closedIndicator.style.display = 'block';
+						closedIndicator.textContent = '📢 Message groupé (réponse désactivée)';
 					} else {
 						closedIndicator.style.display = 'none';
 					}
 					
-					// Gérer l'état de l'input selon si la conversation est clôturée
-					if (isClosed) {
+					// Gérer l'état de l'input selon si la conversation est clôturée ou groupée
+					if (isClosed || isGroupMessage) {
 						chatInput.disabled = true;
 						sendBtn.disabled = true;
-						chatInput.placeholder = 'Cette conversation est clôturée';
+						chatInput.placeholder = isGroupMessage ? 'Réponse désactivée pour ce message groupé' : 'Cette conversation est clôturée';
 					} else {
 						chatInput.disabled = false;
 						sendBtn.disabled = false;
@@ -907,6 +926,12 @@ const data = await response.json();
 						// clear input
 						chatInput.value = '';
 						chatInput.style.height = 'auto';
+						
+						// Masquer l'état vide si présent
+						const emptyState = chatMessages.querySelector('.chat-empty');
+						if (emptyState) {
+							emptyState.remove();
+						}
 
 					// append message to DOM so it stays visible in the conversation
 					const dateNow = (new Date()).toLocaleString();
@@ -939,6 +964,10 @@ const data = await response.json();
 								if (timeEl) {
 									timeEl.textContent = new Date().toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
 								}
+								
+								// Déplacer la conversation en haut de la liste
+								const list = document.querySelector('.conversations-list');
+								list.insertBefore(convItem, list.firstChild);
 							}
 						}
 						
@@ -1130,7 +1159,7 @@ window.deleteMessage = async function(event, messageId) {
 	// Définir l'action de confirmation
 	confirmCallback = async () => {
 		try {
-			const response = await fetch(`/benevole/messages/${messageId}/delete`, {
+			const response = await fetch(`/benevole/messages/${messageId}/delete-message`, {
 				method: 'POST',
 				headers: {
 					'X-Requested-With': 'XMLHttpRequest'

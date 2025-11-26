@@ -33,10 +33,6 @@ class Notification
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $createdAt = null;
 
-    // AJOUT DU CHAMP RÉPONSE
-    #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $reponse = null;
-
     public function __construct()
     {
         $this->createdAt = new \DateTime();
@@ -110,18 +106,6 @@ class Notification
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
-        return $this;
-    }
-
-    // GETTER & SETTER POUR LA RÉPONSE ADMIN
-    public function getReponse(): ?string
-    {
-        return $this->reponse;
-    }
-
-    public function setReponse(?string $reponse): self
-    {
-        $this->reponse = $reponse;
         return $this;
     }
 }

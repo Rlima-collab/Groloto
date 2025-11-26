@@ -49,7 +49,7 @@
                     </div>
 
                     <!-- CORPS DU FORMULAIRE -->
-                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true, 'id': 'contactForm'}}) }}
 
                     <div class="form-body">
 
@@ -119,4 +119,75 @@
         </div>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('contactForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Envoi...';
+
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Créer une alerte de succès
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show shadow-sm';
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = `
+                    <i class="fas fa-check-circle me-2"></i> Votre message a été envoyé avec succès !
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                // Insérer avant le formulaire ou dans le conteneur de flash messages
+                const flashContainer = document.querySelector('.container.mt-4');
+                if (flashContainer) {
+                    flashContainer.innerHTML = ''; // Vider les anciens messages
+                    flashContainer.appendChild(alertDiv);
+                    flashContainer.scrollIntoView({ behavior: 'smooth' });
+                }
+
+                form.reset();
+            } else {
+                throw new Error(data.error || 'Une erreur est survenue');
+            }
+        } catch (error) {
+            console.error(error);
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show shadow-sm';
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                <i class="fas fa-exclamation-circle me-2"></i> ${error.message || 'Une erreur est survenue lors de l\'envoi.'}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            const flashContainer = document.querySelector('.container.mt-4');
+            if (flashContainer) {
+                flashContainer.innerHTML = '';
+                flashContainer.appendChild(alertDiv);
+                flashContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
+    });
+});
+</script>
 {% endblock %}
