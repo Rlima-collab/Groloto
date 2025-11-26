@@ -55,6 +55,12 @@ class DemandeTacheController extends AbstractController
                 continue;
             }
 
+            // Vérifier les chevauchements d'horaires avec d'autres affectations
+            $chevauchements = $affectationRepository->findOverlappingAssignments($benevole, $tache->getDebut(), $tache->getFin());
+            if (!empty($chevauchements)) {
+                continue;
+            }
+
             // Vérifier si le bénévole a déjà fait une demande en attente
             $demandeEnAttente = $demandeRepository->findByBenevoleAndTache($benevole, $tache);
             if ($demandeEnAttente) {
@@ -114,6 +120,13 @@ class DemandeTacheController extends AbstractController
         $dejaAffecte = $affectationRepository->findOneByTacheAndBenevole($tache, $benevole);
         if ($dejaAffecte) {
             $this->addFlash('error', 'Vous êtes déjà affecté à cette tâche.');
+            return $this->redirectToRoute('benevole_taches_disponibles');
+        }
+
+        // Vérifier les chevauchements d'horaires
+        $chevauchements = $affectationRepository->findOverlappingAssignments($benevole, $tache->getDebut(), $tache->getFin());
+        if (!empty($chevauchements)) {
+            $this->addFlash('error', 'Vous êtes déjà inscrit à une autre tâche sur ce créneau horaire.');
             return $this->redirectToRoute('benevole_taches_disponibles');
         }
 
@@ -269,6 +282,13 @@ class DemandeTacheController extends AbstractController
         $nbAffectations = $affectationRepository->countBenevolesByTache($tache);
         if ($nbAffectations >= $tache->getMaxPersonnes()) {
             $this->addFlash('error', 'Cette tâche est maintenant complète.');
+            return $this->redirectToRoute('admin_demandes_taches');
+        }
+
+        // Vérifier les chevauchements d'horaires pour le bénévole
+        $chevauchements = $affectationRepository->findOverlappingAssignments($demande->getBenevole(), $tache->getDebut(), $tache->getFin());
+        if (!empty($chevauchements)) {
+            $this->addFlash('error', 'Ce bénévole est déjà affecté à une autre tâche sur ce créneau horaire.');
             return $this->redirectToRoute('admin_demandes_taches');
         }
 

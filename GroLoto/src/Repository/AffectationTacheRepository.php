@@ -68,4 +68,21 @@ class AffectationTacheRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * Trouve les affectations qui chevauchent une période donnée pour un bénévole
+     */
+    public function findOverlappingAssignments($benevole, \DateTimeInterface $start, \DateTimeInterface $end): array
+    {
+        return $this->createQueryBuilder('a')
+            ->join('a.tache', 't')
+            ->andWhere('a.benevole = :benevole')
+            ->andWhere('t.debut < :end')
+            ->andWhere('t.fin > :start')
+            ->setParameter('benevole', $benevole)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getResult();
+    }
 }
