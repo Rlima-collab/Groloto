@@ -103,6 +103,33 @@
     color: white;
 }
 
+/* Row wrapper to show role and small action button */
+.user-role-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-create-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #ffffff;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.15s ease, transform 0.08s ease;
+}
+
+.admin-create-btn:hover {
+    background: #ffffff;
+    color: #0d1b2a;
+    transform: translateY(-1px);
+}
+
 .sidebar.collapsed .user-info .user-role,
 .sidebar.collapsed .nav-text {
     display: none;

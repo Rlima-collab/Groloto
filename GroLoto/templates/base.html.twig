@@ -32,8 +32,15 @@
                             {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
                         {% endif %}
                     </div>
-                    <div class="user-role">
-                        {{ app.user.role.nom|capitalize }}
+                    <div class="user-role-row">
+                        <div class="user-role">
+                            {{ app.user.role.nom|capitalize }}
+                        </div>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('admin_create_user') }}" class="admin-create-btn" title="Créer un compte admin">
+                                <i class="bi bi-person-plus" aria-hidden="true"></i>
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             {% endif %}
