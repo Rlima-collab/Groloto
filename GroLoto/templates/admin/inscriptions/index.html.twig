@@ -160,6 +160,12 @@
                                 </div>
                                 {% endif %}
 
+                                {% if inscription.adressePostale %}
+                                <div class="info-item" style="grid-column: 1 / -1;">
+                                    <span class="info-text"><strong>📍 Adresse de livraison:</strong> <br>{{ inscription.adressePostale|nl2br }}</span>
+                                </div>
+                                {% endif %}
+
                                 <div class="info-item">
                                     <span class="info-text"><strong>Date de soumission:</strong> {{ inscription.dateInscription|date('d/m/Y à H:i') }}</span>
                                 </div>

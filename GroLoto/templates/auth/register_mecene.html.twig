@@ -67,6 +67,11 @@
                 </div>
 
                 <div class="registration-form-group">
+                    <label for="adresse_postale" class="registration-form-label">Adresse postale *</label>
+                    <textarea name="adresse_postale" id="adresse_postale" class="registration-form-control mecene-focus" rows="3" placeholder="Adresse complète de l'organisation" required>{{ app.request.request.get('adresse_postale') }}</textarea>
+                </div>
+
+                <div class="registration-form-group">
                     <label for="siret" class="registration-form-label">Numéro SIRET *</label>
                     <div class="siret-container" id="siret-container">
                         <input type="text" name="siret" id="siret" 
