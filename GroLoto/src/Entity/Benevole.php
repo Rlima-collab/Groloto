@@ -23,6 +23,9 @@ class Benevole
     #[ORM\Column(type: 'boolean', options: ['default' => 1])]
     private bool $actif = true;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $disponibilites = null; // JSON encodé
+
 
     public function getId(): ?int
     {
@@ -59,6 +62,21 @@ class Benevole
     public function setActif(bool $actif): self
     {
         $this->actif = $actif;
+        return $this;
+    }
+
+    public function getDisponibilites(): array
+    {
+        if (!$this->disponibilites) {
+            return [];
+        }
+        $decoded = json_decode($this->disponibilites, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    public function setDisponibilites(?array $dispos): self
+    {
+        $this->disponibilites = $dispos && count($dispos) > 0 ? json_encode(array_values($dispos)) : null;
         return $this;
     }
 }

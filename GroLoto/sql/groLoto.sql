@@ -67,6 +67,7 @@ CREATE TABLE BENEVOLE (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_utilisateur INTEGER NOT NULL UNIQUE,
     remarque TEXT,
+  disponibilites TEXT,
     actif BOOLEAN DEFAULT 1,
     FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );

@@ -71,6 +71,8 @@ class AuthController extends AbstractController
             $nom = $request->request->get('nom');
             $telephone = $request->request->get('telephone');
             $remarque = $request->request->get('remarque');
+            $postAll = $request->request->all();
+            $postedDispos = isset($postAll['disponibilites']) && is_array($postAll['disponibilites']) ? $postAll['disponibilites'] : [];
 
             if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $errors[] = "Email invalide";
@@ -109,6 +111,8 @@ class AuthController extends AbstractController
                             $benevole->setUtilisateur($user);
                             $benevole->setRemarque($remarque);
                             $benevole->setActif(true);
+                            if (!is_array($postedDispos)) { $postedDispos = []; }
+                            $benevole->setDisponibilites($postedDispos);
 
                             $entityManager->persist($benevole);
                             $entityManager->flush();
@@ -224,15 +228,30 @@ class AuthController extends AbstractController
 
 
     #[Route('/profile', name: 'app_profile')]
-    public function profile(): Response
+    public function profile(EntityManagerInterface $entityManager): Response
     {
         // Vérifier que l'utilisateur est connecté
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         
         $user = $this->getUser();
+        // Préparer les disponibilités si bénévole
+        $dispos = [];
+        $benevoleRemark = null;
+        $roleName = strtolower($user->getRole()?->getNom() ?? '');
+        if ($roleName === 'benevole') {
+            $benevole = $entityManager->getRepository(\App\Entity\Benevole::class)
+                ->findOneBy(['utilisateur' => $user]);
+            if ($benevole) {
+                $dispos = $benevole->getDisponibilites();
+                $benevoleRemark = $benevole->getRemarque();
+            }
+        }
         
         return $this->render('auth/profile.html.twig', [
             'user' => $user,
+            'dispos' => $dispos,
+            'benevoleRemark' => $benevoleRemark,
+            'benevole' => $benevole ?? null,
         ]);
     }
 
@@ -251,6 +270,18 @@ class AuthController extends AbstractController
         $form = $this->createForm(ProfileType::class, $user);
         $form->handleRequest($request);
 
+        // Préparer les disponibilités pour les bénévoles
+        $benevole = null;
+        $dispos = [];
+        $roleName = strtolower($user->getRole()?->getNom() ?? '');
+        if ($roleName === 'benevole') {
+            $benevole = $entityManager->getRepository(\App\Entity\Benevole::class)
+                ->findOneBy(['utilisateur' => $user]);
+            if ($benevole) {
+                $dispos = $benevole->getDisponibilites();
+            }
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
             // Gérer l'upload de l'image de profil
             $profileImageFile = $request->files->get('profileImage');
@@ -264,6 +295,7 @@ class AuthController extends AbstractController
                     return $this->render('auth/profile_edit.html.twig', [
                         'form' => $form->createView(),
                         'user' => $user,
+                        'dispos' => $dispos,
                     ]);
                 }
                 
@@ -272,6 +304,7 @@ class AuthController extends AbstractController
                     return $this->render('auth/profile_edit.html.twig', [
                         'form' => $form->createView(),
                         'user' => $user,
+                        'dispos' => $dispos,
                     ]);
                 }
                 
@@ -332,6 +365,7 @@ class AuthController extends AbstractController
                     return $this->render('auth/profile_edit.html.twig', [
                         'form' => $form->createView(),
                         'user' => $user,
+                        'dispos' => $dispos,
                     ]);
                 }
 
@@ -340,6 +374,7 @@ class AuthController extends AbstractController
                     return $this->render('auth/profile_edit.html.twig', [
                         'form' => $form->createView(),
                         'user' => $user,
+                        'dispos' => $dispos,
                     ]);
                 }
 
@@ -359,7 +394,33 @@ class AuthController extends AbstractController
                     return $this->render('auth/profile_edit.html.twig', [
                         'form' => $form->createView(),
                         'user' => $user,
+                        'dispos' => $dispos,
                     ]);
+                }
+            }
+
+            // Sauvegarder les disponibilités (bénévole uniquement)
+            if ($roleName === 'benevole') {
+                if (!$benevole) {
+                    // Créer l'entité si manquante par cohérence
+                    $benevole = new \App\Entity\Benevole();
+                    $benevole->setUtilisateur($user);
+                    $entityManager->persist($benevole);
+                }
+                $postAll = $request->request->all();
+                $postedDispos = isset($postAll['disponibilites']) && is_array($postAll['disponibilites']) ? $postAll['disponibilites'] : [];
+                $benevole->setDisponibilites($postedDispos);
+
+                // Mettre à jour la note/remarque du bénévole si fournie
+                $remarque = isset($postAll['remarque']) ? (string)$postAll['remarque'] : '';
+                // Normaliser (trim) et limiter longueur côté contrôleur de manière basique
+                $remarque = trim($remarque);
+                if ($remarque === '') {
+                    // Autoriser remarque vide
+                    $benevole->setRemarque(null);
+                } else {
+                    // Optionnel: tronquer très long texte pour éviter abus
+                    $benevole->setRemarque(mb_substr($remarque, 0, 1000));
                 }
             }
 
@@ -378,6 +439,7 @@ class AuthController extends AbstractController
         return $this->render('auth/profile_edit.html.twig', [
             'form' => $form->createView(),
             'user' => $user,
+            'dispos' => $dispos,
         ]);
     }
 
