@@ -38,14 +38,6 @@ class TacheType extends AbstractType
                 'widget' => 'single_text',
                 'attr' => ['class' => 'form-control'],
             ])
-            ->add('posteRequis', TextType::class, [
-                'label' => 'Poste requis',
-                'required' => false,
-                'attr' => [
-                    'class' => 'form-control',
-                    'placeholder' => 'Ex: Bar, Accueil, Cuisine...'
-                ],
-            ])
             ->add('maxPersonnes', IntegerType::class, [
                 'label' => 'Nombre max de personnes',
                 'required' => false,

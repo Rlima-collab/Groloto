@@ -98,7 +98,6 @@
                                     <th>Evenement</th>
                                     <th>Date de debut</th>
                                     <th>Date de fin</th>
-                                    <th>Poste requis</th>
                                     <th>Benevoles assignes</th>
                                     <th>Max personnes</th>
                                     <th>Actions</th>
@@ -131,13 +130,6 @@
                                         </td>
                                         <td>{{ tache.debut|date('d/m/Y H:i') }}</td>
                                         <td>{{ tache.fin|date('d/m/Y H:i') }}</td>
-                                        <td>
-                                            {% if tache.posteRequis %}
-                                                <span class="badge" style="background: #f59e0b;">{{ tache.posteRequis }}</span>
-                                            {% else %}
-                                                <span style="color: #9ca3af;">—</span>
-                                            {% endif %}
-                                        </td>
                                         <td>
                                             {% if data.nbBenevoles > 0 %}
                                                 <div style="font-size: 0.85em;">

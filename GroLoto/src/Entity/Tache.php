@@ -24,9 +24,6 @@ class Tache
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $fin = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $posteRequis = null;
-
     #[ORM\Column(nullable: true)]
     private ?int $maxPersonnes = null;
 
@@ -76,17 +73,6 @@ class Tache
     public function setFin(\DateTimeInterface $fin): self
     {
         $this->fin = $fin;
-        return $this;
-    }
-
-    public function getPosteRequis(): ?string
-    {
-        return $this->posteRequis;
-    }
-
-    public function setPosteRequis(?string $posteRequis): self
-    {
-        $this->posteRequis = $posteRequis;
         return $this;
     }
 
