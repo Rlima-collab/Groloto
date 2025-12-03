@@ -4,7 +4,9 @@ namespace App\Form;
 
 use App\Entity\Tache;
 use App\Entity\Weekend;
+use App\Entity\Benevole;
 use App\Repository\WeekendRepository;
+use App\Repository\BenevoleRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -83,12 +85,35 @@ class TacheType extends AbstractType
                 'required' => true,
                 'attr' => ['class' => 'form-control'],
             ]);
+
+        // Ajouter le champ bénévoles uniquement pour la création
+        if ($options['include_benevoles']) {
+            $builder->add('benevoles', EntityType::class, [
+                'class' => Benevole::class,
+                'query_builder' => fn(BenevoleRepository $br) => $br->createQueryBuilder('b')
+                    ->innerJoin('b.utilisateur', 'u')
+                    ->where('b.actif = :actif')
+                    ->setParameter('actif', true)
+                    ->orderBy('u.nom', 'ASC'),
+                'choice_label' => fn(Benevole $b) => $b->getUtilisateur()->getPrenom() . ' ' . $b->getUtilisateur()->getNom(),
+                'label' => 'Proposer aux bénévoles',
+                'multiple' => true,
+                'expanded' => true,
+                'mapped' => false,
+                'required' => false,
+                'attr' => ['class' => 'benevoles-checkboxes'],
+                'choice_attr' => function($choice, $key, $value) {
+                    return ['class' => 'benevole-checkbox'];
+                },
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Tache::class,
+            'include_benevoles' => true,
         ]);
     }
 }

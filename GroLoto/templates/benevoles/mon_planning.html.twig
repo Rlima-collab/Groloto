@@ -18,7 +18,10 @@
     <div class="hero-content">
         <h1 class="hero-title">Mon Planning</h1>
         <p class="hero-description">Vue d'ensemble des tâches assignées et du calendrier.</p>
-        <a href="{{ path('dashboard') }}" class="btn-login">Retour aux bénévoles</a>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{{ path('dashboard') }}" class="btn-login">Retour aux bénévoles</a>
+            <a href="{{ path('benevole_propositions') }}" class="btn-login" style="background-color: #d97706;">Voir mes propositions</a>
+        </div>
     </div>
 </div>
 <br>
@@ -73,9 +76,24 @@
                                         <div class="event-month">{{ tache.debut|date('M')|upper }}</div>
                                         <div class="event-day">{{ tache.debut|date('d') }}</div>
                                     </div>
-                                    <div class="event-details">
+                                    <div class="event-details" style="flex: 1;">
                                         <h4 class="event-title">{{ tache.titre }}</h4>
                                         <p class="event-time">{{ tache.debut|date('H\\hi') }}{% if tache.poste_requis %} - {{ tache.poste_requis }}{% endif %}</p>
+                                    </div>
+                                    <div class="event-actions" style="margin-left: 0.5rem;">
+                                        {% if tache.demande_annulation_en_attente %}
+                                            <span class="badge" style="background: #f59e0b; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">
+                                                Annulation demandée
+                                            </span>
+                                        {% elseif tache.affectation_id %}
+                                            <button type="button" 
+                                                    class="btn btn-small btn-danger"
+                                                    style="font-size: 0.75rem; padding: 0.25rem 0.5rem;"
+                                                    onclick="openAnnulationModal({{ tache.affectation_id }}, '{{ tache.titre|e('js') }}')"
+                                                    title="Demander l'annulation">
+                                                Annuler
+                                            </button>
+                                        {% endif %}
                                     </div>
                                 </div>
                             {% endfor %}
@@ -116,6 +134,126 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Demande d'annulation -->
+<div id="annulationModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close" onclick="closeAnnulationModal()">&times;</span>
+        <h2 style="margin-top: 0; color: #dc2626;">Demander une annulation</h2>
+        <p><strong>Tâche:</strong> <span id="annulationTacheNom"></span></p>
+        <form id="annulationForm" method="POST">
+            <input type="hidden" name="_token" id="annulationCsrfToken">
+            <div class="form-group">
+                <label for="motif">Motif de la demande d'annulation</label>
+                <textarea name="motif" id="motif" class="form-control" rows="4" placeholder="Expliquez pourquoi vous souhaitez annuler cette tâche..." required></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeAnnulationModal()">Annuler</button>
+                <button type="submit" class="btn btn-danger">Envoyer la demande</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 8px;
+    width: 80%;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+}
+
+.btn-small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-danger {
+    background-color: #dc2626;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+</style>
+
+<script>
+// Générer les tokens CSRF pour chaque affectation
+var csrfTokens = {
+    {% for tache in taches_proches %}
+        {% if tache.affectation_id %}
+        {{ tache.affectation_id }}: '{{ csrf_token('demander_annulation_' ~ tache.affectation_id) }}',
+        {% endif %}
+    {% endfor %}
+};
+
+function openAnnulationModal(affectationId, tacheNom) {
+    document.getElementById('annulationTacheNom').textContent = tacheNom;
+    document.getElementById('annulationForm').action = '/benevole/demander-annulation/' + affectationId;
+    document.getElementById('annulationCsrfToken').value = csrfTokens[affectationId] || '';
+    document.getElementById('annulationModal').style.display = 'block';
+}
+
+function closeAnnulationModal() {
+    document.getElementById('annulationModal').style.display = 'none';
+    document.getElementById('motif').value = '';
+}
+
+// Fermer le modal si on clique en dehors
+window.onclick = function(event) {
+    const modal = document.getElementById('annulationModal');
+    if (event.target == modal) {
+        closeAnnulationModal();
+    }
+}
+</script>
 
 <script>
 window.calendarInstance = null;

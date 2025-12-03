@@ -166,7 +166,7 @@ class NotificationService
             $benevole,
             'acceptation_annulation',
             "Votre demande d'annulation pour la tâche \"{$tacheNom}\" a été acceptée.",
-            '/benevoles'
+            '/benevole/mon-planning'
         );
     }
 
@@ -185,6 +185,45 @@ class NotificationService
             'refus_annulation',
             $message,
             '/benevoles'
+        );
+    }
+
+    /**
+     * Notifier un bénévole qu'une tâche lui est proposée
+     */
+    public function notifyBenevoleProposition(Utilisateur $benevole, string $tacheNom): void
+    {
+        $this->createNotification(
+            $benevole,
+            'proposition_tache',
+            "Une nouvelle tâche vous est proposée : \"{$tacheNom}\".",
+            '/benevole/propositions'
+        );
+    }
+
+    /**
+     * Notifier l'admin qu'un bénévole a accepté une proposition
+     */
+    public function notifyAdminPropositionAcceptee(Utilisateur $admin, string $benevoleNom, string $tacheNom): void
+    {
+        $this->createNotification(
+            $admin,
+            'proposition_acceptee',
+            "{$benevoleNom} a accepté la proposition pour la tâche \"{$tacheNom}\".",
+            '/taches'
+        );
+    }
+
+    /**
+     * Notifier l'admin qu'un bénévole a refusé une proposition
+     */
+    public function notifyAdminPropositionRefusee(Utilisateur $admin, string $benevoleNom, string $tacheNom): void
+    {
+        $this->createNotification(
+            $admin,
+            'proposition_refusee',
+            "{$benevoleNom} a refusé la proposition pour la tâche \"{$tacheNom}\".",
+            '/taches'
         );
     }
 
