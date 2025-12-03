@@ -30,13 +30,6 @@
                         {% endif %}
                     </p>
                     <p><strong>Période :</strong> {{ tache.debut|date('d/m/Y H:i') }} - {{ tache.fin|date('d/m/Y H:i') }}</p>
-                    <p><strong>Poste requis :</strong> 
-                        {% if tache.posteRequis %}
-                            {{ tache.posteRequis }}
-                        {% else %}
-                            <span style="color: #6b7280;">Non spécifié</span>
-                        {% endif %}
-                    </p>
                     {% if tache.maxPersonnes %}
                         <p style="margin-bottom: 0;"><strong>Maximum de personnes :</strong> {{ tache.maxPersonnes }}</p>
                     {% endif %}

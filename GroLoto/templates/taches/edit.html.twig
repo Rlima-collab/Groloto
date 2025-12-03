@@ -7,42 +7,6 @@
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/taches/taches-common.css') }}">
     <link rel="stylesheet" href="{{ asset('css/taches/taches-forms.css') }}">
-    <style>
-        .plages-horaires-collection {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .plage-horaire-entry {
-            border: 1px solid #e5e7eb;
-            border-radius: 0.375rem;
-            padding: 1rem;
-            background: #f9fafb;
-            position: relative;
-        }
-        
-        .plage-horaire-entry:hover {
-            background: #f3f4f6;
-        }
-        
-        .remove-plage-btn {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
-        
-        .remove-plage-btn:hover {
-            background: #dc2626;
-        }
-    </style>
 {% endblock %}
 
 {% block body %}
@@ -53,7 +17,7 @@
         <a href="{{ path('tache_index') }}" class="btn btn-secondary">Retour à la liste</a>
     </div>
 
-    <div style="max-width: 900px; margin: 0 auto;">
+    <div style="max-width: 800px; margin: 0 auto;">
         <div class="card">
             <div class="card-header">
                 <h2 class="card-title">Informations de la tâche</h2>
@@ -76,49 +40,31 @@
                         </div>
                     </div>
 
-                    {# Plages horaires #}
-                    <div class="form-group full-width">
-                        <label>Plages horaires</label>
-                        <div class="plages-horaires-collection" data-collection-holder>
-                            {% for plageForm in form.plagesHoraires %}
-                                <div class="plage-horaire-entry" data-collection-item>
-                                    <button type="button" class="remove-plage-btn" data-remove-collection-item>✕ Supprimer</button>
-                                    <div class="form-grid">
-                                        <div class="form-group">
-                                            {{ form_label(plageForm.jour) }}
-                                            {{ form_widget(plageForm.jour) }}
-                                            {{ form_errors(plageForm.jour) }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ form_label(plageForm.heureDebut) }}
-                                            {{ form_widget(plageForm.heureDebut) }}
-                                            {{ form_errors(plageForm.heureDebut) }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ form_label(plageForm.heureFin) }}
-                                            {{ form_widget(plageForm.heureFin) }}
-                                            {{ form_errors(plageForm.heureFin) }}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ form_label(plageForm.maxPersonnesPlage) }}
-                                            {{ form_widget(plageForm.maxPersonnesPlage) }}
-                                            {{ form_errors(plageForm.maxPersonnesPlage) }}
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
+                    {# Affichage des plages horaires existantes #}
+                    {% if tache.plagesHoraires|length > 0 %}
+                    <div class="card" style="margin: 1.5rem 0; background: #f8fafc;">
+                        <div class="card-header" style="padding-bottom: 0.75rem;">
+                            <h3 style="margin: 0; font-size: 1rem;">Plages horaires existantes</h3>
                         </div>
-                        <button type="button" class="btn btn-secondary" data-add-collection-item data-collection-holder=".plages-horaires-collection">
-                            + Ajouter une plage horaire
-                        </button>
+                        <div class="card-content">
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                {% for plage in tache.plagesHoraires %}
+                                    <div style="padding: 0.75rem; background: white; border-radius: 0.375rem; border-left: 4px solid #3b82f6;">
+                                        <strong>{{ plage.jour|date('d/m/Y') }}</strong> 
+                                        <span style="color: #6b7280;">{{ plage.heureDebut|date('H:i') }} - {{ plage.heureFin|date('H:i') }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
+                    {% endif %}
 
                     <div class="form-grid">
                         <div class="form-group">
                             {{ form_label(form.maxPersonnes) }}
                             {{ form_widget(form.maxPersonnes) }}
                             {{ form_errors(form.maxPersonnes) }}
-                            <small class="form-text">Limite globale de bénévoles pour cette tâche</small>
+                            <small class="form-text">Limite globale de bénévoles</small>
                         </div>
 
                         <div class="form-group full-width">
@@ -138,56 +84,4 @@
     </div>
 </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const collectionHolder = document.querySelector('[data-collection-holder]');
-    const addBtn = document.querySelector('[data-add-collection-item]');
-    
-    if (addBtn) {
-        addBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            addPlageHoraire();
-        });
-    }
-    
-    function addPlageHoraire() {
-        const collectionHolder = document.querySelector('[data-collection-holder]');
-        const count = collectionHolder.querySelectorAll('[data-collection-item]').length;
-        
-        const newItem = document.createElement('div');
-        newItem.className = 'plage-horaire-entry';
-        newItem.setAttribute('data-collection-item', '');
-        
-        // Récupérer le prototype du formulaire
-        const prototype = collectionHolder.getAttribute('data-prototype');
-        if (prototype) {
-            const newItemHTML = prototype.replace(/__name__/g, count);
-            newItem.innerHTML = `
-                <button type="button" class="remove-plage-btn" data-remove-collection-item>✕ Supprimer</button>
-                <div class="form-grid">
-                    ${newItemHTML}
-                </div>
-            `;
-        }
-        
-        collectionHolder.appendChild(newItem);
-        attachRemoveButtons();
-    }
-    
-    function attachRemoveButtons() {
-        document.querySelectorAll('[data-remove-collection-item]').forEach(btn => {
-            btn.removeEventListener('click', removeItem);
-            btn.addEventListener('click', removeItem);
-        });
-    }
-    
-    function removeItem(e) {
-        e.preventDefault();
-        this.closest('[data-collection-item]').remove();
-    }
-    
-    attachRemoveButtons();
-});
-</script>
 {% endblock %}

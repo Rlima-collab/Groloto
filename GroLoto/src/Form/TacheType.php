@@ -13,7 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\{
     TextType,
     TextareaType,
     IntegerType,
-    CollectionType
+    DateType,
+    TimeType
 };
 
 class TacheType extends AbstractType
@@ -45,13 +46,27 @@ class TacheType extends AbstractType
                 'required' => true,
                 'attr' => ['class' => 'form-control'],
             ])
-            ->add('plagesHoraires', CollectionType::class, [
-                'entry_type' => PlageHoraireType::class,
-                'label' => 'Plages horaires',
-                'allow_add' => true,
-                'allow_delete' => true,
-                'by_reference' => false,
-                'attr' => ['class' => 'plages-horaires-collection'],
+            // Plage horaire unique pour la création simple
+            ->add('jour_plage', DateType::class, [
+                'label' => 'Jour',
+                'widget' => 'single_text',
+                'attr' => ['class' => 'form-control'],
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('heure_debut_plage', TimeType::class, [
+                'label' => 'Heure de début',
+                'widget' => 'single_text',
+                'attr' => ['class' => 'form-control'],
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('heure_fin_plage', TimeType::class, [
+                'label' => 'Heure de fin',
+                'widget' => 'single_text',
+                'attr' => ['class' => 'form-control'],
+                'mapped' => false,
+                'required' => false,
             ])
             ->add('maxPersonnes', IntegerType::class, [
                 'label' => 'Nombre max de personnes (global)',
@@ -59,7 +74,7 @@ class TacheType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'min' => 1,
-                    'placeholder' => 'Ex: 5'
+                    'placeholder' => 'Laisser vide pour illimité'
                 ],
             ])
             ->add('remarque', TextareaType::class, [
