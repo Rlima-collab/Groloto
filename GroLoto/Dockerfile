@@ -12,10 +12,13 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     sqlite3 \
     libsqlite3-dev \
+    libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
     pdo \
     pdo_sqlite \
+    pdo_pgsql \
+    pgsql \
     intl \
     zip \
     gd \
