@@ -154,6 +154,7 @@ class AuthController extends AbstractController
             $telephone = $request->request->get('telephone');
             $organisation = $request->request->get('organisation');
             $siret = $request->request->get('siret');
+            $adressePostale = $request->request->get('adresse_postale');
 
             if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $errors[] = "Email invalide";
@@ -166,6 +167,9 @@ class AuthController extends AbstractController
             }
             if (empty($organisation)) {
                 $errors[] = "L'organisation est obligatoire";
+            }
+            if (empty($adressePostale)) {
+                $errors[] = "L'adresse postale est obligatoire";
             }
             if (empty($siret) || !preg_match('/^[0-9]{14}$/', $siret)) {
                 $errors[] = "Le numéro SIRET doit contenir exactement 14 chiffres";
@@ -198,6 +202,7 @@ class AuthController extends AbstractController
                             $mecene->setUtilisateur($user);
                             $mecene->setOrganisation($organisation);
                             $mecene->setSiret($siret);
+                            $mecene->setAdressePostale($adressePostale);
 
                             $entityManager->persist($mecene);
                             $entityManager->flush();

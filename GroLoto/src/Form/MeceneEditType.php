@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -102,6 +103,15 @@ class MeceneEditType extends AbstractType
                         'pattern' => '/^\d{14}$/',
                         'message' => 'Le SIRET doit contenir 14 chiffres'
                     ])
+                ]
+            ])
+            ->add('adresse_postale', TextareaType::class, [
+                'label' => 'Adresse postale',
+                'required' => true,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Adresse complète de l\'organisation',
+                    'rows' => 3
                 ]
             ]);
     }
