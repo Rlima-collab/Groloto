@@ -99,6 +99,9 @@ class TacheController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Synchroniser debut/fin avec les plages horaires
+            $tache = $this->syncTaskDates($tache);
+            
             $entityManager->persist($tache);
             $entityManager->flush();
 
@@ -125,6 +128,9 @@ class TacheController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Synchroniser debut/fin avec les plages horaires
+            $tache = $this->syncTaskDates($tache);
+            
             $entityManager->flush();
             
             $this->addFlash('success', 'La tâche a été mise à jour avec succès !');
@@ -237,5 +243,42 @@ class TacheController extends AbstractController
             'tache' => $tache,
             'benevolesActuels' => $benevolesActuels,
         ]);
+    }
+
+    /**
+     * Synchronise les champs debut/fin de la tâche avec les plages horaires
+     */
+    private function syncTaskDates(Tache $tache): Tache
+    {
+        if ($tache->getPlagesHoraires()->isEmpty()) {
+            $tache->setDebut(null);
+            $tache->setFin(null);
+            return $tache;
+        }
+
+        $plages = $tache->getPlagesHoraires()->toArray();
+        
+        // Récupérer le début le plus tôt
+        $debut = null;
+        foreach ($plages as $plage) {
+            $plageDebut = $plage->getDebut();
+            if ($debut === null || $plageDebut < $debut) {
+                $debut = $plageDebut;
+            }
+        }
+
+        // Récupérer la fin la plus tard
+        $fin = null;
+        foreach ($plages as $plage) {
+            $plageFin = $plage->getFin();
+            if ($fin === null || $plageFin > $fin) {
+                $fin = $plageFin;
+            }
+        }
+
+        $tache->setDebut($debut);
+        $tache->setFin($fin);
+        
+        return $tache;
     }
 }

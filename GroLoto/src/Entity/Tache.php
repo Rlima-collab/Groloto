@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TacheRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -18,10 +20,10 @@ class Tache
     #[ORM\Column(length: 255)]
     private ?string $titre = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $debut = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $fin = null;
 
     #[ORM\Column(nullable: true)]
@@ -33,6 +35,14 @@ class Tache
     #[ORM\ManyToOne(targetEntity: Weekend::class, inversedBy: 'taches')]
     #[ORM\JoinColumn(name: 'id_weekend', referencedColumnName: 'id', nullable: false)]
     private ?Weekend $weekend = null;
+
+    #[ORM\OneToMany(mappedBy: 'tache', targetEntity: PlageHoraire::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $plagesHoraires;
+
+    public function __construct()
+    {
+        $this->plagesHoraires = new ArrayCollection();
+    }
 
     // ====================
     // GETTERS & SETTERS
@@ -59,7 +69,7 @@ class Tache
         return $this->debut;
     }
 
-    public function setDebut(\DateTimeInterface $debut): self
+    public function setDebut(?\DateTimeInterface $debut): self
     {
         $this->debut = $debut;
         return $this;
@@ -70,7 +80,7 @@ class Tache
         return $this->fin;
     }
 
-    public function setFin(\DateTimeInterface $fin): self
+    public function setFin(?\DateTimeInterface $fin): self
     {
         $this->fin = $fin;
         return $this;
@@ -106,6 +116,33 @@ class Tache
     public function setWeekend(Weekend $weekend): self
     {
         $this->weekend = $weekend;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlageHoraire>
+     */
+    public function getPlagesHoraires(): Collection
+    {
+        return $this->plagesHoraires;
+    }
+
+    public function addPlageHoraire(PlageHoraire $plageHoraire): self
+    {
+        if (!$this->plagesHoraires->contains($plageHoraire)) {
+            $this->plagesHoraires->add($plageHoraire);
+            $plageHoraire->setTache($this);
+        }
+        return $this;
+    }
+
+    public function removePlageHoraire(PlageHoraire $plageHoraire): self
+    {
+        if ($this->plagesHoraires->removeElement($plageHoraire)) {
+            if ($plageHoraire->getTache() === $this) {
+                $plageHoraire->setTache(null);
+            }
+        }
         return $this;
     }
 }
