@@ -123,6 +123,57 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
                 </div>
             </div>
 
+            {% if user.role.nom == 'benevole' %}
+            <div class="info-section">
+                <div class="info-section-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path></svg>
+                    Disponibilités (Bénévole)
+                </div>
+                {% set days = {'lundi':'Lun.','mardi':'Mar.','mercredi':'Mer.','jeudi':'Jeu.','vendredi':'Ven.','samedi':'Sam.','dimanche':'Dim.'} %}
+                {% set slots = {'matin':'Matin','pm':'Après-midi','soir':'Soir'} %}
+                {% if dispos is defined and dispos|length > 0 %}
+                    <div class="info-grid">
+                        <div class="info-item" style="grid-column: 1 / -1;">
+                            <div class="info-label">Créneaux cochés</div>
+                            <div class="info-value">
+                                {% set labels = [] %}
+                                {% for v in dispos %}
+                                    {% set parts = v|split('_') %}
+                                    {% if parts|length == 2 %}
+                                        {% set d = parts[0] %}
+                                        {% set s = parts[1] %}
+                                        {% set labels = labels|merge([ (days[d]|default(d|capitalize)) ~ ' ' ~ (slots[s]|default(s)) ]) %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ labels|join(', ') }}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="info-item">
+                        <div class="info-label">Créneaux cochés</div>
+                        <div class="info-value empty">Aucune disponibilité renseignée</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="info-section">
+                <div class="info-section-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-8 8h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Note / Remarque
+                </div>
+                <div class="info-grid">
+                    <div class="info-item" style="grid-column: 1 / -1;">
+                        <div class="info-label">Votre remarque</div>
+                        <div class="info-value {{ (user.role.nom == 'benevole' and user is defined and dispos is defined and benevoleRemark is defined) ? '' : '' }}">
+                            {% set remark = benevoleRemark|default(null) %}
+                            {{ remark ? remark : 'Aucune remarque renseignée' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <div class="btn-group">
                 <a href="{{ path('dashboard') }}" class="btn-custom btn-secondary">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>

@@ -90,6 +90,27 @@
                                     <span class="info-icon"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i></span>
                                     <span class="info-text"><strong>{{ item.nb_taches_realisees }}</strong> tâche{% if item.nb_taches_realisees > 1 %}s{% endif %} réalisée{% if item.nb_taches_realisees > 1 %}s{% endif %}</span>
                                 </div>
+                                {# Disponibilités (résumé) #}
+                                {% set dmap = {'lundi':'Lun.','mardi':'Mar.','mercredi':'Mer.','jeudi':'Jeu.','vendredi':'Ven.','samedi':'Sam.','dimanche':'Dim.'} %}
+                                {% set smap = {'matin':'Matin','pm':'Après-midi','soir':'Soir'} %}
+                                {% set dispos = benevole.disponibilites %}
+                                <div class="info-item">
+                                    <span class="info-icon">🗓️</span>
+                                    <span class="info-text">
+                                        {% if dispos %}
+                                            {% set labels = [] %}
+                                            {% for v in dispos %}
+                                                {% set parts = v|split('_') %}
+                                                {% if parts|length == 2 %}
+                                                    {% set labels = labels|merge([ (dmap[parts[0]]|default(parts[0]|capitalize)) ~ ' ' ~ (smap[parts[1]]|default(parts[1])) ]) %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            {{ labels|slice(0,6)|join(', ') }}{% if labels|length > 6 %}…{% endif %}
+                                        {% else %}
+                                            Aucune dispo renseignée
+                                        {% endif %}
+                                    </span>
+                                </div>
                             </div>
                             {% if benevole.remarque %}
                             <div class="benevole-notes">
