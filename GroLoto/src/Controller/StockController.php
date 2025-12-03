@@ -19,6 +19,11 @@ class StockController extends AbstractController
     #[Route('/stocks', name: 'stocks')]
     public function index(EntityManagerInterface $em): Response
     {
+        // Bloquer l'accès aux mécènes
+        if ($this->isGranted('ROLE_MECENE') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs et bénévoles.');
+        }
+        
         // Statistiques globales
         $stockItems = $em->getRepository(Stock::class)->findAll();
         $total_items = array_sum(array_map(fn($i) => $i->getQuantite(), $stockItems));
@@ -37,6 +42,11 @@ class StockController extends AbstractController
     #[Route('/stocks/inventaire', name: 'stocks_inventaire')]
     public function inventaire(EntityManagerInterface $em): Response
     {
+        // Bloquer l'accès aux mécènes
+        if ($this->isGranted('ROLE_MECENE') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs et bénévoles.');
+        }
+        
         $stockItems = $em->getRepository(Stock::class)->findAll();
         $total_items = array_sum(array_map(fn($i) => $i->getQuantite(), $stockItems));
         $stock_value = array_sum(array_map(fn($i) => $i->getQuantite() * $i->getValeurUnitaire(), $stockItems));
@@ -55,6 +65,11 @@ class StockController extends AbstractController
     #[Route('/stocks/mouvements', name: 'stocks_mouvements')]
     public function mouvements(EntityManagerInterface $em): Response
     {
+        // Bloquer l'accès aux mécènes
+        if ($this->isGranted('ROLE_MECENE') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs et bénévoles.');
+        }
+        
         $stockItems = $em->getRepository(Stock::class)->findAll();
         $total_items = array_sum(array_map(fn($i) => $i->getQuantite(), $stockItems));
         $stock_value = array_sum(array_map(fn($i) => $i->getQuantite() * $i->getValeurUnitaire(), $stockItems));
@@ -72,6 +87,11 @@ class StockController extends AbstractController
     #[Route('/stocks/historique', name: 'stocks_historique')]
     public function historique(EntityManagerInterface $em): Response
     {
+        // Bloquer l'accès aux mécènes
+        if ($this->isGranted('ROLE_MECENE') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs et bénévoles.');
+        }
+        
         $stockItems = $em->getRepository(Stock::class)->findAll();
         $total_items = array_sum(array_map(fn($i) => $i->getQuantite(), $stockItems));
         $stock_value = array_sum(array_map(fn($i) => $i->getQuantite() * $i->getValeurUnitaire(), $stockItems));
@@ -136,6 +156,11 @@ class StockController extends AbstractController
     #[Route('/stocks/export-historique/{annee}', name: 'stocks_export_historique')]
     public function exportHistoriquePDF(string $annee, EntityManagerInterface $em): Response
     {
+        // Bloquer l'accès aux mécènes
+        if ($this->isGranted('ROLE_MECENE') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs et bénévoles.');
+        }
+        
         // Récupération de l'historique pour l'année demandée
         $historiques = $em->getRepository(HistoriqueStock::class)->findAll();
         
@@ -200,6 +225,7 @@ class StockController extends AbstractController
     }
 
     #[Route('/stocks/ajouter', name: 'stock_ajouter_mouvement', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function ajouterMouvement(Request $request, EntityManagerInterface $em): Response
     {
         $articleId = $request->request->get('article');
@@ -241,6 +267,11 @@ class StockController extends AbstractController
     #[Route('/stocks/export-inventaire', name: 'stocks_export_inventaire')]
     public function exportInventaire(EntityManagerInterface $em): Response
     {
+        // Bloquer l'accès aux mécènes
+        if ($this->isGranted('ROLE_MECENE') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs et bénévoles.');
+        }
+        
         $stockItems = $em->getRepository(Stock::class)->findAll();
         
         // Créer le contenu CSV
