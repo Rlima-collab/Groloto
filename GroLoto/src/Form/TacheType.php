@@ -13,7 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\{
     TextType,
     TextareaType,
     IntegerType,
-    DateTimeType
+    DateType,
+    TimeType
 };
 
 class TacheType extends AbstractType
@@ -28,36 +29,6 @@ class TacheType extends AbstractType
                     'placeholder' => 'Ex: Vente de billets'
                 ],
             ])
-            ->add('debut', DateTimeType::class, [
-                'label' => 'Date et heure de début',
-                'widget' => 'single_text',
-                'attr' => ['class' => 'form-control'],
-            ])
-            ->add('fin', DateTimeType::class, [
-                'label' => 'Date et heure de fin',
-                'widget' => 'single_text',
-                'attr' => ['class' => 'form-control'],
-            ])
-            ->add('maxPersonnes', IntegerType::class, [
-                'label' => 'Nombre max de personnes',
-                'required' => false,
-                'attr' => [
-                    'class' => 'form-control',
-                    'min' => 1,
-                    'placeholder' => 'Ex: 5'
-                ],
-            ])
-            ->add('remarque', TextareaType::class, [
-                'label' => 'Remarques',
-                'required' => false,
-                'attr' => [
-                    'class' => 'form-control',
-                    'rows' => 4,
-                    'placeholder' => 'Infos supplémentaires...'
-                ],
-            ])
-
-            // WEEKEND UNIQUEMENT
             ->add('weekend', EntityType::class, [
                 'class' => Weekend::class,
                 'query_builder' => fn(WeekendRepository $wr) => $wr->createQueryBuilder('w')
@@ -74,6 +45,46 @@ class TacheType extends AbstractType
                 'placeholder' => 'Choisir un weekend',
                 'required' => true,
                 'attr' => ['class' => 'form-control'],
+            ])
+            // Plage horaire unique pour la création simple
+            ->add('jour_plage', DateType::class, [
+                'label' => 'Jour',
+                'widget' => 'single_text',
+                'attr' => ['class' => 'form-control'],
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('heure_debut_plage', TimeType::class, [
+                'label' => 'Heure de début',
+                'widget' => 'single_text',
+                'attr' => ['class' => 'form-control'],
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('heure_fin_plage', TimeType::class, [
+                'label' => 'Heure de fin',
+                'widget' => 'single_text',
+                'attr' => ['class' => 'form-control'],
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('maxPersonnes', IntegerType::class, [
+                'label' => 'Nombre max de personnes (global)',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'min' => 1,
+                    'placeholder' => 'Laisser vide pour illimité'
+                ],
+            ])
+            ->add('remarque', TextareaType::class, [
+                'label' => 'Remarques',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'rows' => 4,
+                    'placeholder' => 'Infos supplémentaires...'
+                ],
             ]);
     }
 

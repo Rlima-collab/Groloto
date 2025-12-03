@@ -26,41 +26,45 @@
             <div class="card-content">
                 {{ form_start(form) }}
                     <div class="form-grid">
-                        <div class="form-group required">
+                        <div class="form-group required full-width">
                             {{ form_label(form.titre) }}
                             {{ form_widget(form.titre) }}
                             {{ form_errors(form.titre) }}
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group full-width">
                             {{ form_label(form.weekend) }}
                             {{ form_widget(form.weekend) }}
                             {{ form_errors(form.weekend) }}
                             <small class="form-text">Le weekend auquel cette tâche est rattachée</small>
                         </div>
+                    </div>
 
-                        <div class="form-group required">
-                            {{ form_label(form.debut) }}
-                            {{ form_widget(form.debut) }}
-                            {{ form_errors(form.debut) }}
+                    {# Affichage des plages horaires existantes #}
+                    {% if tache.plagesHoraires|length > 0 %}
+                    <div class="card" style="margin: 1.5rem 0; background: #f8fafc;">
+                        <div class="card-header" style="padding-bottom: 0.75rem;">
+                            <h3 style="margin: 0; font-size: 1rem;">Plages horaires existantes</h3>
                         </div>
-
-                        <div class="form-group required">
-                            {{ form_label(form.fin) }}
-                            {{ form_widget(form.fin) }}
-                            {{ form_errors(form.fin) }}
+                        <div class="card-content">
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                {% for plage in tache.plagesHoraires %}
+                                    <div style="padding: 0.75rem; background: white; border-radius: 0.375rem; border-left: 4px solid #3b82f6;">
+                                        <strong>{{ plage.jour|date('d/m/Y') }}</strong> 
+                                        <span style="color: #6b7280;">{{ plage.heureDebut|date('H:i') }} - {{ plage.heureFin|date('H:i') }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         </div>
+                    </div>
+                    {% endif %}
 
-                        <div class="form-group">
-                            {{ form_label(form.posteRequis) }}
-                            {{ form_widget(form.posteRequis) }}
-                            {{ form_errors(form.posteRequis) }}
-                        </div>
-
+                    <div class="form-grid">
                         <div class="form-group">
                             {{ form_label(form.maxPersonnes) }}
                             {{ form_widget(form.maxPersonnes) }}
                             {{ form_errors(form.maxPersonnes) }}
+                            <small class="form-text">Limite globale de bénévoles</small>
                         </div>
 
                         <div class="form-group full-width">

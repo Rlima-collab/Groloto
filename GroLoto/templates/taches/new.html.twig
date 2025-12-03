@@ -26,35 +26,48 @@
             <div class="card-content">
                 {{ form_start(form) }}
                     <div class="form-grid">
-                        <div class="form-group required">
+                        <div class="form-group required full-width">
                             {{ form_label(form.titre) }}
                             {{ form_widget(form.titre) }}
                             {{ form_errors(form.titre) }}
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group required full-width">
                             {{ form_label(form.weekend) }}
                             {{ form_widget(form.weekend) }}
                             {{ form_errors(form.weekend) }}
                             <small class="form-text">Le weekend auquel cette tâche est rattachée</small>
                         </div>
+                    </div>
 
-                        <div class="form-group required">
-                            {{ form_label(form.debut) }}
-                            {{ form_widget(form.debut) }}
-                            {{ form_errors(form.debut) }}
+                    {# Plage horaire sur une ligne #}
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 0.375rem; margin: 1.5rem 0;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 1rem; color: #1f2937;">📅 Plage horaire</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                {{ form_label(form.jour_plage) }}
+                                {{ form_widget(form.jour_plage) }}
+                                {{ form_errors(form.jour_plage) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(form.heure_debut_plage) }}
+                                {{ form_widget(form.heure_debut_plage) }}
+                                {{ form_errors(form.heure_debut_plage) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(form.heure_fin_plage) }}
+                                {{ form_widget(form.heure_fin_plage) }}
+                                {{ form_errors(form.heure_fin_plage) }}
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="form-group required">
-                            {{ form_label(form.fin) }}
-                            {{ form_widget(form.fin) }}
-                            {{ form_errors(form.fin) }}
-                        </div>
-
+                    <div class="form-grid">
                         <div class="form-group">
                             {{ form_label(form.maxPersonnes) }}
                             {{ form_widget(form.maxPersonnes) }}
                             {{ form_errors(form.maxPersonnes) }}
+                            <small class="form-text">Limite globale de bénévoles</small>
                         </div>
 
                         <div class="form-group full-width">
@@ -74,9 +87,9 @@
 
         <div class="card alert-conseil">
             <div class="card-content">
-                <h4>Conseil</h4>
+                <h4>💡 Besoin d'ajouter d'autres plages?</h4>
                 <p>
-                    Après avoir créé la tâche, vous pourrez assigner des bénévoles via le bouton "Bénévoles" dans la liste des tâches.
+                    Vous pouvez créer la tâche avec une première plage horaire, puis utiliser le bouton "Dupliquer" dans la liste pour créer d'autres plages sur d'autres jours!
                 </p>
             </div>
         </div>
@@ -84,3 +97,4 @@
 </div>
 </div>
 {% endblock %}
+
