@@ -50,8 +50,13 @@
                     {% for weekend in weekends %}
                         <div class="weekend-card">
                             {% if weekend.cover_image %}
+                                {% set imagePath = weekend.cover_image %}
                                 <div class="weekend-image">
-                                    <img src="{{ asset('uploads/weekends/' ~ weekend.cover_image) }}" alt="{{ weekend.nom }}">
+                                    {% if imagePath starts with 'uploads/' %}
+                                        <img src="{{ asset(imagePath) }}" alt="{{ weekend.nom }}">
+                                    {% else %}
+                                        <img src="{{ asset('uploads/weekends/' ~ imagePath) }}" alt="{{ weekend.nom }}">
+                                    {% endif %}
                                 </div>
                             {% endif %}
                             <div class="weekend-header">
