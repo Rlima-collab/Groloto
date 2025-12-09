@@ -44,7 +44,7 @@ class InscriptionMeceneType extends AbstractType
                 'help' => 'Choisissez la destination de votre don',
                 'required' => true,
                 'choices' => [
-                    'Don pour les lots de la tombola' => 'lots',
+                    'Don pour les lots' => 'lots',
                     'Don pour le fonctionnement du festival' => 'fonctionnement'
                 ],
                 'expanded' => true,

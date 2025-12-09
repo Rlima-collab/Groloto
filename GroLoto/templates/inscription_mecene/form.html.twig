@@ -87,6 +87,14 @@
                         <small class="form-help">{{ form.evenement.vars.help }}</small>
                     {% endif %}
                 </div>
+            </div>
+
+            <!-- Section 2 : Informations sur le don -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">Informations sur votre don</h3>
+                    <p class="section-description">Ces informations seront utilisées pour ajouter votre don au stock si votre demande est acceptée</p>
+                </div>
 
                 <div class="form-group">
                     {{ form_label(form.type_don, null, {'label_attr': {'class': 'form-label required'}}) }}
@@ -97,14 +105,6 @@
                     {% if form.type_don.vars.help %}
                         <small class="form-help">{{ form.type_don.vars.help }}</small>
                     {% endif %}
-                </div>
-            </div>
-
-            <!-- Section 2 : Informations sur le don -->
-            <div class="form-section">
-                <div class="section-header">
-                    <h3 class="section-title">Informations sur votre don</h3>
-                    <p class="section-description">Ces informations seront utilisées pour ajouter votre don au stock si votre demande est acceptée</p>
                 </div>
 
                 <div class="form-row">
