@@ -96,6 +96,17 @@
                     <p class="section-description">Ces informations seront utilisées pour ajouter votre don au stock si votre demande est acceptée</p>
                 </div>
 
+                <div class="form-group">
+                    {{ form_label(form.type_don, null, {'label_attr': {'class': 'form-label required'}}) }}
+                    <div class="radio-group">
+                        {{ form_widget(form.type_don) }}
+                    </div>
+                    {{ form_errors(form.type_don) }}
+                    {% if form.type_don.vars.help %}
+                        <small class="form-help">{{ form.type_don.vars.help }}</small>
+                    {% endif %}
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         {{ form_label(form.nom_don, null, {'label_attr': {'class': 'form-label required'}}) }}

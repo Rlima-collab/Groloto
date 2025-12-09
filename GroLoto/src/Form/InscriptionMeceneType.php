@@ -39,6 +39,20 @@ class InscriptionMeceneType extends AbstractType
                     new Assert\NotBlank(['message' => 'Veuillez sélectionner un événement'])
                 ]
             ])
+            ->add('type_don', ChoiceType::class, [
+                'label' => 'Type de don',
+                'help' => 'Choisissez la destination de votre don',
+                'required' => true,
+                'choices' => [
+                    'Don pour les lots' => 'lots',
+                    'Don pour le fonctionnement du festival' => 'fonctionnement'
+                ],
+                'expanded' => true,
+                'data' => 'lots',
+                'constraints' => [
+                    new Assert\NotBlank(['message' => 'Veuillez sélectionner un type de don'])
+                ]
+            ])
             ->add('nom_don', TextType::class, [
                 'label' => 'Nom du don',
                 'help' => 'Nom de l\'article ou du lot à ajouter au stock',
@@ -117,21 +131,6 @@ class InscriptionMeceneType extends AbstractType
                 'attr' => [
                     'rows' => 3,
                     'placeholder' => 'Informations complémentaires...'
-                ]
-            ])
-            ->add('adresse_postale', TextareaType::class, [
-                'label' => 'Adresse postale de livraison',
-                'help' => 'Adresse complète où récupérer ou livrer le don',
-                'required' => false,
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => "Numéro et rue\nCode postal et ville\nPays"
-                ],
-                'constraints' => [
-                    new Assert\Length([
-                        'max' => 500,
-                        'maxMessage' => 'L\'adresse ne peut pas dépasser {{ limit }} caractères'
-                    ])
                 ]
             ]);
     }
