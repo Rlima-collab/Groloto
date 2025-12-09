@@ -58,7 +58,21 @@ class InscriptionMecene
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $adresse_postale = null;
 
+    #[ORM\Column(length: 20, options: ["default" => "fonctionnement"])]
+    private ?string $type_don = 'fonctionnement';
+
     // --- GETTERS & SETTERS ---
+
+    public function getTypeDon(): ?string
+    {
+        return $this->type_don;
+    }
+
+    public function setTypeDon(string $type_don): self
+    {
+        $this->type_don = $type_don;
+        return $this;
+    }
 
     public function getId(): ?int
     {

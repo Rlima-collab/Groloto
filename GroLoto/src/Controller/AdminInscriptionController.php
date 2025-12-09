@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Entity\InscriptionMecene;
+use App\Entity\Lot;
 use App\Entity\Notification;
 use App\Entity\Role;
 use App\Entity\Stock;
@@ -50,25 +51,43 @@ class AdminInscriptionController extends AbstractController
                 $inscription->setRemarqueAcceptation($remarqueAcceptation);
             }
             
-            // Créer automatiquement l'entrée de stock
-            $stock = new Stock();
-            $stock->setNom($inscription->getNomDon());
-            $stock->setCategorie($inscription->getCategorie());
-            $stock->setQuantite($inscription->getQuantite());
-            $stock->setUnite('pièces');
-            $stock->setValeurUnitaire($inscription->getValeurUnitaire() ?? 0.0);
-            $stock->setSeuil(0); // Seuil par défaut
-            
-            // Ajouter une remarque avec la provenance
-            $remarque = 'Don de ' . $inscription->getMecene()->getOrganisation();
-            $remarque .= ' pour l\'événement ' . $inscription->getEvenement()->getNom();
-            if ($inscription->getDescriptionDon()) {
-                $remarque .= ' - ' . $inscription->getDescriptionDon();
+            $messageSuccess = '';
+
+            if ($inscription->getTypeDon() === 'lot') {
+                $lot = new Lot();
+                $lot->setTitre($inscription->getNomDon());
+                $lot->setDescription($inscription->getDescriptionDon());
+                $lot->setQuantite($inscription->getQuantite());
+                $lot->setValeurEstimee($inscription->getValeurUnitaire() ?? 0.0);
+                $lot->setMecene($inscription->getMecene());
+                $lot->setWeekend($inscription->getEvenement()->getWeekend());
+                $lot->setDateCreation(new \DateTime());
+                
+                $em->persist($lot);
+                $messageSuccess = 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été acceptée et le lot "' . $lot->getTitre() . '" a été créé.';
+            } else {
+                // Créer automatiquement l'entrée de stock
+                $stock = new Stock();
+                $stock->setNom($inscription->getNomDon());
+                $stock->setCategorie($inscription->getCategorie());
+                $stock->setQuantite($inscription->getQuantite());
+                $stock->setUnite('pièces');
+                $stock->setValeurUnitaire($inscription->getValeurUnitaire() ?? 0.0);
+                $stock->setSeuil(0); // Seuil par défaut
+                $stock->setSource('don');
+                
+                // Ajouter une remarque avec la provenance
+                $remarque = 'Don de ' . $inscription->getMecene()->getOrganisation();
+                $remarque .= ' pour l\'événement ' . $inscription->getEvenement()->getNom();
+                if ($inscription->getDescriptionDon()) {
+                    $remarque .= ' - ' . $inscription->getDescriptionDon();
+                }
+                $stock->setRemarque($remarque);
+                $stock->setDerniereModif(new \DateTime());
+                
+                $em->persist($stock);
+                $messageSuccess = 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été acceptée et l\'article "' . $stock->getNom() . '" a été ajouté au stock.';
             }
-            $stock->setRemarque($remarque);
-            $stock->setDerniereModif(new \DateTime());
-            
-            $em->persist($stock);
             
             // Créer une notification pour le mécène
             $notificationMecene = new Notification();
@@ -96,7 +115,7 @@ class AdminInscriptionController extends AbstractController
             if ($statutPrecedent === 'refuse') {
                 $this->addFlash('success', 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été reconsidérée et acceptée.');
             } else {
-                $this->addFlash('success', 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été acceptée et l\'article "' . $stock->getNom() . '" a été ajouté au stock.');
+                $this->addFlash('success', $messageSuccess);
             }
         } else {
             $this->addFlash('error', 'Token CSRF invalide.');
@@ -114,17 +133,29 @@ class AdminInscriptionController extends AbstractController
             
             // Si l'inscription était acceptée, supprimer le stock associé
             if ($statutPrecedent === 'accepte' && $inscription->getNomDon()) {
-                $stockRepository = $em->getRepository(Stock::class);
-                $stocks = $stockRepository->createQueryBuilder('s')
-                    ->where('s.nom = :nom')
-                    ->andWhere('s.remarque LIKE :remarque')
-                    ->setParameter('nom', $inscription->getNomDon())
-                    ->setParameter('remarque', '%' . $inscription->getMecene()->getOrganisation() . '%' . $inscription->getEvenement()->getNom() . '%')
-                    ->getQuery()
-                    ->getResult();
-                
-                foreach ($stocks as $stock) {
-                    $em->remove($stock);
+                if ($inscription->getTypeDon() === 'lot') {
+                    $lotRepository = $em->getRepository(Lot::class);
+                    $lots = $lotRepository->findBy([
+                        'titre' => $inscription->getNomDon(),
+                        'mecene' => $inscription->getMecene(),
+                        'weekend' => $inscription->getEvenement()->getWeekend()
+                    ]);
+                    foreach ($lots as $lot) {
+                        $em->remove($lot);
+                    }
+                } else {
+                    $stockRepository = $em->getRepository(Stock::class);
+                    $stocks = $stockRepository->createQueryBuilder('s')
+                        ->where('s.nom = :nom')
+                        ->andWhere('s.remarque LIKE :remarque')
+                        ->setParameter('nom', $inscription->getNomDon())
+                        ->setParameter('remarque', '%' . $inscription->getMecene()->getOrganisation() . '%' . $inscription->getEvenement()->getNom() . '%')
+                        ->getQuery()
+                        ->getResult();
+                    
+                    foreach ($stocks as $stock) {
+                        $em->remove($stock);
+                    }
                 }
             }
             
@@ -155,7 +186,7 @@ class AdminInscriptionController extends AbstractController
             $em->flush();
 
             if ($statutPrecedent === 'accepte') {
-                $this->addFlash('success', 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été refusée et l\'article a été retiré du stock.');
+                $this->addFlash('success', 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été refusée et l\'article/lot a été retiré.');
             } else {
                 $this->addFlash('success', 'L\'inscription de ' . $inscription->getMecene()->getOrganisation() . ' a été refusée.');
             }
@@ -176,28 +207,41 @@ class AdminInscriptionController extends AbstractController
             if ($inscription->getStatut() === 'accepte') {
                 // Rechercher et supprimer le stock créé pour cette inscription
                 if ($inscription->getNomDon()) {
-                    $stockRepository = $em->getRepository(Stock::class);
-                    $stocks = $stockRepository->createQueryBuilder('s')
-                        ->where('s.nom = :nom')
-                        ->andWhere('s.remarque LIKE :remarque')
-                        ->setParameter('nom', $inscription->getNomDon())
-                        ->setParameter('remarque', '%' . $inscription->getMecene()->getOrganisation() . '%' . $inscription->getEvenement()->getNom() . '%')
-                        ->getQuery()
-                        ->getResult();
-                    
-                    // Supprimer le(s) stock(s) trouvé(s)
-                    foreach ($stocks as $stock) {
-                        $em->remove($stock);
-                        $stockSupprime = true;
+                    if ($inscription->getTypeDon() === 'lot') {
+                        $lotRepository = $em->getRepository(Lot::class);
+                        $lots = $lotRepository->findBy([
+                            'titre' => $inscription->getNomDon(),
+                            'mecene' => $inscription->getMecene(),
+                            'weekend' => $inscription->getEvenement()->getWeekend()
+                        ]);
+                        foreach ($lots as $lot) {
+                            $em->remove($lot);
+                            $stockSupprime = true;
+                        }
+                    } else {
+                        $stockRepository = $em->getRepository(Stock::class);
+                        $stocks = $stockRepository->createQueryBuilder('s')
+                            ->where('s.nom = :nom')
+                            ->andWhere('s.remarque LIKE :remarque')
+                            ->setParameter('nom', $inscription->getNomDon())
+                            ->setParameter('remarque', '%' . $inscription->getMecene()->getOrganisation() . '%' . $inscription->getEvenement()->getNom() . '%')
+                            ->getQuery()
+                            ->getResult();
+                        
+                        // Supprimer le(s) stock(s) trouvé(s)
+                        foreach ($stocks as $stock) {
+                            $em->remove($stock);
+                            $stockSupprime = true;
+                        }
                     }
                 }
                 
                 // Passer l'inscription en refusée au lieu de la supprimer
                 $inscription->setStatut('refuse');
-                $inscription->setRemarqueRefus('Demande annulée par l\'administrateur après acceptation. L\'article a été retiré du stock.');
+                $inscription->setRemarqueRefus('Demande annulée par l\'administrateur après acceptation. L\'article/lot a été retiré.');
                 $em->flush();
 
-                $this->addFlash('success', 'L\'inscription a été annulée et passée en statut "Refusée". L\'article a été retiré du stock.');
+                $this->addFlash('success', 'L\'inscription a été annulée et passée en statut "Refusée". L\'article/lot a été retiré.');
             } else {
                 // Pour les inscriptions en attente ou déjà refusées, on peut les supprimer définitivement
                 $em->remove($inscription);

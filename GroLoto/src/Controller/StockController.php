@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Stock;
 use App\Entity\HistoriqueStock;
+use App\Form\StockType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -136,8 +137,33 @@ class StockController extends AbstractController
 
     #[Route('/stocks/gerer', name: 'stocks_gerer')]
     #[IsGranted('ROLE_ADMIN')]
-    public function gerer(EntityManagerInterface $em): Response
+    public function gerer(Request $request, EntityManagerInterface $em): Response
     {
+        // Gestion du formulaire de création
+        $stock = new Stock();
+        $form = $this->createForm(StockType::class, $stock);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $stock->setDerniereModif(new \DateTime());
+            $em->persist($stock);
+            
+            // Add initial history
+            $historique = new HistoriqueStock();
+            $historique->setStock($stock);
+            $historique->setTypeChangement('creation');
+            $historique->setQuantite($stock->getQuantite());
+            $historique->setRaison('Création initiale (' . $stock->getSource() . ')');
+            $historique->setDateCreation(new \DateTime());
+            $historique->setUtilisateur($this->getUser());
+            $em->persist($historique);
+
+            $em->flush();
+
+            $this->addFlash('success', 'Article ajouté au stock avec succès.');
+            return $this->redirectToRoute('stocks_gerer');
+        }
+
         $stockItems = $em->getRepository(Stock::class)->findAll();
         $total_items = array_sum(array_map(fn($i) => $i->getQuantite(), $stockItems));
         $stock_value = array_sum(array_map(fn($i) => $i->getQuantite() * $i->getValeurUnitaire(), $stockItems));
@@ -150,6 +176,7 @@ class StockController extends AbstractController
             'stock_value' => $stock_value,
             'low_stock_count' => $low_stock_count,
             'categories_count' => $categories_count,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -223,6 +250,7 @@ class StockController extends AbstractController
             ]
         );
     }
+
 
     #[Route('/stocks/ajouter', name: 'stock_ajouter_mouvement', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
