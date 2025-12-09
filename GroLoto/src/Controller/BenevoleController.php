@@ -6,6 +6,10 @@ use App\Entity\Benevole;
 use App\Form\BenevoleEditType;
 use App\Repository\BenevoleRepository;
 use App\Repository\TacheRepository;
+use App\Repository\AffectationTacheRepository;
+use App\Repository\UtilisateurRepository;
+use App\Repository\DemandeAnnulationRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -129,7 +133,9 @@ class BenevoleController extends AbstractController
     #[Route('/benevole/mon-planning', name: 'benevole_mon_planning')]
     public function monPlanning(
         BenevoleRepository $benevoleRepository,
-        TacheRepository $tacheRepository
+        TacheRepository $tacheRepository,
+        AffectationTacheRepository $affectationRepository,
+        DemandeAnnulationRepository $demandeAnnulationRepository
     ): Response {
         $user = $this->getUser();
         $benevole = $benevoleRepository->findOneBy(['utilisateur' => $user]);
@@ -178,34 +184,29 @@ class BenevoleController extends AbstractController
             return $this->redirectToRoute('benevole_mon_planning');
         }
 
-        // Récupérer les tâches du bénévole pour ce weekend
-        $taches = $tacheRepository->findTachesForBenevoleByWeekend($benevole->getId(), $id);
-        
-        if (empty($taches)) {
-            $this->addFlash('warning', 'Vous n\'avez pas de tâches pour ce weekend.');
-            return $this->redirectToRoute('benevole_mon_planning');
+        // Tâches à venir avec les infos d'affectation et de demande d'annulation
+        $tachesProches = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
+        if (empty($tachesProches)) {
+            $tachesProches = $tacheRepository->findTachesForBenevole($benevole->getId());
         }
 
-        return $this->render('benevoles/planning_weekend_detail.html.twig', [
-            'benevole' => $benevole,
-            'weekend' => $weekend,
-            'taches' => $taches,
-        ]);
-    }
+        $tachesProchesData = [];
+        foreach ($tachesProches as $tp) {
+            $affectation = $affectationRepository->findOneByTacheAndBenevole($tp, $benevole);
+            $demandeEnAttente = null;
+            if ($affectation) {
+                $demandeEnAttente = $demandeAnnulationRepository->findByAffectationEnAttente($affectation);
+            }
+            
+            $tachesProchesData[] = [
+                'id' => $tp->getId(),
+                'titre' => $tp->getTitre(),
+                'debut' => $tp->getDebut(),
+                'poste_requis' => $tp->getPosteRequis(),
+                'affectation_id' => $affectation ? $affectation->getId() : null,
+                'demande_annulation_en_attente' => $demandeEnAttente !== null,
+            ];
 
-    #[Route('/benevole/mon-planning/weekend/{id}/pdf', name: 'benevole_planning_weekend_pdf')]
-    public function planningWeekendPdf(
-        int $id,
-        BenevoleRepository $benevoleRepository,
-        TacheRepository $tacheRepository,
-        EntityManagerInterface $em
-    ): Response {
-        $user = $this->getUser();
-        $benevole = $benevoleRepository->findOneBy(['utilisateur' => $user]);
-
-        if (!$benevole) {
-            $this->addFlash('error', 'Vous devez être un bénévole pour accéder à cette page.');
-            return $this->redirectToRoute('benevoles');
         }
 
         // Récupérer le weekend
@@ -388,6 +389,111 @@ class BenevoleController extends AbstractController
             'total_taches' => count($tachesBrutes),
             'total_futures' => count($tachesFutures),
             'total_realisees' => count($tachesRealisees)
+        ]);
+    }
+
+    #[Route('/benevole/propositions', name: 'benevole_propositions')]
+    public function propositions(
+        BenevoleRepository $benevoleRepository,
+        TacheRepository $tacheRepository,
+        AffectationTacheRepository $affectationRepository,
+        UtilisateurRepository $utilisateurRepository,
+        NotificationService $notificationService,
+        EntityManagerInterface $entityManager,
+        Request $request
+    ): Response {
+        $user = $this->getUser();
+        $benevole = $benevoleRepository->findOneBy(['utilisateur' => $user]);
+
+        if (!$benevole) {
+            $this->addFlash('error', 'Vous devez être un bénévole.');
+            return $this->redirectToRoute('benevoles');
+        }
+
+        // Traitement des actions (Accepter/Refuser)
+        if ($request->isMethod('POST')) {
+            $action = $request->request->get('action');
+            $tacheId = $request->request->get('tache_id');
+            $tache = $tacheRepository->find($tacheId);
+            
+            if ($tache) {
+                $affectation = $affectationRepository->findOneByTacheAndBenevole($tache, $benevole);
+                if ($affectation && $affectation->getStatut() === 'proposee') {
+                    if ($action === 'accepter') {
+                        // Vérifier s'il reste des places disponibles
+                        $maxPersonnes = $tache->getMaxPersonnes();
+                        if ($maxPersonnes !== null) {
+                            $nbAssignes = $affectationRepository->countBenevolesAssignesByTache($tache->getId());
+                            if ($nbAssignes >= $maxPersonnes) {
+                                $this->addFlash('error', 'Désolé, il n\'y a plus de place disponible pour cette tâche. Le nombre maximum de bénévoles (' . $maxPersonnes . ') a été atteint.');
+                                return $this->redirectToRoute('benevole_propositions');
+                            }
+                        }
+
+                        // Vérifier chevauchement avant d'accepter
+                        $chevauchements = $affectationRepository->findOverlappingAssignments($benevole, $tache->getDebut(), $tache->getFin());
+                        $estPrisAilleurs = false;
+                        foreach ($chevauchements as $chevauchement) {
+                            if ($chevauchement->getTache()->getId() !== $tache->getId() && $chevauchement->getStatut() === 'assigne') {
+                                $estPrisAilleurs = true;
+                                break;
+                            }
+                        }
+                        
+                        if ($estPrisAilleurs) {
+                            $this->addFlash('error', 'Vous ne pouvez pas accepter cette tâche car vous avez déjà une tâche validée sur ce créneau.');
+                        } else {
+                            $affectation->setStatut('assigne');
+                            $entityManager->flush();
+                            $this->addFlash('success', 'Vous avez accepté la tâche.');
+
+                            // Notifier les admins
+                            $admins = $utilisateurRepository->findByRoleName('admin');
+                            foreach ($admins as $admin) {
+                                $notificationService->notifyAdminPropositionAcceptee(
+                                    $admin,
+                                    $user->getPrenom() . ' ' . $user->getNom(),
+                                    $tache->getTitre()
+                                );
+                            }
+                        }
+                    } elseif ($action === 'refuser') {
+                        $affectation->setStatut('refusee');
+                        $entityManager->flush();
+                        $this->addFlash('info', 'Vous avez refusé la tâche.');
+
+                        // Notifier les admins (optionnel, mais utile)
+                        $admins = $utilisateurRepository->findByRoleName('admin');
+                        foreach ($admins as $admin) {
+                            $notificationService->notifyAdminPropositionRefusee(
+                                $admin,
+                                $user->getPrenom() . ' ' . $user->getNom(),
+                                $tache->getTitre()
+                            );
+                        }
+                    }
+                }
+            }
+            return $this->redirectToRoute('benevole_propositions');
+        }
+
+        $propositions = $tacheRepository->findPropositionsForBenevole($benevole->getId());
+
+        // Calculer les places disponibles pour chaque proposition
+        $placesDisponibles = [];
+        foreach ($propositions as $tache) {
+            $maxPersonnes = $tache->getMaxPersonnes();
+            if ($maxPersonnes !== null) {
+                $nbAssignes = $affectationRepository->countBenevolesAssignesByTache($tache->getId());
+                $placesDisponibles[$tache->getId()] = max(0, $maxPersonnes - $nbAssignes);
+            } else {
+                $placesDisponibles[$tache->getId()] = null; // Illimité
+            }
+        }
+
+        return $this->render('benevoles/propositions.html.twig', [
+            'propositions' => $propositions,
+            'places_disponibles' => $placesDisponibles
         ]);
     }
 }

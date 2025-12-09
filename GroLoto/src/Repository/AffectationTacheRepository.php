@@ -56,6 +56,21 @@ class AffectationTacheRepository extends ServiceEntityRepository
     }
 
     /**
+     * Compte le nombre de bénévoles effectivement assignés (statut 'assigne') à une tâche
+     */
+    public function countBenevolesAssignesByTache($tacheId): int
+    {
+        return (int) $this->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.tache = :tacheId')
+            ->andWhere('a.statut = :statut')
+            ->setParameter('tacheId', $tacheId)
+            ->setParameter('statut', 'assigne')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
      * Trouve une affectation spécifique (tâche + bénévole)
      */
     public function findOneByTacheAndBenevole($tacheId, $benevoleId): ?AffectationTache
