@@ -65,11 +65,12 @@
                     <table class="table table-hover align-middle">
                         <thead>
                             <tr>
-                                <th style="width: 25%;">Événement</th>
-                                <th style="width: 10%;">Date</th>
-                                <th style="width: 15%;">Lieu</th>
-                                <th style="width: 20%;">Description du don</th>
-                                <th style="width: 10%; text-align: right;">Montant</th>
+                                <th style="width: 20%;">Événement</th>
+                                <th style="width: 8%;">Date</th>
+                                <th style="width: 12%;">Lieu</th>
+                                <th style="width: 10%;">Type de don</th>
+                                <th style="width: 18%;">Description du don</th>
+                                <th style="width: 8%; text-align: right;">Montant</th>
                                 <th style="width: 10%; text-align: center;">Statut</th>
                                 <th style="width: 10%; text-align: center;">Date demande</th>
                             </tr>
@@ -84,6 +85,13 @@
                                             <span class="text-muted">{{ inscription.evenement.lieu }}</span>
                                         {% else %}
                                             <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if inscription.typeDon == 'lots' %}
+                                            <span class="badge" style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">🎁 Lots</span>
+                                        {% else %}
+                                            <span class="badge" style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">🎪 Fonctionnement</span>
                                         {% endif %}
                                     </td>
                                     <td>

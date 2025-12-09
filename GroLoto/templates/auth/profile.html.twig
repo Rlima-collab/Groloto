@@ -174,6 +174,35 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
             </div>
             {% endif %}
 
+            {% if user.role.nom == 'mecene' and mecene is defined and mecene %}
+            <div class="info-section">
+                <div class="info-section-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    Informations Mécène
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Organisation</div>
+                        <div class="info-value {{ mecene.organisation ? '' : 'empty' }}">
+                            {{ mecene.organisation ?? 'Non renseigné' }}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">SIRET</div>
+                        <div class="info-value {{ mecene.siret ? '' : 'empty' }}">
+                            {{ mecene.siret ?? 'Non renseigné' }}
+                        </div>
+                    </div>
+                    <div class="info-item" style="grid-column: 1 / -1;">
+                        <div class="info-label">Adresse postale</div>
+                        <div class="info-value {{ mecene.adressePostale ? '' : 'empty' }}" style="white-space: pre-line;">
+                            {{ mecene.adressePostale ?? 'Non renseignée' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <div class="btn-group">
                 <a href="{{ path('dashboard') }}" class="btn-custom btn-secondary">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>

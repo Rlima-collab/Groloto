@@ -39,6 +39,20 @@ class InscriptionMeceneType extends AbstractType
                     new Assert\NotBlank(['message' => 'Veuillez sélectionner un événement'])
                 ]
             ])
+            ->add('type_don', ChoiceType::class, [
+                'label' => 'Type de don',
+                'help' => 'Choisissez la destination de votre don',
+                'required' => true,
+                'choices' => [
+                    'Don pour les lots de la tombola' => 'lots',
+                    'Don pour le fonctionnement du festival' => 'fonctionnement'
+                ],
+                'expanded' => true,
+                'data' => 'lots',
+                'constraints' => [
+                    new Assert\NotBlank(['message' => 'Veuillez sélectionner un type de don'])
+                ]
+            ])
             ->add('nom_don', TextType::class, [
                 'label' => 'Nom du don',
                 'help' => 'Nom de l\'article ou du lot à ajouter au stock',

@@ -58,6 +58,9 @@ class InscriptionMecene
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $adresse_postale = null;
 
+    #[ORM\Column(length: 50)]
+    private ?string $type_don = 'lots';
+
     // --- GETTERS & SETTERS ---
 
     public function getId(): ?int
@@ -216,6 +219,17 @@ class InscriptionMecene
     public function setAdressePostale(?string $adresse_postale): self
     {
         $this->adresse_postale = $adresse_postale;
+        return $this;
+    }
+
+    public function getTypeDon(): ?string
+    {
+        return $this->type_don;
+    }
+
+    public function setTypeDon(string $type_don): self
+    {
+        $this->type_don = $type_don;
         return $this;
     }
 }
