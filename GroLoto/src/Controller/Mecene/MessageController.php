@@ -23,18 +23,23 @@ class MessageController extends AbstractController
     public function index(): Response
     {
         $user = $this->getUser();
-        $email = $user?->getEmail();
+        if (!$user instanceof \App\Entity\Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+        $email = $user->getEmail();
 
         $messages = [];
         if ($email) {
             // Récupérer les messages racines (parent_id IS NULL) où l'utilisateur est soit destinataire, soit expéditeur
             // ET qui ne sont pas masqués pour cet utilisateur
+            // INCLURE AUSSI les messages envoyés à 'ALL_MECENES'
             $messages = $this->em->getRepository(ContactMessage::class)
                 ->createQueryBuilder('cm')
                 ->where('cm.parent_id IS NULL')
-                ->andWhere('cm.destinataire = :email OR cm.email = :email')
+                ->andWhere('cm.destinataire = :email OR cm.email = :email OR cm.destinataire = :allMecenes')
                 ->andWhere('cm.masqueePour IS NULL OR cm.masqueePour NOT LIKE :emailPattern')
                 ->setParameter('email', $email)
+                ->setParameter('allMecenes', 'ALL_MECENES')
                 ->setParameter('emailPattern', '%' . $email . '%')
                 ->orderBy('cm.createdAt', 'DESC')
                 ->getQuery()
@@ -56,7 +61,26 @@ class MessageController extends AbstractController
                 
                 // Déterminer le rôle de l'interlocuteur
                 $otherEmail = ($msg->getEmail() === $email) ? $msg->getDestinataire() : $msg->getEmail();
-                $msg->otherUserRole = $this->getUserRole($otherEmail);
+                
+                // Récupérer les infos de l'utilisateur
+                $otherUser = $this->em->getRepository(\App\Entity\Utilisateur::class)->findOneBy(['email' => $otherEmail]);
+                
+                if ($otherUser) {
+                    $roles = $otherUser->getRoles();
+                    if (in_array('ROLE_ADMIN', $roles) || in_array('admin', $roles)) {
+                        $msg->otherUserRole = 'Admin';
+                        $msg->otherUserName = 'Admin';
+                    } else {
+                        $msg->otherUserName = trim(($otherUser->getPrenom() ?? '') . ' ' . ($otherUser->getNom() ?? '')) ?: $otherUser->getEmail();
+                        
+                        if (in_array('ROLE_MECENE', $roles)) $msg->otherUserRole = 'Mécène';
+                        elseif (in_array('ROLE_BENEVOLE', $roles)) $msg->otherUserRole = 'Bénévole';
+                        else $msg->otherUserRole = 'Utilisateur';
+                    }
+                } else {
+                    $msg->otherUserRole = 'Externe';
+                    $msg->otherUserName = $otherEmail;
+                }
             }
         }
 
@@ -84,6 +108,7 @@ class MessageController extends AbstractController
     private function getUserRole(?string $email): string
     {
         if (!$email) return 'Inconnu';
+        if ($email === 'ROLE_ADMIN') return 'Admin';
         
         $user = $this->em->getRepository(\App\Entity\Utilisateur::class)
             ->findOneBy(['email' => $email]);
@@ -117,7 +142,10 @@ class MessageController extends AbstractController
     public function sent(): Response
     {
         $user = $this->getUser();
-        $email = $user?->getEmail();
+        if (!$user instanceof \App\Entity\Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
+        $email = $user->getEmail();
 
         $messages = [];
         if ($email) {
@@ -159,26 +187,40 @@ class MessageController extends AbstractController
         }
 
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\Utilisateur) {
+            return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 403);
+        }
         $nom = trim(($user->getPrenom() ?? '') . ' ' . ($user->getNom() ?? '')) ?: $user->getEmail();
         $email = $user->getEmail();
 
-        // Récupérer l'email d'un admin
-        $adminUser = $this->em->getRepository(\App\Entity\Utilisateur::class)
+        // Récupérer les emails de tous les admins
+        $admins = $this->em->getRepository(\App\Entity\Utilisateur::class)
             ->createQueryBuilder('u')
             ->join('u.role', 'r')
-            ->where('r.nom = :role')
-            ->setParameter('role', 'admin')
-            ->setMaxResults(1)
+            ->where('r.nom IN (:roles)')
+            ->setParameter('roles', ['ROLE_ADMIN', 'admin'])
             ->getQuery()
-            ->getOneOrNullResult();
-
-        $adminEmail = $adminUser ? $adminUser->getEmail() : 'contact@groloto.com';
+            ->getResult();
+            
+        $adminEmails = [];
+        foreach ($admins as $admin) {
+            if ($admin->getEmail()) {
+                $adminEmails[] = $admin->getEmail();
+            }
+        }
+        
+        if (empty($adminEmails)) {
+            $adminEmails = ['contact@groloto.com'];
+        }
+        
+        // Utiliser ROLE_ADMIN pour le champ destinataire en BDD
+        $destinataireDb = 'ROLE_ADMIN';
 
         // Créer un nouveau message racine (nouvelle conversation)
         $cm = new ContactMessage();
         $cm->setNom($nom)
             ->setEmail($email)
-            ->setDestinataire($adminEmail)
+            ->setDestinataire($destinataireDb)
             ->setMessage($messageText);
 
         $this->em->persist($cm);
@@ -186,14 +228,6 @@ class MessageController extends AbstractController
 
         // Créer une notification pour tous les admins
         try {
-            $admins = $this->em->getRepository(\App\Entity\Utilisateur::class)
-                ->createQueryBuilder('u')
-                ->join('u.role', 'r')
-                ->where('r.nom IN (:roles)')
-                ->setParameter('roles', ['ROLE_ADMIN', 'admin'])
-                ->getQuery()
-                ->getResult();
-
             foreach ($admins as $adm) {
                 $notification = new \App\Entity\Notification();
                 $notification->setDestinataire($adm)
@@ -211,7 +245,7 @@ class MessageController extends AbstractController
         try {
             $emailObj = (new Email())
                 ->from($email)
-                ->to($adminEmail)
+                ->to(...$adminEmails)
                 ->subject($subject ?: 'Message depuis la messagerie')
                 ->html(nl2br(htmlspecialchars($messageText)));
 
@@ -230,6 +264,13 @@ class MessageController extends AbstractController
         
         // sécurité : n'autoriser que le propriétaire (email)
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\Utilisateur) {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 403);
+            }
+            throw $this->createAccessDeniedException();
+        }
+
         if ($user->getEmail() !== $message->getEmail() && $user->getEmail() !== $message->getDestinataire()) {
             if ($isAjax) {
                 return $this->json(['success' => false, 'error' => 'Action non autorisée'], 403);
@@ -257,6 +298,10 @@ class MessageController extends AbstractController
     public function cloturer(ContactMessage $message, Request $request): JsonResponse
     {
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\Utilisateur) {
+            return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 403);
+        }
+
         if ($user->getEmail() !== $message->getEmail() && $user->getEmail() !== $message->getDestinataire()) {
             return $this->json(['success' => false, 'error' => 'Action non autorisée'], 403);
         }
@@ -268,11 +313,17 @@ class MessageController extends AbstractController
     }
 
     #[Route('/{id}/repondre', name: 'mecene_message_reply', methods: ['POST'])]
-    public function reply(Request $request, ContactMessage $message, MailerInterface $mailer): JsonResponse
+    public function reply(Request $request, ContactMessage $message, MailerInterface $mailer): Response
     {
         $isAjax = $request->isXmlHttpRequest();
         
         $currentUser = $this->getUser();
+        if (!$currentUser instanceof \App\Entity\Utilisateur) {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 403);
+            }
+            throw $this->createAccessDeniedException();
+        }
         $currentEmail = $currentUser->getEmail();
 
         // Vérifier si la conversation est masquée par l'autre utilisateur
@@ -303,20 +354,31 @@ class MessageController extends AbstractController
             return $this->redirectToRoute('mecene_messages');
         }
 
-        $user = $this->getUser();
+        $user = $currentUser;
         $nom = trim(($user->getPrenom() ?? '') . ' ' . ($user->getNom() ?? '')) ?: $user->getEmail();
         
-        // Récupérer l'email d'un admin
-        $adminUser = $this->em->getRepository(\App\Entity\Utilisateur::class)
+        // Récupérer les emails de tous les admins
+        $admins = $this->em->getRepository(\App\Entity\Utilisateur::class)
             ->createQueryBuilder('u')
             ->join('u.role', 'r')
             ->where('r.nom IN (:roles)')
             ->setParameter('roles', ['ROLE_ADMIN', 'admin'])
-            ->setMaxResults(1)
             ->getQuery()
-            ->getOneOrNullResult();
-
-        $adminEmail = $adminUser ? $adminUser->getEmail() : 'contact@groloto.com';
+            ->getResult();
+            
+        $adminEmails = [];
+        foreach ($admins as $admin) {
+            if ($admin->getEmail()) {
+                $adminEmails[] = $admin->getEmail();
+            }
+        }
+        
+        if (empty($adminEmails)) {
+            $adminEmails = ['contact@groloto.com'];
+        }
+        
+        // Utiliser ROLE_ADMIN pour le champ destinataire en BDD
+        $destinataireDb = 'ROLE_ADMIN';
 
         // Extraire le sujet du message original
         $subject = 'Re: Votre message';
@@ -330,7 +392,7 @@ class MessageController extends AbstractController
         $newMessage = new ContactMessage();
         $newMessage->setNom($nom)
             ->setEmail($user->getEmail())
-            ->setDestinataire($adminEmail)
+            ->setDestinataire($destinataireDb)
             ->setMessage($reponse)
             ->setParentId($rootParentId); // Lien vers le message racine
 
@@ -339,14 +401,6 @@ class MessageController extends AbstractController
 
         // Créer une notification pour tous les admins
         try {
-            $admins = $this->em->getRepository(\App\Entity\Utilisateur::class)
-                ->createQueryBuilder('u')
-                ->join('u.role', 'r')
-                ->where('r.nom IN (:roles)')
-                ->setParameter('roles', ['ROLE_ADMIN', 'admin'])
-                ->getQuery()
-                ->getResult();
-
             foreach ($admins as $adm) {
                 $notification = new \App\Entity\Notification();
                 $notification->setDestinataire($adm)
@@ -364,7 +418,7 @@ class MessageController extends AbstractController
         try {
             $email = (new Email())
                 ->from($user->getEmail())
-                ->to($adminEmail)
+                ->to(...$adminEmails)
                 ->subject($subject)
                 ->html("
                     <h3>Message original :</h3>
@@ -400,6 +454,9 @@ class MessageController extends AbstractController
         }
 
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\Utilisateur) {
+            return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 403);
+        }
         
         // Vérifier que l'utilisateur est bien l'auteur du message
         if ($message->getEmail() !== $user->getEmail()) {
@@ -425,7 +482,7 @@ class MessageController extends AbstractController
         return $this->json(['success' => true, 'message' => 'Message modifié']);
     }
 
-    #[Route('/{id}/delete', name: 'mecene_message_delete', methods: ['POST'])]
+    #[Route('/{id}/delete-message', name: 'mecene_message_delete_message', methods: ['POST'])]
     public function deleteMessage(Request $request, ContactMessage $message): JsonResponse
     {
         if (!$request->isXmlHttpRequest()) {
@@ -433,6 +490,9 @@ class MessageController extends AbstractController
         }
 
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\Utilisateur) {
+            return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 403);
+        }
         
         // Vérifier que l'utilisateur est bien l'auteur du message
         if ($message->getEmail() !== $user->getEmail()) {

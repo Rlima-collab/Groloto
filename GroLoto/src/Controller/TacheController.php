@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Tache;
+use App\Entity\PlageHoraire;
 use App\Entity\AffectationTache;
 use App\Form\TacheType;
 use App\Form\TacheAffectationType;
@@ -107,6 +108,21 @@ class TacheController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $formData = $request->request->all()['tache'] ?? [];
+            
+            // Créer une plage horaire avec le jour et les horaires spécifiés
+            if (isset($formData['jour_plage']) && !empty($formData['jour_plage'])) {
+                $plage = new PlageHoraire();
+                $plage->setJour(new \DateTime($formData['jour_plage']));
+                $plage->setHeureDebut(new \DateTime($formData['heure_debut_plage']));
+                $plage->setHeureFin(new \DateTime($formData['heure_fin_plage']));
+                $plage->setTache($tache);
+                $tache->addPlageHoraire($plage);
+            }
+            
+            // Synchroniser debut/fin avec les plages horaires
+            $tache = $this->syncTaskDates($tache);
+            
             $entityManager->persist($tache);
             
             // Gestion des bénévoles sélectionnés
@@ -190,6 +206,9 @@ class TacheController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Synchroniser debut/fin avec les plages horaires
+            $tache = $this->syncTaskDates($tache);
+            
             $entityManager->flush();
             
             $this->addFlash('success', 'La tâche a été mise à jour avec succès !');
@@ -228,6 +247,43 @@ class TacheController extends AbstractController
         }
 
         return $this->redirectToRoute('tache_index');
+    }
+
+    #[Route('/{id}/duplicate', name: 'tache_duplicate')]
+    public function duplicate(int $id, TacheRepository $tacheRepository, EntityManagerInterface $entityManager): Response
+    {
+        $tacheSource = $tacheRepository->find($id);
+
+        if (!$tacheSource) {
+            $this->addFlash('error', 'Tâche source non trouvée.');
+            return $this->redirectToRoute('tache_index');
+        }
+
+        $tache = new Tache();
+        $tache->setTitre($tacheSource->getTitre());
+        $tache->setWeekend($tacheSource->getWeekend());
+        $tache->setMaxPersonnes($tacheSource->getMaxPersonnes());
+        $tache->setRemarque($tacheSource->getRemarque());
+
+        // Cloner les plages horaires
+        foreach ($tacheSource->getPlagesHoraires() as $plageSrc) {
+            $plage = new PlageHoraire();
+            $plage->setJour($plageSrc->getJour());
+            $plage->setHeureDebut($plageSrc->getHeureDebut());
+            $plage->setHeureFin($plageSrc->getHeureFin());
+            $plage->setMaxPersonnesPlage($plageSrc->getMaxPersonnesPlage());
+            $plage->setTache($tache);
+            $tache->addPlageHoraire($plage);
+        }
+
+        // Synchroniser debut/fin
+        $tache = $this->syncTaskDates($tache);
+
+        $entityManager->persist($tache);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'La tâche a été dupliquée avec succès!');
+        return $this->redirectToRoute('tache_edit', ['id' => $tache->getId()]);
     }
 
     #[Route('/{id}/affectation', name: 'tache_affectation')]
@@ -419,5 +475,6 @@ class TacheController extends AbstractController
             'benevolesData' => $benevolesData,
             'search' => $search
         ]);
+
     }
 }

@@ -24,6 +24,9 @@ class Mecene
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
     private ?string $siret = null;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $adresse_postale = null;
+
     public function getId(): ?int { return $this->id; }
 
     public function getUtilisateur(): ?Utilisateur { return $this->utilisateur; }
@@ -37,4 +40,8 @@ class Mecene
     public function getSiret(): string { return $this->siret; }
     public function setSiret(string $siret): self 
     { $this->siret = $siret; return $this; }
+
+    public function getAdressePostale(): ?string { return $this->adresse_postale; }
+    public function setAdressePostale(?string $adresse_postale): self 
+    { $this->adresse_postale = $adresse_postale; return $this; }
 }

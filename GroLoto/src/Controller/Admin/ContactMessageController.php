@@ -26,6 +26,9 @@ class ContactMessageController extends AbstractController
     public function index(): Response
     {
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
         $adminEmail = $user->getEmail();
 
         // Récupérer les messages racines (parent_id IS NULL) où l'admin est soit destinataire, soit expéditeur
@@ -33,9 +36,10 @@ class ContactMessageController extends AbstractController
         $messages = $this->em->getRepository(ContactMessage::class)
             ->createQueryBuilder('cm')
             ->where('cm.parent_id IS NULL')
-            ->andWhere('cm.destinataire = :email OR cm.email = :email')
+            ->andWhere('cm.destinataire = :email OR cm.email = :email OR cm.destinataire = :roleAdmin')
             ->andWhere('cm.masqueePour IS NULL OR cm.masqueePour NOT LIKE :emailPattern')
             ->setParameter('email', $adminEmail)
+            ->setParameter('roleAdmin', 'ROLE_ADMIN')
             ->setParameter('emailPattern', '%' . $adminEmail . '%')
             ->orderBy('cm.createdAt', 'DESC')
             ->getQuery()
@@ -57,12 +61,31 @@ class ContactMessageController extends AbstractController
             
             // Déterminer le rôle de l'interlocuteur
             $otherEmail = ($msg->getEmail() === $adminEmail) ? $msg->getDestinataire() : $msg->getEmail();
+            $msg->otherUserEmail = $otherEmail;
             $msg->otherUserRole = $this->getUserRole($otherEmail);
             $msg->otherUserProfileImage = $this->getUserProfileImage($otherEmail);
+            
+            // Déterminer le nom de l'interlocuteur pour l'affichage
+            if ($otherEmail === 'ALL_BENEVOLES') {
+                $msg->otherUserName = 'Tous les bénévoles';
+            } elseif ($otherEmail === 'ALL_MECENES') {
+                $msg->otherUserName = 'Tous les mécènes';
+            } else {
+                $otherUser = $this->em->getRepository(\App\Entity\Utilisateur::class)->findOneBy(['email' => $otherEmail]);
+                if ($otherUser) {
+                    $msg->otherUserName = trim(($otherUser->getPrenom() ?? '') . ' ' . ($otherUser->getNom() ?? ''));
+                } else {
+                    $msg->otherUserName = $otherEmail;
+                }
+            }
         }
+
+        // Compter les bénévoles actifs pour l'interface
+        $benevoleCount = $this->em->getRepository(\App\Entity\Benevole::class)->countActive();
 
         return $this->render('admin/message/messages.html.twig', [
             'messages' => $messages,
+            'benevoleCount' => $benevoleCount,
         ]);
     }
 
@@ -72,6 +95,7 @@ class ContactMessageController extends AbstractController
     private function getUserRole(?string $email): string
     {
         if (!$email) return 'Inconnu';
+        if ($email === 'ROLE_ADMIN') return 'Admin';
         
         $user = $this->em->getRepository(\App\Entity\Utilisateur::class)
             ->findOneBy(['email' => $email]);
@@ -119,6 +143,9 @@ class ContactMessageController extends AbstractController
     public function sent(): Response
     {
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
         $adminEmail = $user->getEmail();
 
         // Messages envoyés par l'admin (email = admin email, destinataire rempli)
@@ -140,77 +167,221 @@ class ContactMessageController extends AbstractController
             return $this->json(['success' => false, 'error' => 'Requête non autorisée'], 403);
         }
 
-        $to = trim($request->request->get('to'));
-        $subject = trim($request->request->get('subject'));
-        $message = trim($request->request->get('message'));
-
-        if (!$to || !$message) {
-            return $this->json(['success' => false, 'error' => 'Destinataire et message requis'], 400);
-        }
-
-        // Vérifier que le destinataire existe dans la base de données
-        $destinataire = $this->em->getRepository(\App\Entity\Utilisateur::class)
-            ->findOneBy(['email' => $to]);
-        
-        if (!$destinataire) {
-            return $this->json(['success' => false, 'error' => 'Le destinataire n\'est pas enregistré sur le site'], 400);
-        }
-
-        // Enregistrer le message dans la base
-        $user = $this->getUser();
-        $fullMessage = $subject ? "[{$subject}] {$message}" : $message;
-        
-        $cm = new ContactMessage();
-        $cm->setNom($user->getPrenom() . ' ' . $user->getNom())
-            ->setEmail($user->getEmail())
-            ->setDestinataire($to)
-            ->setMessage($fullMessage);
-        
-        $this->em->persist($cm);
-        $this->em->flush();
-
         try {
-            $email = (new Email())
-                ->from('contact@groloto.com')
-                ->to($to)
-                ->subject($subject ?: 'Message depuis Groloto')
-                ->html(nl2br(htmlspecialchars($message)));
+            $to = trim($request->request->get('to'));
+            $subject = trim($request->request->get('subject'));
+            $message = trim($request->request->get('message'));
 
-            $mailer->send($email);
-
-            // créer une notification pour l'utilisateur destinataire si trouvé
-            try {
-                $userDest = $this->em->getRepository(\App\Entity\Utilisateur::class)->findOneByEmail($to);
-                if ($userDest) {
-                    $roleName = strtolower($userDest->getRole()?->getNom() ?? '');
-                    $lien = '/';
-                    if ($roleName === 'benevole') {
-                        $lien = '/benevole/messages?conv=' . $cm->getId();
-                    } elseif ($roleName === 'mecene') {
-                        $lien = '/mecene/messages?conv=' . $cm->getId();
-                    }
-                    
-                    $notif = new Notification();
-                    $notif->setDestinataire($userDest)
-                        ->setType('contact')
-                        ->setMessage("Vous avez reçu un message de l'admin")
-                        ->setLien($lien)
-                        ->setLue(false)
-                        ->setCreatedAt(new \DateTime());
-                    $this->em->persist($notif);
-                    $this->em->flush();
-                }
-            } catch (\Exception $e) {
-                // ignore notification failures
+            if (!$to || !$message) {
+                return $this->json(['success' => false, 'error' => 'Destinataire et message requis'], 400);
             }
 
-            return $this->json([
-                'success' => true, 
-                'message' => 'Message envoyé !',
-                'conversationId' => $cm->getId()
-            ]);
-        } catch (\Exception $e) {
-            return $this->json(['success' => false, 'error' => 'Échec d\'envoi'], 500);
+            $user = $this->getUser();
+            if (!$user instanceof \App\Entity\Utilisateur) {
+                return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 500);
+            }
+
+            $fullMessage = $subject ? "[{$subject}] {$message}" : $message;
+            
+            // Nom de l'expéditeur (Admin)
+            $nomExpediteur = trim(($user->getPrenom() ?? '') . ' ' . ($user->getNom() ?? ''));
+            if (empty($nomExpediteur)) {
+                $nomExpediteur = $user->getEmail();
+            }
+
+            // Supporter l'envoi massif à des groupes spéciaux : ALL_BENEVOLES / ALL_MECENES
+            $lowerTo = mb_strtolower($to);
+            if (in_array($lowerTo, ['all_benevoles', 'all_bénévoles', 'tous_les_benevoles', 'tous', 'tous_les_bénévoles'])) {
+                // Envoyer à tous les bénévoles actifs
+                $benevoles = $this->em->getRepository(\App\Entity\Benevole::class)->findActiveWithUser();
+
+                if (empty($benevoles)) {
+                    return $this->json(['success' => false, 'error' => 'Aucun bénévole actif trouvé'], 400);
+                }
+
+                // Créer UN SEUL message de groupe pour l'admin
+                $cm = new ContactMessage();
+                $cm->setNom($nomExpediteur)
+                    ->setEmail($user->getEmail())
+                    ->setDestinataire('ALL_BENEVOLES') // Marqueur spécial
+                    ->setMessage($fullMessage);
+                $this->em->persist($cm);
+
+                $sent = 0;
+                foreach ($benevoles as $benevole) {
+                    $destUser = $benevole->getUtilisateur();
+                    if (!$destUser) continue;
+
+                    try {
+                        $destEmail = $destUser->getEmail();
+                        
+                        // Envoi mail
+                        $emailObj = (new Email())
+                            ->from('contact@groloto.com')
+                            ->to($destEmail)
+                            ->subject($subject ?: 'Message depuis Groloto')
+                            ->html(nl2br(htmlspecialchars($message)));
+                        $mailer->send($emailObj);
+
+                        // Notification
+                        try {
+                            $notif = new Notification();
+                            $notif->setDestinataire($destUser)
+                                ->setType('contact')
+                                ->setMessage("Vous avez reçu un message de l'admin")
+                                ->setLien('/benevole/messages') // Redirige vers la messagerie où ils verront le message de groupe
+                                ->setLue(false)
+                                ->setCreatedAt(new \DateTime());
+                            $this->em->persist($notif);
+                        } catch (\Exception $e) {
+                            // ignore
+                        }
+
+                        $sent++;
+                    } catch (\Exception $e) {
+                        // ignorer les erreurs individuelles
+                        continue;
+                    }
+                }
+
+                $this->em->flush();
+
+                return $this->json([
+                    'success' => true, 
+                    'message' => sprintf('%d messages envoyés aux bénévoles', $sent), 
+                    'sentCount' => $sent,
+                    'conversationId' => $cm->getId() // Retourner l'ID de la conversation de groupe
+                ]);
+            }
+
+            if (in_array($lowerTo, ['all_mecenes', 'tous_les_mecenes', 'tous_mecenes'])) {
+                // Envoyer à tous les mécènes
+                $mecenes = $this->em->getRepository(\App\Entity\Utilisateur::class)
+                    ->createQueryBuilder('u')
+                    ->join('u.role', 'r')
+                    ->where('r.nom = :role')
+                    ->setParameter('role', 'mecene')
+                    ->getQuery()
+                    ->getResult();
+
+                if (empty($mecenes)) {
+                    return $this->json(['success' => false, 'error' => 'Aucun mécène trouvé'], 400);
+                }
+
+                // Créer UN SEUL message de groupe pour l'admin
+                $cm = new ContactMessage();
+                $cm->setNom($nomExpediteur)
+                    ->setEmail($user->getEmail())
+                    ->setDestinataire('ALL_MECENES') // Marqueur spécial
+                    ->setMessage($fullMessage);
+                $this->em->persist($cm);
+
+                $sent = 0;
+                foreach ($mecenes as $destUser) {
+                    try {
+                        $destEmail = $destUser->getEmail();
+
+                        // Envoi mail
+                        $emailObj = (new Email())
+                            ->from('contact@groloto.com')
+                            ->to($destEmail)
+                            ->subject($subject ?: 'Message depuis Groloto')
+                            ->html(nl2br(htmlspecialchars($message)));
+                        $mailer->send($emailObj);
+
+                        // Notification
+                        try {
+                            $notif = new Notification();
+                            $notif->setDestinataire($destUser)
+                                ->setType('contact')
+                                ->setMessage("Vous avez reçu un message de l'admin")
+                                ->setLien('/mecene/messages')
+                                ->setLue(false)
+                                ->setCreatedAt(new \DateTime());
+                            $this->em->persist($notif);
+                        } catch (\Exception $e) {
+                            // ignore
+                        }
+
+                        $sent++;
+                    } catch (\Exception $e) {
+                        continue;
+                    }
+                }
+
+                $this->em->flush();
+
+                return $this->json([
+                    'success' => true, 
+                    'message' => sprintf('%d messages envoyés aux mécènes', $sent), 
+                    'sentCount' => $sent,
+                    'conversationId' => $cm->getId() // Retourner l'ID de la conversation de groupe
+                ]);
+            }
+
+            // Vérifier que le destinataire existe dans la base de données (flux normal)
+            $destinataire = $this->em->getRepository(\App\Entity\Utilisateur::class)
+                ->findOneBy(['email' => $to]);
+            
+            if (!$destinataire) {
+                return $this->json(['success' => false, 'error' => 'Le destinataire n\'est pas enregistré sur le site'], 400);
+            }
+
+            // Enregistrer le message dans la base et envoyer un email unique
+            $cm = new ContactMessage();
+            $cm->setNom($nomExpediteur)
+                ->setEmail($user->getEmail())
+                ->setDestinataire($to)
+                ->setMessage($fullMessage);
+            
+            $this->em->persist($cm);
+            $this->em->flush();
+
+            try {
+                $email = (new Email())
+                    ->from('contact@groloto.com')
+                    ->to($to)
+                    ->subject($subject ?: 'Message depuis Groloto')
+                    ->html(nl2br(htmlspecialchars($message)));
+
+                $mailer->send($email);
+
+                // créer une notification pour l'utilisateur destinataire si trouvé
+                try {
+                    $userDest = $this->em->getRepository(\App\Entity\Utilisateur::class)->findOneByEmail($to);
+                    if ($userDest) {
+                        $roleName = strtolower($userDest->getRole()?->getNom() ?? '');
+                        $lien = '/';
+                        if ($roleName === 'benevole') {
+                            $lien = '/benevole/messages?conv=' . $cm->getId();
+                        } elseif ($roleName === 'mecene') {
+                            $lien = '/mecene/messages?conv=' . $cm->getId();
+                        }
+                        
+                        $notif = new Notification();
+                        $notif->setDestinataire($userDest)
+                            ->setType('contact')
+                            ->setMessage("Vous avez reçu un message de l'admin")
+                            ->setLien($lien)
+                            ->setLue(false)
+                            ->setCreatedAt(new \DateTime());
+                        $this->em->persist($notif);
+                        $this->em->flush();
+                    }
+                } catch (\Exception $e) {
+                    // ignore notification failures
+                }
+
+                return $this->json([
+                    'success' => true, 
+                    'message' => 'Message envoyé !',
+                    'conversationId' => $cm->getId()
+                ]);
+            } catch (\Exception $e) {
+                return $this->json(['success' => false, 'error' => 'Échec d\'envoi'], 500);
+            }
+        } catch (\Throwable $e) {
+            return $this->json(['success' => false, 'error' => 'Erreur serveur: ' . $e->getMessage()], 500);
         }
     }
 
@@ -225,6 +396,12 @@ class ContactMessageController extends AbstractController
         $isAjax = $request->isXmlHttpRequest();
         
         $currentUser = $this->getUser();
+        if (!$currentUser instanceof \App\Entity\Utilisateur) {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 403);
+            }
+            throw $this->createAccessDeniedException();
+        }
         $currentEmail = $currentUser->getEmail();
 
         // Vérifier si la conversation est masquée par l'autre utilisateur
@@ -243,6 +420,21 @@ class ContactMessageController extends AbstractController
                 return $this->json(['success' => false, 'error' => 'Cette conversation est clôturée.'], 403);
             }
             $this->addFlash('error', 'Cette conversation est clôturée.');
+            return $this->redirectToRoute('admin_messages');
+        }
+
+        // Vérifier si un autre admin a déjà répondu
+        if ($message->getReponduPar() !== null && $message->getReponduPar() !== $currentUser) {
+            $repondeur = $message->getReponduPar();
+            $nomRepondeur = trim(($repondeur->getPrenom() ?? '') . ' ' . ($repondeur->getNom() ?? ''));
+            if (empty($nomRepondeur)) {
+                $nomRepondeur = $repondeur->getEmail();
+            }
+            
+            if ($isAjax) {
+                return $this->json(['success' => false, 'error' => "Ce message est pris en charge par {$nomRepondeur}."], 409);
+            }
+            $this->addFlash('error', "Ce message est pris en charge par {$nomRepondeur}.");
             return $this->redirectToRoute('admin_messages');
         }
 
@@ -304,7 +496,7 @@ class ContactMessageController extends AbstractController
         $mailer->send($email);
         // 4. Créer un message destiné à l'utilisateur pour qu'il apparaisse dans sa boîte de réception
         try {
-            $admin = $this->getUser();
+            $admin = $currentUser;
             $replyFull = $reponse; // Retirer le préfixe [Reponse admin]
             
             // Déterminer le parent_id : si le message actuel a déjà un parent, on utilise ce parent, sinon on utilise l'ID du message actuel
@@ -362,6 +554,12 @@ class ContactMessageController extends AbstractController
         $isAjax = $request->isXmlHttpRequest();
         
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\Utilisateur) {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 403);
+            }
+            throw $this->createAccessDeniedException();
+        }
         
         // Clôturer la conversation avant de la masquer
         $message->setCloturee(true);
@@ -394,7 +592,7 @@ class ContactMessageController extends AbstractController
         
         $qb = $this->em->getRepository(\App\Entity\Utilisateur::class)
             ->createQueryBuilder('u')
-            ->select('u.email', 'u.prenom', 'u.nom');
+            ->select('u.email', 'u.prenom', 'u.nom', 'u.roles');
         
         if ($query) {
             $qb->where('u.email LIKE :query')
@@ -404,8 +602,23 @@ class ContactMessageController extends AbstractController
         $users = $qb->setMaxResults(10)
                    ->getQuery()
                    ->getResult();
+                   
+        // Formater les données pour le JS
+        $formattedUsers = array_map(function($user) {
+            $role = 'Utilisateur';
+            if (in_array('ROLE_ADMIN', $user['roles'])) $role = 'ROLE_ADMIN';
+            elseif (in_array('ROLE_MECENE', $user['roles'])) $role = 'ROLE_MECENE';
+            elseif (in_array('ROLE_BENEVOLE', $user['roles'])) $role = 'ROLE_BENEVOLE';
+            
+            return [
+                'email' => $user['email'],
+                'prenom' => $user['prenom'],
+                'nom' => $user['nom'],
+                'role' => $role
+            ];
+        }, $users);
         
-        return $this->json($users);
+        return $this->json($formattedUsers);
     }
 
     #[Route('/{id}/edit', name: 'admin_message_edit', methods: ['POST'])]
@@ -416,6 +629,10 @@ class ContactMessageController extends AbstractController
     ): JsonResponse {
         // Vérifier que c'est bien le message de l'admin
         $currentUser = $this->getUser();
+        if (!$currentUser instanceof \App\Entity\Utilisateur) {
+            return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 403);
+        }
+
         if ($message->getEmail() !== $currentUser->getEmail()) {
             return $this->json(['success' => false, 'error' => 'Vous ne pouvez modifier que vos propres messages'], 403);
         }
@@ -458,6 +675,10 @@ class ContactMessageController extends AbstractController
     ): JsonResponse {
         // Vérifier que c'est bien le message de l'admin
         $currentUser = $this->getUser();
+        if (!$currentUser instanceof \App\Entity\Utilisateur) {
+            return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 403);
+        }
+
         if ($message->getEmail() !== $currentUser->getEmail()) {
             return $this->json(['success' => false, 'error' => 'Vous ne pouvez supprimer que vos propres messages'], 403);
         }

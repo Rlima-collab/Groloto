@@ -145,28 +145,43 @@ class BenevoleController extends AbstractController
             return $this->redirectToRoute('benevoles');
         }
 
-        // Récupérer les tâches du bénévole
-        $tachesBrutes = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
-        if (empty($tachesBrutes)) {
-            $tachesBrutes = $tacheRepository->findTachesForBenevole($benevole->getId());
+        // Récupérer tous les weekends où le bénévole a des tâches
+        $weekends = $tacheRepository->findWeekendsForBenevole($benevole->getId());
+        
+        // Calculer les statistiques
+        $totalWeekends = count($weekends);
+        $tachesFutures = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
+        $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
+        
+        return $this->render('benevoles/mon_planning.html.twig', [
+            'benevole' => $benevole,
+            'weekends' => $weekends,
+            'total_weekends' => $totalWeekends,
+            'total_taches_futures' => count($tachesFutures),
+            'total_taches_realisees' => count($tachesRealisees),
+        ]);
+    }
+
+    #[Route('/benevole/mon-planning/weekend/{id}', name: 'benevole_planning_weekend')]
+    public function planningWeekend(
+        int $id,
+        BenevoleRepository $benevoleRepository,
+        TacheRepository $tacheRepository,
+        EntityManagerInterface $em
+    ): Response {
+        $user = $this->getUser();
+        $benevole = $benevoleRepository->findOneBy(['utilisateur' => $user]);
+
+        if (!$benevole) {
+            $this->addFlash('error', 'Vous devez être un bénévole pour accéder à cette page.');
+            return $this->redirectToRoute('benevoles');
         }
 
-        $taches = [];
-        foreach ($tachesBrutes as $tache) {
-            $taches[] = [
-                'id' => $tache->getId(),
-                'title' => $tache->getTitre(),
-                'start' => $tache->getDebut()->format('Y-m-d\TH:i:s'),
-                'end' => $tache->getFin()->format('Y-m-d\TH:i:s'),
-                'backgroundColor' => '#1a3c5a',
-                'borderColor' => '#2b5d8a',
-                'extendedProps' => [
-                    'weekend' => $tache->getWeekend()?->getNom(),
-                    'poste_requis' => $tache->getPosteRequis(),
-                    'max_personnes' => $tache->getMaxPersonnes(),
-                    'remarques' => $tache->getRemarque()
-                ]
-            ];
+        // Récupérer le weekend
+        $weekend = $em->getRepository(\App\Entity\Weekend::class)->find($id);
+        if (!$weekend) {
+            $this->addFlash('error', 'Weekend non trouvé.');
+            return $this->redirectToRoute('benevole_mon_planning');
         }
 
         // Tâches à venir avec les infos d'affectation et de demande d'annulation
@@ -191,34 +206,48 @@ class BenevoleController extends AbstractController
                 'affectation_id' => $affectation ? $affectation->getId() : null,
                 'demande_annulation_en_attente' => $demandeEnAttente !== null,
             ];
+
         }
 
-        // Tâches réalisées
-        $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
-        $tachesRealiseesData = [];
-        foreach ($tachesRealisees as $tr) {
-            $tachesRealiseesData[] = [
-                'id' => $tr->getId(),
-                'titre' => $tr->getTitre(),
-                'debut' => $tr->getDebut(),
-                'fin' => $tr->getFin(),
-                'poste_requis' => $tr->getPosteRequis(),
-            ];
+        // Récupérer le weekend
+        $weekend = $em->getRepository(\App\Entity\Weekend::class)->find($id);
+        if (!$weekend) {
+            $this->addFlash('error', 'Weekend non trouvé.');
+            return $this->redirectToRoute('benevole_mon_planning');
         }
 
-        // Calcul des statistiques
-        $totalTaches = count($tachesBrutes);
-        $totalFutures = count($tachesProchesData);
-        $totalRealisees = count($tachesRealiseesData);
+        // Récupérer les tâches du bénévole pour ce weekend
+        $taches = $tacheRepository->findTachesForBenevoleByWeekend($benevole->getId(), $id);
+        
+        if (empty($taches)) {
+            $this->addFlash('warning', 'Vous n\'avez pas de tâches pour ce weekend.');
+            return $this->redirectToRoute('benevole_mon_planning');
+        }
 
-        return $this->render('benevoles/mon_planning.html.twig', [
+        // Générer le HTML pour le PDF
+        $html = $this->renderView('benevoles/planning_weekend_pdf.html.twig', [
             'benevole' => $benevole,
-            'taches' => json_encode($taches),
-            'taches_proches' => $tachesProchesData,
-            'taches_realisees' => $tachesRealiseesData,
-            'total_taches' => $totalTaches,
-            'total_futures' => $totalFutures,
-            'total_realisees' => $totalRealisees
+            'weekend' => $weekend,
+            'taches' => $taches,
+        ]);
+
+        // Créer le PDF avec Dompdf
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Générer le nom du fichier
+        $filename = sprintf(
+            'planning_%s_%s.pdf',
+            str_replace(' ', '_', $weekend->getNom()),
+            $weekend->getDateDebut()->format('Y-m-d')
+        );
+
+        // Retourner le PDF
+        return new Response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
 

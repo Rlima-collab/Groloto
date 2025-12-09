@@ -76,6 +76,11 @@ class MeceneController extends AbstractController
         LotRepository $lotRepository,
         WeekendRepository $weekendRepository
     ): Response {
+        // Bloquer l'accès aux mécènes
+        if ($this->isGranted('ROLE_MECENE') && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs et bénévoles.');
+        }
+        
         $utilisateur = $this->getUser();
         $mecene = $meceneRepository->findOneBy(['utilisateur' => $utilisateur]);
 

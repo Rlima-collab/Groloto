@@ -315,8 +315,8 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 <div class="chat-container">
 <div class="chat-sidebar">
 <div class="chat-sidebar-header">
-<h2>💬 Messagerie</h2>
-<button class="new-chat-btn" id="newChatBtn">✉️ Nouveau message</button>
+<h2>Messagerie</h2>
+<button class="new-chat-btn" id="newChatBtn">Nouveau message</button>
 <div class="search-box" style="margin-top: 15px;">
 <input type="text" id="searchConversations" placeholder="Rechercher une conversation..." style="width: 100%; padding: 10px 15px; border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; background: rgba(255,255,255,0.1); color: white; font-size: 14px; transition: all 0.3s;">
 </div>
@@ -345,15 +345,30 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 'isDeleted': reply.message starts with '[SUPPRIMÉ]'
 }]) %}
 {% endfor %}
-<div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %}" data-id="{{ msg.id }}" data-subject="{{ subject|e('html_attr') }}" data-conversation="{{ conversationArray|json_encode|e('html_attr') }}" data-sender="{{ msg.nom }}" data-email="{{ msg.email }}" data-message="{{ body|e('html_attr') }}" data-date="{{ msg.createdAt|date('d/m/Y à H:i') }}" data-closed="{{ msg.cloturee ? 'true' : 'false' }}" data-profile-image="{{ msg.otherUserProfileImage|default('') }}">
+<div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %}" 
+    data-id="{{ msg.id }}" 
+    data-subject="{{ subject|e('html_attr') }}" 
+    data-conversation="{{ conversationArray|json_encode|e('html_attr') }}" 
+    data-sender="{{ msg.nom }}" 
+    data-email="{{ msg.email }}" 
+    data-other-email="{{ msg.otherUserEmail|default('') }}"
+    data-repondu-par="{{ msg.reponduPar ? msg.reponduPar.email : '' }}"
+    data-repondu-par-nom="{{ msg.reponduPar ? (msg.reponduPar.prenom ~ ' ' ~ msg.reponduPar.nom)|trim : '' }}"
+    data-message="{{ body|e('html_attr') }}" 
+    data-date="{{ msg.createdAt|date('d/m/Y à H:i') }}" 
+    data-closed="{{ msg.cloturee ? 'true' : 'false' }}" 
+    data-profile-image="{{ msg.otherUserProfileImage|default('') }}">
 	<div class="conversation-item-content">
 		<div class="conversation-name">
 			{{ subject }}
 			{% if msg.cloturee %}
 			<span class="closed-badge">🔒 Clôturée</span>
 			{% endif %}
+            {% if msg.reponduPar and msg.reponduPar.email != app.user.email %}
+            <span class="closed-badge" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">👤 Pris par {{ msg.reponduPar.prenom }}</span>
+            {% endif %}
 		</div>
-		<div class="conversation-sender">{{ msg.nom }} <span style="font-size: 11px; color: #9ca3af;">({{ msg.otherUserRole|default('Utilisateur') }})</span></div>
+		<div class="conversation-sender">{{ msg.otherUserName|default(msg.nom) }} <span style="font-size: 11px; color: #9ca3af;">({{ msg.otherUserRole|default('Utilisateur') }})</span></div>
 		<div class="conversation-preview">{{ lastMessageBody|slice(0, 50) }}{% if lastMessageBody|length > 50 %}...{% endif %}</div>
 		<div class="conversation-time">{{ msg.lastMessageDate|default(msg.createdAt)|date('d/m H:i') }}</div>
 	</div>
@@ -409,10 +424,14 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 <!-- POPUP MODAL POUR DESTINATAIRE + SUJET -->
 <div class="modal-overlay" id="newMessageModal">
 	<div class="modal-content">
-		<div class="modal-header">✉️ Nouveau message Admin</div>
+		<div class="modal-header">Nouveau message Admin</div>
 		<div style="position: relative;">
-			<input type="email" id="modalRecipient" class="modal-input" placeholder="Email du destinataire" autocomplete="off">
+			<input type="text" id="modalRecipient" class="modal-input" placeholder="Email du destinataire (ou cliquez sur 'Tous les bénévoles')" autocomplete="off">
 			<div id="autocompleteList" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #d1d5db; border-top: none; max-height: 200px; overflow-y: auto; z-index: 1000; display: none;"></div>
+			<div style="display:flex; gap:15px; margin-top:15px; margin-bottom: 15px;">
+				<button type="button" id="modalAllBenevoles" class="modal-btn" style="background: linear-gradient(135deg,#10b981 0%,#059669 100%); color:white;">Tous les bénévoles</button>
+				<button type="button" id="modalAllMecenes" class="modal-btn" style="background: linear-gradient(135deg,#3b82f6 0%,#2563eb 100%); color:white;">Tous les mécènes</button>
+			</div>
 		</div>
 		<input type="text" id="modalSubject" class="modal-input" placeholder="Sujet de la conversation" autocomplete="off">
 		<div class="modal-actions">
@@ -498,6 +517,7 @@ let currentRecipientEmail = '';
 let currentRecipientName = ''; // Nom complet du destinataire
 let currentRecipientRole = ''; // Rôle du destinataire
 let currentRecipientProfileImage = ''; // Image de profil du destinataire
+let currentOtherEmail = ''; // Email de l'interlocuteur (pour l'alignement des messages)
 
 // Système de confirmation modal
 let confirmCallback = null;
@@ -543,8 +563,6 @@ const conversationsList = document.getElementById('conversationsList');
 const closedIndicator = document.getElementById('closedIndicator');
 const searchInput = document.getElementById('searchConversations');
 const backToListBtn = document.getElementById('backToListBtn');
-
-console.log('Elements trouves:', items.length, chatMessages, sendBtn);
 
 // Bouton retour pour mobile
 if (backToListBtn) {
@@ -741,6 +759,18 @@ newChatBtn.addEventListener('click', function() {
 	modalRecipient.focus();
 });
 
+// Gérer le bouton "Contacter les bénévoles"
+const contactBenevolesBtn = document.getElementById('contactBenevolesBtn');
+if (contactBenevolesBtn) {
+    contactBenevolesBtn.addEventListener('click', function() {
+        newMessageModal.classList.add('active');
+        modalRecipient.value = 'ALL_BENEVOLES';
+        modalSubject.value = '';
+        modalSubject.focus();
+        showToast('Destinataire : Tous les bénévoles', 'info');
+    });
+}
+
 // Autocomplétion pour le champ email
 const autocompleteList = document.getElementById('autocompleteList');
 let autocompleteTimeout;
@@ -849,57 +879,70 @@ modalCancel.addEventListener('click', () => {
 modalConfirm.addEventListener('click', async () => {
 	const recipient = modalRecipient.value.trim();
 	const subject = modalSubject.value.trim();
-	
+
 	if (!recipient) {
 		showToast('Veuillez saisir un destinataire', 'error');
 		modalRecipient.focus();
 		return;
 	}
-	
+
 	if (!subject) {
 		showToast('Veuillez saisir un sujet', 'error');
 		modalSubject.focus();
 		return;
 	}
-	
-	// Vérifier que l'email existe dans la base de données
+
+	// Gérer les destinataires de groupe spéciaux (ex: ALL_BENEVOLES, ALL_MECENES)
+	// Normaliser : minuscules, sans accents, espaces -> underscores
+	const normalized = recipient.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_');
+	const isAllBene = ['all_benevoles', 'tous_les_benevoles', 'tous_benevoles', 'tous'].includes(normalized);
+	const isAllMec = ['all_mecenes', 'tous_les_mecenes', 'tous_mecenes'].includes(normalized);
+
 	modalConfirm.disabled = true;
-	try {
-		const response = await fetch('{{ path('admin_message_emails_list') }}?q=' + encodeURIComponent(recipient));
-		const users = await response.json();
-		const exactMatch = users.find(u => u.email.toLowerCase() === recipient.toLowerCase());
-		
-		if (!exactMatch) {
-			showToast('L\'adresse email n\'est pas enregistrée dans l\'application', 'error');
-			modalRecipient.focus();
+
+	if (isAllBene || isAllMec) {
+		// Pas de vérification d'email nécessaire, on enverra au back-end en masse
+		currentRecipient = isAllBene ? 'ALL_BENEVOLES' : 'ALL_MECENES';
+		currentRecipientName = isAllBene ? 'Tous les bénévoles' : 'Tous les mécènes';
+		currentRecipientRole = isAllBene ? 'Bénévole' : 'Mécène';
+		currentSubject = subject;
+		currentConversationId = 'new';
+	} else {
+		// Vérifier que l'email existe dans la base de données
+		try {
+			const response = await fetch('{{ path('admin_message_emails_list') }}?q=' + encodeURIComponent(recipient));
+			const users = await response.json();
+			const exactMatch = users.find(u => u.email.toLowerCase() === recipient.toLowerCase());
+
+			if (!exactMatch) {
+				showToast('L\'adresse email n\'est pas enregistrée dans l\'application', 'error');
+				modalRecipient.focus();
+				modalConfirm.disabled = false;
+				return;
+			}
+
+			// Stocker le nom complet du destinataire et son rôle
+			currentRecipientName = `${exactMatch.prenom} ${exactMatch.nom}`;
+			if (exactMatch.role === 'ROLE_BENEVOLE') currentRecipientRole = 'Bénévole';
+			else if (exactMatch.role === 'ROLE_MECENE') currentRecipientRole = 'Mécène';
+			else currentRecipientRole = '';
+
+			currentRecipient = recipient;
+			currentSubject = subject;
+			currentConversationId = 'new';
+		} catch (err) {
+			console.error('Erreur validation email:', err);
+			showToast('Erreur lors de la vérification de l\'email', 'error');
 			modalConfirm.disabled = false;
 			return;
 		}
-		
-		// Stocker le nom complet du destinataire et son rôle
-		currentRecipientName = `${exactMatch.prenom} ${exactMatch.nom}`;
-		// Déterminer le rôle en français
-		if (exactMatch.role === 'ROLE_BENEVOLE') currentRecipientRole = 'Bénévole';
-		else if (exactMatch.role === 'ROLE_MECENE') currentRecipientRole = 'Mécène';
-		else currentRecipientRole = '';
-	} catch (err) {
-		console.error('Erreur validation email:', err);
-		showToast('Erreur lors de la vérification de l\'email', 'error');
-		modalConfirm.disabled = false;
-		return;
 	}
-	modalConfirm.disabled = false;
-	
-	// Stocker les valeurs
-	currentRecipient = recipient;
-	currentSubject = subject;
-	currentConversationId = 'new';
 	
 	// Afficher la zone de composition
 	chatHeader.style.display = 'block';
 	chatInputContainer.style.display = 'block';
 	chatTitle.textContent = 'Nouveau message - ' + recipient;
-	items.forEach(item => item.classList.remove('active'));
+	document.querySelectorAll('.conversation-item').forEach(item => item.classList.remove('active'));
 
 	chatMessages.innerHTML = `
 		<div class="chat-empty">
@@ -917,6 +960,24 @@ modalConfirm.addEventListener('click', async () => {
 	// Fermer le modal
 	newMessageModal.classList.remove('active');
 });
+
+// Boutons rapides pour sélectionner un groupe
+const modalAllBenevolesBtn = document.getElementById('modalAllBenevoles');
+const modalAllMecenesBtn = document.getElementById('modalAllMecenes');
+if (modalAllBenevolesBtn) {
+	modalAllBenevolesBtn.addEventListener('click', () => {
+		modalRecipient.value = 'Tous les bénévoles';
+		modalSubject.focus();
+		showToast('Destinataire : Tous les bénévoles', 'info');
+	});
+}
+if (modalAllMecenesBtn) {
+	modalAllMecenesBtn.addEventListener('click', () => {
+		modalRecipient.value = 'Tous les mécènes';
+		modalSubject.focus();
+		showToast('Destinataire : Tous les mécènes', 'info');
+	});
+}
 
 // Touche Entrée dans le modal
 modalRecipient.addEventListener('keypress', (e) => {
@@ -945,15 +1006,16 @@ function markConversationNotificationsAsRead(conversationId) {
 }
 
 // Gérer le clic sur les conversations
-console.log('Nombre de conversations trouvées:', items.length);
 items.forEach(item => {
 	item.addEventListener('click', function() {
-		console.log('Clic sur conversation:', this.dataset.id);
-		items.forEach(i => i.classList.remove('active'));
+		document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
 		this.classList.add('active');
 		currentConversationId = this.dataset.id;
 		currentSubject = this.dataset.subject || 'Sans sujet';
 		currentRecipientProfileImage = this.dataset.profileImage || '';
+        currentOtherEmail = this.dataset.otherEmail || '';
+        const reponduPar = this.dataset.reponduPar;
+        const reponduParNom = this.dataset.reponduParNom;
 
 		// Vider le champ de saisie quand on change de conversation
 		chatInput.value = '';
@@ -977,16 +1039,26 @@ items.forEach(item => {
 		// Afficher/masquer l'indicateur de clôture
 		if (isClosed) {
 			closedIndicator.style.display = 'block';
-		} else {
+            closedIndicator.textContent = '🔒 Conversation clôturée';
+		} else if (reponduPar && reponduPar !== adminEmail) {
+            closedIndicator.style.display = 'block';
+            closedIndicator.textContent = `👤 Pris en charge par ${reponduParNom || reponduPar}`;
+            closedIndicator.style.background = 'rgba(59, 130, 246, 0.2)';
+            closedIndicator.style.color = '#3b82f6';
+        } else {
 			closedIndicator.style.display = 'none';
 		}
 
-		// Gérer l'état de l'input selon si la conversation est clôturée
+		// Gérer l'état de l'input selon si la conversation est clôturée ou prise en charge
 		if (isClosed) {
 			chatInput.disabled = true;
 			sendBtn.disabled = true;
 			chatInput.placeholder = 'Cette conversation est clôturée';
-		} else {
+		} else if (reponduPar && reponduPar !== adminEmail) {
+            chatInput.disabled = true;
+            sendBtn.disabled = true;
+            chatInput.placeholder = `Cette conversation est prise en charge par ${reponduParNom || reponduPar}`;
+        } else {
 			chatInput.disabled = false;
 			sendBtn.disabled = false;
 			chatInput.placeholder = 'Écrivez votre message...';
@@ -1067,8 +1139,11 @@ function renderMessages(messages) {
 chatMessages.innerHTML = '';
 messages.forEach((msg, index) => {
 const userEmail = '{{ app.user.email|e('js') }}';
-const isAdmin = msg.email && (msg.email.includes('admin') || msg.email.includes('contact@groloto'));
-const isSent = msg.email === userEmail;
+// Un message est "reçu" (gauche) s'il vient de l'interlocuteur (currentOtherEmail)
+// Sinon il est "envoyé" (droite) car il vient d'un admin (moi ou un autre)
+const isReceived = msg.email === currentOtherEmail;
+const isSent = !isReceived;
+
 const wrapper = document.createElement('div');
 wrapper.className = 'message-wrapper ' + (isSent ? 'sent' : 'received');
 wrapper.dataset.messageId = msg.id;
@@ -1085,8 +1160,11 @@ if (msg.isDeleted) {
 cleanMessage = cleanMessage.replace(/^\[[^\]]+\]\s*/, '');
 wrapper.dataset.messageContent = cleanMessage;
 
-const displayName = isAdmin ? 'Admin' : msg.nom;
-const avatarHtml = isAdmin ? createAvatarHtml(currentUserName, currentUserProfileImage) : createAvatarHtml(displayName, currentRecipientProfileImage);
+// Si c'est envoyé (droite), c'est un Admin. Si c'est reçu (gauche), c'est l'utilisateur.
+const displayName = isSent ? 'Admin' : msg.nom;
+// Avatar : Si envoyé (Admin), mon avatar. Si reçu (User), avatar de l'user.
+// Note: Pour les autres admins, on n'a pas leur avatar facilement ici, on met le mien par défaut ou "Admin"
+const avatarHtml = isSent ? createAvatarHtml(currentUserName, currentUserProfileImage) : createAvatarHtml(displayName, currentRecipientProfileImage);
 
 let notificationHtml = '';
 if (msg.isEdited) {
@@ -1161,6 +1239,12 @@ try {
 		// clear input
 		chatInput.value = '';
 		chatInput.style.height = 'auto';
+
+        // Handle mass mailing success
+        if (data.sentCount) {
+             showToast(data.message, 'success');
+             // On continue l'exécution pour ajouter la conversation à la liste
+        }
 
 	// Pour les conversations existantes, ajouter le message au DOM
 	if (currentConversationId !== 'new') {

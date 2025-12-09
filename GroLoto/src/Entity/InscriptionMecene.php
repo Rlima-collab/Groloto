@@ -55,6 +55,9 @@ class InscriptionMecene
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $remarque_acceptation = null;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $adresse_postale = null;
+
     // --- GETTERS & SETTERS ---
 
     public function getId(): ?int
@@ -202,6 +205,17 @@ class InscriptionMecene
     public function setRemarqueAcceptation(?string $remarque_acceptation): self
     {
         $this->remarque_acceptation = $remarque_acceptation;
+        return $this;
+    }
+
+    public function getAdressePostale(): ?string
+    {
+        return $this->adresse_postale;
+    }
+
+    public function setAdressePostale(?string $adresse_postale): self
+    {
+        $this->adresse_postale = $adresse_postale;
         return $this;
     }
 }

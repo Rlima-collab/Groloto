@@ -137,4 +137,30 @@ class TacheRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findWeekendsForBenevole(int $benevoleId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->select('DISTINCT w.id, w.nom, w.date_debut, w.date_fin, w.description, w.cover_image')
+            ->innerJoin('t.weekend', 'w')
+            ->innerJoin('App\Entity\AffectationTache', 'a', 'WITH', 'a.tache = t.id')
+            ->andWhere('a.benevole = :benevoleId')
+            ->setParameter('benevoleId', $benevoleId)
+            ->orderBy('w.date_debut', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findTachesForBenevoleByWeekend(int $benevoleId, int $weekendId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->innerJoin('App\Entity\AffectationTache', 'a', 'WITH', 'a.tache = t.id')
+            ->andWhere('a.benevole = :benevoleId')
+            ->andWhere('t.weekend = :weekendId')
+            ->setParameter('benevoleId', $benevoleId)
+            ->setParameter('weekendId', $weekendId)
+            ->orderBy('t.debut', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

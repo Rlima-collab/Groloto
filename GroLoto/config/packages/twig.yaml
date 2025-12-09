@@ -1,5 +1,9 @@
 twig:
     file_name_pattern: '*.twig'
+    date:
+        timezone: Europe/Paris
+    form_themes:
+        - 'form/custom_collection.html.twig'
 
 when@test:
     twig:

@@ -102,7 +102,7 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 .modal-header { font-size: 20px; font-weight: 600; color: #1e3a8a; margin-bottom: 20px; }
 .modal-input { width: 100%; padding: 12px 16px; border: 2px solid #c7def8; border-radius: 10px; margin-bottom: 15px; font-size: 14px; font-family: 'Inter', sans-serif; }
 .modal-input:focus { outline: none; border-color: #3b82f6; }
-.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.modal-actions { display: flex; gap: 15px; justify-content: flex-end; margin-top: 20px; }
 .modal-btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 .modal-btn-cancel { background: #e5e7eb; color: #374151; }
 .modal-btn-cancel:hover { background: #d1d5db; }
@@ -284,8 +284,8 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 <div class="chat-container">
 <div class="chat-sidebar">
 <div class="chat-sidebar-header">
-<h2>💬 Messagerie</h2>
-<button class="new-chat-btn" id="newChatBtn">✉️ Nouveau message</button>
+<h2>Messagerie</h2>
+<button class="new-chat-btn" id="newChatBtn">Nouveau message</button>
 <div class="search-box" style="margin-top: 15px;">
 <input type="text" id="searchConversations" placeholder="Rechercher une conversation..." style="width: 100%; padding: 10px 15px; border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; background: rgba(255,255,255,0.1); color: white; font-size: 14px; transition: all 0.3s;">
 </div>
@@ -303,6 +303,7 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 {% set lastMessageParts = lastMessageText|split('] ', 2) %}
 {% set lastMessageBody = lastMessageParts|length > 1 and lastMessageParts[0]|slice(0,1) == '[' ? lastMessageParts[1] : lastMessageText %}
 {% set isToAdmin = msg.destinataire and 'admin' in msg.destinataire|lower %}
+{% set isGroupMessage = msg.destinataire == 'ALL_MECENES' %}
 {% set conversationArray = [] %}
 {% for reply in msg.conversation|default([]) %}
 {% set isEdited = '[MODIFIÉ]' in reply.message %}
@@ -317,15 +318,15 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 'isDeleted': isDeleted
 }]) %}
 {% endfor %}
-<div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %}" data-id="{{ msg.id }}" data-subject="{{ subject|e('html_attr') }}" data-conversation='{{ conversationArray|json_encode|e('html_attr') }}' data-sender="{{ msg.nom }}" data-email="{{ msg.email }}" data-message="{{ body|e('html_attr') }}" data-date="{{ msg.createdAt|date('d/m/Y à H:i') }}" data-closed="{{ msg.cloturee ? 'true' : 'false' }}">
+<div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %}" data-id="{{ msg.id }}" data-subject="{{ subject|e('html_attr') }}" data-conversation='{{ conversationArray|json_encode|e('html_attr') }}' data-sender="{{ msg.nom }}" data-email="{{ msg.email }}" data-message="{{ body|e('html_attr') }}" data-date="{{ msg.createdAt|date('d/m/Y à H:i') }}" data-closed="{{ msg.cloturee ? 'true' : 'false' }}" data-is-group-message="{{ isGroupMessage ? 'true' : 'false' }}">
 	<div class="conversation-item-content">
 		<div class="conversation-name">
 			{{ subject }}
 			{% if msg.cloturee %}
-			<span class="closed-badge">🔒 Clôturée</span>
+			<span class="closed-badge">Clôturée</span>
 			{% endif %}
 		</div>
-		<div class="conversation-sender">{{ msg.nom }} <span style="font-size: 11px; color: #9ca3af;">({{ msg.otherUserRole|default('Utilisateur') }})</span></div>
+		<div class="conversation-sender">{{ msg.otherUserName|default(msg.nom) }} <span style="font-size: 11px; color: #9ca3af;">({{ msg.otherUserRole|default('Utilisateur') }})</span></div>
 		<div class="conversation-preview">{{ lastMessageBody|slice(0, 50) }}{% if lastMessageBody|length > 50 %}...{% endif %}</div>
 		<div class="conversation-time">{{ msg.lastMessageDate|default(msg.createdAt)|date('d/m H:i') }}</div>
 	</div>
@@ -358,7 +359,7 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 		Retour
 	</button>
 	<h3 id="chatTitle">Conversation</h3>
-	<span id="closedIndicator" style="display: none; font-size: 12px; padding: 6px 12px; background: rgba(251, 191, 36, 0.2); color: #fbbf24; border-radius: 20px; font-weight: 600;">🔒 Conversation clôturée</span>
+	<span id="closedIndicator" style="display: none; font-size: 12px; padding: 6px 12px; background: rgba(251, 191, 36, 0.2); color: #fbbf24; border-radius: 20px; font-weight: 600;">Conversation clôturée</span>
 </div>
 <div class="chat-messages" id="chatMessages">
 <div class="chat-empty">
@@ -378,7 +379,7 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 <!-- POPUP MODAL POUR SUJET -->
 <div class="modal-overlay" id="subjectModal">
 	<div class="modal-content">
-		<div class="modal-header">✉️ Nouveau message</div>
+		<div class="modal-header">Nouveau message</div>
 		<input type="text" id="modalSubject" class="modal-input" placeholder="Sujet de la conversation" autocomplete="off">
 		<div class="modal-actions">
 			<button class="modal-btn modal-btn-cancel" id="modalCancel">Annuler</button>
@@ -624,7 +625,7 @@ window.closeConversation = async function(e, convId) {
 						// Ajouter le badge dans le nom
 						const nameEl = convItem.querySelector('.conversation-name');
 						if (nameEl && !nameEl.querySelector('.closed-badge')) {
-							nameEl.innerHTML += ' <span class="closed-badge">🔒 Clôturée</span>';
+							nameEl.innerHTML += ' <span class="closed-badge">Clôturée</span>';
 						}
 					}
 					
@@ -745,7 +746,7 @@ modalConfirm.addEventListener('click', () => {
 	chatInput.disabled = false;
 	sendBtn.disabled = false;
 	chatInput.placeholder = 'Écrivez votre message...';
-	items.forEach(item => item.classList.remove('active'));
+	document.querySelectorAll('.conversation-item').forEach(item => item.classList.remove('active'));
 	chatMessages.innerHTML = '<div class="chat-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 60px; height: 60px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Écrivez votre message</p></div>';
 	chatInput.focus();
 });
@@ -759,7 +760,7 @@ modalSubject.addEventListener('keydown', (e) => {
 
 items.forEach(item => {
 item.addEventListener('click', function() {
-items.forEach(i => i.classList.remove('active'));
+document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
 this.classList.add('active');
 currentConversationId = this.dataset.id;
 currentSubject = this.dataset.subject || 'Sans sujet';
@@ -773,6 +774,7 @@ markConversationNotificationsAsRead(currentConversationId);
 
 // Vérifier si la conversation est clôturée
 const isClosed = this.dataset.closed === 'true';
+const isGroupMessage = this.dataset.isGroupMessage === 'true';
 
 const conversationData = this.dataset.conversation;
 					const sender = this.dataset.sender;
@@ -786,15 +788,19 @@ const conversationData = this.dataset.conversation;
 					// Afficher/masquer l'indicateur de clôture
 					if (isClosed) {
 						closedIndicator.style.display = 'block';
+						closedIndicator.textContent = 'Conversation clôturée';
+					} else if (isGroupMessage) {
+						closedIndicator.style.display = 'block';
+						closedIndicator.textContent = 'Message groupé (réponse désactivée)';
 					} else {
 						closedIndicator.style.display = 'none';
 					}
 					
-					// Gérer l'état de l'input selon si la conversation est clôturée
-					if (isClosed) {
+					// Gérer l'état de l'input selon si la conversation est clôturée ou groupée
+					if (isClosed || isGroupMessage) {
 						chatInput.disabled = true;
 						sendBtn.disabled = true;
-						chatInput.placeholder = 'Cette conversation est clôturée';
+						chatInput.placeholder = isGroupMessage ? 'Réponse désactivée pour ce message groupé' : 'Cette conversation est clôturée';
 					} else {
 						chatInput.disabled = false;
 						sendBtn.disabled = false;
@@ -939,6 +945,10 @@ const data = await response.json();
 								if (timeEl) {
 									timeEl.textContent = new Date().toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
 								}
+								
+								// Déplacer la conversation en haut de la liste
+								const list = document.querySelector('.conversations-list');
+								list.insertBefore(convItem, list.firstChild);
 							}
 						}
 						
@@ -1129,7 +1139,7 @@ window.deleteMessage = async function(event, messageId) {
 	// Définir l'action de confirmation
 	confirmCallback = async () => {
 		try {
-			const response = await fetch(`/mecene/messages/${messageId}/delete`, {
+			const response = await fetch(`/mecene/messages/${messageId}/delete-message`, {
 				method: 'POST',
 				headers: {
 					'X-Requested-With': 'XMLHttpRequest'
