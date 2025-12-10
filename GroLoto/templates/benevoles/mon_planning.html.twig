@@ -17,11 +17,12 @@
     <div class="shine"></div>
     <div class="hero-content">
         <h1 class="hero-title">Mon Planning</h1>
-        <p class="hero-description">Vue d'ensemble des tâches assignées et du calendrier.</p>
-        <div style="display: flex; gap: 1rem;">
-            <a href="{{ path('dashboard') }}" class="btn-login">Retour aux bénévoles</a>
-            <a href="{{ path('benevole_propositions') }}" class="btn-login" style="background-color: #d97706;">Voir mes propositions</a>
-        </div>
+        <p class="hero-description">Consultez vos weekends et téléchargez votre planning.</p>
+        <a href="https://www.impots.gouv.fr/sites/default/files/formulaires/2041-rd/2023/2041-rd_4298.pdf" target="_blank" class="btn-login">Télécharger son reçu fiscal</a>
+        <form method="post" action="{{ path('benevole_recu_send') }}" style="display:inline-block;margin-left:10px;">
+            <input type="hidden" name="_token" value="{{ csrf_token('send_recu_benevole') }}">
+            <button type="submit" class="btn-login btn-secondary">Envoyer au admin</button>
+        </form>
     </div>
 </div>
 <br>
