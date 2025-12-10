@@ -5,51 +5,8 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
     <style>
-        .hero-section {
-            background: linear-gradient(135deg, #1a3c5a 0%, #2d5f8f 100%);
-            color: white;
-            padding: 4rem 2rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-        }
-
-        .hero-section .shine {
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg);
-            animation: shine 3s infinite;
-        }
-
-        @keyframes shine {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0 0 1rem 0;
-        }
-
-        .hero-description {
-            font-size: 1.1rem;
-            opacity: 0.95;
-            margin: 0;
-        }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -214,7 +171,7 @@
 {% endblock %}
 
 {% block body %}
-<div class="hero-section">
+<div class="hero-section stocks-hero">
     <div class="shine"></div>
     <div class="hero-content">
             <h1 class="hero-title">Mes Reçus fiscaux</h1>
