@@ -39,12 +39,16 @@ class Tache
     #[ORM\JoinColumn(name: 'id_weekend', referencedColumnName: 'id', nullable: false)]
     private ?Weekend $weekend = null;
 
+    #[ORM\OneToMany(mappedBy: 'tache', targetEntity: PlageHoraire::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $plagesHoraires;
+
     #[ORM\OneToMany(mappedBy: 'tache', targetEntity: AffectationTache::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $affectations;
 
     public function __construct()
     {
-        $this->affectations = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->plagesHoraires = new ArrayCollection();
+        $this->affectations = new ArrayCollection();
     }
 
     // ====================
@@ -130,6 +134,35 @@ class Tache
     public function setWeekend(Weekend $weekend): self
     {
         $this->weekend = $weekend;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlageHoraire>
+     */
+    public function getPlagesHoraires(): Collection
+    {
+        return $this->plagesHoraires;
+    }
+
+    public function addPlageHoraire(PlageHoraire $plageHoraire): self
+    {
+        if (!$this->plagesHoraires->contains($plageHoraire)) {
+            $this->plagesHoraires->add($plageHoraire);
+            $plageHoraire->setTache($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlageHoraire(PlageHoraire $plageHoraire): self
+    {
+        if ($this->plagesHoraires->removeElement($plageHoraire)) {
+            if ($plageHoraire->getTache() === $this) {
+                $plageHoraire->setTache(null);
+            }
+        }
+
         return $this;
     }
 
