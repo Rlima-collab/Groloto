@@ -4,414 +4,310 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/taches/taches-common.css') }}">
     <link rel="stylesheet" href="{{ asset('css/taches/taches-list.css') }}">
-    <style>
-        .modal {
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            display: none;
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 550px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            overflow: hidden;
-        }
-
-        .modal-header {
-            padding: 1.25rem 1.5rem;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header.success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-
-        .modal-header.danger {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        }
-
-        .modal-header h5 {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            opacity: 0.8;
-            line-height: 1;
-        }
-
-        .modal-close:hover {
-            opacity: 1;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .modal-footer {
-            padding: 1rem 1.5rem;
-            background: #f9fafb;
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-        }
-
-        .alert-box {
-            padding: 0.875rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.25rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-
-        .alert-box.info {
-            background: #e0f2fe;
-            color: #0369a1;
-            border: 1px solid #bae6fd;
-        }
-
-        .alert-box.warning {
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fde68a;
-        }
-
-        .info-row {
-            margin-bottom: 0.875rem;
-        }
-
-        .info-row strong {
-            color: #374151;
-        }
-
-        .motif-box {
-            background: #f3f4f6;
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            margin-top: 0.5rem;
-            font-style: italic;
-            color: #4b5563;
-            border-left: 3px solid #9ca3af;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .form-group small {
-            display: block;
-            margin-top: 0.35rem;
-            color: #6b7280;
-            font-size: 0.8rem;
-        }
-
-        .avatar-circle {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1a3c5a 0%, #2b5d8a 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.8rem;
-            margin-right: 0.75rem;
-        }
-
-        .badge-warning {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-success {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .badge-danger {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: #6b7280;
-        }
-
-        .empty-state h3 {
-            color: #374151;
-            margin-bottom: 0.5rem;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .tab {
-            padding: 0.75rem 1.25rem;
-            border: 1px solid #e5e7eb;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            color: #6b7280;
-            transition: all 0.2s;
-        }
-
-        .tab:hover {
-            background: #f9fafb;
-        }
-
-        .tab.selected {
-            background: #1a3c5a;
-            color: white;
-            border-color: #1a3c5a;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .stat-card h3 {
-            font-size: 2rem;
-            margin: 0.5rem 0;
-            color: #1a3c5a;
-        }
-
-        .stat-card p {
-            color: #6b7280;
-            margin: 0;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 {% endblock %}
 
 {% block body %}
 <!-- Hero Section -->
 <div class="hero-section taches-hero">
-    <div class="shine"></div>
+    <div class="hero-overlay"></div>
     <div class="hero-content">
-        <h1 class="hero-title">Demandes d'annulation</h1>
-        <p class="hero-description">Gérez les demandes d'annulation de tâches des bénévoles</p>
+        <div class="container">
+            <div class="hero-text">
+                <h1 class="hero-title">Demandes d'annulation</h1>
+                <p class="hero-subtitle">Gérez les demandes d'annulation de tâches des bénévoles</p>
+            </div>
+        </div>
     </div>
+    <div class="hero-shine"></div>
 </div>
 
 <div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
 
     {% for message in app.flashes('success') %}
-        <div class="alert alert-success" style="background: #d1fae5; border: 1px solid #10b981; color: #065f46; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-            {{ message }}
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     {% endfor %}
 
     {% for message in app.flashes('error') %}
-        <div class="alert alert-danger" style="background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-            {{ message }}
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     {% endfor %}
 
     <!-- Statistiques -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div style="color: #f59e0b; font-size: 2rem;">⏳</div>
-            <h3>{{ demandes_en_attente|length }}</h3>
-            <p>En attente</p>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="stat-icon mb-2" style="color: #f59e0b;">
+                        <i class="bi bi-clock-history" style="font-size: 2rem;"></i>
+                    </div>
+                    <h3 class="mb-0" style="color: #0d1b2a; font-weight: 600;">{{ demandes_en_attente|length }}</h3>
+                    <p class="text-muted mb-0">En attente</p>
+                </div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div style="color: #10b981; font-size: 2rem;">✓</div>
-            <h3>{{ toutes_demandes|filter(d => d.statut == 'acceptee')|length }}</h3>
-            <p>Acceptées</p>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="stat-icon mb-2" style="color: #10b981;">
+                        <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                    </div>
+                    <h3 class="mb-0" style="color: #0d1b2a; font-weight: 600;">
+                        {{ toutes_demandes|filter(d => d.statut == 'acceptee')|length }}
+                    </h3>
+                    <p class="text-muted mb-0">Acceptées</p>
+                </div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div style="color: #ef4444; font-size: 2rem;">✗</div>
-            <h3>{{ toutes_demandes|filter(d => d.statut == 'refusee')|length }}</h3>
-            <p>Refusées</p>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="stat-icon mb-2" style="color: #ef4444;">
+                        <i class="bi bi-x-circle" style="font-size: 2rem;"></i>
+                    </div>
+                    <h3 class="mb-0" style="color: #0d1b2a; font-weight: 600;">
+                        {{ toutes_demandes|filter(d => d.statut == 'refusee')|length }}
+                    </h3>
+                    <p class="text-muted mb-0">Refusées</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Onglets -->
-    <div class="tabs">
-        <button class="tab selected" id="tab-btn-attente" onclick="switchTab('attente')">
-            Demandes en attente 
-            <span class="badge badge-warning" style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem;">{{ demandes_en_attente|length }}</span>
-        </button>
-        <button class="tab" id="tab-btn-historique" onclick="switchTab('historique')">
-            Historique complet
-        </button>
+    <div class="tabs-container mb-4">
+        <div class="tabs">
+            <button class="tab selected" onclick="switchTab(event, 'en_attente')">
+                <i class="bi bi-clock-history me-1"></i> Demandes en attente 
+                <span class="badge bg-warning text-dark ms-1">{{ demandes_en_attente|length }}</span>
+            </button>
+            <button class="tab" onclick="switchTab(event, 'historique')">
+                <i class="bi bi-list-ul me-1"></i> Historique complet
+            </button>
+        </div>
     </div>
 
+    <!-- Contenu des onglets -->
+    
     <!-- Demandes en attente -->
-    <div id="tab-attente" class="tab-content" style="display: block;">
-        <div class="card">
-            <div class="card-content">
+    <div id="tab-en_attente" class="tab-content" style="display: block;">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
                 {% if demandes_en_attente is empty %}
                     <div class="empty-state">
-                        <div style="color: #10b981; font-size: 4rem;">✓</div>
+                        <i class="bi bi-check-circle" style="font-size: 4rem; color: #10b981;"></i>
                         <h3>Aucune demande en attente</h3>
-                        <p>Toutes les demandes d'annulation ont été traitées.</p>
+                        <p class="text-muted">Toutes les demandes d'annulation ont été traitées.</p>
                     </div>
                 {% else %}
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>Bénévole</th>
-                                    <th>Tâche</th>
-                                    <th>Date demande</th>
-                                    <th>Motif</th>
-                                    <th style="text-align: center;">Actions</th>
+                                    <th style="width: 20%;">Bénévole</th>
+                                    <th style="width: 25%;">Tâche</th>
+                                    <th style="width: 12%;">Date demande</th>
+                                    <th style="width: 28%;">Motif</th>
+                                    <th style="width: 15%; text-align: center;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                             {% for demande in demandes_en_attente %}
                                 <tr>
                                     <td>
-                                        <div style="display: flex; align-items: center;">
-                                            <div class="avatar-circle">
-                                                {{ demande.benevole.utilisateur.prenom|slice(0, 1)|upper }}{{ demande.benevole.utilisateur.nom|slice(0, 1)|upper }}
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-2">
+                                                {{ demande.benevole.utilisateur.prenom|slice(0, 1) }}{{ demande.benevole.utilisateur.nom|slice(0, 1) }}
                                             </div>
                                             <div>
-                                                <strong>{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}</strong><br>
-                                                <small style="color: #6b7280;">{{ demande.benevole.utilisateur.email }}</small>
+                                                <strong style="color: #0d1b2a;">{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}</strong><br>
+                                                <small class="text-muted">{{ demande.benevole.utilisateur.email }}</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        {% if demande.affectation and demande.affectation.tache %}
-                                            <strong>{{ demande.affectation.tache.titre }}</strong><br>
-                                            <small style="color: #6b7280;">
-                                                {{ demande.affectation.tache.debut|date('d/m/Y H:i') }} - {{ demande.affectation.tache.fin|date('H:i') }}
-                                            </small>
-                                        {% elseif demande.tacheTitre %}
-                                            <strong>{{ demande.tacheTitre }}</strong><br>
-                                            <small style="color: #6b7280;">(affectation supprimée)</small>
-                                        {% else %}
-                                            <span style="color: #9ca3af;">Tâche supprimée</span>
-                                        {% endif %}
+                                        <strong style="color: #0d1b2a;">{{ demande.affectation.tache.titre }}</strong><br>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar-event me-1"></i>{{ demande.affectation.tache.debut|date('d/m/Y H:i') }}<br>
+                                            <i class="bi bi-arrow-right me-1"></i>{{ demande.affectation.tache.fin|date('d/m/Y H:i') }}
+                                        </small>
                                     </td>
                                     <td>
-                                        {{ demande.dateDemande|date('d/m/Y') }}<br>
-                                        <small style="color: #6b7280;">{{ demande.dateDemande|date('H:i') }}</small>
+                                        <small class="text-muted">{{ demande.dateDemande|date('d/m/Y') }}</small><br>
+                                        <small class="text-muted">{{ demande.dateDemande|date('H:i') }}</small>
                                     </td>
                                     <td>
                                         {% if demande.motifBenevole %}
-                                            <div class="motif-box">{{ demande.motifBenevole }}</div>
+                                            <div class="motif-box">
+                                                <i class="bi bi-chat-left-text me-1"></i>{{ demande.motifBenevole }}
+                                            </div>
                                         {% else %}
-                                            <em style="color: #9ca3af;">Aucun motif fourni</em>
+                                            <em class="text-muted">Aucun motif fourni</em>
                                         {% endif %}
                                     </td>
                                     <td style="text-align: center;">
-                                        {% set tacheTitre = (demande.affectation and demande.affectation.tache) ? demande.affectation.tache.titre : (demande.tacheTitre ?? 'Tâche supprimée') %}
-                                        <button type="button" class="btn btn-small btn-success" 
-                                                onclick="openAccepterModal({{ demande.id }}, '{{ demande.benevole.utilisateur.prenom|e('js') }} {{ demande.benevole.utilisateur.nom|e('js') }}', '{{ tacheTitre|e('js') }}', '{{ demande.motifBenevole|default('')|e('js') }}')">
-                                            ✓
+                                        <button type="button" class="btn btn-sm btn-success me-1" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#accepterModal{{ demande.id }}"
+                                                title="Accepter la demande">
+                                            <i class="bi bi-check-lg"></i>
                                         </button>
-                                        <button type="button" class="btn btn-small btn-danger" 
-                                                onclick="openRefuserModal({{ demande.id }}, '{{ demande.benevole.utilisateur.prenom|e('js') }} {{ demande.benevole.utilisateur.nom|e('js') }}', '{{ tacheTitre|e('js') }}', '{{ demande.motifBenevole|default('')|e('js') }}')">
-                                            ✗
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#refuserModal{{ demande.id }}"
+                                                title="Refuser la demande">
+                                            <i class="bi bi-x-lg"></i>
                                         </button>
                                     </td>
                                 </tr>
+
+                                <!-- Modal Accepter -->
+                                <div class="modal fade" id="accepterModal{{ demande.id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow">
+                                            <div class="modal-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                                                <h5 class="modal-title">
+                                                    <i class="bi bi-check-circle me-2"></i>Accepter la demande d'annulation
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form method="post" action="{{ path('admin_accepter_annulation', {id: demande.id}) }}">
+                                                <div class="modal-body">
+                                                    <div class="alert alert-info border-0">
+                                                        <i class="bi bi-info-circle me-2"></i>
+                                                        L'affectation du bénévole sera supprimée et il sera notifié.
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <strong>Bénévole :</strong> 
+                                                        {{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <strong>Tâche :</strong> {{ demande.affectation.tache.titre }}
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <strong>Motif du bénévole :</strong><br>
+                                                        <div class="motif-box mt-2">
+                                                            {{ demande.motifBenevole ?: 'Aucun motif fourni' }}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="message_admin_accepter{{ demande.id }}" class="form-label">
+                                                            <i class="bi bi-chat-left-text me-1"></i>Message pour le bénévole <small class="text-muted">(optionnel)</small>
+                                                        </label>
+                                                        <textarea class="form-control" id="message_admin_accepter{{ demande.id }}" 
+                                                                  name="message_admin" rows="3" 
+                                                                  placeholder="Ex: Nous comprenons votre situation. N'hésitez pas à vous réinscrire ultérieurement."></textarea>
+                                                    </div>
+                                                    
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('accepter_annulation_' ~ demande.id) }}">
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                                        <i class="bi bi-x-lg me-1"></i>Annuler
+                                                    </button>
+                                                    <button type="submit" class="btn btn-success">
+                                                        <i class="bi bi-check-lg me-1"></i>Confirmer l'acceptation
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Refuser -->
+                                <div class="modal fade" id="refuserModal{{ demande.id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow">
+                                            <div class="modal-header" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                                                <h5 class="modal-title">
+                                                    <i class="bi bi-x-circle me-2"></i>Refuser la demande d'annulation
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form method="post" action="{{ path('admin_refuser_annulation', {id: demande.id}) }}">
+                                                <div class="modal-body">
+                                                    <div class="alert alert-warning border-0">
+                                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                                        Le bénévole restera affecté à cette tâche.
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <strong>Bénévole :</strong> 
+                                                        {{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <strong>Tâche :</strong> {{ demande.affectation.tache.titre }}
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <strong>Motif du bénévole :</strong><br>
+                                                        <div class="motif-box mt-2">
+                                                            {{ demande.motifBenevole ?: 'Aucun motif fourni' }}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="message_admin_refuser{{ demande.id }}" class="form-label">
+                                                            <i class="bi bi-chat-left-text me-1"></i>Motif du refus <span class="text-danger">*</span>
+                                                        </label>
+                                                        <textarea class="form-control" id="message_admin_refuser{{ demande.id }}" 
+                                                                  name="message_admin" rows="3" required
+                                                                  placeholder="Ex: Nous avons besoin de votre présence car il n'y a pas assez de bénévoles inscrits pour cette tâche."></textarea>
+                                                        <small class="text-muted">Le bénévole recevra ce message pour comprendre votre décision.</small>
+                                                    </div>
+                                                    
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('refuser_annulation_' ~ demande.id) }}">
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                                        <i class="bi bi-x-lg me-1"></i>Annuler
+                                                    </button>
+                                                    <button type="submit" class="btn btn-danger">
+                                                        <i class="bi bi-x-lg me-1"></i>Confirmer le refus
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% endif %}
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
         </div>
     </div>
+</div>
 
     <!-- Historique complet -->
-    <div id="tab-historique" class="tab-content">
-        <div class="card">
-            <div class="card-content">
+    <div id="tab-historique" class="tab-content" style="display: none;">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
                 {% if toutes_demandes is empty %}
                     <div class="empty-state">
-                        <div style="font-size: 4rem;">📁</div>
+                        <i class="bi bi-inbox" style="font-size: 4rem; color: #6b7280;"></i>
                         <h3>Aucune demande</h3>
-                        <p>Il n'y a encore aucune demande d'annulation enregistrée.</p>
+                        <p class="text-muted">Il n'y a encore aucune demande d'annulation enregistrée.</p>
                     </div>
                 {% else %}
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>Statut</th>
-                                    <th>Bénévole</th>
-                                    <th>Tâche</th>
-                                    <th>Date demande</th>
-                                    <th>Date réponse</th>
-                                    <th>Réponse admin</th>
+                                    <th style="width: 10%;">Statut</th>
+                                    <th style="width: 18%;">Bénévole</th>
+                                    <th style="width: 20%;">Tâche</th>
+                                    <th style="width: 10%;">Date demande</th>
+                                    <th style="width: 10%;">Date réponse</th>
+                                    <th style="width: 16%;">Motif bénévole</th>
+                                    <th style="width: 16%;">Réponse admin</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -419,208 +315,95 @@
                                 <tr>
                                     <td>
                                         {% if demande.statut == 'en_attente' %}
-                                            <span class="badge" style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem;">En attente</span>
+                                            <span class="badge badge-warning">
+                                                <i class="bi bi-clock-history me-1"></i>En attente
+                                            </span>
                                         {% elseif demande.statut == 'acceptee' %}
-                                            <span class="badge" style="background: #d1fae5; color: #065f46; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem;">Acceptée</span>
+                                            <span class="badge badge-success">
+                                                <i class="bi bi-check-circle me-1"></i>Acceptée
+                                            </span>
                                         {% else %}
-                                            <span class="badge" style="background: #fee2e2; color: #991b1b; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem;">Refusée</span>
+                                            <span class="badge badge-danger">
+                                                <i class="bi bi-x-circle me-1"></i>Refusée
+                                            </span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <strong>{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}</strong>
+                                        <strong style="color: #0d1b2a;">{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}</strong><br>
+                                        <small class="text-muted">{{ demande.benevole.utilisateur.email }}</small>
                                     </td>
                                     <td>
-                                        {% if demande.affectation and demande.affectation.tache %}
-                                            <strong>{{ demande.affectation.tache.titre }}</strong><br>
-                                            <small style="color: #6b7280;">{{ demande.affectation.tache.debut|date('d/m/Y') }}</small>
-                                        {% elseif demande.tacheTitre %}
-                                            <strong>{{ demande.tacheTitre }}</strong><br>
-                                            <small style="color: #6b7280;">(affectation supprimée)</small>
-                                        {% else %}
-                                            <span style="color: #9ca3af;">Tâche supprimée</span>
-                                        {% endif %}
+                                        <strong style="color: #0d1b2a;">{{ demande.affectation.tache.titre }}</strong><br>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar-event me-1"></i>{{ demande.affectation.tache.debut|date('d/m/Y') }}
+                                        </small>
                                     </td>
-                                    <td>{{ demande.dateDemande|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        <small class="text-muted">{{ demande.dateDemande|date('d/m/Y') }}</small><br>
+                                        <small class="text-muted">{{ demande.dateDemande|date('H:i') }}</small>
+                                    </td>
                                     <td>
                                         {% if demande.dateReponse %}
-                                            {{ demande.dateReponse|date('d/m/Y H:i') }}
+                                            <small class="text-muted">{{ demande.dateReponse|date('d/m/Y') }}</small><br>
+                                            <small class="text-muted">{{ demande.dateReponse|date('H:i') }}</small>
                                         {% else %}
-                                            <span style="color: #9ca3af;">-</span>
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if demande.motifBenevole %}
+                                            <div class="motif-box-small">
+                                                {{ demande.motifBenevole|length > 50 ? demande.motifBenevole|slice(0, 50) ~ '...' : demande.motifBenevole }}
+                                            </div>
+                                        {% else %}
+                                            <em class="text-muted">Non fourni</em>
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if demande.messageAdmin %}
-                                            {{ demande.messageAdmin|length > 40 ? demande.messageAdmin|slice(0, 40) ~ '...' : demande.messageAdmin }}
+                                            <div class="motif-box-small">
+                                                {{ demande.messageAdmin|length > 50 ? demande.messageAdmin|slice(0, 50) ~ '...' : demande.messageAdmin }}
+                                            </div>
                                         {% else %}
-                                            <span style="color: #9ca3af;">-</span>
+                                            <span class="text-muted">-</span>
                                         {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% endif %}
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
         </div>
     </div>
+</div>
 
     <!-- Boutons d'action -->
-    <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
-        <a href="{{ path('dashboard') }}" class="btn btn-secondary">← Retour au tableau de bord</a>
-        <a href="{{ path('tache_index') }}" class="btn btn-primary">Voir les tâches</a>
-    </div>
-</div>
-
-<!-- Modal Accepter -->
-<div id="accepterModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header success">
-            <h5>✓ Accepter la demande d'annulation</h5>
-            <button type="button" class="modal-close" onclick="closeAccepterModal()">×</button>
-        </div>
-        <form id="accepterForm" method="POST">
-            <div class="modal-body">
-                <div class="alert-box info">
-                    ℹ️ L'affectation du bénévole sera supprimée et il sera notifié.
-                </div>
-                
-                <div class="info-row">
-                    <strong>Bénévole :</strong> <span id="accepterBenevoleNom"></span>
-                </div>
-                <div class="info-row">
-                    <strong>Tâche :</strong> <span id="accepterTacheNom"></span>
-                </div>
-                <div class="info-row">
-                    <strong>Motif du bénévole :</strong>
-                    <div class="motif-box" id="accepterMotif"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="message_admin_accepter">Message pour le bénévole (optionnel)</label>
-                    <textarea id="message_admin_accepter" name="message_admin" placeholder="Ex: Nous comprenons votre situation. N'hésitez pas à vous réinscrire ultérieurement."></textarea>
-                </div>
-                
-                <input type="hidden" name="_token" id="accepterCsrfToken">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeAccepterModal()">Annuler</button>
-                <button type="submit" class="btn btn-success">✓ Confirmer l'acceptation</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal Refuser -->
-<div id="refuserModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header danger">
-            <h5>✗ Refuser la demande d'annulation</h5>
-            <button type="button" class="modal-close" onclick="closeRefuserModal()">×</button>
-        </div>
-        <form id="refuserForm" method="POST">
-            <div class="modal-body">
-                <div class="alert-box warning">
-                    ⚠️ Le bénévole restera affecté à cette tâche.
-                </div>
-                
-                <div class="info-row">
-                    <strong>Bénévole :</strong> <span id="refuserBenevoleNom"></span>
-                </div>
-                <div class="info-row">
-                    <strong>Tâche :</strong> <span id="refuserTacheNom"></span>
-                </div>
-                <div class="info-row">
-                    <strong>Motif du bénévole :</strong>
-                    <div class="motif-box" id="refuserMotif"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="message_admin_refuser">Motif du refus <span style="color: #ef4444;">*</span></label>
-                    <textarea id="message_admin_refuser" name="message_admin" required placeholder="Ex: Nous avons besoin de votre présence car il n'y a pas assez de bénévoles inscrits pour cette tâche."></textarea>
-                    <small>Le bénévole recevra ce message pour comprendre votre décision.</small>
-                </div>
-                
-                <input type="hidden" name="_token" id="refuserCsrfToken">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeRefuserModal()">Annuler</button>
-                <button type="submit" class="btn btn-danger">✗ Confirmer le refus</button>
-            </div>
-        </form>
+    <div class="mt-4 d-flex gap-2">
+        <a href="{{ path('dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Retour au tableau de bord
+        </a>
+        <a href="{{ path('tache_index') }}" class="btn btn-night-blue">
+            <i class="bi bi-list-task me-1"></i>Voir les tâches
+        </a>
     </div>
 </div>
 
 <script>
-// Tokens CSRF
-var csrfTokensAccepter = {
-    {% for demande in demandes_en_attente %}
-    {{ demande.id }}: '{{ csrf_token('accepter_annulation_' ~ demande.id) }}',
-    {% endfor %}
-};
-
-var csrfTokensRefuser = {
-    {% for demande in demandes_en_attente %}
-    {{ demande.id }}: '{{ csrf_token('refuser_annulation_' ~ demande.id) }}',
-    {% endfor %}
-};
-
-function switchTab(tabName) {
+function switchTab(event, tabName) {
     // Cacher tous les contenus
-    document.querySelectorAll('.tab-content').forEach(function(el) {
-        el.style.display = 'none';
-    });
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => content.style.display = 'none');
     
     // Désactiver tous les onglets
-    document.querySelectorAll('.tab').forEach(function(el) {
-        el.classList.remove('selected');
-    });
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => tab.classList.remove('selected'));
     
     // Activer l'onglet cliqué
-    document.getElementById('tab-btn-' + tabName).classList.add('selected');
+    event.currentTarget.classList.add('selected');
     
     // Afficher le contenu correspondant
     document.getElementById('tab-' + tabName).style.display = 'block';
-}
-
-function openAccepterModal(demandeId, benevoleNom, tacheNom, motif) {
-    document.getElementById('accepterBenevoleNom').textContent = benevoleNom;
-    document.getElementById('accepterTacheNom').textContent = tacheNom;
-    document.getElementById('accepterMotif').textContent = motif || 'Aucun motif fourni';
-    document.getElementById('accepterForm').action = '/admin/accepter-annulation/' + demandeId;
-    document.getElementById('accepterCsrfToken').value = csrfTokensAccepter[demandeId];
-    document.getElementById('accepterModal').style.display = 'block';
-}
-
-function closeAccepterModal() {
-    document.getElementById('accepterModal').style.display = 'none';
-    document.getElementById('message_admin_accepter').value = '';
-}
-
-function openRefuserModal(demandeId, benevoleNom, tacheNom, motif) {
-    document.getElementById('refuserBenevoleNom').textContent = benevoleNom;
-    document.getElementById('refuserTacheNom').textContent = tacheNom;
-    document.getElementById('refuserMotif').textContent = motif || 'Aucun motif fourni';
-    document.getElementById('refuserForm').action = '/admin/refuser-annulation/' + demandeId;
-    document.getElementById('refuserCsrfToken').value = csrfTokensRefuser[demandeId];
-    document.getElementById('refuserModal').style.display = 'block';
-}
-
-function closeRefuserModal() {
-    document.getElementById('refuserModal').style.display = 'none';
-    document.getElementById('message_admin_refuser').value = '';
-}
-
-// Fermer les modals en cliquant en dehors
-window.onclick = function(event) {
-    var accepterModal = document.getElementById('accepterModal');
-    var refuserModal = document.getElementById('refuserModal');
-    if (event.target == accepterModal) {
-        closeAccepterModal();
-    }
-    if (event.target == refuserModal) {
-        closeRefuserModal();
-    }
 }
 </script>
 {% endblock %}

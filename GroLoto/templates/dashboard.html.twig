@@ -39,8 +39,8 @@
                         <i class="bi bi-calendar-check"></i> Événements
                     </a>
                 {% elseif is_granted('ROLE_BENEVOLE') %}
-                    <a href="{{ path('benevole_propositions') }}" class="btn-hero btn-primary">
-                        <i class="bi bi-clipboard-check"></i> Mes propositions
+                    <a href="{{ path('benevole_taches_disponibles') }}" class="btn-hero btn-primary">
+                        <i class="bi bi-clipboard-check"></i> Tâches disponibles
                     </a>
                     <a href="{{ path('benevole_mon_planning') }}" class="btn-hero btn-secondary">
                         <i class="bi bi-calendar3"></i> Mon planning
@@ -245,8 +245,8 @@
                         {% else %}
                             <p class="empty-state">Aucune tâche en attente</p>
                         {% endfor %}
-                        <a href="{{ path('benevole_propositions') }}" class="btn btn-primary w-100 mt-3">
-                            <i class="bi bi-plus-circle"></i> Voir mes propositions
+                        <a href="{{ path('benevole_taches_disponibles') }}" class="btn btn-primary w-100 mt-3">
+                            <i class="bi bi-plus-circle"></i> S'inscrire à une tâche
                         </a>
                     </div>
                 </div>

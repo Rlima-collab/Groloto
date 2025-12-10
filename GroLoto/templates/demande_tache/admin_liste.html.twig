@@ -104,7 +104,7 @@
                                                     data-demande-id="{{ demande.id }}"
                                                     data-benevole-nom="{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}"
                                                     data-tache-nom="{{ demande.tache.titre }}"
-                                                    data-csrf-token="{{ csrf_token('accepter_demande_tache_' ~ demande.id) }}"
+                                                    data-csrf-token="{{ csrf_token('accepter_demande_' ~ demande.id) }}"
                                                     onclick="openAccepterModal(this)">
                                                 Accepter
                                             </button>
@@ -113,7 +113,7 @@
                                                     data-demande-id="{{ demande.id }}"
                                                     data-benevole-nom="{{ demande.benevole.utilisateur.prenom }} {{ demande.benevole.utilisateur.nom }}"
                                                     data-tache-nom="{{ demande.tache.titre }}"
-                                                    data-csrf-token="{{ csrf_token('refuser_demande_tache_' ~ demande.id) }}"
+                                                    data-csrf-token="{{ csrf_token('refuser_demande_' ~ demande.id) }}"
                                                     onclick="openRefuserModal(this)">
                                                 Refuser
                                             </button>
@@ -328,7 +328,7 @@ function openAccepterModal(button) {
     
     document.getElementById('accepterBenevoleNom').textContent = benevoleNom;
     document.getElementById('accepterTacheNom').textContent = tacheNom;
-    document.getElementById('accepterForm').action = `/admin/accepter-demande-tache/${demandeId}`;
+    document.getElementById('accepterForm').action = `/admin/accepter-demande/${demandeId}`;
     document.getElementById('accepterCsrfToken').value = csrfToken;
     document.getElementById('accepterModal').style.display = 'block';
 }
@@ -346,7 +346,7 @@ function openRefuserModal(button) {
     
     document.getElementById('refuserBenevoleNom').textContent = benevoleNom;
     document.getElementById('refuserTacheNom').textContent = tacheNom;
-    document.getElementById('refuserForm').action = `/admin/refuser-demande-tache/${demandeId}`;
+    document.getElementById('refuserForm').action = `/admin/refuser-demande/${demandeId}`;
     document.getElementById('refuserCsrfToken').value = csrfToken;
     document.getElementById('refuserModal').style.display = 'block';
 }

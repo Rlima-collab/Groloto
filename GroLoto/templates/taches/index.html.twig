@@ -23,6 +23,10 @@
 <div class="container">
     <div class="page-header">
         <h1 class="page-title">Toutes les Tâches</h1>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{{ path('admin_demandes_taches') }}" class="btn btn-secondary">Demandes en attente</a>
+            <a href="{{ path('tache_new') }}" class="btn btn-primary">+ Nouvelle tâche</a>
+        </div>
     </div>
 
     {# Filtres et Tri #}
@@ -161,11 +165,12 @@
                                                 <a href="{{ path('tache_edit', {'id': tache.id}) }}" 
                                                    class="btn btn-small btn-primary" 
                                                    title="Modifier">Modifier</a>
-
-                                                <a href="{{ path('tache_proposer', {'id': tache.id}) }}" 
-
+                                                <a href="{{ path('tache_duplicate', {'id': tache.id}) }}" 
+                                                   class="btn btn-small btn-success" 
+                                                   title="Dupliquer la tâche">Dupliquer</a>
+                                                <a href="{{ path('tache_affectation', {'id': tache.id}) }}" 
                                                    class="btn btn-small btn-secondary" 
-                                                   title="Proposer aux bénévoles">Proposer</a>
+                                                   title="Gerer les benevoles">Benevoles</a>
                                                 <button type="button" 
                                                         class="btn btn-small btn-danger" 
                                                         data-tache-id="{{ tache.id }}"

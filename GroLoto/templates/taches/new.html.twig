@@ -75,28 +75,6 @@
                             {{ form_widget(form.remarque) }}
                             {{ form_errors(form.remarque) }}
                         </div>
-
-                        <div class="form-group full-width" id="benevoles-section" style="display: none; background: #f9fafb; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
-                            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #1f2937;">Proposer aux bénévoles disponibles</h3>
-                            <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 1rem;">Les bénévoles déjà occupés sur ce créneau sont grisés.</p>
-                            
-                            <div style="margin-bottom: 1rem; position: relative;">
-                                <i class="bi bi-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                                <input type="text" id="benevole-search" class="form-control" placeholder="Rechercher un bénévole..." style="padding-left: 2.5rem;">
-                            </div>
-
-                            <div class="benevoles-list" style="max-height: 300px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 0.375rem; background: white;">
-                                {% for child in form.benevoles %}
-                                    <div class="benevole-option" style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; transition: background-color 0.2s;">
-                                        {{ form_widget(child, {'attr': {'style': 'width: 1.2rem; height: 1.2rem; margin-right: 0.75rem; cursor: pointer;'}}) }}
-                                        {{ form_label(child, null, {'label_attr': {'style': 'margin-bottom: 0; cursor: pointer; flex: 1; font-weight: 500;'}}) }}
-                                    </div>
-                                {% endfor %}
-                            </div>
-                            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #6b7280; text-align: right;">
-                                <span id="count-selected">0</span> bénévole(s) sélectionné(s)
-                            </div>
-                        </div>
                     </div>
 
                     <div class="form-actions">
@@ -107,96 +85,16 @@
             </div>
         </div>
 
+        <div class="card alert-conseil">
+            <div class="card-content">
+                <h4>💡 Besoin d'ajouter d'autres plages?</h4>
+                <p>
+                    Vous pouvez créer la tâche avec une première plage horaire, puis utiliser le bouton "Dupliquer" dans la liste pour créer d'autres plages sur d'autres jours!
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const debutInput = document.getElementById('tache_debut');
-    const finInput = document.getElementById('tache_fin');
-    const benevolesSection = document.getElementById('benevoles-section');
-    const checkboxes = document.querySelectorAll('.benevole-option input[type="checkbox"]');
-    const labels = document.querySelectorAll('.benevole-option label');
-    const searchInput = document.getElementById('benevole-search');
-    const benevoleOptions = document.querySelectorAll('.benevole-option');
-    const countSelectedSpan = document.getElementById('count-selected');
-
-    // Recherche en temps réel
-    if (searchInput) {
-        searchInput.addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase();
-            benevoleOptions.forEach(option => {
-                const label = option.querySelector('label').textContent.toLowerCase();
-                if (label.includes(term)) {
-                    option.style.display = 'flex';
-                } else {
-                    option.style.display = 'none';
-                }
-            });
-        });
-    }
-
-    // Compteur de sélection
-    function updateCount() {
-        if (countSelectedSpan) {
-            const count = document.querySelectorAll('.benevole-option input[type="checkbox"]:checked').length;
-            countSelectedSpan.textContent = count;
-        }
-    }
-
-    checkboxes.forEach(cb => {
-        cb.addEventListener('change', updateCount);
-    });
-
-    function updateAvailability() {
-        const start = debutInput.value;
-        const end = finInput.value;
-
-        if (start && end) {
-            benevolesSection.style.display = 'block';
-            
-            // Appel API pour vérifier la disponibilité
-            fetch(`/taches/api/check-availability?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`)
-                .then(response => response.json())
-                .then(data => {
-                    const unavailableIds = data.unavailable_ids || [];
-                    
-                    checkboxes.forEach(cb => {
-                        const benevoleId = parseInt(cb.value);
-                        const label = cb.nextElementSibling; // Le label est juste après
-                        const parentDiv = cb.closest('.benevole-option');
-
-                        if (unavailableIds.includes(benevoleId)) {
-                            cb.disabled = true;
-                            cb.checked = false;
-                            parentDiv.style.opacity = '0.5';
-                            parentDiv.title = 'Indisponible sur ce créneau';
-                            if (!label.innerHTML.includes('(Indisponible)')) {
-                                label.innerHTML += ' <span style="color: #dc2626; font-size: 0.8em;">(Indisponible)</span>';
-                            }
-                        } else {
-                            cb.disabled = false;
-                            parentDiv.style.opacity = '1';
-                            parentDiv.title = 'Disponible';
-                            // Nettoyer le label si besoin
-                            label.innerHTML = label.innerHTML.replace(' <span style="color: #dc2626; font-size: 0.8em;">(Indisponible)</span>', '');
-                        }
-                    });
-                })
-                .catch(err => console.error('Erreur lors de la vérification des disponibilités:', err));
-        } else {
-            benevolesSection.style.display = 'none';
-        }
-    }
-
-    if (debutInput && finInput) {
-        debutInput.addEventListener('change', updateAvailability);
-        finInput.addEventListener('change', updateAvailability);
-        // Vérifier au chargement si des dates sont déjà là (ex: rechargement après erreur)
-        updateAvailability();
-    }
-});
-</script>
 {% endblock %}
 

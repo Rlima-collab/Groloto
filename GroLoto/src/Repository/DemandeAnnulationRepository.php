@@ -24,10 +24,6 @@ class DemandeAnnulationRepository extends ServiceEntityRepository
     public function findEnAttente(): array
     {
         return $this->createQueryBuilder('d')
-            ->leftJoin('d.affectation', 'a')
-            ->addSelect('a')
-            ->leftJoin('a.tache', 't')
-            ->addSelect('t')
             ->where('d.statut = :statut')
             ->setParameter('statut', 'en_attente')
             ->orderBy('d.dateDemande', 'DESC')
@@ -43,21 +39,6 @@ class DemandeAnnulationRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('d')
             ->where('d.benevole = :benevole')
             ->setParameter('benevole', $benevole)
-            ->orderBy('d.dateDemande', 'DESC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * Trouver toutes les demandes avec chargement anticipé des relations
-     */
-    public function findAllWithRelations(): array
-    {
-        return $this->createQueryBuilder('d')
-            ->leftJoin('d.affectation', 'a')
-            ->addSelect('a')
-            ->leftJoin('a.tache', 't')
-            ->addSelect('t')
             ->orderBy('d.dateDemande', 'DESC')
             ->getQuery()
             ->getResult();

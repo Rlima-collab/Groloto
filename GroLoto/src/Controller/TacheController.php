@@ -10,12 +10,10 @@ use App\Form\TacheAffectationType;
 use App\Repository\TacheRepository;
 use App\Repository\AffectationTacheRepository;
 use App\Repository\BenevoleRepository;
-use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -74,15 +72,9 @@ class TacheController extends AbstractController
             $affectations = $affectationRepository->findBy(['tache' => $tache]);
             $benevoles = [];
             foreach ($affectations as $affectation) {
-                // On ne garde que les bénévoles réellement assignés (acceptés)
-                if ($affectation->getStatut() !== 'assigne') {
-                    continue;
-                }
-
                 $benevole = $affectation->getBenevole();
                 if ($benevole && $benevole->getUtilisateur()) {
-                    $nom = $benevole->getUtilisateur()->getPrenom() . ' ' . $benevole->getUtilisateur()->getNom();
-                    $benevoles[] = $nom;
+                    $benevoles[] = $benevole->getUtilisateur()->getPrenom() . ' ' . $benevole->getUtilisateur()->getNom();
                 }
             }
             
@@ -101,7 +93,7 @@ class TacheController extends AbstractController
     }
 
     #[Route('/new', name: 'tache_new')]
-    public function new(Request $request, EntityManagerInterface $entityManager, NotificationService $notificationService): Response
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $tache = new Tache();
         $form = $this->createForm(TacheType::class, $tache);
@@ -124,22 +116,6 @@ class TacheController extends AbstractController
             $tache = $this->syncTaskDates($tache);
             
             $entityManager->persist($tache);
-            
-            // Gestion des bénévoles sélectionnés
-            $benevoles = $form->get('benevoles')->getData();
-            foreach ($benevoles as $benevole) {
-                $affectation = new AffectationTache();
-                $affectation->setTache($tache);
-                $affectation->setBenevole($benevole);
-                $affectation->setUtilisateur($benevole->getUtilisateur());
-                $affectation->setDateAffectation(new \DateTime());
-                $affectation->setStatut('proposee');
-                $entityManager->persist($affectation);
-
-                // Notification
-                $notificationService->notifyBenevoleProposition($benevole->getUtilisateur(), $tache->getTitre());
-            }
-
             $entityManager->flush();
 
             $this->addFlash('success', 'La tâche a été créée avec succès !');
@@ -151,45 +127,6 @@ class TacheController extends AbstractController
         ]);
     }
 
-    #[Route('/api/check-availability', name: 'api_check_availability', methods: ['GET'])]
-    public function checkAvailability(Request $request, AffectationTacheRepository $affectationRepository): JsonResponse
-    {
-        $startStr = $request->query->get('start');
-        $endStr = $request->query->get('end');
-
-        if (!$startStr || !$endStr) {
-            return new JsonResponse(['error' => 'Missing parameters'], 400);
-        }
-
-        try {
-            $start = new \DateTime($startStr);
-            $end = new \DateTime($endStr);
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Invalid date format'], 400);
-        }
-
-        // Trouver tous les bénévoles qui ont une affectation "assigne" chevauchant cette période
-        // On doit faire une requête custom car findOverlappingAssignments prend un bénévole spécifique
-        // Ici on veut tous les bénévoles indisponibles d'un coup
-        
-        $indisponibles = $affectationRepository->createQueryBuilder('a')
-            ->select('IDENTITY(a.benevole) as id')
-            ->join('a.tache', 't')
-            ->where('a.statut = :statut')
-            ->andWhere('t.debut < :end')
-            ->andWhere('t.fin > :start')
-            ->setParameter('statut', 'assigne')
-            ->setParameter('start', $start)
-            ->setParameter('end', $end)
-            ->getQuery()
-            ->getResult();
-
-        $ids = array_map(fn($row) => $row['id'], $indisponibles);
-
-        return new JsonResponse(['unavailable_ids' => $ids]);
-    }
-
-
     #[Route('/{id}/edit', name: 'tache_edit')]
     public function edit(int $id, Request $request, TacheRepository $tacheRepository, EntityManagerInterface $entityManager): Response
     {
@@ -200,9 +137,7 @@ class TacheController extends AbstractController
             return $this->redirectToRoute('tache_index');
         }
 
-        $form = $this->createForm(TacheType::class, $tache, [
-            'include_benevoles' => false,
-        ]);
+        $form = $this->createForm(TacheType::class, $tache);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -360,121 +295,40 @@ class TacheController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/proposer', name: 'tache_proposer')]
-    public function proposer(
-        int $id,
-        Request $request,
-        TacheRepository $tacheRepository,
-        BenevoleRepository $benevoleRepository,
-        AffectationTacheRepository $affectationRepository,
-        EntityManagerInterface $entityManager,
-        NotificationService $notificationService
-    ): Response {
-        $tache = $tacheRepository->find($id);
-        if (!$tache) {
-            $this->addFlash('error', 'Tâche non trouvée.');
-            return $this->redirectToRoute('tache_index');
+    /**
+     * Synchronise les champs debut/fin de la tâche avec les plages horaires
+     */
+    private function syncTaskDates(Tache $tache): Tache
+    {
+        if ($tache->getPlagesHoraires()->isEmpty()) {
+            $tache->setDebut(null);
+            $tache->setFin(null);
+            return $tache;
         }
 
-        // Recherche
-        $search = $request->query->get('q');
-        $qb = $benevoleRepository->createQueryBuilder('b')
-            ->innerJoin('b.utilisateur', 'u')
-            ->addSelect('u')
-            ->where('b.actif = :actif')
-            ->setParameter('actif', true)
-            ->orderBy('u.nom', 'ASC');
-
-        if ($search) {
-            $qb->andWhere('(u.nom LIKE :search OR u.prenom LIKE :search OR u.email LIKE :search)')
-               ->setParameter('search', '%' . $search . '%');
-        }
+        $plages = $tache->getPlagesHoraires()->toArray();
         
-        $tousBenevoles = $qb->getQuery()->getResult();
-
-        // Préparer les données pour la vue
-        $benevolesData = [];
-        foreach ($tousBenevoles as $benevole) {
-            // Vérifier si déjà affecté à CETTE tâche
-            $affectationActuelle = $affectationRepository->findOneByTacheAndBenevole($tache, $benevole);
-            
-            // Vérifier chevauchement
-            $chevauchements = $affectationRepository->findOverlappingAssignments($benevole, $tache->getDebut(), $tache->getFin());
-            
-            $estPrisAilleurs = false;
-            foreach ($chevauchements as $chevauchement) {
-                if ($chevauchement->getTache()->getId() !== $tache->getId()) {
-                    $estPrisAilleurs = true;
-                    break;
-                }
-            }
-
-            $statut = 'disponible';
-            if ($affectationActuelle) {
-                $statut = $affectationActuelle->getStatut(); // 'assigne', 'proposee', etc.
-            } elseif ($estPrisAilleurs) {
-                $statut = 'indisponible';
-            }
-
-            $benevolesData[] = [
-                'benevole' => $benevole,
-                'statut' => $statut,
-                'affectation' => $affectationActuelle
-            ];
-        }
-
-        // Traitement du formulaire (POST)
-        if ($request->isMethod('POST')) {
-            $benevolesIds = $request->request->all('benevoles'); // Array of IDs
-            if (!empty($benevolesIds)) {
-                foreach ($benevolesIds as $benevoleId) {
-                    $benevole = $benevoleRepository->find($benevoleId);
-                    if ($benevole) {
-                        // Vérifier à nouveau la disponibilité pour être sûr
-                        $chevauchements = $affectationRepository->findOverlappingAssignments($benevole, $tache->getDebut(), $tache->getFin());
-                        $estPrisAilleurs = false;
-                        foreach ($chevauchements as $chevauchement) {
-                            if ($chevauchement->getTache()->getId() !== $tache->getId()) {
-                                $estPrisAilleurs = true;
-                                break;
-                            }
-                        }
-
-                        if (!$estPrisAilleurs) {
-                            // Vérifier si déjà affecté/proposé
-                            $existing = $affectationRepository->findOneByTacheAndBenevole($tache, $benevole);
-                            if (!$existing) {
-                                $affectation = new AffectationTache();
-                                $affectation->setTache($tache);
-                                $affectation->setBenevole($benevole);
-                                $affectation->setUtilisateur($benevole->getUtilisateur());
-                                $affectation->setDateAffectation(new \DateTime());
-                                $affectation->setStatut('proposee');
-                                $entityManager->persist($affectation);
-
-                                // Notification
-                                $notificationService->notifyBenevoleProposition($benevole->getUtilisateur(), $tache->getTitre());
-                            }
-                        }
-                    }
-                }
-                $entityManager->flush();
-                $this->addFlash('success', 'Les propositions ont été envoyées.');
-                return $this->redirectToRoute('tache_proposer', ['id' => $id]);
+        // Récupérer le début le plus tôt
+        $debut = null;
+        foreach ($plages as $plage) {
+            $plageDebut = $plage->getDebut();
+            if ($debut === null || $plageDebut < $debut) {
+                $debut = $plageDebut;
             }
         }
 
-        if ($request->query->get('ajax')) {
-            return $this->render('taches/_benevoles_list.html.twig', [
-                'benevolesData' => $benevolesData,
-            ]);
+        // Récupérer la fin la plus tard
+        $fin = null;
+        foreach ($plages as $plage) {
+            $plageFin = $plage->getFin();
+            if ($fin === null || $plageFin > $fin) {
+                $fin = $plageFin;
+            }
         }
 
-        return $this->render('taches/proposer.html.twig', [
-            'tache' => $tache,
-            'benevolesData' => $benevolesData,
-            'search' => $search
-        ]);
-
+        $tache->setDebut($debut);
+        $tache->setFin($fin);
+        
+        return $tache;
     }
 }

@@ -39,7 +39,7 @@ class TacheRepository extends ServiceEntityRepository
     public function findTachesFutures(): array
     {
         return $this->createQueryBuilder('t')
-            ->andWhere('t.fin > :now')
+            ->andWhere('t.debut > :now')
             ->setParameter('now', new \DateTime())
             ->orderBy('t.debut', 'ASC')
             ->getQuery()
@@ -52,9 +52,7 @@ class TacheRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('t')
             ->innerJoin('App\Entity\AffectationTache', 'a', 'WITH', 'a.tache = t.id')
             ->andWhere('a.benevole = :benevoleId')
-            ->andWhere('a.statut = :statut')
             ->setParameter('benevoleId', $benevoleId)
-            ->setParameter('statut', 'assigne')
             ->orderBy('t.debut', 'ASC')
             ->getQuery()
             ->getResult();
@@ -65,11 +63,9 @@ class TacheRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('t')
             ->innerJoin('App\Entity\AffectationTache', 'a', 'WITH', 'a.tache = t.id')
             ->andWhere('a.benevole = :benevoleId')
-            ->andWhere('t.fin > :now')
-            ->andWhere('a.statut = :statut')
+            ->andWhere('t.debut > :now')
             ->setParameter('benevoleId', $benevoleId)
             ->setParameter('now', new \DateTime())
-            ->setParameter('statut', 'assigne')
             ->orderBy('t.debut', 'ASC')
             ->getQuery()
             ->getResult();
@@ -81,26 +77,9 @@ class TacheRepository extends ServiceEntityRepository
             ->innerJoin('App\Entity\AffectationTache', 'a', 'WITH', 'a.tache = t.id')
             ->andWhere('a.benevole = :benevoleId')
             ->andWhere('t.fin < :now')
-            ->andWhere('a.statut = :statut')
             ->setParameter('benevoleId', $benevoleId)
             ->setParameter('now', new \DateTime())
-            ->setParameter('statut', 'assigne')
             ->orderBy('t.fin', 'DESC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findPropositionsForBenevole(int $benevoleId): array
-    {
-        return $this->createQueryBuilder('t')
-            ->innerJoin('App\Entity\AffectationTache', 'a', 'WITH', 'a.tache = t.id')
-            ->andWhere('a.benevole = :benevoleId')
-            ->andWhere('a.statut = :statut')
-            ->andWhere('t.fin > :now')
-            ->setParameter('benevoleId', $benevoleId)
-            ->setParameter('statut', 'proposee')
-            ->setParameter('now', new \DateTime())
-            ->orderBy('t.debut', 'ASC')
             ->getQuery()
             ->getResult();
     }

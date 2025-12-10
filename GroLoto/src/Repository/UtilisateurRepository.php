@@ -77,12 +77,4 @@ class UtilisateurRepository extends ServiceEntityRepository implements PasswordU
             ->getQuery()
             ->getResult();
     }
-
-    /**
-     * Find users by role (alias for findByRoleName)
-     */
-    public function findByRole(string $roleName): array
-    {
-        return $this->findByRoleName($roleName);
-    }
 }

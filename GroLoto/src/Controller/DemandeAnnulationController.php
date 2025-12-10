@@ -78,7 +78,7 @@ class DemandeAnnulationController extends AbstractController
         $entityManager->flush();
 
         // Notifier tous les admins
-        $admins = $utilisateurRepository->findByRoleName('admin');
+        $admins = $utilisateurRepository->findByRole('admin');
         $benevoleNom = $user->getPrenom() . ' ' . $user->getNom();
         $tacheNom = $affectation->getTache()->getTitre();
         
@@ -87,7 +87,7 @@ class DemandeAnnulationController extends AbstractController
         }
 
         $this->addFlash('success', 'Votre demande d\'annulation a été envoyée à l\'administrateur.');
-        return $this->redirectToRoute('benevole_mon_planning');
+        return $this->redirectToRoute('benevoles');
     }
 
     /**
@@ -98,7 +98,7 @@ class DemandeAnnulationController extends AbstractController
     public function listeDemandes(DemandeAnnulationRepository $demandeAnnulationRepository): Response
     {
         $demandesEnAttente = $demandeAnnulationRepository->findEnAttente();
-        $toutesLesDemandes = $demandeAnnulationRepository->findAllWithRelations();
+        $toutesLesDemandes = $demandeAnnulationRepository->findBy([], ['dateDemande' => 'DESC']);
 
         return $this->render('demande_annulation/admin_liste.html.twig', [
             'demandes_en_attente' => $demandesEnAttente,
@@ -136,27 +136,27 @@ class DemandeAnnulationController extends AbstractController
             return $this->redirectToRoute('admin_demandes_annulations');
         }
 
-        // Récupérer les informations AVANT de supprimer l'affectation
+        // Supprimer l'affectation
         $affectation = $demande->getAffectation();
         $tacheNom = $affectation->getTache()->getTitre();
-        $benevoleUtilisateur = $demande->getBenevole()->getUtilisateur();
-        $benevoleNom = $benevoleUtilisateur->getPrenom() . ' ' . $benevoleUtilisateur->getNom();
+        $entityManager->remove($affectation);
 
-        // Mettre à jour la demande (retirer la référence à l'affectation)
+        // Mettre à jour la demande
         $demande->setStatut('acceptee');
         $demande->setDateReponse(new \DateTime());
         $demande->setAdminReponse($this->getUser());
         $demande->setMessageAdmin($request->request->get('message_admin', ''));
-        $demande->setTacheTitre($tacheNom); // Sauvegarder le titre avant suppression
-        $demande->setAffectation(null); // Détacher avant suppression
 
-        // Supprimer l'affectation
-        $entityManager->remove($affectation);
         $entityManager->flush();
 
         // Notifier le bénévole
-        $notificationService->notifyBenevoleAnnulationAcceptee($benevoleUtilisateur, $tacheNom);
+        $notificationService->notifyBenevoleAnnulationAcceptee(
+            $demande->getBenevole()->getUtilisateur(),
+            $tacheNom
+        );
 
+        $benevoleNom = $demande->getBenevole()->getUtilisateur()->getPrenom() . ' ' . 
+                       $demande->getBenevole()->getUtilisateur()->getNom();
         $this->addFlash('success', "La demande d'annulation de {$benevoleNom} a été acceptée.");
         return $this->redirectToRoute('admin_demandes_annulations');
     }

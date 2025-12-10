@@ -241,7 +241,7 @@ CREATE TABLE AFFECTATION_TACHE (
     date_affectation DATETIME DEFAULT CURRENT_TIMESTAMP,
     statut TEXT DEFAULT 'assigne',
     remarque TEXT,
-    CONSTRAINT check_statut CHECK (statut IN ('assigne', 'confirme', 'annule', 'proposee', 'refusee')),
+    CONSTRAINT check_statut CHECK (statut IN ('assigne', 'confirme', 'annule')),
     FOREIGN KEY (id_tache) REFERENCES TACHE(id),
     FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
     FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)

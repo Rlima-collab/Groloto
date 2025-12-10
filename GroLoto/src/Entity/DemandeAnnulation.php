@@ -16,7 +16,7 @@ class DemandeAnnulation
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: AffectationTache::class)]
-    #[ORM\JoinColumn(name: 'id_affectation', nullable: true, onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(name: 'id_affectation', nullable: false)]
     private ?AffectationTache $affectation = null;
 
     #[ORM\ManyToOne(targetEntity: Benevole::class)]
@@ -31,9 +31,6 @@ class DemandeAnnulation
 
     #[ORM\Column(name: 'motif_benevole', type: Types::TEXT, nullable: true)]
     private ?string $motifBenevole = null;
-
-    #[ORM\Column(name: 'tache_titre', length: 255, nullable: true)]
-    private ?string $tacheTitre = null;
 
     #[ORM\Column(name: 'message_admin', type: Types::TEXT, nullable: true)]
     private ?string $messageAdmin = null;
@@ -102,17 +99,6 @@ class DemandeAnnulation
     public function setMotifBenevole(?string $motifBenevole): self
     {
         $this->motifBenevole = $motifBenevole;
-        return $this;
-    }
-
-    public function getTacheTitre(): ?string
-    {
-        return $this->tacheTitre;
-    }
-
-    public function setTacheTitre(?string $tacheTitre): self
-    {
-        $this->tacheTitre = $tacheTitre;
         return $this;
     }
 
