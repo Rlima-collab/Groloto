@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TacheRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -36,6 +38,14 @@ class Tache
     #[ORM\ManyToOne(targetEntity: Weekend::class, inversedBy: 'taches')]
     #[ORM\JoinColumn(name: 'id_weekend', referencedColumnName: 'id', nullable: false)]
     private ?Weekend $weekend = null;
+
+    #[ORM\OneToMany(mappedBy: 'tache', targetEntity: AffectationTache::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $affectations;
+
+    public function __construct()
+    {
+        $this->affectations = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     // ====================
     // GETTERS & SETTERS
@@ -120,6 +130,36 @@ class Tache
     public function setWeekend(Weekend $weekend): self
     {
         $this->weekend = $weekend;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AffectationTache>
+     */
+    public function getAffectations(): Collection
+    {
+        return $this->affectations;
+    }
+
+    public function addAffectation(AffectationTache $affectation): self
+    {
+        if (!$this->affectations->contains($affectation)) {
+            $this->affectations->add($affectation);
+            $affectation->setTache($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAffectation(AffectationTache $affectation): self
+    {
+        if ($this->affectations->removeElement($affectation)) {
+            // set the owning side to null (unless already changed)
+            if ($affectation->getTache() === $this) {
+                $affectation->setTache(null);
+            }
+        }
+
         return $this;
     }
 }
