@@ -32,6 +32,9 @@ class Tache
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $remarque = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $posteRequis = null;
+
     #[ORM\ManyToOne(targetEntity: Weekend::class, inversedBy: 'taches')]
     #[ORM\JoinColumn(name: 'id_weekend', referencedColumnName: 'id', nullable: false)]
     private ?Weekend $weekend = null;
@@ -105,6 +108,17 @@ class Tache
     public function setRemarque(?string $remarque): self
     {
         $this->remarque = $remarque;
+        return $this;
+    }
+
+    public function getPosteRequis(): ?string
+    {
+        return $this->posteRequis;
+    }
+
+    public function setPosteRequis(?string $posteRequis): self
+    {
+        $this->posteRequis = $posteRequis;
         return $this;
     }
 

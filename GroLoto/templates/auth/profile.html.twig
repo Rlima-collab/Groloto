@@ -120,6 +120,13 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
                             {{ user.dateModification ? user.dateModification|date('d/m/Y à H:i') : 'Jamais' }}
                         </div>
                     </div>
+                    <div class="info-item">
+                        <div class="info-label">Mot de passe</div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-family: 'Courier New', monospace; font-weight: 600; letter-spacing: 2px; color: #6b7280;">•••••••••</span>
+                            <span style="font-size: 11px; color: #9ca3af; font-style: italic;">(Sécurisé - non affichable)</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
