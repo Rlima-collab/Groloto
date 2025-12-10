@@ -232,15 +232,4 @@ class InscriptionMecene
         $this->adresse_postale = $adresse_postale;
         return $this;
     }
-
-    public function getTypeDon(): ?string
-    {
-        return $this->type_don;
-    }
-
-    public function setTypeDon(string $type_don): self
-    {
-        $this->type_don = $type_don;
-        return $this;
-    }
 }
