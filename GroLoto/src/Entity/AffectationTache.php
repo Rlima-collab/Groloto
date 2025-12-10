@@ -13,7 +13,7 @@ class AffectationTache
     #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Tache::class)]
+    #[ORM\ManyToOne(targetEntity: Tache::class, inversedBy: 'affectations')]
     #[ORM\JoinColumn(name: "id_tache", referencedColumnName: "id", nullable: false)]
     private ?Tache $tache = null;
 

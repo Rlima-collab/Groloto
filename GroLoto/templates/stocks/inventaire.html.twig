@@ -74,6 +74,7 @@
                                 <th style="width: 10%; text-align: right;">Seuil</th>
                                 <th style="width: 15%; text-align: right;">Valeur estimée</th>
                                 <th style="width: 10%;">Unité</th>
+                                <th style="width: 10%;">Source</th>
                                 <th style="width: 15%; text-align: center;">Statut</th>
                             </tr>
                         </thead>
@@ -98,6 +99,23 @@
                                     </td>
                                     <td>
                                         <span class="badge unit">{{ item.unite }}</span>
+                                    </td>
+                                    <td>
+                                        {% if item.source == 'achat' %}
+                                            <span class="badge bg-primary">Achat</span>
+                                        {% elseif item.source == 'don' %}
+                                            <span class="badge bg-success">Don</span>
+                                        {% elseif item.source == 'pret' %}
+                                            <span class="badge bg-warning text-dark">Prêt</span>
+                                            {% if item.dateRetour %}
+                                                <br><small class="text-muted">Retour: {{ item.dateRetour|date('d/m/Y') }}</small>
+                                            {% endif %}
+                                            {% if item.preteur %}
+                                                <br><small class="text-muted">De: {{ item.preteur }}</small>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ item.source|default('Inconnu') }}</span>
+                                        {% endif %}
                                     </td>
                                     <td style="text-align: center;">
                                         {% if item.quantite <= item.seuil * 0.5 %}

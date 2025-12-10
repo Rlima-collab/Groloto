@@ -78,6 +78,7 @@ CREATE TABLE MECENE (
     id_utilisateur INTEGER,
     organisation TEXT NOT NULL,
     siret TEXT NOT NULL,
+    adresse_postale TEXT,
     FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
@@ -140,6 +141,8 @@ CREATE TABLE INSCRIPTION_MECENE (
     quantite INTEGER NOT NULL,
     valeur_unitaire REAL,
     remarque_refus TEXT,
+    adresse_postale TEXT,
+    type_don TEXT DEFAULT 'fonctionnement',
     CONSTRAINT check_statut CHECK (statut IN ('en_attente', 'accepte', 'refuse')),
     FOREIGN KEY (id_mecene) REFERENCES MECENE(id),
     FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
@@ -156,6 +159,9 @@ CREATE TABLE STOCK (
     valeur_unitaire REAL DEFAULT 0.0,
     remarque TEXT,
     derniere_modif DATETIME DEFAULT CURRENT_TIMESTAMP,
+    source TEXT DEFAULT 'achat',
+    date_retour DATE,
+    preteur TEXT,
     CONSTRAINT check_categorie CHECK (categorie IN ('bar', 'resto', 'deco', 'autre'))
 );
 

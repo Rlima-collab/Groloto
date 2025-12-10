@@ -39,12 +39,12 @@ class Tache
     #[ORM\JoinColumn(name: 'id_weekend', referencedColumnName: 'id', nullable: false)]
     private ?Weekend $weekend = null;
 
-    #[ORM\OneToMany(mappedBy: 'tache', targetEntity: PlageHoraire::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Collection $plagesHoraires;
+    #[ORM\OneToMany(mappedBy: 'tache', targetEntity: AffectationTache::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $affectations;
 
     public function __construct()
     {
-        $this->plagesHoraires = new ArrayCollection();
+        $this->affectations = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     // ====================
@@ -134,29 +134,32 @@ class Tache
     }
 
     /**
-     * @return Collection<int, PlageHoraire>
+     * @return Collection<int, AffectationTache>
      */
-    public function getPlagesHoraires(): Collection
+    public function getAffectations(): Collection
     {
-        return $this->plagesHoraires;
+        return $this->affectations;
     }
 
-    public function addPlageHoraire(PlageHoraire $plageHoraire): self
+    public function addAffectation(AffectationTache $affectation): self
     {
-        if (!$this->plagesHoraires->contains($plageHoraire)) {
-            $this->plagesHoraires->add($plageHoraire);
-            $plageHoraire->setTache($this);
+        if (!$this->affectations->contains($affectation)) {
+            $this->affectations->add($affectation);
+            $affectation->setTache($this);
         }
+
         return $this;
     }
 
-    public function removePlageHoraire(PlageHoraire $plageHoraire): self
+    public function removeAffectation(AffectationTache $affectation): self
     {
-        if ($this->plagesHoraires->removeElement($plageHoraire)) {
-            if ($plageHoraire->getTache() === $this) {
-                $plageHoraire->setTache(null);
+        if ($this->affectations->removeElement($affectation)) {
+            // set the owning side to null (unless already changed)
+            if ($affectation->getTache() === $this) {
+                $affectation->setTache(null);
             }
         }
+
         return $this;
     }
 }

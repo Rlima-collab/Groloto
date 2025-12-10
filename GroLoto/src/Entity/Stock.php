@@ -36,6 +36,15 @@ class Stock
     #[ORM\Column(type: "datetime", options: ["default" => "CURRENT_TIMESTAMP"])]
     private ?\DateTimeInterface $derniere_modif = null;
 
+    #[ORM\Column(length: 20, options: ["default" => "achat"])]
+    private ?string $source = 'achat';
+
+    #[ORM\Column(type: "date", nullable: true)]
+    private ?\DateTimeInterface $date_retour = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $preteur = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -96,6 +105,39 @@ class Stock
     public function setSeuil(int $seuil): self
     {
         $this->seuil = $seuil;
+        return $this;
+    }
+
+    public function getSource(): ?string
+    {
+        return $this->source;
+    }
+
+    public function setSource(string $source): self
+    {
+        $this->source = $source;
+        return $this;
+    }
+
+    public function getDateRetour(): ?\DateTimeInterface
+    {
+        return $this->date_retour;
+    }
+
+    public function setDateRetour(?\DateTimeInterface $date_retour): self
+    {
+        $this->date_retour = $date_retour;
+        return $this;
+    }
+
+    public function getPreteur(): ?string
+    {
+        return $this->preteur;
+    }
+
+    public function setPreteur(?string $preteur): self
+    {
+        $this->preteur = $preteur;
         return $this;
     }
 

@@ -113,7 +113,10 @@
                     <p class="empty-message">Aucun événement pour ce weekend.</p>
                     {% if isAdmin %}
                     <a href="{{ path('app_evenement_create', {'preselect_weekend': weekend.id}) }}" class="btn-add">
-                        + Ajouter un événement
+                        <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Ajouter un événement
                     </a>
                     {% endif %}
                 {% else %}
@@ -142,7 +145,10 @@
                     </div>
                     {% if isAdmin %}
                     <a href="{{ path('app_evenement_create', {'preselect_weekend': weekend.id}) }}" class="btn-add">
-                        + Ajouter un événement
+                        <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Ajouter un événement
                     </a>
                     {% endif %}
                 {% endif %}
@@ -177,6 +183,20 @@
                                         <span>{{ tache.posteRequis }}</span>
                                     {% endif %}
                                 </div>
+                                {% if tache.affectations|length > 0 %}
+                                    <div class="item-volunteers" style="margin-top: 0.5rem;">
+                                        <strong style="font-size: 0.9em; color: #666;">Bénévoles :</strong>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem;">
+                                            {% for affectation in tache.affectations %}
+                                                {% if affectation.benevole and affectation.benevole.utilisateur %}
+                                                    <span class="badge" style="background-color: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; font-weight: 500;">
+                                                        {{ affectation.benevole.utilisateur.prenom }} {{ affectation.benevole.utilisateur.nom }}
+                                                    </span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
@@ -185,6 +205,39 @@
             </div>
         </div>
     </div>
+
+    {% if isAdmin and benevoles is defined and benevoles is not empty %}
+    <div class="details-card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <h2>Bénévoles mobilisés ({{ benevoles|length }})</h2>
+        </div>
+        <div class="card-content">
+            <div class="list-items">
+                {% for benevole in benevoles %}
+                <div class="list-item">
+                    <div class="item-icon" style="background: #eef2ff; color: #4f46e5;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <div class="item-content">
+                        <h4>{{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}</h4>
+                        <div class="item-meta">
+                            <span>{{ benevole.utilisateur.email }}</span>
+                            {% if benevole.utilisateur.telephone %}
+                                <span>{{ benevole.utilisateur.telephone }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     {% if isAdmin %}
     <div class="danger-zone">
@@ -385,19 +438,33 @@
 }
 
 .btn-add {
-    display: inline-block;
-    background: #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
+    padding: 0.875rem 1.5rem;
+    border-radius: 12px;
     text-decoration: none;
     font-weight: 600;
-    margin-top: 1rem;
-    transition: all 0.3s ease;
+    margin-top: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06);
+    width: 100%;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-add:hover {
-    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.25), 0 4px 6px -2px rgba(16, 185, 129, 0.15);
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    color: white;
+}
+
+.btn-add:active {
+    transform: translateY(0);
 }
 
 .list-items {
