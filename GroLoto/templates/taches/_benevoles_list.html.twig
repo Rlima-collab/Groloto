@@ -3,29 +3,52 @@
     {% set statut = item.statut %}
     {% set affectation = item.affectation %}
     
-    <div class="benevole-item {% if statut != 'disponible' %}disabled{% endif %}">
-        <div class="checkbox-wrapper">
-            {% if statut == 'disponible' %}
-                <input type="checkbox" name="benevoles[]" value="{{ benevole.id }}" id="benevole_{{ benevole.id }}">
-            {% else %}
-                <input type="checkbox" disabled>
-            {% endif %}
-        </div>
-        <div class="benevole-info" style="margin-left: 1rem;">
-            <label for="benevole_{{ benevole.id }}" style="font-weight: 600; display: block;">
+    <div class="benevole-item {% if statut == 'indisponible' %}disabled{% endif %}">
+        <div class="benevole-info">
+            <div style="font-weight: 600;">
                 {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}
-            </label>
+            </div>
             <span style="color: #6b7280; font-size: 0.875rem;">{{ benevole.utilisateur.email }}</span>
         </div>
+        
         <div class="benevole-status status-{{ statut }}">
             {% if statut == 'assigne' %}
-                Déjà assigné
+                <i class="bi bi-check-circle-fill"></i> Assigné
             {% elseif statut == 'proposee' %}
-                Proposition envoyée
+                <i class="bi bi-hourglass-split"></i> Proposition envoyée
             {% elseif statut == 'indisponible' %}
-                Indisponible (autre tâche)
+                <i class="bi bi-x-circle"></i> Indisponible
             {% else %}
-                Disponible
+                <i class="bi bi-circle"></i> Disponible
+            {% endif %}
+        </div>
+        
+        <div class="benevole-actions">
+            {% if statut == 'disponible' %}
+                <form method="post" style="display: inline;">
+                    <input type="hidden" name="benevole_id" value="{{ benevole.id }}">
+                    <input type="hidden" name="action" value="assigner">
+                    <button type="submit" class="btn btn-small btn-primary" title="Assigner directement">
+                        <i class="bi bi-person-check"></i> Assigner
+                    </button>
+                </form>
+                <form method="post" style="display: inline;">
+                    <input type="hidden" name="benevole_id" value="{{ benevole.id }}">
+                    <input type="hidden" name="action" value="proposer">
+                    <button type="submit" class="btn btn-small btn-warning" title="Envoyer une proposition">
+                        <i class="bi bi-send"></i> Proposer
+                    </button>
+                </form>
+            {% elseif statut == 'assigne' or statut == 'proposee' %}
+                <form method="post" style="display: inline;">
+                    <input type="hidden" name="benevole_id" value="{{ benevole.id }}">
+                    <input type="hidden" name="action" value="retirer">
+                    <button type="submit" class="btn btn-small btn-outline-danger" title="Retirer l'affectation">
+                        <i class="bi bi-x-lg"></i> Retirer
+                    </button>
+                </form>
+            {% else %}
+                <span class="text-muted" style="font-size: 0.75rem;">Non disponible</span>
             {% endif %}
         </div>
     </div>

@@ -202,6 +202,19 @@ class NotificationService
     }
 
     /**
+     * Notifier un bénévole qu'il a été assigné à une tâche
+     */
+    public function notifyBenevoleAssigne(Utilisateur $benevole, string $tacheNom): void
+    {
+        $this->createNotification(
+            $benevole,
+            'assignation_tache',
+            "Vous avez été assigné à la tâche : \"{$tacheNom}\".",
+            '/benevole/mon-planning'
+        );
+    }
+
+    /**
      * Notifier l'admin qu'un bénévole a accepté une proposition
      */
     public function notifyAdminPropositionAcceptee(Utilisateur $admin, string $benevoleNom, string $tacheNom): void

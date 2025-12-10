@@ -193,6 +193,14 @@ class DemandeAnnulationController extends AbstractController
 
         $messageAdmin = $request->request->get('message_admin', '');
         
+        // Récupérer le titre de la tâche (depuis l'affectation si elle existe, sinon depuis tacheTitre)
+        $affectation = $demande->getAffectation();
+        if ($affectation) {
+            $tacheNom = $affectation->getTache()->getTitre();
+        } else {
+            $tacheNom = $demande->getTacheTitre() ?: 'Tâche inconnue';
+        }
+        
         $demande->setStatut('refusee');
         $demande->setDateReponse(new \DateTime());
         $demande->setAdminReponse($this->getUser());
@@ -203,7 +211,7 @@ class DemandeAnnulationController extends AbstractController
         // Notifier le bénévole
         $notificationService->notifyBenevoleAnnulationRefusee(
             $demande->getBenevole()->getUtilisateur(),
-            $demande->getAffectation()->getTache()->getTitre(),
+            $tacheNom,
             $messageAdmin
         );
 

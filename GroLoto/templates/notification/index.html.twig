@@ -338,7 +338,7 @@
                         </div>
                         <div class="notification-body">
                             <p class="notification-message">
-                                {% if notif.reponse %}
+                                {% if notif.type == 'reponse_contact' %}
                                     Un admin a répondu à votre message
                                 {% else %}
                                     {{ notif.message }}
@@ -367,14 +367,6 @@
                             <strong>Votre message initial :</strong><br>
                             {{ notif.message }}
                         </div>
-
-                        <!-- Réponse de l'admin -->
-                        {% if notif.reponse %}
-                            <div class="admin-reply">
-                                <strong>Réponse de l'admin :</strong>
-                                <div>{{ notif.reponse|nl2br }}</div>
-                            </div>
-                        {% endif %}
 
                         <!-- Formulaire de réponse (pour tout le monde) -->
                         {% if notif.type == 'contact' %}

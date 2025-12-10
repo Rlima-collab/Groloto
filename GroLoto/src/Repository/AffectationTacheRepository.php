@@ -100,4 +100,19 @@ class AffectationTacheRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Compte les affectations par tâche et statut
+     */
+    public function countByTacheAndStatut($tache, string $statut): int
+    {
+        return (int) $this->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.tache = :tache')
+            ->andWhere('a.statut = :statut')
+            ->setParameter('tache', $tache)
+            ->setParameter('statut', $statut)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

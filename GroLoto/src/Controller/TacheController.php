@@ -68,28 +68,39 @@ class TacheController extends AbstractController
         
         $taches = $queryBuilder->getQuery()->getResult();
         
-        // Pour chaque tâche, récupérer les bénévoles assignés
+        // Pour chaque tâche, récupérer les bénévoles assignés et proposés
         $tachesData = [];
         foreach ($taches as $tache) {
             $affectations = $affectationRepository->findBy(['tache' => $tache]);
-            $benevoles = [];
+            $benevolesAssignes = [];
+            $benevolesProposees = [];
+            
             foreach ($affectations as $affectation) {
-                // On ne garde que les bénévoles réellement assignés (acceptés)
-                if ($affectation->getStatut() !== 'assigne') {
-                    continue;
-                }
-
                 $benevole = $affectation->getBenevole();
                 if ($benevole && $benevole->getUtilisateur()) {
                     $nom = $benevole->getUtilisateur()->getPrenom() . ' ' . $benevole->getUtilisateur()->getNom();
-                    $benevoles[] = $nom;
+                    
+                    if ($affectation->getStatut() === 'assigne') {
+                        $benevolesAssignes[] = $nom;
+                    } elseif ($affectation->getStatut() === 'proposee') {
+                        $benevolesProposees[] = $nom;
+                    }
                 }
             }
             
+            $nbAssignes = count($benevolesAssignes);
+            $nbProposees = count($benevolesProposees);
+            $maxPersonnes = $tache->getMaxPersonnes();
+            $placesRestantes = $maxPersonnes ? max(0, $maxPersonnes - $nbAssignes) : null;
+            
             $tachesData[] = [
                 'tache' => $tache,
-                'benevoles' => $benevoles,
-                'nbBenevoles' => count($benevoles)
+                'benevolesAssignes' => $benevolesAssignes,
+                'benevolesProposees' => $benevolesProposees,
+                'nbAssignes' => $nbAssignes,
+                'nbProposees' => $nbProposees,
+                'placesRestantes' => $placesRestantes,
+                'nbBenevoles' => $nbAssignes // Pour compatibilité
             ];
         }
         
@@ -319,6 +330,78 @@ class TacheController extends AbstractController
             return $this->redirectToRoute('tache_index');
         }
 
+        // Traitement des actions (POST)
+        if ($request->isMethod('POST')) {
+            $action = $request->request->get('action');
+            $benevoleId = $request->request->get('benevole_id');
+            
+            if ($benevoleId && $action) {
+                $benevole = $benevoleRepository->find($benevoleId);
+                if ($benevole) {
+                    $existingAffectation = $affectationRepository->findOneByTacheAndBenevole($tache, $benevole);
+                    
+                    switch ($action) {
+                        case 'assigner':
+                            if (!$existingAffectation) {
+                                // Vérifier le max de personnes
+                                $nbAssignes = $affectationRepository->countByTacheAndStatut($tache, 'assigne');
+                                if ($tache->getMaxPersonnes() && $nbAssignes >= $tache->getMaxPersonnes()) {
+                                    $this->addFlash('error', 'Le nombre maximum de bénévoles pour cette tâche est atteint.');
+                                    break;
+                                }
+                                
+                                $affectation = new AffectationTache();
+                                $affectation->setTache($tache);
+                                $affectation->setBenevole($benevole);
+                                $affectation->setUtilisateur($benevole->getUtilisateur());
+                                $affectation->setDateAffectation(new \DateTime());
+                                $affectation->setStatut('assigne');
+                                $entityManager->persist($affectation);
+                                $entityManager->flush();
+                                
+                                // Notification
+                                $notificationService->notifyBenevoleAssigne($benevole->getUtilisateur(), $tache->getTitre());
+                                $this->addFlash('success', $benevole->getUtilisateur()->getPrenom() . ' a été assigné à la tâche.');
+                            }
+                            break;
+                            
+                        case 'proposer':
+                            if (!$existingAffectation) {
+                                // Vérifier le max de personnes
+                                $nbAssignes = $affectationRepository->countByTacheAndStatut($tache, 'assigne');
+                                if ($tache->getMaxPersonnes() && $nbAssignes >= $tache->getMaxPersonnes()) {
+                                    $this->addFlash('error', 'Le nombre maximum de bénévoles pour cette tâche est atteint.');
+                                    break;
+                                }
+                                
+                                $affectation = new AffectationTache();
+                                $affectation->setTache($tache);
+                                $affectation->setBenevole($benevole);
+                                $affectation->setUtilisateur($benevole->getUtilisateur());
+                                $affectation->setDateAffectation(new \DateTime());
+                                $affectation->setStatut('proposee');
+                                $entityManager->persist($affectation);
+                                $entityManager->flush();
+                                
+                                // Notification
+                                $notificationService->notifyBenevoleProposition($benevole->getUtilisateur(), $tache->getTitre());
+                                $this->addFlash('success', 'Proposition envoyée à ' . $benevole->getUtilisateur()->getPrenom() . '.');
+                            }
+                            break;
+                            
+                        case 'retirer':
+                            if ($existingAffectation) {
+                                $entityManager->remove($existingAffectation);
+                                $entityManager->flush();
+                                $this->addFlash('success', $benevole->getUtilisateur()->getPrenom() . ' a été retiré de la tâche.');
+                            }
+                            break;
+                    }
+                }
+                return $this->redirectToRoute('tache_proposer', ['id' => $id]);
+            }
+        }
+
         // Recherche
         $search = $request->query->get('q');
         $qb = $benevoleRepository->createQueryBuilder('b')
@@ -366,46 +449,9 @@ class TacheController extends AbstractController
             ];
         }
 
-        // Traitement du formulaire (POST)
-        if ($request->isMethod('POST')) {
-            $benevolesIds = $request->request->all('benevoles'); // Array of IDs
-            if (!empty($benevolesIds)) {
-                foreach ($benevolesIds as $benevoleId) {
-                    $benevole = $benevoleRepository->find($benevoleId);
-                    if ($benevole) {
-                        // Vérifier à nouveau la disponibilité pour être sûr
-                        $chevauchements = $affectationRepository->findOverlappingAssignments($benevole, $tache->getDebut(), $tache->getFin());
-                        $estPrisAilleurs = false;
-                        foreach ($chevauchements as $chevauchement) {
-                            if ($chevauchement->getTache()->getId() !== $tache->getId()) {
-                                $estPrisAilleurs = true;
-                                break;
-                            }
-                        }
-
-                        if (!$estPrisAilleurs) {
-                            // Vérifier si déjà affecté/proposé
-                            $existing = $affectationRepository->findOneByTacheAndBenevole($tache, $benevole);
-                            if (!$existing) {
-                                $affectation = new AffectationTache();
-                                $affectation->setTache($tache);
-                                $affectation->setBenevole($benevole);
-                                $affectation->setUtilisateur($benevole->getUtilisateur());
-                                $affectation->setDateAffectation(new \DateTime());
-                                $affectation->setStatut('proposee');
-                                $entityManager->persist($affectation);
-
-                                // Notification
-                                $notificationService->notifyBenevoleProposition($benevole->getUtilisateur(), $tache->getTitre());
-                            }
-                        }
-                    }
-                }
-                $entityManager->flush();
-                $this->addFlash('success', 'Les propositions ont été envoyées.');
-                return $this->redirectToRoute('tache_proposer', ['id' => $id]);
-            }
-        }
+        // Calculer les statistiques
+        $nbAssignes = $affectationRepository->countByTacheAndStatut($tache, 'assigne');
+        $nbProposees = $affectationRepository->countByTacheAndStatut($tache, 'proposee');
 
         if ($request->query->get('ajax')) {
             return $this->render('taches/_benevoles_list.html.twig', [
@@ -416,7 +462,9 @@ class TacheController extends AbstractController
         return $this->render('taches/proposer.html.twig', [
             'tache' => $tache,
             'benevolesData' => $benevolesData,
-            'search' => $search
+            'search' => $search,
+            'nbAssignes' => $nbAssignes,
+            'nbProposees' => $nbProposees
         ]);
     }
 

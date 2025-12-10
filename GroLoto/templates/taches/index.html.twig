@@ -142,20 +142,53 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if data.nbBenevoles > 0 %}
-                                                <div style="font-size: 0.85em;">
-                                                    {% for benevole in data.benevoles %}
-                                                        <span class="badge" style="background: #059669; margin: 2px;">{{ benevole }}</span>
+                                            {# Bénévoles assignés #}
+                                            {% if data.nbAssignes > 0 %}
+                                                <div style="font-size: 0.85em; margin-bottom: 4px;">
+                                                    {% for benevole in data.benevolesAssignes %}
+                                                        <span class="badge" style="background: #059669; margin: 2px;" title="Assigné">{{ benevole }}</span>
                                                     {% endfor %}
                                                 </div>
-                                                <small style="color: #6b7280;">({{ data.nbBenevoles }} benevole{{ data.nbBenevoles > 1 ? 's' : '' }})</small>
+                                            {% endif %}
+                                            
+                                            {# Propositions en attente #}
+                                            {% if data.nbProposees > 0 %}
+                                                <div style="font-size: 0.85em;">
+                                                    {% for benevole in data.benevolesProposees %}
+                                                        <span class="badge" style="background: #f59e0b; margin: 2px;" title="Proposition en attente">
+                                                            <i class="bi bi-hourglass-split"></i> {{ benevole }}
+                                                        </span>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                            
+                                            {# Résumé #}
+                                            {% if data.nbAssignes == 0 and data.nbProposees == 0 %}
+                                                <span style="color: #dc2626;">Non assignée</span>
                                             {% else %}
-                                                <span style="color: #dc2626;">Non assignee</span>
+                                                <small style="color: #6b7280; display: block; margin-top: 4px;">
+                                                    {{ data.nbAssignes }} assigné{{ data.nbAssignes > 1 ? 's' : '' }}
+                                                    {% if data.nbProposees > 0 %}
+                                                        / {{ data.nbProposees }} en attente
+                                                    {% endif %}
+                                                </small>
                                             {% endif %}
                                         </td>
                                         <td>
                                             {% if tache.maxPersonnes %}
-                                                {{ tache.maxPersonnes }}
+                                                <div style="text-align: center;">
+                                                    <strong>{{ tache.maxPersonnes }}</strong>
+                                                    {% if data.placesRestantes is not null %}
+                                                        <br>
+                                                        {% if data.placesRestantes == 0 %}
+                                                            <span class="badge" style="background: #10b981;">Complet</span>
+                                                        {% elseif data.placesRestantes == 1 %}
+                                                            <span class="badge" style="background: #f59e0b;">1 place</span>
+                                                        {% else %}
+                                                            <span class="badge" style="background: #3b82f6;">{{ data.placesRestantes }} places</span>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </div>
                                             {% else %}
                                                 <span style="color: #9ca3af;">—</span>
                                             {% endif %}
@@ -168,12 +201,13 @@
                                                 <a href="{{ path('tache_duplicate', {'id': tache.id}) }}" 
                                                    class="btn btn-small btn-success" 
                                                    title="Dupliquer la tâche">Dupliquer</a>
-                                                <a href="{{ path('tache_affectation', {'id': tache.id}) }}" 
-                                                   class="btn btn-small btn-secondary" 
-                                                   title="Gerer les benevoles">Benevoles</a>
+                                                {% set isFull = tache.maxPersonnes and data.nbAssignes >= tache.maxPersonnes %}
                                                 <a href="{{ path('tache_proposer', {'id': tache.id}) }}" 
-                                                   class="btn btn-small btn-info" 
-                                                   title="Proposer à un bénévole">Proposer</a>
+                                                   class="btn btn-small {% if isFull %}btn-secondary disabled{% else %}btn-info{% endif %}" 
+                                                   title="{% if isFull %}Tâche complète{% else %}Gérer les bénévoles{% endif %}"
+                                                   {% if isFull %}style="opacity: 0.6; cursor: not-allowed;"{% endif %}>
+                                                   Bénévoles {% if isFull %}<i class="bi bi-check-circle-fill"></i>{% endif %}
+                                                </a>
                                                 <button type="button" 
                                                         class="btn btn-small btn-danger" 
                                                         data-tache-id="{{ tache.id }}"
