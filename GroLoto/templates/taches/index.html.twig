@@ -96,9 +96,7 @@
                                     <th>ID</th>
                                     <th>Titre</th>
                                     <th>Evenement</th>
-                                    <th>Date de debut</th>
-                                    <th>Date de fin</th>
-                                    <th>Poste requis</th>
+                                    <th>Plages horaires</th>
                                     <th>Benevoles assignes</th>
                                     <th>Max personnes</th>
                                     <th>Actions</th>
@@ -129,13 +127,18 @@
                                                 <span style="color: #9ca3af;">—</span>
                                             {% endif %}
                                         </td>
-                                        <td>{{ tache.debut|date('d/m/Y H:i') }}</td>
-                                        <td>{{ tache.fin|date('d/m/Y H:i') }}</td>
                                         <td>
-                                            {% if tache.posteRequis %}
-                                                <span class="badge" style="background: #f59e0b;">{{ tache.posteRequis }}</span>
+                                            {% if tache.plagesHoraires|length > 0 %}
+                                                <div style="font-size: 0.85em;">
+                                                    {% for plage in tache.plagesHoraires %}
+                                                        <div style="margin: 2px 0;">
+                                                            <span class="badge" style="background: #06b6d4;">{{ plage.jour|date('d/m') }}</span>
+                                                            <span class="badge" style="background: #14b8a6;">{{ plage.heureDebut|date('H:i') }} - {{ plage.heureFin|date('H:i') }}</span>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
                                             {% else %}
-                                                <span style="color: #9ca3af;">—</span>
+                                                <span style="color: #dc2626;">Pas de plage définie</span>
                                             {% endif %}
                                         </td>
                                         <td>
@@ -162,9 +165,15 @@
                                                 <a href="{{ path('tache_edit', {'id': tache.id}) }}" 
                                                    class="btn btn-small btn-primary" 
                                                    title="Modifier">Modifier</a>
+                                                <a href="{{ path('tache_duplicate', {'id': tache.id}) }}" 
+                                                   class="btn btn-small btn-success" 
+                                                   title="Dupliquer la tâche">Dupliquer</a>
                                                 <a href="{{ path('tache_affectation', {'id': tache.id}) }}" 
                                                    class="btn btn-small btn-secondary" 
                                                    title="Gerer les benevoles">Benevoles</a>
+                                                <a href="{{ path('tache_proposer', {'id': tache.id}) }}" 
+                                                   class="btn btn-small btn-info" 
+                                                   title="Proposer à un bénévole">Proposer</a>
                                                 <button type="button" 
                                                         class="btn btn-small btn-danger" 
                                                         data-tache-id="{{ tache.id }}"

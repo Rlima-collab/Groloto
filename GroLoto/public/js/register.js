@@ -321,21 +321,28 @@ function showError(field, message) {
     if (!input) return;
     
     input.classList.add('error');
-    const oldError = input.parentNode.querySelector('.error-message');
+    
+    // Trouver le conteneur parent (qui peut avoir l'icône œil)
+    const container = input.parentNode;
+    const oldError = container.parentNode.querySelector('.error-message');
     if (oldError) oldError.remove();
     
     const errorEl = document.createElement('small');
     errorEl.className = 'error-message';
     errorEl.textContent = message;
     errorEl.style.cssText = 'color: #ef4444; font-size: 0.8rem; margin-top: 5px; display: block;';
-    input.parentNode.appendChild(errorEl);
+    
+    // Insérer après le conteneur parent pour afficher en dessous
+    container.parentNode.insertBefore(errorEl, container.nextSibling);
 }
 
 function clearError(field) {
     const input = document.getElementById(field);
     if (input) {
         input.classList.remove('error');
-        const error = input.parentNode.querySelector('.error-message');
+        // Chercher l'erreur au niveau du grand-parent maintenant
+        const container = input.parentNode;
+        const error = container.parentNode.querySelector('.error-message');
         if (error) error.remove();
     }
 }

@@ -6,6 +6,10 @@ use App\Entity\Benevole;
 use App\Form\BenevoleEditType;
 use App\Repository\BenevoleRepository;
 use App\Repository\TacheRepository;
+use App\Repository\AffectationTacheRepository;
+use App\Repository\UtilisateurRepository;
+use App\Repository\DemandeAnnulationRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -126,10 +130,117 @@ class BenevoleController extends AbstractController
         ]);
     }
 
+    #[Route('/benevole/propositions', name: 'benevole_propositions')]
+    public function propositions(
+        BenevoleRepository $benevoleRepository,
+        TacheRepository $tacheRepository,
+        AffectationTacheRepository $affectationRepository,
+        UtilisateurRepository $utilisateurRepository,
+        NotificationService $notificationService,
+        EntityManagerInterface $entityManager,
+        Request $request
+    ): Response {
+        $user = $this->getUser();
+        $benevole = $benevoleRepository->findOneBy(['utilisateur' => $user]);
+
+        if (!$benevole) {
+            $this->addFlash('error', 'Vous devez être un bénévole.');
+            return $this->redirectToRoute('benevoles');
+        }
+
+        // Traitement des actions (Accepter/Refuser)
+        if ($request->isMethod('POST')) {
+            $action = $request->request->get('action');
+            $tacheId = $request->request->get('tache_id');
+            $tache = $tacheRepository->find($tacheId);
+            
+            if ($tache) {
+                $affectation = $affectationRepository->findOneByTacheAndBenevole($tache, $benevole);
+                if ($affectation && $affectation->getStatut() === 'proposee') {
+                    if ($action === 'accepter') {
+                        // Vérifier s'il reste des places disponibles
+                        $maxPersonnes = $tache->getMaxPersonnes();
+                        if ($maxPersonnes !== null) {
+                            $nbAssignes = $affectationRepository->countBenevolesAssignesByTache($tache->getId());
+                            if ($nbAssignes >= $maxPersonnes) {
+                                $this->addFlash('error', 'Désolé, il n\'y a plus de place disponible pour cette tâche. Le nombre maximum de bénévoles (' . $maxPersonnes . ') a été atteint.');
+                                return $this->redirectToRoute('benevole_propositions');
+                            }
+                        }
+
+                        // Vérifier chevauchement avant d'accepter
+                        $chevauchements = $affectationRepository->findOverlappingAssignments($benevole, $tache->getDebut(), $tache->getFin());
+                        $estPrisAilleurs = false;
+                        foreach ($chevauchements as $chevauchement) {
+                            if ($chevauchement->getTache()->getId() !== $tache->getId() && $chevauchement->getStatut() === 'assigne') {
+                                $estPrisAilleurs = true;
+                                break;
+                            }
+                        }
+                        
+                        if ($estPrisAilleurs) {
+                            $this->addFlash('error', 'Vous ne pouvez pas accepter cette tâche car vous avez déjà une tâche validée sur ce créneau.');
+                        } else {
+                            $affectation->setStatut('assigne');
+                            $entityManager->flush();
+                            $this->addFlash('success', 'Vous avez accepté la tâche.');
+
+                            // Notifier les admins
+                            $admins = $utilisateurRepository->findByRoleName('admin');
+                            foreach ($admins as $admin) {
+                                $notificationService->notifyAdminPropositionAcceptee(
+                                    $admin,
+                                    $user->getPrenom() . ' ' . $user->getNom(),
+                                    $tache->getTitre()
+                                );
+                            }
+                        }
+                    } elseif ($action === 'refuser') {
+                        $affectation->setStatut('refusee');
+                        $entityManager->flush();
+                        $this->addFlash('info', 'Vous avez refusé la tâche.');
+
+                        // Notifier les admins (optionnel, mais utile)
+                        $admins = $utilisateurRepository->findByRoleName('admin');
+                        foreach ($admins as $admin) {
+                            $notificationService->notifyAdminPropositionRefusee(
+                                $admin,
+                                $user->getPrenom() . ' ' . $user->getNom(),
+                                $tache->getTitre()
+                            );
+                        }
+                    }
+                }
+            }
+            return $this->redirectToRoute('benevole_propositions');
+        }
+
+        $propositions = $tacheRepository->findPropositionsForBenevole($benevole->getId());
+
+        // Calculer les places disponibles pour chaque proposition
+        $placesDisponibles = [];
+        foreach ($propositions as $tache) {
+            $maxPersonnes = $tache->getMaxPersonnes();
+            if ($maxPersonnes !== null) {
+                $nbAssignes = $affectationRepository->countBenevolesAssignesByTache($tache->getId());
+                $placesDisponibles[$tache->getId()] = max(0, $maxPersonnes - $nbAssignes);
+            } else {
+                $placesDisponibles[$tache->getId()] = null; // Illimité
+            }
+        }
+
+        return $this->render('benevoles/propositions.html.twig', [
+            'propositions' => $propositions,
+            'places_disponibles' => $placesDisponibles
+        ]);
+    }
+
     #[Route('/benevole/mon-planning', name: 'benevole_mon_planning')]
     public function monPlanning(
         BenevoleRepository $benevoleRepository,
-        TacheRepository $tacheRepository
+        TacheRepository $tacheRepository,
+        AffectationTacheRepository $affectationRepository,
+        DemandeAnnulationRepository $demandeAnnulationRepository
     ): Response {
         $user = $this->getUser();
         $benevole = $benevoleRepository->findOneBy(['utilisateur' => $user]);
@@ -139,20 +250,80 @@ class BenevoleController extends AbstractController
             return $this->redirectToRoute('benevoles');
         }
 
-        // Récupérer tous les weekends où le bénévole a des tâches
-        $weekends = $tacheRepository->findWeekendsForBenevole($benevole->getId());
-        
-        // Calculer les statistiques
-        $totalWeekends = count($weekends);
-        $tachesFutures = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
+        // Récupérer les tâches du bénévole pour le calendrier
+        $tachesBrutes = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
+        if (empty($tachesBrutes)) {
+            $tachesBrutes = $tacheRepository->findTachesForBenevole($benevole->getId());
+        }
+
+        $taches = [];
+        foreach ($tachesBrutes as $tache) {
+            $taches[] = [
+                'id' => $tache->getId(),
+                'title' => $tache->getTitre(),
+                'start' => $tache->getDebut()->format('Y-m-d\TH:i:s'),
+                'end' => $tache->getFin()->format('Y-m-d\TH:i:s'),
+                'backgroundColor' => '#1a3c5a',
+                'borderColor' => '#2b5d8a',
+                'extendedProps' => [
+                    'weekend' => $tache->getWeekend()?->getNom(),
+                    'poste_requis' => $tache->getPosteRequis(),
+                    'max_personnes' => $tache->getMaxPersonnes(),
+                    'remarques' => $tache->getRemarque()
+                ]
+            ];
+        }
+
+        // Tâches à venir avec les infos d'affectation et de demande d'annulation
+        $tachesProches = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
+        if (empty($tachesProches)) {
+            $tachesProches = $tacheRepository->findTachesForBenevole($benevole->getId());
+        }
+
+        $tachesProchesData = [];
+        foreach ($tachesProches as $tp) {
+            $affectation = $affectationRepository->findOneByTacheAndBenevole($tp, $benevole);
+            $demandeEnAttente = null;
+            if ($affectation) {
+                $demandeEnAttente = $demandeAnnulationRepository->findByAffectationEnAttente($affectation);
+            }
+            
+            $tachesProchesData[] = [
+                'id' => $tp->getId(),
+                'titre' => $tp->getTitre(),
+                'debut' => $tp->getDebut(),
+                'poste_requis' => $tp->getPosteRequis(),
+                'affectation_id' => $affectation ? $affectation->getId() : null,
+                'demande_annulation_en_attente' => $demandeEnAttente !== null,
+            ];
+        }
+
+        // Tâches réalisées
         $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
-        
+        $tachesRealiseesData = [];
+        foreach ($tachesRealisees as $tr) {
+            $tachesRealiseesData[] = [
+                'id' => $tr->getId(),
+                'titre' => $tr->getTitre(),
+                'debut' => $tr->getDebut(),
+                'fin' => $tr->getFin(),
+                'poste_requis' => $tr->getPosteRequis(),
+            ];
+        }
+
+        // Statistiques
+        $totalTaches = count($tachesBrutes);
+        $totalFutures = count($tachesProches);
+        $totalRealisees = count($tachesRealisees);
+
         return $this->render('benevoles/mon_planning.html.twig', [
             'benevole' => $benevole,
-            'weekends' => $weekends,
-            'total_weekends' => $totalWeekends,
-            'total_taches_futures' => count($tachesFutures),
-            'total_taches_realisees' => count($tachesRealisees),
+            'taches' => json_encode($taches),
+            'taches_proches' => $tachesProchesData,
+            'taches_realisees' => $tachesRealiseesData,
+            'total_taches' => $totalTaches,
+            'total_futures' => $totalFutures,
+            'total_realisees' => $totalRealisees,
         ]);
     }
 

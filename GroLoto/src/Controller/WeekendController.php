@@ -241,11 +241,17 @@ class WeekendController extends AbstractController
     }
 
     #[Route('/{id}/details', name: 'app_weekend_details')]
-    public function details(Weekend $weekend): Response
+    public function details(Weekend $weekend, \App\Repository\BenevoleRepository $benevoleRepo): Response
     {
+        $benevoles = [];
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $benevoles = $benevoleRepo->findByWeekend($weekend->getId());
+        }
+
         return $this->render('weekend/details.html.twig', [
             'weekend' => $weekend,
             'isAdmin' => $this->isGranted('ROLE_ADMIN'),
+            'benevoles' => $benevoles,
         ]);
     }
 

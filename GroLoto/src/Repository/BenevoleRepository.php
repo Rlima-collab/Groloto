@@ -52,6 +52,25 @@ class BenevoleRepository extends ServiceEntityRepository
     }
 
     /**
+     * Récupère les bénévoles associés à un weekend via leurs affectations aux tâches
+     */
+    public function findByWeekend(int $weekendId): array
+    {
+        return $this->createQueryBuilder('b')
+            ->innerJoin('App\Entity\AffectationTache', 'at', 'WITH', 'at.benevole = b')
+            ->innerJoin('at.tache', 't')
+            ->innerJoin('b.utilisateur', 'u')
+            ->addSelect('u')
+            ->where('t.weekend = :weekendId')
+            ->setParameter('weekendId', $weekendId)
+            ->orderBy('u.nom', 'ASC')
+            ->addOrderBy('u.prenom', 'ASC')
+            ->distinct()
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Récupère les bénévoles récemment inscrits (ce mois-ci)
      */
     public function findRecentlyRegistered(): array

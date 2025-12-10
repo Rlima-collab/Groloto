@@ -129,21 +129,6 @@ class InscriptionMeceneType extends AbstractType
                     'rows' => 3,
                     'placeholder' => 'Informations complémentaires...'
                 ]
-            ])
-            ->add('adresse_postale', TextareaType::class, [
-                'label' => 'Adresse postale de livraison',
-                'help' => 'Adresse complète où récupérer ou livrer le don',
-                'required' => false,
-                'attr' => [
-                    'rows' => 4,
-                    'placeholder' => "Numéro et rue\nCode postal et ville\nPays"
-                ],
-                'constraints' => [
-                    new Assert\Length([
-                        'max' => 500,
-                        'maxMessage' => 'L\'adresse ne peut pas dépasser {{ limit }} caractères'
-                    ])
-                ]
             ]);
     }
 

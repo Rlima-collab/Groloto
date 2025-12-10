@@ -242,7 +242,11 @@ class AuthController extends AbstractController
         // Préparer les disponibilités si bénévole
         $dispos = [];
         $benevoleRemark = null;
+        $benevole = null;
+        $mecene = null;
+        
         $roleName = strtolower($user->getRole()?->getNom() ?? '');
+        
         if ($roleName === 'benevole') {
             $benevole = $entityManager->getRepository(\App\Entity\Benevole::class)
                 ->findOneBy(['utilisateur' => $user]);
@@ -250,13 +254,17 @@ class AuthController extends AbstractController
                 $dispos = $benevole->getDisponibilites();
                 $benevoleRemark = $benevole->getRemarque();
             }
+        } elseif ($roleName === 'mecene') {
+            $mecene = $entityManager->getRepository(\App\Entity\Mecene::class)
+                ->findOneBy(['utilisateur' => $user]);
         }
         
         return $this->render('auth/profile.html.twig', [
             'user' => $user,
             'dispos' => $dispos,
             'benevoleRemark' => $benevoleRemark,
-            'benevole' => $benevole ?? null,
+            'benevole' => $benevole,
+            'mecene' => $mecene,
         ]);
     }
 

@@ -84,6 +84,21 @@ class TacheRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findPropositionsForBenevole(int $benevoleId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->innerJoin('App\Entity\AffectationTache', 'a', 'WITH', 'a.tache = t.id')
+            ->andWhere('a.benevole = :benevoleId')
+            ->andWhere('a.statut = :statut')
+            ->andWhere('t.fin > :now')
+            ->setParameter('benevoleId', $benevoleId)
+            ->setParameter('statut', 'proposee')
+            ->setParameter('now', new \DateTime())
+            ->orderBy('t.debut', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findByPosteRequis(string $poste): array
     {
         return $this->createQueryBuilder('t')
