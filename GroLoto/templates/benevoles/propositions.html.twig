@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes propositions de tâches{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-common.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="taches-page">
+<div class="container" style="padding-top: calc(71px + 2rem);">
+    <div class="page-header">
+        <h1 class="page-title">Propositions de tâches</h1>
+        <a href="{{ path('benevole_mon_planning') }}" class="btn btn-secondary">Mon planning</a>
+    </div>
+
+    <div class="card">
+        <div class="card-content">
+            {% if propositions|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tâche</th>
+                                <th>Date</th>
+                                <th>Horaire</th>
+                                <th>Poste</th>
+                                <th>Places</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tache in propositions %}
+                                {% set places = places_disponibles[tache.id] %}
+                                {% set complet = places is not null and places == 0 %}
+                                <tr{% if complet %} style="opacity: 0.6;"{% endif %}>
+                                    <td><strong>{{ tache.titre }}</strong></td>
+                                    <td>{{ tache.debut|date('d/m/Y') }}</td>
+                                    <td>{{ tache.debut|date('H:i') }} - {{ tache.fin|date('H:i') }}</td>
+                                    <td>{{ tache.posteRequis }}</td>
+                                    <td>
+                                        {% if places is null %}
+                                            <span style="color: #6b7280;">Illimité</span>
+                                        {% elseif places == 0 %}
+                                            <span style="color: #ef4444; font-weight: 600;">Complet</span>
+                                        {% elseif places == 1 %}
+                                            <span style="color: #f59e0b; font-weight: 600;">1 place</span>
+                                        {% else %}
+                                            <span style="color: #10b981;">{{ places }} places</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if complet %}
+                                            <span style="color: #6b7280; font-style: italic;">Plus de place disponible</span>
+                                        {% else %}
+                                            <form method="post" style="display: inline-block;">
+                                                <input type="hidden" name="tache_id" value="{{ tache.id }}">
+                                                <button type="submit" name="action" value="accepter" class="btn btn-small btn-success" style="background-color: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer;">Accepter</button>
+                                                <button type="submit" name="action" value="refuser" class="btn btn-small btn-danger" style="background-color: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; margin-left: 0.5rem;">Refuser</button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state" style="text-align: center; padding: 3rem;">
+                    <p style="color: #6b7280; font-size: 1.1rem;">Vous n'avez aucune proposition de tâche en attente.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

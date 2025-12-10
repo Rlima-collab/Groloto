@@ -3,16 +3,19 @@
 namespace App\Controller;
 
 use App\Entity\Tache;
+use App\Entity\PlageHoraire;
 use App\Entity\AffectationTache;
 use App\Form\TacheType;
 use App\Form\TacheAffectationType;
 use App\Repository\TacheRepository;
 use App\Repository\AffectationTacheRepository;
 use App\Repository\BenevoleRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -71,9 +74,15 @@ class TacheController extends AbstractController
             $affectations = $affectationRepository->findBy(['tache' => $tache]);
             $benevoles = [];
             foreach ($affectations as $affectation) {
+                // On ne garde que les bénévoles réellement assignés (acceptés)
+                if ($affectation->getStatut() !== 'assigne') {
+                    continue;
+                }
+
                 $benevole = $affectation->getBenevole();
                 if ($benevole && $benevole->getUtilisateur()) {
-                    $benevoles[] = $benevole->getUtilisateur()->getPrenom() . ' ' . $benevole->getUtilisateur()->getNom();
+                    $nom = $benevole->getUtilisateur()->getPrenom() . ' ' . $benevole->getUtilisateur()->getNom();
+                    $benevoles[] = $nom;
                 }
             }
             
@@ -99,6 +108,21 @@ class TacheController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $formData = $request->request->all()['tache'] ?? [];
+            
+            // Créer une plage horaire avec le jour et les horaires spécifiés
+            if (isset($formData['jour_plage']) && !empty($formData['jour_plage'])) {
+                $plage = new PlageHoraire();
+                $plage->setJour(new \DateTime($formData['jour_plage']));
+                $plage->setHeureDebut(new \DateTime($formData['heure_debut_plage']));
+                $plage->setHeureFin(new \DateTime($formData['heure_fin_plage']));
+                $plage->setTache($tache);
+                $tache->addPlageHoraire($plage);
+            }
+            
+            // Synchroniser debut/fin avec les plages horaires
+            $tache = $this->syncTaskDates($tache);
+            
             $entityManager->persist($tache);
             $entityManager->flush();
 
@@ -125,6 +149,9 @@ class TacheController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Synchroniser debut/fin avec les plages horaires
+            $tache = $this->syncTaskDates($tache);
+            
             $entityManager->flush();
             
             $this->addFlash('success', 'La tâche a été mise à jour avec succès !');
@@ -163,6 +190,43 @@ class TacheController extends AbstractController
         }
 
         return $this->redirectToRoute('tache_index');
+    }
+
+    #[Route('/{id}/duplicate', name: 'tache_duplicate')]
+    public function duplicate(int $id, TacheRepository $tacheRepository, EntityManagerInterface $entityManager): Response
+    {
+        $tacheSource = $tacheRepository->find($id);
+
+        if (!$tacheSource) {
+            $this->addFlash('error', 'Tâche source non trouvée.');
+            return $this->redirectToRoute('tache_index');
+        }
+
+        $tache = new Tache();
+        $tache->setTitre($tacheSource->getTitre());
+        $tache->setWeekend($tacheSource->getWeekend());
+        $tache->setMaxPersonnes($tacheSource->getMaxPersonnes());
+        $tache->setRemarque($tacheSource->getRemarque());
+
+        // Cloner les plages horaires
+        foreach ($tacheSource->getPlagesHoraires() as $plageSrc) {
+            $plage = new PlageHoraire();
+            $plage->setJour($plageSrc->getJour());
+            $plage->setHeureDebut($plageSrc->getHeureDebut());
+            $plage->setHeureFin($plageSrc->getHeureFin());
+            $plage->setMaxPersonnesPlage($plageSrc->getMaxPersonnesPlage());
+            $plage->setTache($tache);
+            $tache->addPlageHoraire($plage);
+        }
+
+        // Synchroniser debut/fin
+        $tache = $this->syncTaskDates($tache);
+
+        $entityManager->persist($tache);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'La tâche a été dupliquée avec succès!');
+        return $this->redirectToRoute('tache_edit', ['id' => $tache->getId()]);
     }
 
     #[Route('/{id}/affectation', name: 'tache_affectation')]
@@ -237,5 +301,159 @@ class TacheController extends AbstractController
             'tache' => $tache,
             'benevolesActuels' => $benevolesActuels,
         ]);
+    }
+
+    #[Route('/{id}/proposer', name: 'tache_proposer')]
+    public function proposer(
+        int $id,
+        Request $request,
+        TacheRepository $tacheRepository,
+        BenevoleRepository $benevoleRepository,
+        AffectationTacheRepository $affectationRepository,
+        EntityManagerInterface $entityManager,
+        NotificationService $notificationService
+    ): Response {
+        $tache = $tacheRepository->find($id);
+        if (!$tache) {
+            $this->addFlash('error', 'Tâche non trouvée.');
+            return $this->redirectToRoute('tache_index');
+        }
+
+        // Recherche
+        $search = $request->query->get('q');
+        $qb = $benevoleRepository->createQueryBuilder('b')
+            ->innerJoin('b.utilisateur', 'u')
+            ->addSelect('u')
+            ->where('b.actif = :actif')
+            ->setParameter('actif', true)
+            ->orderBy('u.nom', 'ASC');
+
+        if ($search) {
+            $qb->andWhere('(u.nom LIKE :search OR u.prenom LIKE :search OR u.email LIKE :search)')
+               ->setParameter('search', '%' . $search . '%');
+        }
+        
+        $tousBenevoles = $qb->getQuery()->getResult();
+
+        // Préparer les données pour la vue
+        $benevolesData = [];
+        foreach ($tousBenevoles as $benevole) {
+            // Vérifier si déjà affecté à CETTE tâche
+            $affectationActuelle = $affectationRepository->findOneByTacheAndBenevole($tache, $benevole);
+            
+            // Vérifier chevauchement
+            $chevauchements = $affectationRepository->findOverlappingAssignments($benevole, $tache->getDebut(), $tache->getFin());
+            
+            $estPrisAilleurs = false;
+            foreach ($chevauchements as $chevauchement) {
+                if ($chevauchement->getTache()->getId() !== $tache->getId()) {
+                    $estPrisAilleurs = true;
+                    break;
+                }
+            }
+
+            $statut = 'disponible';
+            if ($affectationActuelle) {
+                $statut = $affectationActuelle->getStatut(); // 'assigne', 'proposee', etc.
+            } elseif ($estPrisAilleurs) {
+                $statut = 'indisponible';
+            }
+
+            $benevolesData[] = [
+                'benevole' => $benevole,
+                'statut' => $statut,
+                'affectation' => $affectationActuelle
+            ];
+        }
+
+        // Traitement du formulaire (POST)
+        if ($request->isMethod('POST')) {
+            $benevolesIds = $request->request->all('benevoles'); // Array of IDs
+            if (!empty($benevolesIds)) {
+                foreach ($benevolesIds as $benevoleId) {
+                    $benevole = $benevoleRepository->find($benevoleId);
+                    if ($benevole) {
+                        // Vérifier à nouveau la disponibilité pour être sûr
+                        $chevauchements = $affectationRepository->findOverlappingAssignments($benevole, $tache->getDebut(), $tache->getFin());
+                        $estPrisAilleurs = false;
+                        foreach ($chevauchements as $chevauchement) {
+                            if ($chevauchement->getTache()->getId() !== $tache->getId()) {
+                                $estPrisAilleurs = true;
+                                break;
+                            }
+                        }
+
+                        if (!$estPrisAilleurs) {
+                            // Vérifier si déjà affecté/proposé
+                            $existing = $affectationRepository->findOneByTacheAndBenevole($tache, $benevole);
+                            if (!$existing) {
+                                $affectation = new AffectationTache();
+                                $affectation->setTache($tache);
+                                $affectation->setBenevole($benevole);
+                                $affectation->setUtilisateur($benevole->getUtilisateur());
+                                $affectation->setDateAffectation(new \DateTime());
+                                $affectation->setStatut('proposee');
+                                $entityManager->persist($affectation);
+
+                                // Notification
+                                $notificationService->notifyBenevoleProposition($benevole->getUtilisateur(), $tache->getTitre());
+                            }
+                        }
+                    }
+                }
+                $entityManager->flush();
+                $this->addFlash('success', 'Les propositions ont été envoyées.');
+                return $this->redirectToRoute('tache_proposer', ['id' => $id]);
+            }
+        }
+
+        if ($request->query->get('ajax')) {
+            return $this->render('taches/_benevoles_list.html.twig', [
+                'benevolesData' => $benevolesData,
+            ]);
+        }
+
+        return $this->render('taches/proposer.html.twig', [
+            'tache' => $tache,
+            'benevolesData' => $benevolesData,
+            'search' => $search
+        ]);
+    }
+
+    /**
+     * Synchronise les champs debut/fin de la tâche avec les plages horaires
+     */
+    private function syncTaskDates(Tache $tache): Tache
+    {
+        if ($tache->getPlagesHoraires()->isEmpty()) {
+            $tache->setDebut(null);
+            $tache->setFin(null);
+            return $tache;
+        }
+
+        $plages = $tache->getPlagesHoraires()->toArray();
+        
+        // Récupérer le début le plus tôt
+        $debut = null;
+        foreach ($plages as $plage) {
+            $plageDebut = $plage->getDebut();
+            if ($debut === null || $plageDebut < $debut) {
+                $debut = $plageDebut;
+            }
+        }
+
+        // Récupérer la fin la plus tard
+        $fin = null;
+        foreach ($plages as $plage) {
+            $plageFin = $plage->getFin();
+            if ($fin === null || $plageFin > $fin) {
+                $fin = $plageFin;
+            }
+        }
+
+        $tache->setDebut($debut);
+        $tache->setFin($fin);
+        
+        return $tache;
     }
 }

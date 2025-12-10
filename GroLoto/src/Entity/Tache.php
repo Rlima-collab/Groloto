@@ -20,20 +20,20 @@ class Tache
     #[ORM\Column(length: 255)]
     private ?string $titre = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $debut = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $fin = null;
-
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $posteRequis = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $maxPersonnes = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $remarque = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $posteRequis = null;
 
     #[ORM\ManyToOne(targetEntity: Weekend::class, inversedBy: 'taches')]
     #[ORM\JoinColumn(name: 'id_weekend', referencedColumnName: 'id', nullable: false)]
@@ -72,7 +72,7 @@ class Tache
         return $this->debut;
     }
 
-    public function setDebut(\DateTimeInterface $debut): self
+    public function setDebut(?\DateTimeInterface $debut): self
     {
         $this->debut = $debut;
         return $this;
@@ -83,20 +83,9 @@ class Tache
         return $this->fin;
     }
 
-    public function setFin(\DateTimeInterface $fin): self
+    public function setFin(?\DateTimeInterface $fin): self
     {
         $this->fin = $fin;
-        return $this;
-    }
-
-    public function getPosteRequis(): ?string
-    {
-        return $this->posteRequis;
-    }
-
-    public function setPosteRequis(?string $posteRequis): self
-    {
-        $this->posteRequis = $posteRequis;
         return $this;
     }
 
@@ -119,6 +108,17 @@ class Tache
     public function setRemarque(?string $remarque): self
     {
         $this->remarque = $remarque;
+        return $this;
+    }
+
+    public function getPosteRequis(): ?string
+    {
+        return $this->posteRequis;
+    }
+
+    public function setPosteRequis(?string $posteRequis): self
+    {
+        $this->posteRequis = $posteRequis;
         return $this;
     }
 

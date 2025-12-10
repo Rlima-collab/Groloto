@@ -1,0 +1,34 @@
+{% for item in benevolesData %}
+    {% set benevole = item.benevole %}
+    {% set statut = item.statut %}
+    {% set affectation = item.affectation %}
+    
+    <div class="benevole-item {% if statut != 'disponible' %}disabled{% endif %}">
+        <div class="checkbox-wrapper">
+            {% if statut == 'disponible' %}
+                <input type="checkbox" name="benevoles[]" value="{{ benevole.id }}" id="benevole_{{ benevole.id }}">
+            {% else %}
+                <input type="checkbox" disabled>
+            {% endif %}
+        </div>
+        <div class="benevole-info" style="margin-left: 1rem;">
+            <label for="benevole_{{ benevole.id }}" style="font-weight: 600; display: block;">
+                {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}
+            </label>
+            <span style="color: #6b7280; font-size: 0.875rem;">{{ benevole.utilisateur.email }}</span>
+        </div>
+        <div class="benevole-status status-{{ statut }}">
+            {% if statut == 'assigne' %}
+                Déjà assigné
+            {% elseif statut == 'proposee' %}
+                Proposition envoyée
+            {% elseif statut == 'indisponible' %}
+                Indisponible (autre tâche)
+            {% else %}
+                Disponible
+            {% endif %}
+        </div>
+    </div>
+{% else %}
+    <p style="text-align: center; padding: 2rem; color: #6b7280;">Aucun bénévole trouvé.</p>
+{% endfor %}

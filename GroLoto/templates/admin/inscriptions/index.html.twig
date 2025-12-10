@@ -117,6 +117,17 @@
                             </div>
                             
                             <div class="benevole-info">
+                                <div class="info-item" style="grid-column: 1 / -1;">
+                                    <span class="info-text">
+                                        <strong>Type de don:</strong> 
+                                        {% if inscription.typeDon == 'lots' %}
+                                            <span class="badge status success" style="background: #10b981; margin-left: 0.5rem;">🎁 Don pour les lots</span>
+                                        {% else %}
+                                            <span class="badge status pending" style="background: #3b82f6; margin-left: 0.5rem;">🎪 Don pour le fonctionnement du festival</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+
                                 {% if inscription.nomDon %}
                                 <div class="info-item" style="grid-column: 1 / -1; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #16a34a; padding: 1rem; border-radius: 8px;">
                                     <div>

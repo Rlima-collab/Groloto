@@ -120,6 +120,13 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
                             {{ user.dateModification ? user.dateModification|date('d/m/Y à H:i') : 'Jamais' }}
                         </div>
                     </div>
+                    <div class="info-item">
+                        <div class="info-label">Mot de passe</div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-family: 'Courier New', monospace; font-weight: 600; letter-spacing: 2px; color: #6b7280;">•••••••••</span>
+                            <span style="font-size: 11px; color: #9ca3af; font-style: italic;">(Sécurisé - non affichable)</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -168,6 +175,35 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
                         <div class="info-value {{ (user.role.nom == 'benevole' and user is defined and dispos is defined and benevoleRemark is defined) ? '' : '' }}">
                             {% set remark = benevoleRemark|default(null) %}
                             {{ remark ? remark : 'Aucune remarque renseignée' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if user.role.nom == 'mecene' and mecene is defined and mecene %}
+            <div class="info-section">
+                <div class="info-section-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    Informations Mécène
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Organisation</div>
+                        <div class="info-value {{ mecene.organisation ? '' : 'empty' }}">
+                            {{ mecene.organisation ?? 'Non renseigné' }}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">SIRET</div>
+                        <div class="info-value {{ mecene.siret ? '' : 'empty' }}">
+                            {{ mecene.siret ?? 'Non renseigné' }}
+                        </div>
+                    </div>
+                    <div class="info-item" style="grid-column: 1 / -1;">
+                        <div class="info-label">Adresse postale</div>
+                        <div class="info-value {{ mecene.adressePostale ? '' : 'empty' }}" style="white-space: pre-line;">
+                            {{ mecene.adressePostale ?? 'Non renseignée' }}
                         </div>
                     </div>
                 </div>

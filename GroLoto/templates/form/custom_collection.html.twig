@@ -1,0 +1,4 @@
+{%- block collection_widget -%}
+    {%- set attr = attr|merge({'data-prototype': form_row(form.vars.prototype)}) -%}
+    {{- block('form_widget') -}}
+{%- endblock collection_widget -%}
