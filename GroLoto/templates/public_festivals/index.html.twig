@@ -4,16 +4,18 @@
 
 {% block stylesheets %}
 {{ parent() }}
+<link rel="stylesheet" href="{{ asset('css/dashboard.css') }}?v={{ 'now'|date('U') }}">
 <link rel="stylesheet" href="{{ asset('css/weekends.css') }}?v={{ 'now'|date('U') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 {% endblock %}
 
 {% block body %}
-<div class="hero-section weekend-hero">
-    <div class="shine"></div>
+<div class="hero-section dashboard-hero">
     <div class="hero-content">
-        <h1 class="hero-title">Nos Festivals</h1>
-        <p class="hero-description">Plongez dans l'univers de nos festivals exceptionnels. Découvrez des événements uniques, des moments de partage et des expériences inoubliables tout au long de l'année.</p>
+        <div class="hero-text">
+            <h1 class="hero-title">Nos Festivals</h1>
+            <p class="hero-description">Plongez dans l'univers de nos festivals exceptionnels. Découvrez des événements uniques, des moments de partage et des expériences inoubliables tout au long de l'année.</p>
+        </div>
     </div>
 </div>
 
@@ -45,7 +47,7 @@
                         </div>
                     {% endif %}
                 </div>
-                <p>{{ weekend.description|slice(0, 150) }}{% if weekend.description|length > 150 %}...{% endif %}</p>
+                <p>{{ weekend.description }}</p>
                 <div class="card-footer">
                     <span class="read-more">En savoir plus <i class="bi bi-arrow-right"></i></span>
                 </div>
