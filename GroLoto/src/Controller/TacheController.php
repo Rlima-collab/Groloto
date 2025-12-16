@@ -95,8 +95,6 @@ class TacheController extends AbstractController
             
             $tachesData[] = [
                 'tache' => $tache,
-                'benevolesAssignes' => $benevolesAssignes,
-                'benevolesProposees' => $benevolesProposees,
                 'nbAssignes' => $nbAssignes,
                 'nbProposees' => $nbProposees,
                 'placesRestantes' => $placesRestantes,
@@ -201,6 +199,46 @@ class TacheController extends AbstractController
         }
 
         return $this->redirectToRoute('tache_index');
+    }
+
+    #[Route('/{id}/benevoles', name: 'tache_benevoles')]
+    public function benevoles(int $id, TacheRepository $tacheRepository, AffectationTacheRepository $affectationRepository): Response
+    {
+        $tache = $tacheRepository->find($id);
+
+        if (!$tache) {
+            $this->addFlash('error', 'Tâche non trouvée.');
+            return $this->redirectToRoute('tache_index');
+        }
+
+        // Récupérer les affectations pour cette tâche
+        $affectations = $affectationRepository->findBy(['tache' => $tache]);
+
+        $benevolesAssignes = [];
+        $benevolesProposees = [];
+
+        foreach ($affectations as $affectation) {
+            $benevole = $affectation->getBenevole();
+            if ($benevole && $benevole->getUtilisateur()) {
+                $data = [
+                    'benevole' => $benevole,
+                    'utilisateur' => $benevole->getUtilisateur(),
+                    'affectation' => $affectation
+                ];
+
+                if ($affectation->getStatut() === 'assigne') {
+                    $benevolesAssignes[] = $data;
+                } elseif ($affectation->getStatut() === 'proposee') {
+                    $benevolesProposees[] = $data;
+                }
+            }
+        }
+
+        return $this->render('taches/benevoles.html.twig', [
+            'tache' => $tache,
+            'benevolesAssignes' => $benevolesAssignes,
+            'benevolesProposees' => $benevolesProposees,
+        ]);
     }
 
     #[Route('/{id}/duplicate', name: 'tache_duplicate')]
