@@ -165,6 +165,23 @@
                 width: 100%;
             }
         }
+
+        .mecene-logo {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 5px;
+            background: white;
+            margin-top: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .mecene-logo:hover {
+            transform: scale(1.05);
+        }
     </style>
 {% endblock %}
 
@@ -220,20 +237,6 @@
                 </div>
                 
                 <div class="filters-container">
-                    {% if is_granted('ROLE_ADMIN') and weekends is defined %}
-                    <div class="filter-group">
-                        <label for="filterWeekend" class="filter-label">Week-end :</label>
-                        <select id="filterWeekend" name="weekend" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
-                            <option value="">Tous les week-ends</option>
-                            {% for weekend in weekends %}
-                                <option value="{{ weekend.id }}" {% if app.request.query.get('weekend') == weekend.id %}selected{% endif %}>
-                                    {{ weekend.nom }} ({{ weekend.dateVendredi|date('d/m/Y') }})
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    {% endif %}
-
                     <div class="filter-group">
                         <label for="sortBy" class="filter-label">Trier par :</label>
                         <select id="sortBy" name="sort" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
@@ -297,7 +300,8 @@
                                 {% if mecene.logo %}
                                 <div class="info-item">
                                     <span class="info-text"><strong>Logo:</strong></span>
-                                    <img src="{{ asset('uploads/logos/' ~ mecene.logo) }}" alt="Logo {{ mecene.organisation }}" style="max-width: 100px; max-height: 50px; margin-top: 5px;">
+                                    <br>
+                                    <img src="{{ asset(mecene.logo) }}" alt="Logo {{ mecene.organisation }}" class="mecene-logo">
                                 </div>
                                 {% endif %}
                                 <div class="info-item">
@@ -336,9 +340,6 @@
                 <div class="empty-state">
                     <h3>Aucun mécène trouvé</h3>
                     <p>Commencez par ajouter des mécènes à votre base de données.</p>
-                    {% if is_granted('ROLE_ADMIN') %}
-                    <a href="#" class="btn btn-primary">Ajouter un mécène</a>
-                    {% endif %}
                 </div>
             {% endif %}
         </div>

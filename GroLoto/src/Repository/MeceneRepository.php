@@ -55,6 +55,58 @@ class MeceneRepository extends ServiceEntityRepository
     }
 
     /**
+     * Recherche les mécènes selon des critères
+     * @param array $criteria
+     * @return Mecene[]
+     */
+    public function search(array $criteria): array
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->leftJoin('m.utilisateur', 'u')
+            ->addSelect('u');
+
+        if (!empty($criteria['weekend'])) {
+            $qb->leftJoin('m.lots', 'l')
+               ->andWhere('l.weekend = :weekend')
+               ->setParameter('weekend', $criteria['weekend']);
+        }
+
+        if (!empty($criteria['search'])) {
+            $qb->andWhere('m.organisation LIKE :search OR u.nom LIKE :search OR u.prenom LIKE :search OR u.email LIKE :search')
+               ->setParameter('search', '%' . $criteria['search'] . '%');
+        }
+
+        if (!empty($criteria['sort'])) {
+            switch ($criteria['sort']) {
+                case 'nom-asc':
+                    $qb->orderBy('u.nom', 'ASC');
+                    break;
+                case 'nom-desc':
+                    $qb->orderBy('u.nom', 'DESC');
+                    break;
+                case 'organisation-asc':
+                    $qb->orderBy('m.organisation', 'ASC');
+                    break;
+                case 'organisation-desc':
+                    $qb->orderBy('m.organisation', 'DESC');
+                    break;
+                case 'date-asc':
+                    $qb->orderBy('u.date_creation', 'ASC');
+                    break;
+                case 'date-desc':
+                    $qb->orderBy('u.date_creation', 'DESC');
+                    break;
+                default:
+                    $qb->orderBy('u.date_creation', 'DESC');
+            }
+        } else {
+             $qb->orderBy('u.date_creation', 'DESC');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
      * Retourne tous les mécènes ayant des lots pour un week-end spécifique
      * @return Mecene[]
      */
