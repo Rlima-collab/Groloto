@@ -205,53 +205,62 @@
         <div class="card-header">
             <h2 class="card-title">Liste des Mécènes</h2>
             <p class="card-description">Gestion des mécènes et partenaires</p>
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="header-actions">
+                <a href="{{ path('mecenes_download_logos', app.request.query.all|merge({'weekend': weekend_filtre ? weekend_filtre.id : null})) }}" class="btn btn-primary">Télécharger tous les logos</a>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Barre de recherche et filtres -->
         <div class="search-filter-section">
-            <div class="search-bar-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="Rechercher par nom, organisation, email...">
-            </div>
-            
-            <div class="filters-container">
-                {% if is_granted('ROLE_ADMIN') and weekends is defined %}
-                <div class="filter-group">
-                    <label for="filterWeekend" class="filter-label">Week-end :</label>
-                    <select id="filterWeekend" class="filter-select">
-                        <option value="">Tous les week-ends</option>
-                        {% for weekend in weekends %}
-                            <option value="{{ weekend.id }}" {% if weekend_filtre and weekend_filtre.id == weekend.id %}selected{% endif %}>
-                                {{ weekend.nom }} ({{ weekend.dateVendredi|date('d/m/Y') }})
-                            </option>
-                        {% endfor %}
-                    </select>
+            <form method="GET" id="filtersForm">
+                <div class="search-bar-container">
+                    <input type="text" id="searchInput" name="search" class="search-input" placeholder="Rechercher par nom, organisation, email..." value="{{ app.request.query.get('search') }}">
                 </div>
-                {% endif %}
+                
+                <div class="filters-container">
+                    {% if is_granted('ROLE_ADMIN') and weekends is defined %}
+                    <div class="filter-group">
+                        <label for="filterWeekend" class="filter-label">Week-end :</label>
+                        <select id="filterWeekend" name="weekend" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
+                            <option value="">Tous les week-ends</option>
+                            {% for weekend in weekends %}
+                                <option value="{{ weekend.id }}" {% if app.request.query.get('weekend') == weekend.id %}selected{% endif %}>
+                                    {{ weekend.nom }} ({{ weekend.dateVendredi|date('d/m/Y') }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
 
-                <div class="filter-group">
-                    <label for="sortBy" class="filter-label">Trier par :</label>
-                    <select id="sortBy" class="filter-select">
-                        <option value="nom-asc">Nom (A-Z)</option>
-                        <option value="nom-desc">Nom (Z-A)</option>
-                        <option value="organisation-asc">Organisation (A-Z)</option>
-                        <option value="organisation-desc">Organisation (Z-A)</option>
-                        <option value="date-desc">Date (Plus récent)</option>
-                        <option value="date-asc">Date (Plus ancien)</option>
-                    </select>
+                    <div class="filter-group">
+                        <label for="sortBy" class="filter-label">Trier par :</label>
+                        <select id="sortBy" name="sort" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
+                            <option value="nom-asc" {% if app.request.query.get('sort') == 'nom-asc' %}selected{% endif %}>Nom (A-Z)</option>
+                            <option value="nom-desc" {% if app.request.query.get('sort') == 'nom-desc' %}selected{% endif %}>Nom (Z-A)</option>
+                            <option value="organisation-asc" {% if app.request.query.get('sort') == 'organisation-asc' %}selected{% endif %}>Organisation (A-Z)</option>
+                            <option value="organisation-desc" {% if app.request.query.get('sort') == 'organisation-desc' %}selected{% endif %}>Organisation (Z-A)</option>
+                            <option value="date-desc" {% if app.request.query.get('sort') == 'date-desc' or not app.request.query.get('sort') %}selected{% endif %}>Date (Plus récent)</option>
+                            <option value="date-asc" {% if app.request.query.get('sort') == 'date-asc' %}selected{% endif %}>Date (Plus ancien)</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="itemsPerPage" class="filter-label">Afficher :</label>
+                        <select id="itemsPerPage" name="per_page" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
+                            <option value="10" {% if app.request.query.get('per_page') == '10' or not app.request.query.get('per_page') %}selected{% endif %}>10 par page</option>
+                            <option value="20" {% if app.request.query.get('per_page') == '20' %}selected{% endif %}>20 par page</option>
+                            <option value="50" {% if app.request.query.get('per_page') == '50' %}selected{% endif %}>50 par page</option>
+                            <option value="all" {% if app.request.query.get('per_page') == 'all' %}selected{% endif %}>Tous</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <button type="button" id="resetFilters" class="btn-reset-filters" onclick="resetFilters()">Réinitialiser</button>
+                    </div>
                 </div>
-
-                <div class="filter-group">
-                    <label for="itemsPerPage" class="filter-label">Afficher :</label>
-                    <select id="itemsPerPage" class="filter-select">
-                        <option value="10">10 par page</option>
-                        <option value="20">20 par page</option>
-                        <option value="50">50 par page</option>
-                        <option value="all">Tous</option>
-                    </select>
-                </div>
-
-                <button id="resetFilters" class="btn-reset-filters">Réinitialiser</button>
-            </div>
+            </form>
 
             <div id="resultsCount" class="results-count">
                 Affichage de <span id="countCurrent">{{ mecenes|length }}</span> mécène(s)
@@ -285,6 +294,12 @@
                                 <div class="info-item">
                                     <span class="info-text"><strong>SIRET:</strong> {{ mecene.siret }}</span>
                                 </div>
+                                {% if mecene.logo %}
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Logo:</strong></span>
+                                    <img src="{{ asset('uploads/logos/' ~ mecene.logo) }}" alt="Logo {{ mecene.organisation }}" style="max-width: 100px; max-height: 50px; margin-top: 5px;">
+                                </div>
+                                {% endif %}
                                 <div class="info-item">
                                     <span class="info-text"><strong>Inscrit le:</strong> {{ mecene.utilisateur.dateCreation|date('d/m/Y') }}</span>
                                 </div>
@@ -294,6 +309,9 @@
                             <div class="benevole-actions">
                                 <a href="{{ path('mecene_voir_lots', {'id': mecene.id}) }}" class="btn btn-small btn-primary">Voir lots</a>
                                 <a href="{{ path('mecene_edit', {'id': mecene.id}) }}" class="btn btn-small btn-secondary">Modifier</a>
+                                {% if mecene.logo %}
+                                <a href="{{ path('mecene_download_logo', {'id': mecene.id}) }}" class="btn btn-small btn-info" target="_blank">Télécharger logo</a>
+                                {% endif %}
                                 <button type="button" 
                                         class="btn btn-small btn-danger" 
                                         data-mecene-id="{{ mecene.id }}"
@@ -333,205 +351,120 @@
     <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
-    const filterWeekend = document.getElementById('filterWeekend');
-    const sortBy = document.getElementById('sortBy');
-    const itemsPerPage = document.getElementById('itemsPerPage');
-    const resetButton = document.getElementById('resetFilters');
     const meceneCards = Array.from(document.querySelectorAll('.benevole-card'));
     const gridContainer = document.querySelector('.benevoles-grid');
     const countCurrent = document.getElementById('countCurrent');
-    const prevPageBtn = document.getElementById('prevPage');
-    const nextPageBtn = document.getElementById('nextPage');
-    const currentPageSpan = document.getElementById('currentPage');
-    const totalPagesSpan = document.getElementById('totalPages');
-    const paginationContainer = document.getElementById('paginationContainer');
     
     let currentPage = 1;
     let filteredCards = [];
+    let itemsPerPage = {{ app.request.query.get('per_page') ?: 10 }};
+    if (itemsPerPage === 'all') itemsPerPage = meceneCards.length;
 
-    // Fonction de recherche et filtrage
-    function filterAndSort() {
+    // Fonction de recherche en temps réel
+    function filterSearch() {
         const searchTerm = searchInput.value.toLowerCase();
-        const weekendId = filterWeekend ? filterWeekend.value : '';
-        const sortOption = sortBy.value;
-        const [sortField, sortOrder] = sortOption.split('-');
         
         filteredCards = [];
         
         meceneCards.forEach(card => {
             const name = card.querySelector('.benevole-name').textContent.toLowerCase();
-            const organisation = card.querySelector('.info-text:first-child').textContent.toLowerCase();
-            const email = card.querySelectorAll('.info-text')[1].textContent.toLowerCase();
+            const organisation = card.querySelector('.info-text strong:contains("Organisation")').parentElement.textContent.toLowerCase();
+            const email = card.querySelector('.info-text strong:contains("Email")').parentElement.textContent.toLowerCase();
             
-            // Recherche par texte
             const matchesSearch = !searchTerm || 
                 name.includes(searchTerm) || 
                 organisation.includes(searchTerm) || 
                 email.includes(searchTerm);
             
-            // Filtre par weekend
-            let matchesWeekend = true;
-            if (weekendId) {
-                matchesWeekend = true;
-            }
-            
-            if (matchesSearch && matchesWeekend) {
+            if (matchesSearch) {
                 filteredCards.push(card);
             }
         });
         
-        // Tri des cartes visibles
-        if (sortOption && filteredCards.length > 0) {
-            filteredCards.sort((a, b) => {
-                let valA, valB;
-                
-                switch(sortField) {
-                    case 'nom':
-                        valA = a.querySelector('.benevole-name').textContent.trim();
-                        valB = b.querySelector('.benevole-name').textContent.trim();
-                        break;
-                    case 'organisation':
-                        valA = a.querySelector('.info-text:first-child').textContent.split(':')[1].trim();
-                        valB = b.querySelector('.info-text:first-child').textContent.split(':')[1].trim();
-                        break;
-                    case 'date':
-                        valA = a.querySelector('.info-item:last-child .info-text').textContent.split(':')[1].trim();
-                        valB = b.querySelector('.info-item:last-child .info-text').textContent.split(':')[1].trim();
-                        break;
-                }
-                
-                const comparison = valA.localeCompare(valB);
-                return sortOrder === 'asc' ? comparison : -comparison;
-            });
-        }
-        
-        // Réinitialiser à la page 1 après filtrage
-        currentPage = 1;
-        displayPage();
+        displayPage(1);
+        updatePagination();
     }
-    
-    // Fonction d'affichage de la page
-    function displayPage() {
-        const perPage = itemsPerPage.value === 'all' ? filteredCards.length : parseInt(itemsPerPage.value);
-        const totalPages = Math.ceil(filteredCards.length / perPage);
+
+    // Afficher une page spécifique
+    function displayPage(page) {
+        currentPage = page;
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = itemsPerPage === 'all' ? filteredCards.length : startIndex + itemsPerPage;
         
-        // Masquer toutes les cartes
-        meceneCards.forEach(card => card.classList.add('hidden'));
+        meceneCards.forEach(card => card.style.display = 'none');
         
-        // Afficher les cartes de la page courante
-        const start = (currentPage - 1) * perPage;
-        const end = itemsPerPage.value === 'all' ? filteredCards.length : start + perPage;
-        
-        for (let i = start; i < end && i < filteredCards.length; i++) {
-            filteredCards[i].classList.remove('hidden');
-            gridContainer.appendChild(filteredCards[i]);
-        }
-        
-        // Mettre à jour le compteur
-        countCurrent.textContent = filteredCards.length;
-        
-        // Mettre à jour la pagination
-        currentPageSpan.textContent = totalPages === 0 ? 0 : currentPage;
-        totalPagesSpan.textContent = totalPages;
-        prevPageBtn.disabled = currentPage <= 1;
-        nextPageBtn.disabled = currentPage >= totalPages || totalPages === 0;
-        
-        // Masquer la pagination si "Tous" est sélectionné
-        if (itemsPerPage.value === 'all') {
-            paginationContainer.style.display = 'none';
-        } else {
-            paginationContainer.style.display = 'flex';
-        }
-        
-        // Afficher un message si aucun résultat
-        let noResultsMsg = document.querySelector('.no-results-message');
-        if (filteredCards.length === 0) {
-            if (!noResultsMsg) {
-                noResultsMsg = document.createElement('div');
-                noResultsMsg.className = 'no-results-message';
-                noResultsMsg.innerHTML = 'Aucun mécène ne correspond à votre recherche';
-                gridContainer.parentElement.insertBefore(noResultsMsg, gridContainer);
-            }
-            gridContainer.style.display = 'none';
-            paginationContainer.style.display = 'none';
-        } else {
-            if (noResultsMsg) {
-                noResultsMsg.remove();
-            }
-            gridContainer.style.display = 'grid';
-        }
-    }
-    
-    // Fonction de réinitialisation
-    function resetFilters() {
-        searchInput.value = '';
-        if (filterWeekend) filterWeekend.value = '';
-        sortBy.value = 'nom-asc';
-        itemsPerPage.value = '10';
-        currentPage = 1;
-        filterAndSort();
-    }
-    
-    // Écouteurs d'événements
-    searchInput.addEventListener('input', filterAndSort);
-    
-    if (filterWeekend) {
-        filterWeekend.addEventListener('change', function() {
-            if (this.value) {
-                window.location.href = `?weekend=${this.value}`;
-            } else {
-                filterAndSort();
-            }
+        filteredCards.slice(startIndex, endIndex).forEach(card => {
+            card.style.display = 'block';
         });
+        
+        countCurrent.textContent = filteredCards.length;
     }
-    
-    sortBy.addEventListener('change', filterAndSort);
-    itemsPerPage.addEventListener('change', function() {
-        currentPage = 1;
-        displayPage();
-    });
-    resetButton.addEventListener('click', resetFilters);
-    
-    prevPageBtn.addEventListener('click', function() {
-        if (currentPage > 1) {
-            currentPage--;
-            displayPage();
+
+    // Mettre à jour la pagination
+    function updatePagination() {
+        if (itemsPerPage === 'all') {
+            paginationContainer.style.display = 'none';
+            return;
         }
+        
+        const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+        currentPageSpan.textContent = currentPage;
+        totalPagesSpan.textContent = totalPages;
+        
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages;
+        
+        paginationContainer.style.display = totalPages > 1 ? 'flex' : 'none';
+    }
+
+    // Événements
+    searchInput.addEventListener('input', filterSearch);
+    
+    // Pagination
+    prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) displayPage(currentPage - 1);
     });
     
-    nextPageBtn.addEventListener('click', function() {
-        const perPage = itemsPerPage.value === 'all' ? filteredCards.length : parseInt(itemsPerPage.value);
-        const totalPages = Math.ceil(filteredCards.length / perPage);
-        if (currentPage < totalPages) {
-            currentPage++;
-            displayPage();
-        }
+    nextPageBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+        if (currentPage < totalPages) displayPage(currentPage + 1);
     });
-    
-    // Appliquer le tri initial
-    filterAndSort();
+
+    // Initialisation
+    filterSearch();
 });
 
+    // Initialisation
+    filterSearch();
+});
+
+// Fonction pour réinitialiser les filtres
+function resetFilters() {
+    window.location.href = '{{ path('mecenes') }}';
+}
+
+// Fonction de confirmation de suppression
 function confirmDeleteMecene(button) {
     const meceneId = button.getAttribute('data-mecene-id');
-    const meceneNom = button.getAttribute('data-mecene-nom');
+    const meceneName = button.getAttribute('data-mecene-nom');
     const csrfToken = button.getAttribute('data-csrf-token');
     
-    if (confirm(`Êtes-vous sûr de vouloir supprimer le mécène "${meceneNom}" ?\n\nCette action est irréversible et supprimera toutes les données associées.`)) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le mécène "${meceneName}" ? Cette action est irréversible.`)) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/mecenes/${meceneId}/delete`;
+        form.action = `/mecene/${meceneId}/delete`;
         
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_token';
-        csrfInput.value = csrfToken;
-        form.appendChild(csrfInput);
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '_token';
+        tokenInput.value = csrfToken;
         
+        form.appendChild(tokenInput);
         document.body.appendChild(form);
         form.submit();
     }
 }
+</script>
 </script>
 {% endblock %}
 

@@ -35,7 +35,7 @@
                 </div>
             {% endif %}
 
-            <form method="post" novalidate id="registerForm">
+            <form method="post" novalidate id="registerForm" enctype="multipart/form-data">
                 <div class="registration-row">
                     <div class="registration-col">
                         <div class="registration-form-group">
@@ -83,6 +83,12 @@
                         <div class="siret-inputs" id="siret-inputs"></div>
                     </div>
                     <small class="registration-form-text">14 chiffres obligatoires</small>
+                </div>
+
+                <div class="registration-form-group">
+                    <label for="logo" class="registration-form-label">Logo (PNG ou JPEG)</label>
+                    <input type="file" name="logo" id="logo" class="registration-form-control mecene-focus" accept=".png,.jpeg,.jpg">
+                    <small class="registration-form-text">Optionnel - Format PNG ou JPEG uniquement</small>
                 </div>
 
                 <div class="registration-row">

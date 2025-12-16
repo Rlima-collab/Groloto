@@ -51,6 +51,11 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
 .file-input-label svg { width: 16px; height: 16px; }
 .remove-image-btn { margin-left: 10px; padding: 10px 20px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
 .remove-image-btn:hover { background: #dc2626; }
+.logo-section { margin-bottom: 30px; padding: 25px; background: #f8fafc; border-radius: 12px; border: 1px solid #e5e7eb; }
+.logo-preview { text-align: center; margin-bottom: 20px; padding: 20px; background: white; border-radius: 8px; border: 2px solid #e5e7eb; }
+.logo-image { max-width: 200px; max-height: 100px; object-fit: contain; }
+.remove-logo-btn { margin-left: 10px; padding: 10px 20px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+.remove-logo-btn:hover { background: #dc2626; }
 @media (max-width: 768px) {
     .profile-container { margin: 20px auto; }
     .profile-header { padding: 25px 20px; }
@@ -59,6 +64,10 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
     .form-grid { grid-template-columns: 1fr; }
     .btn-group { flex-direction: column; }
     .btn-custom { width: 100%; justify-content: center; }
+    .profile-image-section { padding: 20px; }
+    .logo-section { padding: 20px; }
+    .logo-preview { padding: 15px; }
+    .logo-image { max-width: 150px; max-height: 75px; }
 }
 </style>
 {% endblock %}
@@ -123,6 +132,38 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
                 </div>
                 <small class="form-text" style="display: block; margin-top: 10px;">JPG, PNG ou GIF. Maximum 2 Mo.</small>
             </div>
+
+            {% if mecene is defined and mecene %}
+            <!-- Section Logo Mécène -->
+            <div class="logo-section">
+                <h3 style="margin-bottom: 20px; color: #1f2937; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 22px; height: 22px; color: #3b82f6;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    Logo de l'organisation
+                </h3>
+                {% if mecene.logo %}
+                    <div class="logo-preview">
+                        <img src="{{ asset('uploads/logos/' ~ mecene.logo) }}" alt="Logo {{ mecene.organisation }}" class="logo-image">
+                    </div>
+                {% endif %}
+                <div class="file-input-wrapper">
+                    <input type="file" id="logoInput" name="logo" accept=".png,.jpeg,.jpg" onchange="previewLogo(event)">
+                    <label for="logoInput" class="file-input-label">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Choisir un logo
+                    </label>
+                    {% if mecene.logo %}
+                        <button type="button" class="remove-logo-btn" onclick="removeLogo()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            Supprimer le logo
+                        </button>
+                        <input type="hidden" name="removeLogo" id="removeLogoFlag" value="0">
+                    {% endif %}
+                </div>
+                <small class="form-text" style="display: block; margin-top: 10px;">PNG ou JPEG uniquement. Recommandé: 200x100px maximum.</small>
+            </div>
+            {% endif %}
 
             <div class="form-section">
                 <div class="form-section-title">
@@ -309,6 +350,29 @@ function removeImage() {
         const initials = '{{ (user.prenom|default("U")|first ~ user.nom|default("S")|first)|upper }}';
         preview.innerHTML = '<span id="previewInitials">' + initials + '</span>';
         document.getElementById('profileImageInput').value = '';
+    }
+}
+
+function previewLogo(event) {
+    // Simple validation for logo
+    const file = event.target.files[0];
+    if (file && !['image/png', 'image/jpeg'].includes(file.type)) {
+        alert('Le logo doit être au format PNG ou JPEG.');
+        event.target.value = '';
+        return;
+    }
+    // Could add preview here if needed, but for now just validation
+}
+
+function removeLogo() {
+    if (confirm('Êtes-vous sûr de vouloir supprimer le logo de votre organisation ?')) {
+        document.getElementById('removeLogoFlag').value = '1';
+        document.getElementById('logoInput').value = '';
+        // Hide the current logo display if exists
+        const logoImg = document.querySelector('.profile-image-section img[alt*="Logo"]');
+        if (logoImg) {
+            logoImg.style.display = 'none';
+        }
     }
 }
 </script>
