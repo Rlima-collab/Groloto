@@ -137,12 +137,19 @@
                                 <span class="weekend-status upcoming">À venir</span>
                             {% endif %}
                         </div>
-                        <div style="flex:1; display:flex; justify-content:flex-end;">
+                        <div class="weekend-actions">
                             {% if isAdmin %}
                             <a href="{{ path('app_evenement_edit', {id: evenement.id}) }}" class="weekend-view-btn" title="Modifier">
                                 <i class="fas fa-edit"></i>
                                 Modifier
                             </a>
+                            <form method="post" action="{{ path('app_evenement_delete', {id: evenement.id}) }}" onsubmit="return confirm('Supprimer cet événement ? Cette action est définitive.');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_evenement_' ~ evenement.id) }}">
+                                <button type="submit" class="weekend-delete-btn" title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                    Supprimer
+                                </button>
+                            </form>
                             {% endif %}
                         </div>
                     </div>
@@ -267,6 +274,62 @@
 .empty-state p {
     color: #64748b;
     margin-bottom: 1.5rem;
+}
+
+.weekend-card-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.weekend-card-footer > div:first-child {
+    flex: 1 1 auto;
+}
+
+.weekend-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}
+
+.weekend-card-footer form {
+    margin: 0;
+}
+
+.weekend-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecdd3;
+    padding: 0.45rem 0.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.weekend-delete-btn:hover {
+    background: #fecdd3;
+    color: #7f1d1d;
+    border-color: #fca5a5;
+}
+
+.weekend-delete-btn i {
+    font-size: 0.9rem;
+}
+
+.weekend-view-btn { white-space: nowrap; }
+
+@media (max-width: 420px) {
+    .weekend-actions {
+        flex-basis: 100%;
+        justify-content: flex-start;
+        margin-top: 0.25rem;
+    }
 }
 
 @media (max-width: 768px) {

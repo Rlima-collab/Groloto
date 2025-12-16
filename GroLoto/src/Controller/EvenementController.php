@@ -14,11 +14,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class EvenementController extends AbstractController
 {
     #[Route('/evenements', name: 'app_evenements')]
-    public function index(EvenementRepository $evenementRepo, TacheRepository $tacheRepo): Response
+    public function index(EvenementRepository $evenementRepo, TacheRepository $tacheRepo, CsrfTokenManagerInterface $csrfTokenManager): Response
     {
         $isAdmin = $this->isGranted('ROLE_ADMIN');
         $now = new \DateTime();
@@ -57,6 +58,10 @@ class EvenementController extends AbstractController
                 'backgroundColor' => '#3b82f6',
                 'borderColor' => '#3b82f6',
                 'className' => 'tache-event',
+                'extendedProps' => [
+                    'entity' => 'tache',
+                    'tacheId' => $tache->getId(),
+                ],
             ];
         }
 
@@ -73,6 +78,16 @@ class EvenementController extends AbstractController
                 'backgroundColor' => $isPasse ? '#6b7280' : '#10b981',
                 'borderColor' => $isPasse ? '#6b7280' : '#10b981',
                 'className' => 'evenement-event',
+                'extendedProps' => [
+                    'entity' => 'evenement',
+                    'evenementId' => $evenement->getId(),
+                    'lieu' => $evenement->getLieu(),
+                    'description' => $evenement->getDescription(),
+                    'isAdmin' => $isAdmin,
+                    'editUrl' => $this->generateUrl('app_evenement_edit', ['id' => $evenement->getId()]),
+                    'deleteUrl' => $this->generateUrl('app_evenement_delete', ['id' => $evenement->getId()]),
+                    'csrfToken' => $csrfTokenManager->getToken('delete_evenement_' . $evenement->getId())->getValue(),
+                ],
             ];
         }
 
@@ -241,5 +256,29 @@ class EvenementController extends AbstractController
             'statutFilter' => $statutFilter,
             'isAdmin' => $isAdmin,
         ]);
+    }
+
+    #[Route('/evenements/{id}/delete', name: 'app_evenement_delete', methods: ['POST'])]
+    public function delete(Request $request, Evenement $evenement, EntityManagerInterface $em): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if (!$this->isCsrfTokenValid('delete_evenement_' . $evenement->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton CSRF invalide.');
+            return $this->redirectToRoute('app_evenements_liste');
+        }
+
+        if ($evenement->getImage()) {
+            $imagePath = $this->getParameter('kernel.project_dir') . '/public/images/evenements/' . $evenement->getImage();
+            if (is_file($imagePath)) {
+                @unlink($imagePath);
+            }
+        }
+
+        $em->remove($evenement);
+        $em->flush();
+
+        $this->addFlash('success', 'Événement supprimé avec succès.');
+        return $this->redirectToRoute('app_evenements_liste');
     }
 }
