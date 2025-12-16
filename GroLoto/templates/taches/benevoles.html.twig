@@ -1,0 +1,155 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bénévoles de la tâche : {{ tache.titre }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-common.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="taches-page">
+<div class="hero-section taches-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Bénévoles de la tâche</h1>
+        <p class="hero-description">Consultez les bénévoles assignés et proposés pour la tâche "{{ tache.titre }}"</p>
+        <a href="{{ path('tache_index') }}" class="btn-login">← Retour aux tâches</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">{{ tache.titre }}</h1>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{{ path('tache_edit', {'id': tache.id}) }}" class="btn btn-secondary">Modifier la tâche</a>
+            <a href="{{ path('tache_affectation', {'id': tache.id}) }}" class="btn btn-primary">Gérer les affectations</a>
+        </div>
+    </div>
+
+    {# Informations de la tâche #}
+    <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+            <h2 class="card-title">Informations de la tâche</h2>
+        </div>
+        <div class="card-content">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div>
+                    <strong>Événement :</strong>
+                    {% if tache.weekend %}
+                        {{ tache.weekend.nom }}
+                    {% else %}
+                        Non spécifié
+                    {% endif %}
+                </div>
+                <div>
+                    <strong>Plages horaires :</strong>
+                    {% if tache.plagesHoraires|length > 0 %}
+                        <div style="margin-top: 0.5rem;">
+                            {% for plage in tache.plagesHoraires %}
+                                <div style="margin-bottom: 0.25rem;">
+                                    <span class="badge" style="background: #06b6d4;">{{ plage.jour|date('d/m/Y') }}</span>
+                                    <span class="badge" style="background: #14b8a6;">{{ plage.heureDebut|date('H:i') }} - {{ plage.heureFin|date('H:i') }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        Aucune plage définie
+                    {% endif %}
+                </div>
+                <div>
+                    <strong>Maximum de personnes :</strong> {{ tache.maxPersonnes ?: 'Non limité' }}
+                </div>
+                <div>
+                    <strong>Remarques :</strong> {{ tache.remarque ?: 'Aucune' }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Bénévoles assignés #}
+    <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+            <h2 class="card-title">Bénévoles assignés ({{ benevolesAssignes|length }})</h2>
+            <p class="card-description">Personnes actuellement affectées à cette tâche</p>
+        </div>
+        <div class="card-content">
+            {% if benevolesAssignes|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Email</th>
+                                <th>Téléphone</th>
+                                <th>Date d'affectation</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in benevolesAssignes %}
+                                <tr>
+                                    <td>{{ data.utilisateur.nom }}</td>
+                                    <td>{{ data.utilisateur.prenom }}</td>
+                                    <td>{{ data.utilisateur.email }}</td>
+                                    <td>{{ data.utilisateur.telephone ?: '—' }}</td>
+                                    <td>{{ data.affectation.dateAffectation|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        <span class="badge" style="background: #059669;">Assigné</span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p style="color: #6b7280; text-align: center; padding: 2rem;">
+                    Aucun bénévole n'est actuellement assigné à cette tâche.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Propositions en attente #}
+    {% if benevolesProposees|length > 0 %}
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Propositions en attente ({{ benevolesProposees|length }})</h2>
+                <p class="card-description">Bénévoles qui ont été proposés pour cette tâche</p>
+            </div>
+            <div class="card-content">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Email</th>
+                                <th>Téléphone</th>
+                                <th>Date de proposition</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in benevolesProposees %}
+                                <tr>
+                                    <td>{{ data.utilisateur.nom }}</td>
+                                    <td>{{ data.utilisateur.prenom }}</td>
+                                    <td>{{ data.utilisateur.email }}</td>
+                                    <td>{{ data.utilisateur.telephone ?: '—' }}</td>
+                                    <td>{{ data.affectation.dateAffectation|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        <span class="badge" style="background: #f59e0b;">En attente</span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
