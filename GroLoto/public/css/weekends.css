@@ -97,6 +97,7 @@
     /* height: auto; removed to allow flex stretch */
     overflow: hidden;
     position: relative;
+    background-color: #f1f5f9; /* Fallback color if image is missing */
 }
 
 .weekend-card .image img {
@@ -146,6 +147,9 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     word-break: break-word; /* Prevent long words from overflowing */
+    overflow-wrap: break-word; /* Standard property */
+    word-wrap: break-word; /* Legacy property */
+    max-height: 5em; /* Fallback height limit approx 3 lines */
 }
 
 /* Dates */
@@ -327,6 +331,12 @@
     margin: 0;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     opacity: 0.9;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 5; /* Limit to 5 lines in hero */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .weekend-content {

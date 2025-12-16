@@ -107,19 +107,16 @@
                         <div class="weekend-card-info">
                             <div class="weekend-info-item">
                                 <i class="far fa-calendar-check"></i>
-                                <div class="value">{{ evenement.dateDebut|date('H:i') }}</div>
+                                <div class="value">{{ evenement.heureDebut ? evenement.heureDebut|date('H:i') : '-' }}</div>
                                 <div class="label">Début</div>
                             </div>
                             <div class="weekend-info-item">
                                 <i class="far fa-clock"></i>
                                 <div class="value">
-                                    {% if evenement.dateFin %}
-                                        {% set dureeMinutes = ((evenement.dateFin.timestamp - evenement.dateDebut.timestamp) / 60)|round %}
-                                        {% if dureeMinutes >= 60 %}
-                                            {{ (dureeMinutes / 60)|round }}h
-                                        {% else %}
-                                            {{ dureeMinutes }}m
-                                        {% endif %}
+                                    {% if evenement.dureeMinutes %}
+                                        {% set h = (evenement.dureeMinutes / 60)|round(0, 'floor') %}
+                                        {% set m = evenement.dureeMinutes % 60 %}
+                                        {% if h > 0 %}{{ h }}h{% endif %}{% if m > 0 %}{{ m }}m{% endif %}
                                     {% else %}
                                         -
                                     {% endif %}
@@ -137,12 +134,19 @@
                                 <span class="weekend-status upcoming">À venir</span>
                             {% endif %}
                         </div>
-                        <div style="flex:1; display:flex; justify-content:flex-end;">
+                        <div style="flex:1; display:flex; justify-content:flex-end; gap: 0.5rem;">
                             {% if isAdmin %}
                             <a href="{{ path('app_evenement_edit', {id: evenement.id}) }}" class="weekend-view-btn" title="Modifier">
                                 <i class="fas fa-edit"></i>
                                 Modifier
                             </a>
+                            <form method="post" action="{{ path('app_evenement_delete', {'id': evenement.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');" style="display: inline-block;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evenement.id) }}">
+                                <button class="weekend-view-btn danger" title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                    Supprimer
+                                </button>
+                            </form>
                             {% endif %}
                         </div>
                     </div>

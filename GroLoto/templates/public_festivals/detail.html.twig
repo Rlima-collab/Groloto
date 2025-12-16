@@ -49,7 +49,10 @@
                             {% if evenement.dateDebut %}
                                 <p class="event-date">
                                     <i class="bi bi-calendar-event"></i> 
-                                    {{ evenement.dateDebut|date('l d F Y')|capitalize }}
+                                    {{ evenement.dateDebut|date('l d F Y')|replace({
+                                        'Monday': 'Lundi', 'Tuesday': 'Mardi', 'Wednesday': 'Mercredi', 'Thursday': 'Jeudi', 'Friday': 'Vendredi', 'Saturday': 'Samedi', 'Sunday': 'Dimanche',
+                                        'January': 'Janvier', 'February': 'Février', 'March': 'Mars', 'April': 'Avril', 'May': 'Mai', 'June': 'Juin', 'July': 'Juillet', 'August': 'Août', 'September': 'Septembre', 'October': 'Octobre', 'November': 'Novembre', 'December': 'Décembre'
+                                    }) }}
                                 </p>
                             {% endif %}
                             {% if evenement.heureDebut %}
@@ -57,7 +60,11 @@
                                     <i class="bi bi-clock"></i> 
                                     {{ evenement.heureDebut|date('H:i') }}
                                     {% if evenement.dureeMinutes %}
-                                        <span class="duration">({{ evenement.dureeMinutes }} min)</span>
+                                        {% set h = (evenement.dureeMinutes / 60)|round(0, 'floor') %}
+                                        {% set m = evenement.dureeMinutes % 60 %}
+                                        <span class="duration">
+                                            ({% if h > 0 %}{{ h }}h{{ m > 0 ? (m < 10 ? '0' ~ m : m) : '' }}{% else %}{{ m }} min{% endif %})
+                                        </span>
                                     {% endif %}
                                 </p>
                             {% endif %}

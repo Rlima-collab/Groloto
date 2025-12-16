@@ -150,9 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentWeekendEnd = null;
 
     function formatDateFr(date) {
-        const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-        const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-        return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]} ${date.getFullYear()}`;
+        return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     }
 
     function formatHeure(date) {
@@ -162,6 +160,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function getDureeEnMinutes() {
         const val = parseFloat(dureeInput.value);
         return isNaN(val) || val <= 0 ? 0 : (uniteSelect.value === 'heures' ? val * 60 : val);
+    }
+
+    // Conversion automatique des heures en minutes lors de la soumission
+    const form = document.getElementById('evenement-form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            if (uniteSelect.value === 'heures') {
+                const val = parseFloat(dureeInput.value);
+                if (!isNaN(val)) {
+                    dureeInput.value = Math.round(val * 60);
+                }
+            }
+        });
     }
 
     function formatDuree(minutes) {
@@ -240,15 +251,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Récupérer le nombre de jours du weekend
         const dayCount = parseInt(opt.dataset.dayCount || '0');
         
-        const joursFr = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-        
         // Créer les options pour chaque jour du weekend
         for (let i = 0; i < dayCount; i++) {
             const dateStr = opt.dataset['day-' + i];
             if (dateStr) {
                 const dateObj = new Date(dateStr);
-                const jourNom = joursFr[dateObj.getDay()];
-                const label = jourNom + ' ' + dateObj.toLocaleDateString('fr-FR');
+                const label = formatDateFr(dateObj);
                 
                 const option = document.createElement('option');
                 option.value = dateStr;

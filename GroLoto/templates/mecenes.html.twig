@@ -166,42 +166,21 @@
             }
         }
 
-        .benevole-social-links {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            display: flex;
-            gap: 8px;
+        .mecene-logo {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 5px;
+            background: white;
+            margin-top: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
         }
 
-        .social-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .social-link.instagram {
-            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
-        }
-
-        .social-link.facebook {
-            background: #1877f2;
-        }
-
-        .social-link:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .benevole-card {
-            position: relative;
+        .mecene-logo:hover {
+            transform: scale(1.05);
         }
     </style>
 {% endblock %}
@@ -258,20 +237,6 @@
                 </div>
                 
                 <div class="filters-container">
-                    {% if is_granted('ROLE_ADMIN') and weekends is defined %}
-                    <div class="filter-group">
-                        <label for="filterWeekend" class="filter-label">Week-end :</label>
-                        <select id="filterWeekend" name="weekend" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
-                            <option value="">Tous les week-ends</option>
-                            {% for weekend in weekends %}
-                                <option value="{{ weekend.id }}" {% if app.request.query.get('weekend') == weekend.id %}selected{% endif %}>
-                                    {{ weekend.nom }} ({{ weekend.dateVendredi|date('d/m/Y') }})
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    {% endif %}
-
                     <div class="filter-group">
                         <label for="sortBy" class="filter-label">Trier par :</label>
                         <select id="sortBy" name="sort" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
@@ -335,7 +300,8 @@
                                 {% if mecene.logo %}
                                 <div class="info-item">
                                     <span class="info-text"><strong>Logo:</strong></span>
-                                    <img src="{{ asset('uploads/logos/' ~ mecene.logo) }}" alt="Logo {{ mecene.organisation }}" style="max-width: 100px; max-height: 50px; margin-top: 5px;">
+                                    <br>
+                                    <img src="{{ asset(mecene.logo) }}" alt="Logo {{ mecene.organisation }}" class="mecene-logo">
                                 </div>
                                 {% endif %}
                                 <div class="info-item">
@@ -391,9 +357,6 @@
                 <div class="empty-state">
                     <h3>Aucun mécène trouvé</h3>
                     <p>Commencez par ajouter des mécènes à votre base de données.</p>
-                    {% if is_granted('ROLE_ADMIN') %}
-                    <a href="#" class="btn btn-primary">Ajouter un mécène</a>
-                    {% endif %}
                 </div>
             {% endif %}
         </div>

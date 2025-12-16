@@ -142,37 +142,19 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {# Bénévoles assignés #}
-                                            {% if data.nbAssignes > 0 %}
-                                                <div style="font-size: 0.85em; margin-bottom: 4px;">
-                                                    {% for benevole in data.benevolesAssignes %}
-                                                        <span class="badge" style="background: #059669; margin: 2px;" title="Assigné">{{ benevole }}</span>
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
-                                            
-                                            {# Propositions en attente #}
-                                            {% if data.nbProposees > 0 %}
-                                                <div style="font-size: 0.85em;">
-                                                    {% for benevole in data.benevolesProposees %}
-                                                        <span class="badge" style="background: #f59e0b; margin: 2px;" title="Proposition en attente">
-                                                            <i class="bi bi-hourglass-split"></i> {{ benevole }}
-                                                        </span>
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
-                                            
-                                            {# Résumé #}
-                                            {% if data.nbAssignes == 0 and data.nbProposees == 0 %}
-                                                <span style="color: #dc2626;">Non assignée</span>
-                                            {% else %}
-                                                <small style="color: #6b7280; display: block; margin-top: 4px;">
-                                                    {{ data.nbAssignes }} assigné{{ data.nbAssignes > 1 ? 's' : '' }}
-                                                    {% if data.nbProposees > 0 %}
-                                                        / {{ data.nbProposees }} en attente
-                                                    {% endif %}
-                                                </small>
-                                            {% endif %}
+                                            {# Bouton pour voir les bénévoles #}
+                                            <a href="{{ path('tache_benevoles', {'id': tache.id}) }}" 
+                                               class="btn btn-small btn-outline-secondary" 
+                                               title="Voir les bénévoles assignés">
+                                                {% if data.nbAssignes > 0 %}
+                                                    <i class="bi bi-people-fill"></i> {{ data.nbAssignes }} assigné{{ data.nbAssignes > 1 ? 's' : '' }}
+                                                {% else %}
+                                                    <i class="bi bi-people"></i> Aucun
+                                                {% endif %}
+                                                {% if data.nbProposees > 0 %}
+                                                    <br><small style="color: #f59e0b;">{{ data.nbProposees }} en attente</small>
+                                                {% endif %}
+                                            </a>
                                         </td>
                                         <td>
                                             {% if tache.maxPersonnes %}

@@ -242,4 +242,24 @@ class EvenementController extends AbstractController
             'isAdmin' => $isAdmin,
         ]);
     }
+
+    #[Route('/evenements/delete/{id}', name: 'app_evenement_delete', methods: ['POST'])]
+    public function delete(Request $request, Evenement $evenement, EntityManagerInterface $em): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$evenement->getId(), $request->request->get('_token'))) {
+            // Supprimer l'image si elle existe
+            if ($evenement->getImage()) {
+                $imagePath = $this->getParameter('kernel.project_dir').'/public/images/evenements/'.$evenement->getImage();
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+
+            $em->remove($evenement);
+            $em->flush();
+            $this->addFlash('success', 'Événement supprimé avec succès !');
+        }
+
+        return $this->redirectToRoute('app_evenements');
+    }
 }

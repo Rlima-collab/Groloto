@@ -117,6 +117,22 @@
     margin-bottom: 1.5rem;
 }
 
+/* Description box in success page */
+.weekend-description-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    color: #475569;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
 /* Conteneur des boutons d'action */
 .form-actions {
     display: flex;
