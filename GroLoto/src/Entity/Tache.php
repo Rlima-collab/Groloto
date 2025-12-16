@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\TacheRepository;
+use App\Entity\Evenement;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -38,6 +39,10 @@ class Tache
     #[ORM\ManyToOne(targetEntity: Weekend::class, inversedBy: 'taches')]
     #[ORM\JoinColumn(name: 'id_weekend', referencedColumnName: 'id', nullable: false)]
     private ?Weekend $weekend = null;
+
+    #[ORM\ManyToOne(targetEntity: Evenement::class, inversedBy: 'taches')]
+    #[ORM\JoinColumn(name: 'id_evenement', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?Evenement $evenement = null;
 
     #[ORM\OneToMany(mappedBy: 'tache', targetEntity: PlageHoraire::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $plagesHoraires;
@@ -134,6 +139,17 @@ class Tache
     public function setWeekend(Weekend $weekend): self
     {
         $this->weekend = $weekend;
+        return $this;
+    }
+
+    public function getEvenement(): ?Evenement
+    {
+        return $this->evenement;
+    }
+
+    public function setEvenement(?Evenement $evenement): self
+    {
+        $this->evenement = $evenement;
         return $this;
     }
 
