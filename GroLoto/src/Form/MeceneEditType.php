@@ -7,7 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -113,6 +113,24 @@ class MeceneEditType extends AbstractType
                     'placeholder' => 'Adresse complète de l\'organisation',
                     'rows' => 3
                 ]
+            ])
+            ->add('logo', FileType::class, [
+                'label' => 'Logo de l\'organisation',
+                'required' => false,
+                'mapped' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'accept' => 'image/png,image/jpeg,image/jpg'
+                ],
+                'constraints' => [
+                    new Assert\File([
+                        'maxSize' => '2M',
+                        'mimeTypes' => ['image/png', 'image/jpeg', 'image/jpg'],
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (PNG, JPEG)',
+                        'maxSizeMessage' => 'Le fichier ne peut pas dépasser 2 Mo'
+                    ])
+                ],
+                'help' => 'Formats acceptés : PNG, JPEG. Taille maximale : 2 Mo'
             ]);
     }
 

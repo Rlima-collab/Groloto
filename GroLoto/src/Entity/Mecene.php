@@ -4,6 +4,8 @@ namespace App\Entity;
 use App\Repository\MeceneRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Utilisateur;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity(repositoryClass: MeceneRepository::class)]
 #[ORM\Table(name: 'MECENE')]
@@ -27,6 +29,17 @@ class Mecene
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $adresse_postale = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $logo = null;
+
+    #[ORM\OneToMany(targetEntity: Lot::class, mappedBy: 'mecene')]
+    private Collection $lots;
+
+    public function __construct()
+    {
+        $this->lots = new ArrayCollection();
+    }
+
     public function getId(): ?int { return $this->id; }
 
     public function getUtilisateur(): ?Utilisateur { return $this->utilisateur; }
@@ -44,4 +57,38 @@ class Mecene
     public function getAdressePostale(): ?string { return $this->adresse_postale; }
     public function setAdressePostale(?string $adresse_postale): self 
     { $this->adresse_postale = $adresse_postale; return $this; }
+
+    public function getLogo(): ?string { return $this->logo; }
+    public function setLogo(?string $logo): self 
+    { $this->logo = $logo; return $this; }
+
+    /**
+     * @return Collection<int, Lot>
+     */
+    public function getLots(): Collection
+    {
+        return $this->lots;
+    }
+
+    public function addLot(Lot $lot): self
+    {
+        if (!$this->lots->contains($lot)) {
+            $this->lots->add($lot);
+            $lot->setMecene($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLot(Lot $lot): self
+    {
+        if ($this->lots->removeElement($lot)) {
+            // set the owning side to null (unless already changed)
+            if ($lot->getMecene() === $this) {
+                $lot->setMecene(null);
+            }
+        }
+
+        return $this;
+    }
 }
