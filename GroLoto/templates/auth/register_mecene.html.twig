@@ -91,6 +91,18 @@
                     <small class="registration-form-text">Optionnel - Format PNG ou JPEG uniquement</small>
                 </div>
 
+                <div class="registration-form-group">
+                    <label for="instagram" class="registration-form-label">Lien Instagram</label>
+                    <input type="url" name="instagram" id="instagram" class="registration-form-control mecene-focus" placeholder="https://www.instagram.com/votrecompte" value="{{ app.request.request.get('instagram') }}">
+                    <small class="registration-form-text">Optionnel - Lien vers votre compte Instagram</small>
+                </div>
+
+                <div class="registration-form-group">
+                    <label for="facebook" class="registration-form-label">Lien Facebook</label>
+                    <input type="url" name="facebook" id="facebook" class="registration-form-control mecene-focus" placeholder="https://www.facebook.com/votrepage" value="{{ app.request.request.get('facebook') }}">
+                    <small class="registration-form-text">Optionnel - Lien vers votre page Facebook</small>
+                </div>
+
                 <div class="registration-row">
                     <div class="registration-col">
                         <div class="registration-form-group" id="password-group">

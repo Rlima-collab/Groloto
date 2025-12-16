@@ -264,25 +264,20 @@
         </div>
 
         <div class="form-section">
-            <h5>Logo de l'organisation</h5>
+            <h5>Réseaux sociaux</h5>
             
-            {% if mecene.logo %}
             <div class="form-group">
-                <label>Logo actuel</label>
-                <div style="margin-bottom: 15px;">
-                    <img src="{{ asset('uploads/logos/' ~ mecene.logo) }}" 
-                         alt="Logo actuel" 
-                         style="max-width: 200px; max-height: 150px; border: 1px solid #ddd; border-radius: 8px; padding: 5px;">
-                </div>
-                <div class="small-text">Laissez vide pour conserver le logo actuel.</div>
+                {{ form_label(form.instagram) }}
+                {{ form_widget(form.instagram) }}
+                {{ form_errors(form.instagram) }}
+                <div class="small-text">Lien vers le compte Instagram de l'organisation (optionnel).</div>
             </div>
-            {% endif %}
-            
+
             <div class="form-group">
-                {{ form_label(form.logo) }}
-                {{ form_widget(form.logo) }}
-                {{ form_errors(form.logo) }}
-                <div class="small-text">Formats acceptés : PNG, JPEG. Taille maximale : 2 Mo. {{ mecene.logo ? 'Laissez vide pour conserver le logo actuel.' : 'Optionnel.' }}</div>
+                {{ form_label(form.facebook) }}
+                {{ form_widget(form.facebook) }}
+                {{ form_errors(form.facebook) }}
+                <div class="small-text">Lien vers la page Facebook de l'organisation (optionnel).</div>
             </div>
         </div>
 
