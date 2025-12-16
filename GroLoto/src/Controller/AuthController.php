@@ -159,6 +159,7 @@ class AuthController extends AbstractController
             $organisation = $request->request->get('organisation');
             $siret = $request->request->get('siret');
             $adressePostale = $request->request->get('adresse_postale');
+            $logoFile = $request->files->get('logo');
 
             if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $errors[] = "Email invalide";
@@ -177,6 +178,9 @@ class AuthController extends AbstractController
             }
             if (empty($siret) || !preg_match('/^[0-9]{14}$/', $siret)) {
                 $errors[] = "Le numéro SIRET doit contenir exactement 14 chiffres";
+            }
+            if ($logoFile && !in_array($logoFile->getMimeType(), ['image/png', 'image/jpeg'])) {
+                $errors[] = "Le logo doit être au format PNG ou JPEG";
             }
 
             if (empty($errors)) {
@@ -207,6 +211,17 @@ class AuthController extends AbstractController
                             $mecene->setOrganisation($organisation);
                             $mecene->setSiret($siret);
                             $mecene->setAdressePostale($adressePostale);
+
+                            // Handle logo upload
+                            if ($logoFile) {
+                                $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/';
+                                if (!is_dir($uploadDir)) {
+                                    mkdir($uploadDir, 0755, true);
+                                }
+                                $filename = uniqid() . '.' . $logoFile->guessExtension();
+                                $logoFile->move($uploadDir, $filename);
+                                $mecene->setLogo('uploads/logos/' . $filename);
+                            }
 
                             $entityManager->persist($mecene);
                             $entityManager->flush();
@@ -285,6 +300,7 @@ class AuthController extends AbstractController
 
         // Préparer les disponibilités pour les bénévoles
         $benevole = null;
+        $mecene = null;
         $dispos = [];
         $roleName = strtolower($user->getRole()?->getNom() ?? '');
         if ($roleName === 'benevole') {
@@ -293,6 +309,9 @@ class AuthController extends AbstractController
             if ($benevole) {
                 $dispos = $benevole->getDisponibilites();
             }
+        } elseif ($roleName === 'mecene') {
+            $mecene = $entityManager->getRepository(\App\Entity\Mecene::class)
+                ->findOneBy(['utilisateur' => $user]);
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -362,13 +381,17 @@ class AuthController extends AbstractController
             $newPassword = $form->get('newPassword')->getData();
             $confirmPassword = $form->get('confirmPassword')->getData();
 
-            // Vérifier le mot de passe actuel
-            if (!$passwordHasher->isPasswordValid($user, $currentPassword)) {
-                $this->addFlash('error', 'Le mot de passe actuel est incorrect.');
-                return $this->render('auth/profile_edit.html.twig', [
-                    'form' => $form->createView(),
-                    'user' => $user,
-                ]);
+            // Vérifier le mot de passe actuel seulement si un nouveau mot de passe est fourni
+            if (!empty($newPassword)) {
+                if (empty($currentPassword) || !$passwordHasher->isPasswordValid($user, $currentPassword)) {
+                    $this->addFlash('error', 'Le mot de passe actuel est incorrect.');
+                    return $this->render('auth/profile_edit.html.twig', [
+                        'form' => $form->createView(),
+                        'user' => $user,
+                        'dispos' => $dispos,
+                        'mecene' => $mecene ?? null,
+                    ]);
+                }
             }
 
             // Si un nouveau mot de passe est fourni, le valider et le mettre à jour
@@ -379,6 +402,7 @@ class AuthController extends AbstractController
                         'form' => $form->createView(),
                         'user' => $user,
                         'dispos' => $dispos,
+                        'mecene' => $mecene ?? null,
                     ]);
                 }
 
@@ -388,6 +412,7 @@ class AuthController extends AbstractController
                         'form' => $form->createView(),
                         'user' => $user,
                         'dispos' => $dispos,
+                        'mecene' => $mecene ?? null,
                     ]);
                 }
 
@@ -408,6 +433,7 @@ class AuthController extends AbstractController
                         'form' => $form->createView(),
                         'user' => $user,
                         'dispos' => $dispos,
+                        'mecene' => $mecene ?? null,
                     ]);
                 }
             }
@@ -437,6 +463,63 @@ class AuthController extends AbstractController
                 }
             }
 
+            // Gérer l'upload du logo pour les mécènes
+            if ($roleName === 'mecene') {
+                if (!$mecene) {
+                    $mecene = new \App\Entity\Mecene();
+                    $mecene->setUtilisateur($user);
+                    $entityManager->persist($mecene);
+                }
+
+                $logoFile = $request->files->get('logo');
+                if ($logoFile) {
+                    if (!in_array($logoFile->getMimeType(), ['image/png', 'image/jpeg'])) {
+                        $this->addFlash('error', 'Le logo doit être au format PNG ou JPEG.');
+                        return $this->render('auth/profile_edit.html.twig', [
+                            'form' => $form->createView(),
+                            'user' => $user,
+                            'dispos' => $dispos,
+                            'mecene' => $mecene ?? null,
+                        ]);
+                    }
+
+                    // Supprimer l'ancien logo si existe
+                    if ($mecene->getLogo()) {
+                        $oldLogoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . $mecene->getLogo();
+                        if (file_exists($oldLogoPath)) {
+                            unlink($oldLogoPath);
+                        }
+                    }
+
+                    // Générer nom unique
+                    $newFilename = uniqid() . '.' . $logoFile->guessExtension();
+
+                    // Créer dossier si nécessaire
+                    $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/logos';
+                    if (!is_dir($uploadsDirectory)) {
+                        mkdir($uploadsDirectory, 0777, true);
+                    }
+
+                    try {
+                        $logoFile->move($uploadsDirectory, $newFilename);
+                        $mecene->setLogo($newFilename);
+                    } catch (\Exception $e) {
+                        $this->addFlash('error', 'Erreur lors de l\'upload du logo.');
+                    }
+                }
+
+                // Gérer suppression logo
+                if ($request->request->get('removeLogo') === '1') {
+                    if ($mecene->getLogo()) {
+                        $logoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . $mecene->getLogo();
+                        if (file_exists($logoPath)) {
+                            unlink($logoPath);
+                        }
+                        $mecene->setLogo(null);
+                    }
+                }
+            }
+
             // Mettre à jour la date de modification
             $user->setDateModification(new \DateTime());
 
@@ -453,6 +536,7 @@ class AuthController extends AbstractController
             'form' => $form->createView(),
             'user' => $user,
             'dispos' => $dispos,
+            'mecene' => $mecene ?? null,
         ]);
     }
 

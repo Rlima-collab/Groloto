@@ -80,6 +80,7 @@ CREATE TABLE MECENE (
     organisation TEXT NOT NULL,
     siret TEXT NOT NULL,
     adresse_postale TEXT,
+    logo TEXT,
     FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
