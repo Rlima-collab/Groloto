@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS COMMUNICATION;
 DROP TABLE IF EXISTS DEMANDE_ANNULATION;
 DROP TABLE IF EXISTS DEMANDE_TACHE;
 DROP TABLE IF EXISTS AFFECTATION_TACHE;
+DROP TABLE IF EXISTS PLAGE_HORAIRE;
 DROP TABLE IF EXISTS TACHE;
 DROP TABLE IF EXISTS DISPONIBILITE_BENEVOLE;
 DROP TABLE IF EXISTS HISTORIQUE_STOCK;
@@ -207,6 +208,16 @@ CREATE TABLE TACHE (
     FOREIGN KEY (id_weekend) REFERENCES WEEKEND(id)
 );
 
+CREATE TABLE PLAGE_HORAIRE (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_tache INTEGER NOT NULL,
+    jour DATE NOT NULL,
+    heure_debut TIME NOT NULL,
+    heure_fin TIME NOT NULL,
+    max_personnes_plage INTEGER,
+    FOREIGN KEY (id_tache) REFERENCES TACHE(id)
+);
+
 CREATE TABLE DEMANDE_TACHE (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   id_tache INTEGER NOT NULL,
@@ -231,6 +242,7 @@ CREATE TABLE DEMANDE_ANNULATION (
   date_demande DATETIME DEFAULT CURRENT_TIMESTAMP,
   statut TEXT DEFAULT 'en_attente',
   motif_benevole TEXT,
+  tache_titre TEXT,
   message_admin TEXT,
   date_reponse DATETIME,
   CONSTRAINT check_statut_annulation CHECK (statut IN ('en_attente', 'acceptee', 'refusee')),
@@ -418,6 +430,13 @@ INSERT INTO TACHE (id_weekend, titre, poste_requis, debut, fin, max_personnes, r
   (1, 'Service bar', 'bar', '2025-11-15 19:00:00', '2025-11-15 22:00:00', 2, 'Préparer et servir les boissons'),
   (1, 'Montage scène', 'technique', '2025-11-14 09:00:00', '2025-11-14 12:00:00', 4, 'Montage de la scène et sonorisation'),
   (1, 'Accueil billetterie', 'accueil', '2025-11-15 17:00:00', '2025-11-15 19:00:00', 3, 'Accueil du public et vérification des billets');
+
+INSERT INTO PLAGE_HORAIRE (id_tache, jour, heure_debut, heure_fin, max_personnes_plage) VALUES
+  (1, '2025-11-15', '18:00:00', '19:00:00', 3),
+  (2, '2025-11-15', '19:00:00', '20:30:00', 2),
+  (2, '2025-11-15', '20:30:00', '22:00:00', 2),
+  (3, '2025-11-14', '09:00:00', '12:00:00', 4),
+  (4, '2025-11-15', '17:00:00', '19:00:00', 3);
 
 INSERT INTO AFFECTATION_TACHE (id_tache, id_benevole, id_utilisateur, statut, remarque) VALUES
   (1, 1, 2, 'confirme', 'Alice affectée à l''accueil'),

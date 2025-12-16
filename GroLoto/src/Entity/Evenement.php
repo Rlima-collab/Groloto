@@ -47,12 +47,8 @@ class Evenement
     #[ORM\JoinColumn(name: "id_weekend", referencedColumnName: "id", nullable: true)]
     private ?Weekend $weekend = null;
 
-    #[ORM\OneToMany(mappedBy: 'evenement', targetEntity: Tache::class, orphanRemoval: true)]
-    private Collection $taches;
-
     public function __construct()
     {
-        $this->taches = new ArrayCollection();
         $this->date_creation = new \DateTime();
     }
 
@@ -104,25 +100,4 @@ class Evenement
         return $this;
     }
 
-    /**
-     * @return Collection<int, Tache>
-     */
-    public function getTaches(): Collection { return $this->taches; }
-
-    public function addTache(Tache $tache): self
-    {
-        if (!$this->taches->contains($tache)) {
-            $this->taches->add($tache);
-            $tache->setEvenement($this);
-        }
-        return $this;
-    }
-
-    public function removeTache(Tache $tache): self
-    {
-        if ($this->taches->removeElement($tache) && $tache->getEvenement() === $this) {
-            $tache->setEvenement(null);
-        }
-        return $this;
-    }
 }
