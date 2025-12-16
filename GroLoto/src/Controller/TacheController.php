@@ -242,7 +242,7 @@ class TacheController extends AbstractController
     }
 
     #[Route('/{id}/duplicate', name: 'tache_duplicate')]
-    public function duplicate(int $id, TacheRepository $tacheRepository, EntityManagerInterface $entityManager): Response
+    public function duplicate(int $id, Request $request, TacheRepository $tacheRepository, EntityManagerInterface $entityManager): Response
     {
         $tacheSource = $tacheRepository->find($id);
 
@@ -251,31 +251,55 @@ class TacheController extends AbstractController
             return $this->redirectToRoute('tache_index');
         }
 
+        // Créer une nouvelle tâche pré-remplie avec les données de la source
         $tache = new Tache();
-        $tache->setTitre($tacheSource->getTitre());
+        $tache->setTitre($tacheSource->getTitre() . ' (copie)');
         $tache->setWeekend($tacheSource->getWeekend());
         $tache->setMaxPersonnes($tacheSource->getMaxPersonnes());
         $tache->setRemarque($tacheSource->getRemarque());
 
-        // Cloner les plages horaires
-        foreach ($tacheSource->getPlagesHoraires() as $plageSrc) {
-            $plage = new PlageHoraire();
-            $plage->setJour($plageSrc->getJour());
-            $plage->setHeureDebut($plageSrc->getHeureDebut());
-            $plage->setHeureFin($plageSrc->getHeureFin());
-            $plage->setMaxPersonnesPlage($plageSrc->getMaxPersonnesPlage());
-            $plage->setTache($tache);
-            $tache->addPlageHoraire($plage);
+        // Créer le formulaire avec les données pré-remplies
+        $form = $this->createForm(TacheType::class, $tache);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $formData = $request->request->all()['tache'] ?? [];
+            
+            // Créer une plage horaire avec le jour et les horaires spécifiés
+            if (isset($formData['jour_plage']) && !empty($formData['jour_plage'])) {
+                $plage = new PlageHoraire();
+                $plage->setJour(new \DateTime($formData['jour_plage']));
+                $plage->setHeureDebut(new \DateTime($formData['heure_debut_plage']));
+                $plage->setHeureFin(new \DateTime($formData['heure_fin_plage']));
+                $plage->setTache($tache);
+                $tache->addPlageHoraire($plage);
+            }
+            
+            // Synchroniser debut/fin avec les plages horaires
+            $tache = $this->syncTaskDates($tache);
+            
+            $entityManager->persist($tache);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La tâche a été dupliquée avec succès !');
+            return $this->redirectToRoute('tache_index');
         }
 
-        // Synchroniser debut/fin
-        $tache = $this->syncTaskDates($tache);
+        // Préparer les données des plages horaires de la source pour le template
+        $plagesSource = [];
+        foreach ($tacheSource->getPlagesHoraires() as $plage) {
+            $plagesSource[] = [
+                'jour' => $plage->getJour(),
+                'heureDebut' => $plage->getHeureDebut(),
+                'heureFin' => $plage->getHeureFin(),
+            ];
+        }
 
-        $entityManager->persist($tache);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'La tâche a été dupliquée avec succès!');
-        return $this->redirectToRoute('tache_edit', ['id' => $tache->getId()]);
+        return $this->render('taches/duplicate.html.twig', [
+            'form' => $form->createView(),
+            'tacheSource' => $tacheSource,
+            'plagesSource' => $plagesSource,
+        ]);
     }
 
     #[Route('/{id}/affectation', name: 'tache_affectation')]
