@@ -455,4 +455,61 @@ class MeceneController extends AbstractController
 
         return $this->file($zipPath, $zipName)->deleteFileAfterSend();
     }
+
+    #[Route('/mecenes/export-social-csv', name: 'mecenes_export_social_csv')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function exportSocialCsv(
+        Request $request,
+        MeceneRepository $meceneRepository,
+        WeekendRepository $weekendRepository
+    ): Response {
+        // Récupérer les filtres depuis la requête
+        $weekendId = $request->query->get('weekend');
+        $search = $request->query->get('search');
+        $sort = $request->query->get('sort');
+
+        $weekendFiltre = null;
+        if ($weekendId) {
+            $weekendFiltre = $weekendRepository->find($weekendId);
+        }
+
+        // Construction des critères de recherche
+        $criteria = [
+            'weekend' => $weekendFiltre,
+            'search' => $search,
+            'sort' => $sort
+        ];
+
+        // Récupération des mécènes selon les filtres
+        $mecenes = $meceneRepository->search($criteria);
+
+        // Créer le contenu CSV
+        $csvContent = "Organisation,Nom,Prénom,Email,Instagram,Facebook\n";
+
+        foreach ($mecenes as $mecene) {
+            $organisation = $mecene->getOrganisation() ?? '';
+            $nom = $mecene->getUtilisateur()->getNom() ?? '';
+            $prenom = $mecene->getUtilisateur()->getPrenom() ?? '';
+            $email = $mecene->getUtilisateur()->getEmail() ?? '';
+            $instagram = $mecene->getInstagram() ?? '';
+            $facebook = $mecene->getFacebook() ?? '';
+
+            // Échapper les virgules et guillemets dans les champs
+            $organisation = '"' . str_replace('"', '""', $organisation) . '"';
+            $nom = '"' . str_replace('"', '""', $nom) . '"';
+            $prenom = '"' . str_replace('"', '""', $prenom) . '"';
+            $email = '"' . str_replace('"', '""', $email) . '"';
+            $instagram = '"' . str_replace('"', '""', $instagram) . '"';
+            $facebook = '"' . str_replace('"', '""', $facebook) . '"';
+
+            $csvContent .= "$organisation,$nom,$prenom,$email,$instagram,$facebook\n";
+        }
+
+        // Créer la réponse avec le fichier CSV
+        $response = new Response($csvContent);
+        $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="reseaux_sociaux_mecenes.csv"');
+
+        return $response;
+    }
 }
