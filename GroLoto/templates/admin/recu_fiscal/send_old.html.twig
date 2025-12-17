@@ -7,7 +7,250 @@
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/recu_fiscal.css') }}">
 {% endblock %}
-
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f3f4f6;
+            text-align: center;
+        }
+        .card-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+        }
+        .card-description {
+            color: #6b7280;
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .form-section {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e5e7eb;
+        }
+        .form-section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #3b82f6;
+            border-radius: 2px;
+        }
+        .form-group {
+            margin-bottom: 2rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #374151;
+            font-size: 1rem;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .radio-option {
+            position: relative;
+        }
+        .radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .radio-option label {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: #374151;
+        }
+        .radio-option input[type="radio"]:checked + label {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+        .radio-option label:hover {
+            border-color: #3b82f6;
+        }
+        .user-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            background: white;
+        }
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .user-item:hover {
+            background-color: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        .user-item.selected {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .user-info h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        .user-info p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background: #fafafa;
+            transition: all 0.2s ease;
+        }
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+            background: #f0f8ff;
+        }
+        .file-upload-area.dragover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .btn {
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .alert-success {
+            background-color: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        .alert-error {
+            background-color: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+        .alert-icon {
+            font-size: 1.25rem;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .required {
+            color: #ef4444;
+        }
+        .help-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
 {% block body %}
 <div class="recu-fiscal-container">
     <div class="recu-fiscal-card">
@@ -31,24 +274,26 @@
         {% endfor %}
 
         <form method="post" enctype="multipart/form-data" id="recu-form">
-            <div class="recu-form-section">
-                <h3 class="recu-form-section-title">Type et année</h3>
-                <div class="recu-form-group">
-                    <label class="recu-form-label">Type de reçu <span class="required">*</span></label>
-                    <div class="recu-radio-group">
-                        <div class="recu-radio-option">
+            <div class="form-section">
+                <h3 class="form-section-title">📋 Informations générales</h3>
+                <div class="form-group">
+                    <label class="form-label">Type de reçu <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <div class="radio-option">
                             <input type="radio" name="type" value="mecene" id="type-mecene" checked>
                             <label for="type-mecene">Mécène</label>
                         </div>
-                        <div class="recu-radio-option">
+                        <div class="radio-option">
                             <input type="radio" name="type" value="benevole" id="type-benevole">
                             <label for="type-benevole">Bénévole</label>
                         </div>
                     </div>
+                    <p class="help-text">Sélectionnez le type d'utilisateur concerné par ce reçu fiscal</p>
                 </div>
-                <div class="recu-form-group">
-                    <label class="recu-form-label" for="annee">Année fiscale <span class="required">*</span></label>
-                    <input type="number" name="annee" id="annee" class="recu-form-input" value="{{ current_year }}" min="2020" max="{{ current_year + 1 }}" required>
+                <div class="form-group">
+                    <label class="form-label" for="annee">Année fiscale <span class="required">*</span></label>
+                    <input type="number" name="annee" id="annee" class="form-control" value="{{ current_year }}" min="2020" max="{{ current_year + 1 }}" required>
+                    <p class="help-text">Année pour laquelle ce reçu fiscal est établi</p>
                 </div>
             </div>
 
@@ -155,19 +400,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 meceneList.style.display = 'none';
                 benevoleList.style.display = 'block';
             }
-            selectedUserInput.value = '';
-            document.querySelectorAll('.recu-user-item.selected').forEach(item => {
+            document.querySelectorAll('.user-item.selected').forEach(item => {
                 item.classList.remove('selected');
             });
+            selectedUserInput.value = '';
         });
     });
 
     // Gestion de la sélection d'utilisateur
     document.addEventListener('click', function(e) {
-        if (e.target.closest('.recu-user-item')) {
-            const item = e.target.closest('.recu-user-item');
+        if (e.target.closest('.user-item')) {
+            const item = e.target.closest('.user-item');
             const userId = item.dataset.userId;
-            document.querySelectorAll('.recu-user-item.selected').forEach(selectedItem => {
+            document.querySelectorAll('.user-item.selected').forEach(selectedItem => {
                 selectedItem.classList.remove('selected');
             });
             item.classList.add('selected');
@@ -189,8 +434,8 @@ document.addEventListener('DOMContentLoaded', function() {
     ['dragleave', 'drop'].forEach(eventName => {
         fileUploadArea.addEventListener(eventName, unhighlight, false);
     });
-    function highlight() { fileUploadArea.classList.add('dragover'); }
-    function unhighlight() { fileUploadArea.classList.remove('dragover'); }
+    function highlight(e) { fileUploadArea.classList.add('dragover'); }
+    function unhighlight(e) { fileUploadArea.classList.remove('dragover'); }
 
     fileUploadArea.addEventListener('drop', handleDrop, false);
     function handleDrop(e) {
@@ -233,9 +478,9 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Veuillez sélectionner un fichier PDF.');
             return;
         }
+        submitBtn.disabled = true;
         btnText.style.display = 'none';
         btnLoading.style.display = 'inline-block';
-        submitBtn.disabled = true;
     });
 });
 </script>
