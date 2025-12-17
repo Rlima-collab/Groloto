@@ -241,7 +241,7 @@ class BatchTaskAssignmentService
                 $user,
                 'Nouvelles tâches',
                 trim($message),
-                'info'
+                '/benevole/mon-planning'
             );
         }
     }

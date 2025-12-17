@@ -162,4 +162,78 @@ class RevenuFiscalController extends AbstractController
 
         return $this->render('benevole/revenu_fiscal/index.html.twig', ['recus' => $recus]);
     }
+
+    #[Route('/benevole/demande-recu-fiscal', name: 'benevole_recu_send', methods: ['POST'])]
+    #[IsGranted('ROLE_BENEVOLE')]
+    public function benevoleDemandeRecu(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('send_recu_benevole', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('benevole_mon_planning');
+        }
+
+        $user = $this->getUser();
+
+        // Envoyer une notification aux admins
+        $admins = $this->em->getRepository(Utilisateur::class)
+            ->createQueryBuilder('u')
+            ->join('u.role', 'r')
+            ->where('r.nom LIKE :role')
+            ->setParameter('role', '%ADMIN%')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($admins as $admin) {
+            $notification = new Notification();
+            $notification->setDestinataire($admin)
+                ->setType('demande_recu')
+                ->setMessage(sprintf('%s %s demande son reçu fiscal bénévole', $user->getPrenom(), $user->getNom()))
+                ->setLien('/admin/recus-fiscaux/envoyer')
+                ->setLue(false);
+
+            $this->em->persist($notification);
+        }
+
+        $this->em->flush();
+
+        $this->addFlash('success', 'Votre demande de reçu fiscal a été envoyée aux administrateurs.');
+        return $this->redirectToRoute('benevole_mon_planning');
+    }
+
+    #[Route('/mecene/demande-recu-fiscal', name: 'mecene_recu_send', methods: ['POST'])]
+    #[IsGranted('ROLE_MECENE')]
+    public function meceneDemandeRecu(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('send_recu_mecene', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('mecene_dashboard');
+        }
+
+        $user = $this->getUser();
+
+        // Envoyer une notification aux admins
+        $admins = $this->em->getRepository(Utilisateur::class)
+            ->createQueryBuilder('u')
+            ->join('u.role', 'r')
+            ->where('r.nom LIKE :role')
+            ->setParameter('role', '%ADMIN%')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($admins as $admin) {
+            $notification = new Notification();
+            $notification->setDestinataire($admin)
+                ->setType('demande_recu')
+                ->setMessage(sprintf('%s %s demande son reçu fiscal mécène', $user->getPrenom(), $user->getNom()))
+                ->setLien('/admin/recus-fiscaux/envoyer')
+                ->setLue(false);
+
+            $this->em->persist($notification);
+        }
+
+        $this->em->flush();
+
+        $this->addFlash('success', 'Votre demande de reçu fiscal a été envoyée aux administrateurs.');
+        return $this->redirectToRoute('mecene_dashboard');
+    }
 }
