@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20251216153314 extends AbstractMigration
+final class Version20251217141557 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,6 +20,11 @@ final class Version20251216153314 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql('CREATE TABLE CRENEAU (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_evenement INTEGER NOT NULL, titre VARCHAR(255) NOT NULL, poste_requis VARCHAR(255) DEFAULT NULL, debut DATETIME NOT NULL, fin DATETIME NOT NULL, max_personnes INTEGER NOT NULL, remarque CLOB DEFAULT NULL, date_creation DATETIME DEFAULT NULL, CONSTRAINT FK_C62375458B13D439 FOREIGN KEY (id_evenement) REFERENCES EVENEMENT (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE INDEX IDX_C62375458B13D439 ON CRENEAU (id_evenement)');
+        $this->addSql('CREATE TABLE RECU_FISCAL (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, destinataire_id INTEGER NOT NULL, envoye_par_id INTEGER NOT NULL, type VARCHAR(20) NOT NULL, fichier VARCHAR(255) NOT NULL, annee INTEGER NOT NULL, created_at DATETIME NOT NULL, CONSTRAINT FK_AD0C71B0A4F84F6E FOREIGN KEY (destinataire_id) REFERENCES UTILISATEUR (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_AD0C71B0D603292 FOREIGN KEY (envoye_par_id) REFERENCES UTILISATEUR (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE INDEX IDX_AD0C71B0A4F84F6E ON RECU_FISCAL (destinataire_id)');
+        $this->addSql('CREATE INDEX IDX_AD0C71B0D603292 ON RECU_FISCAL (envoye_par_id)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__AFFECTATION_TACHE AS SELECT id, id_tache, id_benevole, id_utilisateur, date_affectation, statut, remarque FROM AFFECTATION_TACHE');
         $this->addSql('DROP TABLE AFFECTATION_TACHE');
         $this->addSql('CREATE TABLE AFFECTATION_TACHE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_tache INTEGER NOT NULL, id_benevole INTEGER NOT NULL, id_utilisateur INTEGER DEFAULT NULL, date_affectation DATETIME NOT NULL, statut VARCHAR(20) NOT NULL, remarque CLOB DEFAULT NULL, FOREIGN KEY (id_tache) REFERENCES TACHE (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE, FOREIGN KEY (id_benevole) REFERENCES BENEVOLE (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE, FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
@@ -52,10 +57,10 @@ final class Version20251216153314 extends AbstractMigration
         $this->addSql('INSERT INTO CONVENTION (id, id_mecene, nom_modele, url_pdf, date_signature, methode_signature, date_creation) SELECT id, id_mecene, nom_modele, url_pdf, date_signature, methode_signature, date_creation FROM __temp__CONVENTION');
         $this->addSql('DROP TABLE __temp__CONVENTION');
         $this->addSql('CREATE INDEX IDX_8EC97841D364722F ON CONVENTION (id_mecene)');
-        $this->addSql('CREATE TEMPORARY TABLE __temp__DEMANDE_ANNULATION AS SELECT id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, message_admin, date_reponse FROM DEMANDE_ANNULATION');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__DEMANDE_ANNULATION AS SELECT id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, tache_titre, message_admin, date_reponse FROM DEMANDE_ANNULATION');
         $this->addSql('DROP TABLE DEMANDE_ANNULATION');
-        $this->addSql('CREATE TABLE DEMANDE_ANNULATION (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_affectation INTEGER DEFAULT NULL, id_benevole INTEGER NOT NULL, id_admin_reponse INTEGER DEFAULT NULL, date_demande DATETIME NOT NULL, statut VARCHAR(20) NOT NULL, motif_benevole CLOB DEFAULT NULL, message_admin CLOB DEFAULT NULL, date_reponse DATETIME DEFAULT NULL, tache_titre VARCHAR(255) DEFAULT NULL, CONSTRAINT FK_75084DE6ECCFAC24 FOREIGN KEY (id_affectation) REFERENCES AFFECTATION_TACHE (id) ON DELETE SET NULL NOT DEFERRABLE INITIALLY IMMEDIATE, FOREIGN KEY (id_benevole) REFERENCES BENEVOLE (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE, FOREIGN KEY (id_admin_reponse) REFERENCES UTILISATEUR (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
-        $this->addSql('INSERT INTO DEMANDE_ANNULATION (id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, message_admin, date_reponse) SELECT id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, message_admin, date_reponse FROM __temp__DEMANDE_ANNULATION');
+        $this->addSql('CREATE TABLE DEMANDE_ANNULATION (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_affectation INTEGER DEFAULT NULL, id_benevole INTEGER NOT NULL, id_admin_reponse INTEGER DEFAULT NULL, date_demande DATETIME NOT NULL, statut VARCHAR(20) NOT NULL, motif_benevole CLOB DEFAULT NULL, tache_titre VARCHAR(255) DEFAULT NULL, message_admin CLOB DEFAULT NULL, date_reponse DATETIME DEFAULT NULL, CONSTRAINT FK_75084DE6ECCFAC24 FOREIGN KEY (id_affectation) REFERENCES AFFECTATION_TACHE (id) ON DELETE SET NULL NOT DEFERRABLE INITIALLY IMMEDIATE, FOREIGN KEY (id_benevole) REFERENCES BENEVOLE (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE, FOREIGN KEY (id_admin_reponse) REFERENCES UTILISATEUR (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('INSERT INTO DEMANDE_ANNULATION (id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, tache_titre, message_admin, date_reponse) SELECT id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, tache_titre, message_admin, date_reponse FROM __temp__DEMANDE_ANNULATION');
         $this->addSql('DROP TABLE __temp__DEMANDE_ANNULATION');
         $this->addSql('CREATE INDEX IDX_75084DE6ECCFAC24 ON DEMANDE_ANNULATION (id_affectation)');
         $this->addSql('CREATE INDEX IDX_75084DE6E4DAA34E ON DEMANDE_ANNULATION (id_benevole)');
@@ -116,10 +121,10 @@ final class Version20251216153314 extends AbstractMigration
         $this->addSql('DROP TABLE __temp__LOT');
         $this->addSql('CREATE INDEX IDX_9D266B91D364722F ON LOT (id_mecene)');
         $this->addSql('CREATE INDEX IDX_9D266B91704F64DE ON LOT (id_weekend)');
-        $this->addSql('CREATE TEMPORARY TABLE __temp__MECENE AS SELECT id, id_utilisateur, organisation, siret, adresse_postale FROM MECENE');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__MECENE AS SELECT id, id_utilisateur, organisation, siret, adresse_postale, logo, instagram, facebook FROM MECENE');
         $this->addSql('DROP TABLE MECENE');
         $this->addSql('CREATE TABLE MECENE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_utilisateur INTEGER DEFAULT NULL, organisation VARCHAR(255) DEFAULT NULL, siret VARCHAR(50) DEFAULT NULL, adresse_postale CLOB DEFAULT NULL, logo VARCHAR(255) DEFAULT NULL, instagram VARCHAR(255) DEFAULT NULL, facebook VARCHAR(255) DEFAULT NULL, FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
-        $this->addSql('INSERT INTO MECENE (id, id_utilisateur, organisation, siret, adresse_postale) SELECT id, id_utilisateur, organisation, siret, adresse_postale FROM __temp__MECENE');
+        $this->addSql('INSERT INTO MECENE (id, id_utilisateur, organisation, siret, adresse_postale, logo, instagram, facebook) SELECT id, id_utilisateur, organisation, siret, adresse_postale, logo, instagram, facebook FROM __temp__MECENE');
         $this->addSql('DROP TABLE __temp__MECENE');
         $this->addSql('CREATE INDEX IDX_5AB004450EAE44 ON MECENE (id_utilisateur)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__NOTIFICATION AS SELECT id, id_destinataire, type, message, lien, lue, created_at FROM NOTIFICATION');
@@ -134,6 +139,12 @@ final class Version20251216153314 extends AbstractMigration
         $this->addSql('INSERT INTO PARAMETRE (id, cle, valeur, date_modification) SELECT id, cle, valeur, date_modification FROM __temp__PARAMETRE');
         $this->addSql('DROP TABLE __temp__PARAMETRE');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_E8058EAE41401D17 ON PARAMETRE (cle)');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__PLAGE_HORAIRE AS SELECT id, id_tache, jour, heure_debut, heure_fin, max_personnes_plage FROM PLAGE_HORAIRE');
+        $this->addSql('DROP TABLE PLAGE_HORAIRE');
+        $this->addSql('CREATE TABLE PLAGE_HORAIRE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_tache INTEGER NOT NULL, jour DATE NOT NULL, heure_debut TIME NOT NULL, heure_fin TIME NOT NULL, max_personnes_plage INTEGER DEFAULT NULL, FOREIGN KEY (id_tache) REFERENCES TACHE (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('INSERT INTO PLAGE_HORAIRE (id, id_tache, jour, heure_debut, heure_fin, max_personnes_plage) SELECT id, id_tache, jour, heure_debut, heure_fin, max_personnes_plage FROM __temp__PLAGE_HORAIRE');
+        $this->addSql('DROP TABLE __temp__PLAGE_HORAIRE');
+        $this->addSql('CREATE INDEX IDX_59D5EA847D026145 ON PLAGE_HORAIRE (id_tache)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__ROLE AS SELECT id, nom, description FROM ROLE');
         $this->addSql('DROP TABLE ROLE');
         $this->addSql('CREATE TABLE ROLE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, description CLOB DEFAULT NULL)');
@@ -145,12 +156,13 @@ final class Version20251216153314 extends AbstractMigration
         $this->addSql('CREATE TABLE STOCK (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, categorie VARCHAR(50) DEFAULT NULL, quantite INTEGER DEFAULT 0 NOT NULL, unite VARCHAR(255) DEFAULT NULL, seuil INTEGER DEFAULT 0 NOT NULL, valeur_unitaire DOUBLE PRECISION DEFAULT \'0\' NOT NULL, remarque CLOB DEFAULT NULL, derniere_modif DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, source VARCHAR(20) DEFAULT \'achat\' NOT NULL, date_retour DATE DEFAULT NULL, preteur VARCHAR(255) DEFAULT NULL)');
         $this->addSql('INSERT INTO STOCK (id, nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque, derniere_modif, source, date_retour, preteur) SELECT id, nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque, derniere_modif, source, date_retour, preteur FROM __temp__STOCK');
         $this->addSql('DROP TABLE __temp__STOCK');
-        $this->addSql('CREATE TEMPORARY TABLE __temp__TACHE AS SELECT id, id_weekend, titre, poste_requis, debut, fin, max_personnes, remarque FROM TACHE');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__TACHE AS SELECT id, id_weekend, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque FROM TACHE');
         $this->addSql('DROP TABLE TACHE');
-        $this->addSql('CREATE TABLE TACHE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_weekend INTEGER NOT NULL, titre VARCHAR(255) NOT NULL, poste_requis VARCHAR(255) DEFAULT NULL, debut DATETIME DEFAULT NULL, fin DATETIME DEFAULT NULL, max_personnes INTEGER DEFAULT NULL, remarque CLOB DEFAULT NULL, FOREIGN KEY (id_weekend) REFERENCES WEEKEND (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
-        $this->addSql('INSERT INTO TACHE (id, id_weekend, titre, poste_requis, debut, fin, max_personnes, remarque) SELECT id, id_weekend, titre, poste_requis, debut, fin, max_personnes, remarque FROM __temp__TACHE');
+        $this->addSql('CREATE TABLE TACHE (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_weekend INTEGER NOT NULL, id_evenement INTEGER DEFAULT NULL, titre VARCHAR(255) NOT NULL, poste_requis VARCHAR(255) DEFAULT NULL, debut DATETIME DEFAULT NULL, fin DATETIME DEFAULT NULL, max_personnes INTEGER DEFAULT NULL, remarque CLOB DEFAULT NULL, FOREIGN KEY (id_weekend) REFERENCES WEEKEND (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE, FOREIGN KEY (id_evenement) REFERENCES EVENEMENT (id) ON UPDATE NO ACTION ON DELETE SET NULL NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('INSERT INTO TACHE (id, id_weekend, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque) SELECT id, id_weekend, id_evenement, titre, poste_requis, debut, fin, max_personnes, remarque FROM __temp__TACHE');
         $this->addSql('DROP TABLE __temp__TACHE');
         $this->addSql('CREATE INDEX IDX_64D3E2C5704F64DE ON TACHE (id_weekend)');
+        $this->addSql('CREATE INDEX IDX_64D3E2C58B13D439 ON TACHE (id_evenement)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__UTILISATEUR AS SELECT id, id_role, email, mot_de_passe, prenom, nom, telephone, profile_image, date_creation, date_modification FROM UTILISATEUR');
         $this->addSql('DROP TABLE UTILISATEUR');
         $this->addSql('CREATE TABLE UTILISATEUR (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, id_role INTEGER NOT NULL, email VARCHAR(180) NOT NULL, mot_de_passe VARCHAR(255) DEFAULT NULL, prenom VARCHAR(255) DEFAULT NULL, nom VARCHAR(255) DEFAULT NULL, telephone VARCHAR(255) DEFAULT NULL, profile_image VARCHAR(255) DEFAULT NULL, date_creation DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, date_modification DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY (id_role) REFERENCES ROLE (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
@@ -179,6 +191,8 @@ final class Version20251216153314 extends AbstractMigration
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
+        $this->addSql('DROP TABLE CRENEAU');
+        $this->addSql('DROP TABLE RECU_FISCAL');
         $this->addSql('CREATE TEMPORARY TABLE __temp__AFFECTATION_TACHE AS SELECT id, id_tache, id_benevole, id_utilisateur, date_affectation, statut, remarque FROM AFFECTATION_TACHE');
         $this->addSql('DROP TABLE AFFECTATION_TACHE');
         $this->addSql('CREATE TABLE AFFECTATION_TACHE (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_tache INTEGER NOT NULL, id_benevole INTEGER NOT NULL, id_utilisateur INTEGER DEFAULT NULL, date_affectation DATETIME DEFAULT CURRENT_TIMESTAMP, statut CLOB DEFAULT \'assigne\', remarque CLOB DEFAULT NULL, CONSTRAINT FK_12694ECF7D026145 FOREIGN KEY (id_tache) REFERENCES TACHE (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_12694ECFE4DAA34E FOREIGN KEY (id_benevole) REFERENCES BENEVOLE (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_12694ECF50EAE44 FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
@@ -212,10 +226,10 @@ final class Version20251216153314 extends AbstractMigration
         $this->addSql('INSERT INTO CONVENTION (id, id_mecene, nom_modele, url_pdf, date_signature, methode_signature, date_creation) SELECT id, id_mecene, nom_modele, url_pdf, date_signature, methode_signature, date_creation FROM __temp__CONVENTION');
         $this->addSql('DROP TABLE __temp__CONVENTION');
         $this->addSql('CREATE INDEX IDX_8EC97841D364722F ON CONVENTION (id_mecene)');
-        $this->addSql('CREATE TEMPORARY TABLE __temp__DEMANDE_ANNULATION AS SELECT id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, message_admin, date_reponse FROM DEMANDE_ANNULATION');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__DEMANDE_ANNULATION AS SELECT id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, tache_titre, message_admin, date_reponse FROM DEMANDE_ANNULATION');
         $this->addSql('DROP TABLE DEMANDE_ANNULATION');
-        $this->addSql('CREATE TABLE DEMANDE_ANNULATION (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_affectation INTEGER NOT NULL, id_benevole INTEGER NOT NULL, id_admin_reponse INTEGER DEFAULT NULL, date_demande DATETIME DEFAULT CURRENT_TIMESTAMP, statut CLOB DEFAULT \'en_attente\', motif_benevole CLOB DEFAULT NULL, message_admin CLOB DEFAULT NULL, date_reponse DATETIME DEFAULT NULL, CONSTRAINT FK_75084DE6E4DAA34E FOREIGN KEY (id_benevole) REFERENCES BENEVOLE (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_75084DE625A28D2B FOREIGN KEY (id_admin_reponse) REFERENCES UTILISATEUR (id) NOT DEFERRABLE INITIALLY IMMEDIATE, FOREIGN KEY (id_affectation) REFERENCES AFFECTATION_TACHE (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
-        $this->addSql('INSERT INTO DEMANDE_ANNULATION (id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, message_admin, date_reponse) SELECT id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, message_admin, date_reponse FROM __temp__DEMANDE_ANNULATION');
+        $this->addSql('CREATE TABLE DEMANDE_ANNULATION (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_affectation INTEGER NOT NULL, id_benevole INTEGER NOT NULL, id_admin_reponse INTEGER DEFAULT NULL, date_demande DATETIME DEFAULT CURRENT_TIMESTAMP, statut CLOB DEFAULT \'en_attente\', motif_benevole CLOB DEFAULT NULL, tache_titre CLOB DEFAULT NULL, message_admin CLOB DEFAULT NULL, date_reponse DATETIME DEFAULT NULL, CONSTRAINT FK_75084DE6E4DAA34E FOREIGN KEY (id_benevole) REFERENCES BENEVOLE (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_75084DE625A28D2B FOREIGN KEY (id_admin_reponse) REFERENCES UTILISATEUR (id) NOT DEFERRABLE INITIALLY IMMEDIATE, FOREIGN KEY (id_affectation) REFERENCES AFFECTATION_TACHE (id) ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('INSERT INTO DEMANDE_ANNULATION (id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, tache_titre, message_admin, date_reponse) SELECT id, id_affectation, id_benevole, id_admin_reponse, date_demande, statut, motif_benevole, tache_titre, message_admin, date_reponse FROM __temp__DEMANDE_ANNULATION');
         $this->addSql('DROP TABLE __temp__DEMANDE_ANNULATION');
         $this->addSql('CREATE INDEX IDX_75084DE6ECCFAC24 ON DEMANDE_ANNULATION (id_affectation)');
         $this->addSql('CREATE INDEX IDX_75084DE6E4DAA34E ON DEMANDE_ANNULATION (id_benevole)');
@@ -276,10 +290,10 @@ final class Version20251216153314 extends AbstractMigration
         $this->addSql('DROP TABLE __temp__LOT');
         $this->addSql('CREATE INDEX IDX_9D266B91D364722F ON LOT (id_mecene)');
         $this->addSql('CREATE INDEX IDX_9D266B91704F64DE ON LOT (id_weekend)');
-        $this->addSql('CREATE TEMPORARY TABLE __temp__MECENE AS SELECT id, id_utilisateur, organisation, siret, adresse_postale FROM MECENE');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__MECENE AS SELECT id, id_utilisateur, organisation, siret, adresse_postale, logo, instagram, facebook FROM MECENE');
         $this->addSql('DROP TABLE MECENE');
-        $this->addSql('CREATE TABLE MECENE (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_utilisateur INTEGER DEFAULT NULL, organisation CLOB NOT NULL, siret CLOB NOT NULL, adresse_postale CLOB DEFAULT NULL, CONSTRAINT FK_5AB004450EAE44 FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
-        $this->addSql('INSERT INTO MECENE (id, id_utilisateur, organisation, siret, adresse_postale) SELECT id, id_utilisateur, organisation, siret, adresse_postale FROM __temp__MECENE');
+        $this->addSql('CREATE TABLE MECENE (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_utilisateur INTEGER DEFAULT NULL, organisation CLOB NOT NULL, siret CLOB NOT NULL, adresse_postale CLOB DEFAULT NULL, logo CLOB DEFAULT NULL, instagram CLOB DEFAULT NULL, facebook CLOB DEFAULT NULL, CONSTRAINT FK_5AB004450EAE44 FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('INSERT INTO MECENE (id, id_utilisateur, organisation, siret, adresse_postale, logo, instagram, facebook) SELECT id, id_utilisateur, organisation, siret, adresse_postale, logo, instagram, facebook FROM __temp__MECENE');
         $this->addSql('DROP TABLE __temp__MECENE');
         $this->addSql('CREATE INDEX IDX_5AB004450EAE44 ON MECENE (id_utilisateur)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__NOTIFICATION AS SELECT id, id_destinataire, type, message, lien, lue, created_at FROM NOTIFICATION');
@@ -294,6 +308,12 @@ final class Version20251216153314 extends AbstractMigration
         $this->addSql('CREATE TABLE PARAMETRE (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, cle CLOB NOT NULL, valeur CLOB DEFAULT NULL, date_modification DATETIME DEFAULT CURRENT_TIMESTAMP)');
         $this->addSql('INSERT INTO PARAMETRE (id, cle, valeur, date_modification) SELECT id, cle, valeur, date_modification FROM __temp__PARAMETRE');
         $this->addSql('DROP TABLE __temp__PARAMETRE');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__PLAGE_HORAIRE AS SELECT id, id_tache, jour, heure_debut, heure_fin, max_personnes_plage FROM PLAGE_HORAIRE');
+        $this->addSql('DROP TABLE PLAGE_HORAIRE');
+        $this->addSql('CREATE TABLE PLAGE_HORAIRE (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_tache INTEGER NOT NULL, jour DATE NOT NULL, heure_debut TIME NOT NULL, heure_fin TIME NOT NULL, max_personnes_plage INTEGER DEFAULT NULL, CONSTRAINT FK_59D5EA847D026145 FOREIGN KEY (id_tache) REFERENCES TACHE (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('INSERT INTO PLAGE_HORAIRE (id, id_tache, jour, heure_debut, heure_fin, max_personnes_plage) SELECT id, id_tache, jour, heure_debut, heure_fin, max_personnes_plage FROM __temp__PLAGE_HORAIRE');
+        $this->addSql('DROP TABLE __temp__PLAGE_HORAIRE');
+        $this->addSql('CREATE INDEX IDX_59D5EA847D026145 ON PLAGE_HORAIRE (id_tache)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__ROLE AS SELECT id, nom, description FROM ROLE');
         $this->addSql('DROP TABLE ROLE');
         $this->addSql('CREATE TABLE ROLE (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, nom CLOB NOT NULL, description CLOB DEFAULT NULL)');
@@ -304,12 +324,13 @@ final class Version20251216153314 extends AbstractMigration
         $this->addSql('CREATE TABLE STOCK (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, nom CLOB NOT NULL, categorie CLOB DEFAULT NULL, quantite INTEGER DEFAULT 0, unite CLOB DEFAULT NULL, seuil INTEGER DEFAULT 0, valeur_unitaire DOUBLE PRECISION DEFAULT \'0.0\', remarque CLOB DEFAULT NULL, derniere_modif DATETIME DEFAULT CURRENT_TIMESTAMP, source CLOB DEFAULT \'achat\', date_retour DATE DEFAULT NULL, preteur CLOB DEFAULT NULL)');
         $this->addSql('INSERT INTO STOCK (id, nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque, derniere_modif, source, date_retour, preteur) SELECT id, nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque, derniere_modif, source, date_retour, preteur FROM __temp__STOCK');
         $this->addSql('DROP TABLE __temp__STOCK');
-        $this->addSql('CREATE TEMPORARY TABLE __temp__TACHE AS SELECT id, id_weekend, titre, debut, fin, max_personnes, remarque, poste_requis FROM TACHE');
+        $this->addSql('CREATE TEMPORARY TABLE __temp__TACHE AS SELECT id, id_weekend, id_evenement, titre, debut, fin, max_personnes, remarque, poste_requis FROM TACHE');
         $this->addSql('DROP TABLE TACHE');
-        $this->addSql('CREATE TABLE TACHE (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_weekend INTEGER NOT NULL, titre CLOB NOT NULL, debut DATETIME NOT NULL, fin DATETIME NOT NULL, max_personnes INTEGER DEFAULT 1, remarque CLOB DEFAULT NULL, poste_requis CLOB DEFAULT NULL, CONSTRAINT FK_64D3E2C5704F64DE FOREIGN KEY (id_weekend) REFERENCES WEEKEND (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
-        $this->addSql('INSERT INTO TACHE (id, id_weekend, titre, debut, fin, max_personnes, remarque, poste_requis) SELECT id, id_weekend, titre, debut, fin, max_personnes, remarque, poste_requis FROM __temp__TACHE');
+        $this->addSql('CREATE TABLE TACHE (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_weekend INTEGER NOT NULL, id_evenement INTEGER DEFAULT NULL, titre CLOB NOT NULL, debut DATETIME NOT NULL, fin DATETIME NOT NULL, max_personnes INTEGER DEFAULT 1, remarque CLOB DEFAULT NULL, poste_requis CLOB DEFAULT NULL, CONSTRAINT FK_64D3E2C5704F64DE FOREIGN KEY (id_weekend) REFERENCES WEEKEND (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_64D3E2C58B13D439 FOREIGN KEY (id_evenement) REFERENCES EVENEMENT (id) ON DELETE SET NULL NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('INSERT INTO TACHE (id, id_weekend, id_evenement, titre, debut, fin, max_personnes, remarque, poste_requis) SELECT id, id_weekend, id_evenement, titre, debut, fin, max_personnes, remarque, poste_requis FROM __temp__TACHE');
         $this->addSql('DROP TABLE __temp__TACHE');
         $this->addSql('CREATE INDEX IDX_64D3E2C5704F64DE ON TACHE (id_weekend)');
+        $this->addSql('CREATE INDEX IDX_64D3E2C58B13D439 ON TACHE (id_evenement)');
         $this->addSql('CREATE TEMPORARY TABLE __temp__UTILISATEUR AS SELECT id, id_role, email, mot_de_passe, prenom, nom, telephone, date_creation, date_modification, profile_image FROM UTILISATEUR');
         $this->addSql('DROP TABLE UTILISATEUR');
         $this->addSql('CREATE TABLE UTILISATEUR (id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT NULL, id_role INTEGER NOT NULL, email CLOB NOT NULL, mot_de_passe CLOB DEFAULT NULL, prenom CLOB DEFAULT NULL, nom CLOB DEFAULT NULL, telephone CLOB DEFAULT NULL, date_creation DATETIME DEFAULT CURRENT_TIMESTAMP, date_modification DATETIME DEFAULT CURRENT_TIMESTAMP, profile_image CLOB DEFAULT NULL, CONSTRAINT FK_901FF15BDC499668 FOREIGN KEY (id_role) REFERENCES ROLE (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
