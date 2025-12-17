@@ -258,53 +258,20 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
                 </div>
             </div>
 
-            {# Disponibilités pour les bénévoles #}
+            {# Les disponibilités sont maintenant gérées par weekend - voir "Mes disponibilités" dans le menu #}
             {% if user.role.nom == 'benevole' %}
             <div class="form-section">
                 <div class="form-section-title">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Disponibilités (Bénévole)
+                    Disponibilités
                 </div>
-                <style>
-                    .dispos-grid { overflow-x: auto; }
-                    .dispos-table { width: 100%; border-collapse: collapse; }
-                    .dispos-table th, .dispos-table td { border: 1px solid #e5e7eb; padding: 10px; text-align: center; }
-                    .dispos-table thead th { background: #f8fafc; font-size: 13px; color: #374151; }
-                    .slot-label { font-size: 12px; color: #374151; font-weight: 600; }
-                    .day-label { text-align: left; font-weight: 600; color: #1f2937; background: #f8fafc; }
-                </style>
-                {% set days = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'] %}
-                {% set slots = {'matin':'Matin','am':'Matin','pm':'Après-midi','soir':'Soir'} %}
-                {% set slotKeys = ['matin','pm','soir'] %}
-                {% set selected = dispos|default([]) %}
-                <div class="dispos-grid">
-                    <table class="dispos-table">
-                        <thead>
-                            <tr>
-                                <th style="text-align:left">Jour</th>
-                                <th>Matin</th>
-                                <th>Après-midi</th>
-                                <th>Soir</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for d in days %}
-                            <tr>
-                                <td class="day-label">{{ d|capitalize }}</td>
-                                {% for sk in slotKeys %}
-                                    {% set val = d ~ '_' ~ sk %}
-                                    <td>
-                                        <label class="slot-label">
-                                            <input type="checkbox" name="disponibilites[]" value="{{ val }}" {% if val in selected %}checked{% endif %}>
-                                        </label>
-                                    </td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="alert alert-info" style="background: #e0f2fe; border: 1px solid #0ea5e9; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                    <p style="margin: 0; color: #0369a1;">
+                        <strong>📅 Les disponibilités sont maintenant gérées par weekend.</strong><br>
+                        Rendez-vous dans <a href="{{ path('benevole_disponibilites_index') }}" style="color: #0369a1; font-weight: bold;">Mes disponibilités</a> 
+                        pour indiquer vos créneaux disponibles pour chaque weekend.
+                    </p>
                 </div>
-                <small class="form-text">Cochez vos créneaux généraux de disponibilité. Ils serviront de référence lors des plannings.</small>
             </div>
 
             <div class="form-section">
@@ -314,7 +281,7 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
                 </div>
                 <div class="form-group">
                     <label for="remarque">Votre remarque (optionnel)</label>
-                    <textarea id="remarque" name="remarque" class="form-control" rows="3" maxlength="1000" placeholder="Ex : Je suis dispo les mercredis après-midi.">{{ app.request.request.get('remarque') ?? benevole.remarque|default('') }}</textarea>
+                    <textarea id="remarque" name="remarque" class="form-control" rows="3" maxlength="1000" placeholder="Ex : Je préfère les weekends d'été.">{{ app.request.request.get('remarque') ?? benevole.remarque|default('') }}</textarea>
                     <small class="form-text">Ajoutez une note pour clarifier vos préférences ou contraintes.</small>
                 </div>
             </div>

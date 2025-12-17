@@ -185,7 +185,7 @@ CREATE TABLE HISTORIQUE_STOCK (
     FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
--- DISPONIBILITE_BENEVOLE
+-- DISPONIBILITE_BENEVOLE (ancienne table - conservée pour compatibilité)
 CREATE TABLE DISPONIBILITE_BENEVOLE (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_benevole INTEGER NOT NULL,
@@ -196,6 +196,22 @@ CREATE TABLE DISPONIBILITE_BENEVOLE (
     date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
     FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id)
+);
+
+-- DISPONIBILITE_WEEKEND (nouvelle table - disponibilités par weekend)
+CREATE TABLE DISPONIBILITE_WEEKEND (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_benevole INTEGER NOT NULL,
+    id_weekend INTEGER NOT NULL,
+    jour DATE NOT NULL,
+    matin BOOLEAN DEFAULT 0,
+    apres_midi BOOLEAN DEFAULT 0,
+    soir BOOLEAN DEFAULT 0,
+    remarque TEXT,
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_benevole) REFERENCES BENEVOLE(id),
+    FOREIGN KEY (id_weekend) REFERENCES WEEKEND(id),
+    UNIQUE(id_benevole, id_weekend, jour)
 );
 
 -- TACHE

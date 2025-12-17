@@ -39,8 +39,8 @@
                         <i class="bi bi-calendar-check"></i> Événements
                     </a>
                 {% elseif is_granted('ROLE_BENEVOLE') %}
-                    <a href="{{ path('tache_index') }}" class="btn-hero btn-primary">
-                        <i class="bi bi-clipboard-check"></i> Tâches disponibles
+                    <a href="{{ path('benevole_disponibilites_index') }}" class="btn-hero btn-primary">
+                        <i class="bi bi-calendar-check"></i> Mes disponibilités
                     </a>
                     <a href="{{ path('benevole_mon_planning') }}" class="btn-hero btn-secondary">
                         <i class="bi bi-calendar3"></i> Mon planning
@@ -245,8 +245,13 @@
                         {% else %}
                             <p class="empty-state">Aucune tâche en attente</p>
                         {% endfor %}
+<<<<<<< Updated upstream
                         <a href="{{ path('tache_index') }}" class="btn btn-primary w-100 mt-3">
                             <i class="bi bi-plus-circle"></i> S'inscrire à une tâche
+=======
+                        <a href="{{ path('benevole_disponibilites_index') }}" class="btn btn-primary w-100 mt-3">
+                            <i class="bi bi-calendar-check"></i> Gérer mes disponibilités
+>>>>>>> Stashed changes
                         </a>
                     </div>
                 </div>

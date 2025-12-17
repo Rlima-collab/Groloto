@@ -1,0 +1,189 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Disponibilités Bénévoles - {{ weekend.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .dispo-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .dispo-table th,
+        .dispo-table td {
+            padding: 0.75rem 1rem;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+        .dispo-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+        .dispo-table th:first-child,
+        .dispo-table td:first-child {
+            text-align: left;
+        }
+        .dispo-table tbody tr:hover {
+            background: #f9fafb;
+        }
+        .badge-dispo {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-matin { background: #fef3c7; color: #92400e; }
+        .badge-aprem { background: #dbeafe; color: #1e40af; }
+        .badge-soir { background: #ede9fe; color: #5b21b6; }
+        .badge-none { background: #f3f4f6; color: #9ca3af; }
+        .benevole-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .benevole-email {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+        .jour-header {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .jour-date {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: normal;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="page-container">
+    {% include 'sidebar/_nav_admin.html.twig' %}
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header" style="margin-bottom: 2rem;">
+                <div>
+                    <a href="{{ path('app_weekend_details', {id: weekend.id}) }}" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #6b7280; text-decoration: none; margin-bottom: 0.5rem;">
+                        ← Retour au weekend
+                    </a>
+                    <h1 class="page-title" style="margin: 0;">Disponibilités - {{ weekend.nom }}</h1>
+                    <p style="color: #6b7280; margin-top: 0.5rem;">
+                        Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #10b981;">{{ benevolesAvecDispos }}</div>
+                    <div class="stat-label">Bénévoles ont répondu</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #f59e0b;">{{ benevolesSansDispos }}</div>
+                    <div class="stat-label">En attente de réponse</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ totalBenevoles }}</div>
+                    <div class="stat-label">Total bénévoles actifs</div>
+                </div>
+            </div>
+
+            {% if disposParBenevole|length == 0 %}
+                <div class="card">
+                    <div class="card-content" style="padding: 3rem; text-align: center;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+                        <h3 style="color: #374151; margin-bottom: 0.5rem;">Aucune disponibilité renseignée</h3>
+                        <p style="color: #6b7280;">Les bénévoles n'ont pas encore indiqué leurs disponibilités pour ce weekend.</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card">
+                    <div class="card-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #e5e7eb;">
+                        <h2 style="margin: 0; font-size: 1.125rem; color: #1f2937;">📋 Tableau des disponibilités</h2>
+                    </div>
+                    <div class="card-content" style="padding: 0; overflow-x: auto;">
+                        <table class="dispo-table">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 200px;">Bénévole</th>
+                                    {% for jour in jours %}
+                                        <th style="min-width: 150px;">
+                                            <div class="jour-header">{{ jour|date('l')|capitalize }}</div>
+                                            <div class="jour-date">{{ jour|date('d/m') }}</div>
+                                        </th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in disposParBenevole %}
+                                    {% set benevole = data.benevole %}
+                                    {% set joursDispos = data.jours %}
+                                    <tr>
+                                        <td>
+                                            <div class="benevole-name">{{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}</div>
+                                            <div class="benevole-email">{{ benevole.utilisateur.email }}</div>
+                                        </td>
+                                        {% for jour in jours %}
+                                            {% set jourKey = jour|date('Y-m-d') %}
+                                            {% set dispo = joursDispos[jourKey]|default(null) %}
+                                            <td>
+                                                {% if dispo %}
+                                                    <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; justify-content: center;">
+                                                        {% if dispo.matin %}
+                                                            <span class="badge-dispo badge-matin">Matin</span>
+                                                        {% endif %}
+                                                        {% if dispo.apresMidi %}
+                                                            <span class="badge-dispo badge-aprem">Après-midi</span>
+                                                        {% endif %}
+                                                        {% if dispo.soir %}
+                                                            <span class="badge-dispo badge-soir">Soir</span>
+                                                        {% endif %}
+                                                        {% if not dispo.matin and not dispo.apresMidi and not dispo.soir %}
+                                                            <span class="badge-dispo badge-none">Indisponible</span>
+                                                        {% endif %}
+                                                    </div>
+                                                {% else %}
+                                                    <span class="badge-dispo badge-none">-</span>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

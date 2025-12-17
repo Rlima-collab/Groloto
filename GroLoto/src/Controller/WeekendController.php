@@ -7,6 +7,8 @@ use App\Form\WeekendType;
 use App\Repository\WeekendRepository;
 use App\Repository\EvenementRepository;
 use App\Repository\TacheRepository;
+use App\Repository\BenevoleRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -152,7 +154,12 @@ class WeekendController extends AbstractController
     }
 
     #[Route('/create', name: 'app_weekend_create')]
-    public function create(Request $request, EntityManagerInterface $em): Response
+    public function create(
+        Request $request, 
+        EntityManagerInterface $em,
+        BenevoleRepository $benevoleRepo,
+        NotificationService $notificationService
+    ): Response
     {
         $weekend = new Weekend();
         $form    = $this->createForm(WeekendType::class, $weekend);
@@ -209,10 +216,26 @@ class WeekendController extends AbstractController
             $em->persist($weekend);
             $em->flush();
 
+            // Envoyer une notification à tous les bénévoles actifs
+            $benevoles = $benevoleRepo->findBy(['actif' => true]);
+            $dateDebutStr = $weekend->getDateDebut()->format('d/m/Y');
+            $dateFinStr = $weekend->getDateFin()->format('d/m/Y');
+            
+            foreach ($benevoles as $benevole) {
+                if ($benevole->getUtilisateur()) {
+                    $notificationService->createNotification(
+                        $benevole->getUtilisateur(),
+                        'nouveau_weekend',
+                        "🎉 Nouveau weekend \"{$weekend->getNom()}\" du {$dateDebutStr} au {$dateFinStr} ! Indiquez vos disponibilités.",
+                        '/benevole/disponibilites/weekend/' . $weekend->getId()
+                    );
+                }
+            }
+
             // Stocker l'ID du weekend dans la session pour le pré-sélectionner
             $request->getSession()->set('last_created_weekend_id', $weekend->getId());
 
-            $this->addFlash('success', 'Weekend créé avec succès !');
+            $this->addFlash('success', 'Weekend créé avec succès ! Les bénévoles ont été notifiés.');
             
             // Rediriger vers une page de confirmation qui propose d'ajouter un événement
             return $this->redirectToRoute('app_weekend_created', ['id' => $weekend->getId()]);
