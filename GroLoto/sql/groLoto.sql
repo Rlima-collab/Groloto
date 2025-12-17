@@ -81,6 +81,8 @@ CREATE TABLE MECENE (
     siret TEXT NOT NULL,
     adresse_postale TEXT,
     logo TEXT,
+    instagram TEXT,
+    facebook TEXT,
     FOREIGN KEY (id_utilisateur) REFERENCES UTILISATEUR(id)
 );
 
@@ -200,13 +202,15 @@ CREATE TABLE DISPONIBILITE_BENEVOLE (
 CREATE TABLE TACHE (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_weekend INTEGER NOT NULL,
+    id_evenement INTEGER,
     titre TEXT NOT NULL,
     poste_requis TEXT,
     debut DATETIME NOT NULL,
     fin DATETIME NOT NULL,
     max_personnes INTEGER DEFAULT 1,
     remarque TEXT,
-    FOREIGN KEY (id_weekend) REFERENCES WEEKEND(id)
+    FOREIGN KEY (id_weekend) REFERENCES WEEKEND(id),
+    FOREIGN KEY (id_evenement) REFERENCES EVENEMENT(id) ON DELETE SET NULL
 );
 
 CREATE TABLE PLAGE_HORAIRE (
