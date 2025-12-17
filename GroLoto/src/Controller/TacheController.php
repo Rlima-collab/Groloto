@@ -11,6 +11,7 @@ use App\Repository\TacheRepository;
 use App\Repository\AffectationTacheRepository;
 use App\Repository\BenevoleRepository;
 use App\Service\NotificationService;
+use App\Service\BatchTaskAssignmentService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -565,5 +566,195 @@ class TacheController extends AbstractController
         $tache->setFin($fin);
         
         return $tache;
+    }
+
+    /**
+     * Page de gestion groupée des bénévoles
+     */
+    #[Route('/benevoles-management', name: 'tache_benevoles_management')]
+    public function benevolesManagement(
+        BenevoleRepository $benevoleRepo,
+        AffectationTacheRepository $affectationRepo
+    ): Response {
+        $benevoles = $benevoleRepo->findAll();
+        
+        // Pour chaque bénévole, compter ses tâches
+        $benevolesData = [];
+        foreach ($benevoles as $benevole) {
+            $user = $benevole->getUtilisateur();
+            if (!$user) continue;
+
+            $affectations = $affectationRepo->findBy(['benevole' => $benevole, 'statut' => 'assigne']);
+            
+            $benevolesData[] = [
+                'benevole' => $benevole,
+                'nom' => $user->getNom(),
+                'prenom' => $user->getPrenom(),
+                'email' => $user->getEmail(),
+                'nbTaches' => count($affectations)
+            ];
+        }
+
+        return $this->render('taches/benevoles_management.html.twig', [
+            'benevolesData' => $benevolesData
+        ]);
+    }
+
+    /**
+     * API : Récupère les tâches disponibles pour un bénévole (avec détection conflits)
+     */
+    #[Route('/api/benevole/{id}/available-tasks', name: 'tache_api_available_tasks', methods: ['GET'])]
+    public function getAvailableTasksForBenevole(
+        int $id,
+        BenevoleRepository $benevoleRepo,
+        TacheRepository $tacheRepo,
+        BatchTaskAssignmentService $batchService
+    ): JsonResponse {
+        $benevole = $benevoleRepo->find($id);
+        if (!$benevole) {
+            return $this->json(['error' => 'Bénévole non trouvé'], 404);
+        }
+
+        // Récupérer toutes les tâches futures
+        $now = new \DateTime();
+        $taches = $tacheRepo->createQueryBuilder('t')
+            ->where('t.debut > :now')
+            ->setParameter('now', $now)
+            ->orderBy('t.debut', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // Vérifier conflits
+        $tasksData = $batchService->getAvailableTasksWithConflicts($benevole, $taches);
+
+        // Formater pour JSON
+        $result = [];
+        foreach ($tasksData as $data) {
+            $tache = $data['tache'];
+            $result[] = [
+                'id' => $tache->getId(),
+                'titre' => $tache->getTitre(),
+                'debut' => $tache->getDebut()?->format('d/m/Y H:i'),
+                'fin' => $tache->getFin()?->format('d/m/Y H:i'),
+                'hasConflict' => $data['hasConflict'],
+                'weekendNom' => $tache->getWeekend()?->getNom()
+            ];
+        }
+
+        return $this->json($result);
+    }
+
+    /**
+     * Récupérer les tâches assignées à un bénévole (pour suppression)
+     */
+    #[Route('/api/benevole/{id}/assigned-tasks', name: 'tache_api_benevole_assigned', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function getAssignedTasksForBenevole(
+        int $id,
+        BenevoleRepository $benevoleRepo,
+        AffectationTacheRepository $affectationRepo
+    ): Response {
+        $benevole = $benevoleRepo->find($id);
+        if (!$benevole) {
+            return $this->json(['error' => 'Bénévole non trouvé'], 404);
+        }
+
+        // Récupérer toutes les affectations du bénévole
+        $affectations = $affectationRepo->findBy([
+            'benevole' => $benevole,
+            'statut' => 'assigne'
+        ]);
+
+        $result = [];
+        foreach ($affectations as $affectation) {
+            $tache = $affectation->getTache();
+            $result[] = [
+                'id' => $tache->getId(),
+                'titre' => $tache->getTitre(),
+                'debut' => $tache->getDebut()?->format('d/m/Y H:i'),
+                'fin' => $tache->getFin()?->format('d/m/Y H:i'),
+                'weekendNom' => $tache->getWeekend()?->getNom()
+            ];
+        }
+
+        return $this->json($result);
+    }
+
+    /**
+     * Assigner/proposer plusieurs tâches à un bénévole
+     */
+    #[Route('/benevole/{id}/batch-assign', name: 'tache_batch_assign', methods: ['POST'])]
+    public function batchAssignTasks(
+        int $id,
+        Request $request,
+        BenevoleRepository $benevoleRepo,
+        BatchTaskAssignmentService $batchService
+    ): Response {
+        $benevole = $benevoleRepo->find($id);
+        if (!$benevole) {
+            $this->addFlash('error', 'Bénévole non trouvé');
+            return $this->redirectToRoute('tache_benevoles_management');
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $tasksData = $data['tasks'] ?? [];
+
+        if (empty($tasksData)) {
+            $this->addFlash('warning', 'Aucune tâche sélectionnée');
+            return $this->redirectToRoute('tache_benevoles_management');
+        }
+
+        $admin = $this->getUser();
+        $stats = $batchService->batchAssignTasks($benevole, $tasksData, $admin);
+
+        if ($stats['success'] > 0) {
+            $this->addFlash('success', sprintf(
+                '%d tâche(s) traitée(s) avec succès',
+                $stats['success']
+            ));
+        }
+
+        if ($stats['conflicts'] > 0) {
+            $this->addFlash('warning', sprintf(
+                '%d tâche(s) ignorée(s) (conflit horaire)',
+                $stats['conflicts']
+            ));
+        }
+
+        if (!empty($stats['errors'])) {
+            foreach ($stats['errors'] as $error) {
+                $this->addFlash('error', $error);
+            }
+        }
+
+        return $this->json(['success' => true, 'stats' => $stats]);
+    }
+
+    /**
+     * Supprimer plusieurs tâches d'un bénévole
+     */
+    #[Route('/benevole/{id}/batch-remove', name: 'tache_batch_remove', methods: ['POST'])]
+    public function batchRemoveTasks(
+        int $id,
+        Request $request,
+        BenevoleRepository $benevoleRepo,
+        BatchTaskAssignmentService $batchService
+    ): Response {
+        $benevole = $benevoleRepo->find($id);
+        if (!$benevole) {
+            return $this->json(['error' => 'Bénévole non trouvé'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $tacheIds = $data['tache_ids'] ?? [];
+
+        $removed = $batchService->batchRemoveTasks($benevole, $tacheIds);
+
+        return $this->json([
+            'success' => true,
+            'count' => $removed,
+            'removed' => $removed,
+            'message' => sprintf('%d tâche(s) retirée(s)', $removed)
+        ]);
     }
 }
