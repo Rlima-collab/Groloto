@@ -592,6 +592,47 @@ class AuthController extends AbstractController
                         $mecene->setLogo(null);
                     }
                 }
+
+                // Gérer les réseaux sociaux
+                $instagram = $request->request->get('instagram');
+                $facebook = $request->request->get('facebook');
+                
+                // Valider et nettoyer les URLs
+                if ($instagram) {
+                    $instagram = trim($instagram);
+                    if (!empty($instagram) && !filter_var($instagram, FILTER_VALIDATE_URL)) {
+                        $this->addFlash('error', 'L\'URL Instagram n\'est pas valide.');
+                        return $this->render('auth/profile_edit.html.twig', [
+                            'form' => $form->createView(),
+                            'user' => $user,
+                            'dispos' => $dispos,
+                            'mecene' => $mecene ?? null,
+                        ]);
+                    }
+                }
+                
+                if ($facebook) {
+                    $facebook = trim($facebook);
+                    if (!empty($facebook) && !filter_var($facebook, FILTER_VALIDATE_URL)) {
+                        $this->addFlash('error', 'L\'URL Facebook n\'est pas valide.');
+                        return $this->render('auth/profile_edit.html.twig', [
+                            'form' => $form->createView(),
+                            'user' => $user,
+                            'dispos' => $dispos,
+                            'mecene' => $mecene ?? null,
+                        ]);
+                    }
+                }
+                
+                $mecene->setInstagram($instagram ?: null);
+                $mecene->setFacebook($facebook ?: null);
+
+                // Gérer l'adresse postale
+                $adressePostale = $request->request->get('adresse_postale');
+                if ($adressePostale !== null) {
+                    $adressePostale = trim($adressePostale);
+                    $mecene->setAdressePostale($adressePostale ?: null);
+                }
             }
 
             // Mettre à jour la date de modification
