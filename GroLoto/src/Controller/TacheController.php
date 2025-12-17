@@ -27,8 +27,8 @@ class TacheController extends AbstractController
     #[Route('', name: 'tache_index')]
     public function index(Request $request, TacheRepository $tacheRepository, AffectationTacheRepository $affectationRepository): Response
     {
-        // Récupérer les paramètres de filtre
-        $filtre = $request->query->get('filtre', 'toutes'); // toutes, futures, en_cours, passees
+        // Récupérer les paramètres de filtre (défaut: futures)
+        $filtre = $request->query->get('filtre', 'futures'); // futures (défaut), toutes, en_cours, passees
         $tri = $request->query->get('tri', 'date_proche'); // date_proche, date_eloignee, titre
         
         // Récupérer les tâches selon le filtre
