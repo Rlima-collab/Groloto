@@ -36,16 +36,8 @@
             </div>
 
             <div class="mb-4">
-                <label for="weekend-day-select" class="form-label" style="font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; display: block;">
-                    Jour du week-end <span style="color: #dc2626;">*</span>
-                </label>
-                <select id="weekend-day-select" class="form-control">
-                    <option value="">Sélectionnez d'abord un week-end</option>
-                </select>
+                {{ form_row(form.date_debut, {'attr': {'class': 'form-control'}}) }}
             </div>
-
-            {# Champ date supprimé, remplacé par champ caché pour garder compatibilité #}
-            <input type="hidden" id="evenement_date" name="evenement[date_debut]">
 
             <div class="form-row mb-4">
                 <div class="form-col">
@@ -64,33 +56,6 @@
                     </div>
                     {{ form_errors(form.duree_minutes) }}
                 </div>
-            </div>
-
-            <div class="mb-4" id="recapitulatif-container" style="display: none; background-color: #f0f9ff; border: 2px solid #3b82f6; border-radius: 0.5rem; padding: 1rem;">
-                <h3 style="color: #1e40af; font-size: 1.1rem; margin-bottom: 0.75rem; font-weight: 600;">
-                    Récapitulatif de l'événement
-                </h3>
-                <div style="display: grid; gap: 0.5rem;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="font-weight: 600; color: #374151;">Début :</span>
-                        <span id="recap-debut" style="color: #059669; font-weight: 600;"></span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="font-weight: 600; color: #374151;">Fin :</span>
-                        <span id="recap-fin" style="color: #dc2626; font-weight: 600;"></span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding-top: 0.5rem; border-top: 1px solid #bfdbfe;">
-                        <span style="font-weight: 600; color: #374151;">Durée totale :</span>
-                        <span id="recap-duree" style="color: #7c3aed; font-weight: 600;"></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-4" id="error-container" style="display: none; background-color: #fef2f2; border: 2px solid #dc2626; border-radius: 0.5rem; padding: 1rem;">
-                <h3 style="color: #dc2626; font-size: 1rem; margin-bottom: 0.5rem; font-weight: 600;">
-                    ⚠️ Erreur
-                </h3>
-                <p id="error-message" style="color: #991b1b; margin: 0;"></p>
             </div>
 
             <div class="mb-4">
@@ -134,34 +99,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const dateHiddenInput = document.getElementById('evenement_date');
-    const heureDebutInput = document.querySelector('input[type="time"]');
     const dureeInput = document.querySelector('input[name*="duree_minutes"]');
     const uniteSelect = document.getElementById('unite-duree');
-    const recapContainer = document.getElementById('recapitulatif-container');
-    const recapDebut = document.getElementById('recap-debut');
-    const recapFin = document.getElementById('recap-fin');
-    const recapDuree = document.getElementById('recap-duree');
-    const errorContainer = document.getElementById('error-container');
-    const errorMessage = document.getElementById('error-message');
-    const submitButton = document.getElementById('submit-button');
-    const weekendSelect = document.querySelector('select[name$="[weekend]"]');
     
-    let currentWeekendEnd = null;
-
-    function formatDateFr(date) {
-        return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    }
-
-    function formatHeure(date) {
-        return `${String(date.getHours()).padStart(2, '0')}h${String(date.getMinutes()).padStart(2, '0')}`;
-    }
-
-    function getDureeEnMinutes() {
-        const val = parseFloat(dureeInput.value);
-        return isNaN(val) || val <= 0 ? 0 : (uniteSelect.value === 'heures' ? val * 60 : val);
-    }
-
     // Conversion automatique des heures en minutes lors de la soumission
     const form = document.getElementById('evenement-form');
     if (form) {
@@ -172,126 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     dureeInput.value = Math.round(val * 60);
                 }
             }
-        });
-    }
-
-    function formatDuree(minutes) {
-        const h = Math.floor(minutes / 60), m = minutes % 60;
-        if (!h) return `${m} minute${m > 1 ? 's' : ''}`;
-        if (!m) return `${h} heure${h > 1 ? 's' : ''}`;
-        return `${h}h${String(m).padStart(2, '0')}`;
-    }
-
-    function verifierDepassementWeekend(dateFin) {
-        if (!currentWeekendEnd) return true;
-        
-        const finWeekend = new Date(currentWeekendEnd);
-        finWeekend.setHours(23, 59, 59, 999);
-        
-        return dateFin <= finWeekend;
-    }
-
-    function calculerRecapitulatif() {
-        errorContainer.style.display = 'none';
-        submitButton.disabled = false;
-        
-        if (!dateHiddenInput.value || !heureDebutInput.value || !dureeInput.value) {
-            recapContainer.style.display = 'none';
-            return;
-        }
-        
-        const [y, mo, d] = dateHiddenInput.value.split('-');
-        const [h, mi] = heureDebutInput.value.split(':');
-        const debut = new Date(y, mo - 1, d, h, mi);
-        const fin = new Date(debut.getTime() + getDureeEnMinutes() * 60000);
-        
-        // Vérifier si l'événement dépasse le weekend
-        if (!verifierDepassementWeekend(fin)) {
-            const finWeekend = new Date(currentWeekendEnd);
-            finWeekend.setHours(23, 59, 59);
-            
-            errorContainer.style.display = 'block';
-            errorMessage.textContent = `L'événement ne peut pas dépasser la fin du week-end (${formatDateFr(finWeekend)} à 23h59). Veuillez réduire la durée ou choisir une heure de début plus tôt.`;
-            submitButton.disabled = true;
-            recapContainer.style.display = 'none';
-            return;
-        }
-        
-        recapDebut.textContent = `${formatDateFr(debut)} à ${formatHeure(debut)}`;
-        recapFin.textContent = `${formatDateFr(fin)} à ${formatHeure(fin)}`;
-        recapDuree.textContent = formatDuree(getDureeEnMinutes());
-        recapContainer.style.display = 'block';
-    }
-
-    [heureDebutInput, dureeInput, uniteSelect].forEach(el => {
-        if (el) el.addEventListener('input', calculerRecapitulatif);
-    });
-
-    // Gestion du select des jours du week-end
-    const weekendDaySelect = document.getElementById('weekend-day-select');
-
-    function clearWeekendDayChoices() {
-        weekendDaySelect.innerHTML = '<option value="">Sélectionnez un jour</option>';
-    }
-
-    function onWeekendChange() {
-        clearWeekendDayChoices();
-        errorContainer.style.display = 'none';
-        submitButton.disabled = false;
-        
-        const opt = weekendSelect.selectedOptions[0];
-        if (!opt) {
-            currentWeekendEnd = null;
-            return;
-        }
-        
-        // Récupérer la date de fin du weekend
-        currentWeekendEnd = opt.dataset.fin;
-        
-        // Récupérer le nombre de jours du weekend
-        const dayCount = parseInt(opt.dataset.dayCount || '0');
-        
-        // Créer les options pour chaque jour du weekend
-        for (let i = 0; i < dayCount; i++) {
-            const dateStr = opt.dataset['day-' + i];
-            if (dateStr) {
-                const dateObj = new Date(dateStr);
-                const label = formatDateFr(dateObj);
-                
-                const option = document.createElement('option');
-                option.value = dateStr;
-                option.textContent = label;
-                if (i === 0) option.selected = true;
-                
-                weekendDaySelect.appendChild(option);
-            }
-        }
-        
-        // Mettre à jour la date sélectionnée
-        if (weekendDaySelect.value) {
-            dateHiddenInput.value = weekendDaySelect.value;
-            calculerRecapitulatif();
-        }
-    }
-    
-    // Écouter les changements sur le select des jours
-    if (weekendDaySelect) {
-        weekendDaySelect.addEventListener('change', () => {
-            dateHiddenInput.value = weekendDaySelect.value;
-            calculerRecapitulatif();
-        });
-    }
-
-    if (weekendSelect) {
-        weekendSelect.addEventListener('change', onWeekendChange);
-        setTimeout(onWeekendChange, 100);
-        
-        {% if preselect_weekend is defined and preselect_weekend %}
-        // Pré-sélectionner le weekend spécifié
-        weekendSelect.value = {{ preselect_weekend }};
-        weekendSelect.dispatchEvent(new Event('change'));
-        {% endif %}
-    }
 });
 </script>
 {% endblock %}
