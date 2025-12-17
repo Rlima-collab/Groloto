@@ -113,7 +113,7 @@ class EvenementController extends AbstractController
     public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger, ?int $preselect_weekend = null): Response
     {
         $evenement = new Evenement();
-        
+
         // Définir la date par défaut à aujourd'hui
         $evenement->setDateDebut(new \DateTime());
         
