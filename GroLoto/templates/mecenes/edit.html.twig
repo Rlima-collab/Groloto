@@ -202,7 +202,7 @@
             </div>
         {% endfor %}
 
-        {{ form_start(form) }}
+        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
 
         <div class="form-section">
             <h5>Informations de contact</h5>
@@ -270,7 +270,7 @@
             <div class="form-group">
                 <label>Logo actuel</label>
                 <div style="margin-bottom: 15px;">
-                    <img src="{{ asset('uploads/logos/' ~ mecene.logo) }}" 
+                    <img src="{{ asset(mecene.logo) }}" 
                          alt="Logo actuel" 
                          style="max-width: 200px; max-height: 150px; border: 1px solid #ddd; border-radius: 8px; padding: 5px;">
                 </div>

@@ -283,6 +283,48 @@ class AuthController extends AbstractController
         ]);
     }
 
+    #[Route('/profile/remove-logo', name: 'app_profile_remove_logo', methods: ['POST'])]
+    public function removeProfileLogo(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+        $roleName = strtolower($user->getRole()?->getNom() ?? '');
+        
+        if ($roleName !== 'mecene') {
+            $this->addFlash('error', 'Action non autorisée.');
+            return $this->redirectToRoute('app_profile_edit');
+        }
+        
+        // Vérifier le token CSRF
+        $token = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('remove_logo', $token)) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('app_profile_edit');
+        }
+        
+        $mecene = $entityManager->getRepository(\App\Entity\Mecene::class)
+            ->findOneBy(['utilisateur' => $user]);
+        
+        if ($mecene && $mecene->getLogo()) {
+            $logoPath = $this->getParameter('kernel.project_dir') . '/public/' . ltrim($mecene->getLogo(), '/');
+            if (!file_exists($logoPath)) {
+                $logoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . basename($mecene->getLogo());
+            }
+            if (file_exists($logoPath)) {
+                unlink($logoPath);
+            }
+            $mecene->setLogo(null);
+            $entityManager->flush();
+            $this->addFlash('success', 'Le logo a été supprimé avec succès.');
+        } else {
+            $this->addFlash('info', 'Aucun logo à supprimer.');
+        }
+        
+        return $this->redirectToRoute('app_profile_edit');
+    }
+
     #[Route('/profile/edit', name: 'app_profile_edit')]
     public function editProfile(
         Request $request,
@@ -315,6 +357,20 @@ class AuthController extends AbstractController
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Récupérer le mot de passe actuel
+            $currentPassword = $form->get('currentPassword')->getData();
+            
+            // Vérifier le mot de passe actuel pour toute modification
+            if (empty($currentPassword) || !$passwordHasher->isPasswordValid($user, $currentPassword)) {
+                $this->addFlash('error', 'Veuillez entrer votre mot de passe actuel pour valider les modifications.');
+                return $this->render('auth/profile_edit.html.twig', [
+                    'form' => $form->createView(),
+                    'user' => $user,
+                    'dispos' => $dispos,
+                    'mecene' => $mecene ?? null,
+                ]);
+            }
+            
             // Gérer l'upload de l'image de profil
             $profileImageFile = $request->files->get('profileImage');
             if ($profileImageFile) {
@@ -364,35 +420,10 @@ class AuthController extends AbstractController
                     $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
                 }
             }
-            
-            // Gérer la suppression de l'image
-            if ($request->request->get('removeImage') === '1') {
-                if ($user->getProfileImage()) {
-                    $imagePath = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $user->getProfileImage();
-                    if (file_exists($imagePath)) {
-                        unlink($imagePath);
-                    }
-                    $user->setProfileImage(null);
-                }
-            }
-            
-            // Récupérer les données du formulaire
-            $currentPassword = $form->get('currentPassword')->getData();
+
+            // Récupérer les données du formulaire pour changement de mot de passe
             $newPassword = $form->get('newPassword')->getData();
             $confirmPassword = $form->get('confirmPassword')->getData();
-
-            // Vérifier le mot de passe actuel seulement si un nouveau mot de passe est fourni
-            if (!empty($newPassword)) {
-                if (empty($currentPassword) || !$passwordHasher->isPasswordValid($user, $currentPassword)) {
-                    $this->addFlash('error', 'Le mot de passe actuel est incorrect.');
-                    return $this->render('auth/profile_edit.html.twig', [
-                        'form' => $form->createView(),
-                        'user' => $user,
-                        'dispos' => $dispos,
-                        'mecene' => $mecene ?? null,
-                    ]);
-                }
-            }
 
             // Si un nouveau mot de passe est fourni, le valider et le mettre à jour
             if (!empty($newPassword)) {
@@ -473,8 +504,29 @@ class AuthController extends AbstractController
 
                 $logoFile = $request->files->get('logo');
                 if ($logoFile) {
-                    if (!in_array($logoFile->getMimeType(), ['image/png', 'image/jpeg'])) {
-                        $this->addFlash('error', 'Le logo doit être au format PNG ou JPEG.');
+                    // Vérification basique de l'erreur d'upload
+                    if ($logoFile->getError() !== UPLOAD_ERR_OK) {
+                        $this->addFlash('error', 'Erreur lors du téléchargement du logo. Code erreur : ' . $logoFile->getError());
+                        return $this->render('auth/profile_edit.html.twig', [
+                            'form' => $form->createView(),
+                            'user' => $user,
+                            'dispos' => $dispos,
+                            'mecene' => $mecene ?? null,
+                        ]);
+                    }
+
+                    // Vérification du type MIME (ajout de jpg et webp au cas où)
+                    $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+                    
+                    try {
+                        $mimeType = $logoFile->getMimeType();
+                    } catch (\Exception $e) {
+                        // Fallback si getMimeType échoue (ex: fichier temporaire introuvable)
+                        $mimeType = $logoFile->getClientMimeType();
+                    }
+
+                    if (!in_array($mimeType, $allowedMimeTypes)) {
+                        $this->addFlash('error', 'Le logo doit être au format PNG, JPEG ou WEBP.');
                         return $this->render('auth/profile_edit.html.twig', [
                             'form' => $form->createView(),
                             'user' => $user,
@@ -485,14 +537,26 @@ class AuthController extends AbstractController
 
                     // Supprimer l'ancien logo si existe
                     if ($mecene->getLogo()) {
-                        $oldLogoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . $mecene->getLogo();
+                        $oldLogoPath = $this->getParameter('kernel.project_dir') . '/public/' . ltrim($mecene->getLogo(), '/');
+                        if (!file_exists($oldLogoPath)) {
+                            $oldLogoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . basename($mecene->getLogo());
+                        }
                         if (file_exists($oldLogoPath)) {
                             unlink($oldLogoPath);
                         }
                     }
 
                     // Générer nom unique
-                    $newFilename = uniqid() . '.' . $logoFile->guessExtension();
+                    try {
+                        $extension = $logoFile->guessExtension();
+                    } catch (\Exception $e) {
+                        $extension = null;
+                    }
+                    
+                    if (!$extension) {
+                        $extension = $logoFile->getClientOriginalExtension();
+                    }
+                    $newFilename = uniqid() . '.' . $extension;
 
                     // Créer dossier si nécessaire
                     $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/logos';
@@ -501,17 +565,23 @@ class AuthController extends AbstractController
                     }
 
                     try {
+                        if (!file_exists($logoFile->getPathname())) {
+                             throw new \Exception("Fichier temporaire introuvable (" . $logoFile->getPathname() . ")");
+                        }
                         $logoFile->move($uploadsDirectory, $newFilename);
-                        $mecene->setLogo($newFilename);
+                        $mecene->setLogo('uploads/logos/' . $newFilename);
                     } catch (\Exception $e) {
-                        $this->addFlash('error', 'Erreur lors de l\'upload du logo.');
+                        $this->addFlash('error', 'Erreur lors de l\'upload du logo : ' . $e->getMessage());
                     }
                 }
 
                 // Gérer suppression logo
                 if ($request->request->get('removeLogo') === '1') {
                     if ($mecene->getLogo()) {
-                        $logoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . $mecene->getLogo();
+                        $logoPath = $this->getParameter('kernel.project_dir') . '/public/' . ltrim($mecene->getLogo(), '/');
+                        if (!file_exists($logoPath)) {
+                            $logoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . basename($mecene->getLogo());
+                        }
                         if (file_exists($logoPath)) {
                             unlink($logoPath);
                         }

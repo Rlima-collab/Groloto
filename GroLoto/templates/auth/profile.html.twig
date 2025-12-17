@@ -206,6 +206,14 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
                             {{ mecene.adressePostale ?? 'Non renseignée' }}
                         </div>
                     </div>
+                    {% if mecene.logo %}
+                    <div class="info-item" style="grid-column: 1 / -1;">
+                        <div class="info-label">Logo</div>
+                        <div class="info-value">
+                            <img src="{{ asset(mecene.logo) }}" alt="Logo {{ mecene.organisation }}" style="max-width: 200px; max-height: 100px; object-fit: contain; border-radius: 8px; border: 1px solid #e5e7eb; padding: 5px; background: white;">
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}
