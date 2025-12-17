@@ -32,6 +32,12 @@ class Mecene
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $logo = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $instagram = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $facebook = null;
+
     #[ORM\OneToMany(targetEntity: Lot::class, mappedBy: 'mecene')]
     private Collection $lots;
 
@@ -61,6 +67,14 @@ class Mecene
     public function getLogo(): ?string { return $this->logo; }
     public function setLogo(?string $logo): self 
     { $this->logo = $logo; return $this; }
+
+    public function getInstagram(): ?string { return $this->instagram; }
+    public function setInstagram(?string $instagram): self 
+    { $this->instagram = $instagram; return $this; }
+
+    public function getFacebook(): ?string { return $this->facebook; }
+    public function setFacebook(?string $facebook): self 
+    { $this->facebook = $facebook; return $this; }
 
     /**
      * @return Collection<int, Lot>

@@ -160,6 +160,8 @@ class AuthController extends AbstractController
             $siret = $request->request->get('siret');
             $adressePostale = $request->request->get('adresse_postale');
             $logoFile = $request->files->get('logo');
+            $instagram = $request->request->get('instagram');
+            $facebook = $request->request->get('facebook');
 
             if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $errors[] = "Email invalide";
@@ -211,6 +213,8 @@ class AuthController extends AbstractController
                             $mecene->setOrganisation($organisation);
                             $mecene->setSiret($siret);
                             $mecene->setAdressePostale($adressePostale);
+                            $mecene->setInstagram($instagram);
+                            $mecene->setFacebook($facebook);
 
                             // Handle logo upload
                             if ($logoFile) {

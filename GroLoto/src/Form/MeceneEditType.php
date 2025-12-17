@@ -132,6 +132,32 @@ class MeceneEditType extends AbstractType
                     ])
                 ],
                 'help' => 'Formats acceptés : PNG, JPEG. Taille maximale : 2 Mo'
+            ])
+            ->add('instagram', TextType::class, [
+                'label' => 'Lien Instagram',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'https://www.instagram.com/votrecompte'
+                ],
+                'constraints' => [
+                    new Assert\Url([
+                        'message' => 'Veuillez entrer une URL valide pour Instagram'
+                    ])
+                ]
+            ])
+            ->add('facebook', TextType::class, [
+                'label' => 'Lien Facebook',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'https://www.facebook.com/votrepage'
+                ],
+                'constraints' => [
+                    new Assert\Url([
+                        'message' => 'Veuillez entrer une URL valide pour Facebook'
+                    ])
+                ]
             ]);
     }
 
