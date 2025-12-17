@@ -12,7 +12,7 @@ class Lot
     #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Mecene::class)]
+    #[ORM\ManyToOne(targetEntity: Mecene::class, inversedBy: 'lots')]
     #[ORM\JoinColumn(name: "id_mecene", referencedColumnName: "id", nullable: true)]
     private ?Mecene $mecene = null;
 

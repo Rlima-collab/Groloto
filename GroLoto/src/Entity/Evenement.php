@@ -47,9 +47,13 @@ class Evenement
     #[ORM\JoinColumn(name: "id_weekend", referencedColumnName: "id", nullable: true)]
     private ?Weekend $weekend = null;
 
+    #[ORM\OneToMany(mappedBy: 'evenement', targetEntity: Tache::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $taches;
+
     public function __construct()
     {
         $this->date_creation = new \DateTime();
+        $this->taches = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -97,6 +101,36 @@ class Evenement
     public function setWeekend(?Weekend $weekend): self
     {
         $this->weekend = $weekend;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tache>
+     */
+    public function getTaches(): Collection
+    {
+        return $this->taches;
+    }
+
+    public function addTache(Tache $tache): self
+    {
+        if (!$this->taches->contains($tache)) {
+            $this->taches->add($tache);
+            $tache->setEvenement($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTache(Tache $tache): self
+    {
+        if ($this->taches->removeElement($tache)) {
+            // set the owning side to null (unless already changed)
+            if ($tache->getEvenement() === $this) {
+                $tache->setEvenement(null);
+            }
+        }
+
         return $this;
     }
 
