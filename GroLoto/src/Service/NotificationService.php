@@ -44,19 +44,6 @@ class NotificationService
     }
 
     /**
-     * Notifier l'admin qu'un bénévole a fait une demande de tâche
-     */
-    public function notifyAdminDemandeTache(Utilisateur $admin, string $benevoleNom, string $tacheNom): void
-    {
-        $this->createNotification(
-            $admin,
-            'demande_tache',
-            "{$benevoleNom} souhaite rejoindre la tâche \"{$tacheNom}\"",
-            '/admin/demandes-taches'
-        );
-    }
-
-    /**
      * Notifier un bénévole que sa demande a été acceptée
      */
     public function notifyBenevoleDemandeAcceptee(Utilisateur $benevole, string $tacheNom): void
