@@ -33,6 +33,8 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 .conversation-item:hover { background: #2d3748; border-left-color: #3b82f6; }
 .conversation-item.active { background: #2d3748; border-left-color: #3b82f6; }
 .conversation-name { font-weight: 600; font-size: 14px; margin-bottom: 5px; color: #e8eaed; }
+.replied-badge { margin-left: 8px; font-size: 12px; background: rgba(16,185,129,0.12); color: #059669; padding: 4px 8px; border-radius: 12px; font-weight: 700; }
+.conversation-replied { opacity: 0.9; border-left-color: rgba(16,185,129,0.4) !important; }
 .conversation-preview { font-size: 13px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .conversation-time { font-size: 11px; color: #6b7280; margin-top: 5px; }
 .chat-main { flex: 1; display: flex; flex-direction: column; background: #ffffff; overflow: hidden; }
@@ -345,13 +347,14 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 'isDeleted': reply.message starts with '[SUPPRIMÉ]'
 }]) %}
 {% endfor %}
-<div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %}" 
+<div class="conversation-item {% if isToAdmin %}to-admin{% endif %} {% if msg.cloturee %}conversation-closed{% endif %} {% if msg.reponduPar %}conversation-replied{% endif %}" 
     data-id="{{ msg.id }}" 
     data-subject="{{ subject|e('html_attr') }}" 
     data-conversation="{{ conversationArray|json_encode|e('html_attr') }}" 
     data-sender="{{ msg.nom }}" 
     data-email="{{ msg.email }}" 
     data-other-email="{{ msg.otherUserEmail|default('') }}"
+    data-other-role="{{ msg.otherUserRole|default('Utilisateur') }}"
     data-repondu-par="{{ msg.reponduPar ? msg.reponduPar.email : '' }}"
     data-repondu-par-nom="{{ msg.reponduPar ? (msg.reponduPar.prenom ~ ' ' ~ msg.reponduPar.nom)|trim : '' }}"
     data-message="{{ body|e('html_attr') }}" 
@@ -364,9 +367,12 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
 			{% if msg.cloturee %}
 			<span class="closed-badge">🔒 Clôturée</span>
 			{% endif %}
-            {% if msg.reponduPar and msg.reponduPar.email != app.user.email %}
-            <span class="closed-badge" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">👤 Pris par {{ msg.reponduPar.prenom }}</span>
-            {% endif %}
+			{% if msg.reponduPar %}
+				<span class="replied-badge">✅ Répondu</span>
+			{% endif %}
+			{% if msg.reponduPar and msg.reponduPar.email != app.user.email %}
+			<span class="closed-badge" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">👤 Pris par {{ msg.reponduPar.prenom }}</span>
+			{% endif %}
 		</div>
 		<div class="conversation-sender">{{ msg.otherUserName|default(msg.nom) }} <span style="font-size: 11px; color: #9ca3af;">({{ msg.otherUserRole|default('Utilisateur') }})</span></div>
 		<div class="conversation-preview">{{ lastMessageBody|slice(0, 50) }}{% if lastMessageBody|length > 50 %}...{% endif %}</div>
@@ -415,7 +421,24 @@ main.content .container-fluid { padding: 0 !important; height: 100%; }
         <input type="text" id="chatSubject" class="chat-subject" placeholder="Sujet de la conversation" style="display:none;">
         <textarea class="chat-input" id="chatInput" placeholder="Écrivez votre message..." rows="1"></textarea>
         <button class="chat-send-btn" id="sendBtn">Envoyer</button>
-    </div>
+	</div>
+	<div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
+		<div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+			<a href="#" class="chat-send-btn" id="sendEmailBtn" style="display:none; background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); color: white; text-decoration: none; text-align: center; padding:10px 14px; border-radius:8px;">
+				<i class="bi bi-envelope"></i> Répondre par email
+			</a>
+
+			<div id="markRepliedContainer" style="display: none;">
+				<label style="display:flex; align-items:center; gap:10px; font-size:14px; color:#374151;">
+					<input type="checkbox" id="markRepliedCheckbox" style="width:18px; height:18px;"> <span id="markRepliedLabel">Cocher si vous avez répondu par email</span>
+				</label>
+			</div>
+		</div>
+
+		<div id="externalUserNotice" style="display: none; padding: 10px 15px; background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.12); border-radius: 8px; font-size: 13px; color: #1e3a8a;">
+			<i class="bi bi-info-circle"></i> Cet utilisateur n'est pas inscrit sur l'application. Utilisez le bouton "Répondre par email" pour lui envoyer une réponse via votre client email.
+		</div>
+	</div>
 </div>
 </div>
 </div>
@@ -555,6 +578,8 @@ const items = document.querySelectorAll('.conversation-item');
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 const sendBtn = document.getElementById('sendBtn');
+const sendEmailBtn = document.getElementById('sendEmailBtn');
+const externalUserNotice = document.getElementById('externalUserNotice');
 const newChatBtn = document.getElementById('newChatBtn');
 const chatHeader = document.getElementById('chatHeader');
 const chatInputContainer = document.getElementById('chatInputContainer');
@@ -563,6 +588,64 @@ const conversationsList = document.getElementById('conversationsList');
 const closedIndicator = document.getElementById('closedIndicator');
 const searchInput = document.getElementById('searchConversations');
 const backToListBtn = document.getElementById('backToListBtn');
+const markRepliedCheckbox = document.getElementById('markRepliedCheckbox');
+
+// Gérer la checkbox 'marqué comme répondu' (AJAX)
+if (markRepliedCheckbox) {
+	markRepliedCheckbox.addEventListener('change', async function() {
+		if (!currentConversationId) {
+			showToast('Aucune conversation sélectionnée', 'error');
+			this.checked = !this.checked;
+			return;
+		}
+
+		const mark = this.checked ? '1' : '0';
+		try {
+			const url = '{{ path('admin_message_mark_replied', {'id':'PLACEHOLDER'}) }}'.replace('PLACEHOLDER', currentConversationId);
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest',
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+				body: 'mark=' + encodeURIComponent(mark)
+			});
+			const data = await response.json();
+			if (data.success) {
+				showToast(this.checked ? 'Marqué comme répondu' : 'Démarquée', 'success');
+				// Mettre à jour l'attribut data-repondu-par sur la conversation
+				const convItem = document.querySelector(`.conversation-item[data-id="${currentConversationId}"]`);
+				if (convItem) {
+					convItem.dataset.reponduPar = this.checked ? '{{ app.user.email|e('js') }}' : '';
+					// Mettre à jour l'affichage (badge + style)
+					const nameEl = convItem.querySelector('.conversation-name');
+					if (nameEl) {
+						let repliedSpan = nameEl.querySelector('.replied-badge');
+						if (this.checked) {
+							if (!repliedSpan) {
+								repliedSpan = document.createElement('span');
+								repliedSpan.className = 'replied-badge';
+								repliedSpan.textContent = '✅ Répondu';
+								nameEl.insertBefore(repliedSpan, nameEl.childNodes[2] || null);
+							}
+							convItem.classList.add('conversation-replied');
+						} else {
+							if (repliedSpan) repliedSpan.remove();
+							convItem.classList.remove('conversation-replied');
+						}
+					}
+				}
+			} else {
+				showToast(data.error || 'Erreur', 'error');
+				this.checked = !this.checked;
+			}
+		} catch (err) {
+			console.error(err);
+			showToast('Erreur réseau', 'error');
+			this.checked = !this.checked;
+		}
+	});
+}
 
 // Bouton retour pour mobile
 if (backToListBtn) {
@@ -1032,6 +1115,52 @@ items.forEach(item => {
 		const email = this.dataset.email;
 		const message = this.dataset.message;
 		const date = this.dataset.date;
+
+		// Gestion des utilisateurs externes / bouton email
+		const otherEmail = this.dataset.otherEmail || '';
+		const otherRole = this.dataset.otherRole || '';
+
+		if (otherEmail && otherEmail.trim() !== '') {
+			// Préparer le lien Gmail (ouvrir dans un nouvel onglet)
+			const subject = 'Re: ' + (this.dataset.subject || currentSubject || '');
+			const to = encodeURIComponent(otherEmail);
+			// CC : si dataset.email est différent de otherEmail, ajouter en cc (ex: admin copy)
+			let cc = '';
+			if (this.dataset.email && this.dataset.email !== otherEmail) {
+				cc = encodeURIComponent(this.dataset.email);
+			}
+			let gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + to + '&su=' + encodeURIComponent(subject);
+			if (cc) gmailUrl += '&cc=' + cc;
+			sendEmailBtn.setAttribute('href', gmailUrl);
+			sendEmailBtn.setAttribute('target', '_blank');
+			sendEmailBtn.style.display = 'inline-block';
+			externalUserNotice.style.display = 'block';
+
+			// Si l'utilisateur est externe (non enregistré), masquer la zone d'envoi interne
+			if (otherRole === 'Externe' || otherRole === 'externe') {
+				chatInput.style.display = 'none';
+				sendBtn.style.display = 'none';
+			} else {
+				chatInput.style.display = '';
+				sendBtn.style.display = 'inline-block';
+			}
+			// Afficher checkbox pour marquer comme répondu
+			document.getElementById('markRepliedContainer').style.display = 'block';
+			// Synchroniser l'état de la checkbox selon si déjà marqué
+			const markCb = document.getElementById('markRepliedCheckbox');
+			if (reponduPar && reponduPar.trim() !== '') {
+				markCb.checked = true;
+			} else {
+				markCb.checked = false;
+			}
+		} else {
+			sendEmailBtn.style.display = 'none';
+			externalUserNotice.style.display = 'none';
+			document.getElementById('markRepliedContainer').style.display = 'none';
+			// Restaurer l'UI d'envoi standard
+			chatInput.style.display = '';
+			sendBtn.style.display = 'inline-block';
+		}
 		chatHeader.style.display = 'flex';
 		chatInputContainer.style.display = 'block';
 		chatTitle.textContent = sender;

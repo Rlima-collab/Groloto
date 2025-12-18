@@ -120,8 +120,14 @@ class ContactController extends AbstractController
                     ->setNom($contactDto->getNom())
                     ->setEmail($contactDto->getEmail())
                     ->setMessage(($contactDto->getSujet() ? "[{$contactDto->getSujet()}] " : "") . $contactDto->getMessage())
+                    ->setDestinataire('ROLE_ADMIN')
                     ->setCreatedAt(new \DateTime());
                 $this->em->persist($contactMessage);
+
+                // Flush early pour obtenir l'ID de la conversation avant de créer les notifications
+                $this->em->flush();
+
+                $convId = $contactMessage->getId();
 
                 // 3. Déterminer s'il s'agit d'une nouvelle conversation ou d'une réponse
                 $isReponse = $this->em->getRepository(ContactMessage::class)
@@ -130,7 +136,7 @@ class ContactController extends AbstractController
                 // 4. Création de la notification pour l'admin
                 $users = $this->em->getRepository(\App\Entity\Utilisateur::class)->findByRoleName('admin');
                 if (!empty($users)) {
-                    // Envoi de la notification à tous les admins
+                    // Envoi de la notification à tous les admins, lien direct vers la conversation
                     foreach ($users as $admin) {
                         $notification = new Notification();
                         $notification
@@ -139,7 +145,7 @@ class ContactController extends AbstractController
                             ->setMessage($isReponse 
                                 ? "{$contactDto->getNom()} a répondu à votre message" 
                                 : "Nouveau message de {$contactDto->getNom()}")
-                            ->setLien('/admin/messages')
+                            ->setLien('/admin/messages?conv=' . $convId)
                             ->setLue(false)
                             ->setCreatedAt(new \DateTime());
 
@@ -147,7 +153,7 @@ class ContactController extends AbstractController
                     }
                 }
 
-                // Sauvegarde tout (COMME LES DEMANDES DE TÂCHE)
+                // Sauvegarde restante (notifications déjà persistées)
                 $this->em->flush();
 
                 if ($isAjax) {
@@ -169,6 +175,30 @@ class ContactController extends AbstractController
                     }
                 }
             }
+        }
+
+        // Si le formulaire est soumis mais invalide et que c'est une requête AJAX,
+        // retourner les erreurs de validation en JSON plutôt que la page HTML (qui casse JSON.parse côté client).
+        if ($form->isSubmitted() && !$form->isValid() && $request->isXmlHttpRequest()) {
+            // Récupérer les erreurs du formulaire
+            $errors = [];
+            /** @var \Symfony\Component\Form\FormErrorIterator $formErrors */
+            $formErrors = $form->getErrors(true, true);
+            foreach ($formErrors as $error) {
+                $origin = $error->getOrigin();
+                $name = $origin ? $origin->getName() : '_form';
+                $errors[$name][] = $error->getMessage();
+            }
+
+            // Message générique pour l'utilisateur
+            $first = reset($errors);
+            $message = is_array($first) ? ($first[0] ?? 'Veuillez corriger les erreurs du formulaire.') : 'Veuillez corriger les erreurs du formulaire.';
+
+            return $this->json([
+                'success' => false,
+                'error' => $message,
+                'errors' => $errors
+            ], 400);
         }
 
         return $this->render('contact/contact.html.twig', [

@@ -143,51 +143,100 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            const data = await response.json();
+            // Lire d'abord le texte pour éviter "body already consumed" puis tenter d'analyser en JSON
+            const raw = await response.text();
+            let data = null;
+            try {
+                data = raw ? JSON.parse(raw) : null;
+            } catch (parseErr) {
+                console.error('Réponse non-JSON:', raw);
+                showAlert('danger', 'Erreur serveur inattendue. Veuillez réessayer plus tard.');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
 
-            if (data.success) {
-                // Créer une alerte de succès
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success alert-dismissible fade show shadow-sm';
-                alertDiv.role = 'alert';
-                alertDiv.innerHTML = `
-                    <i class="fas fa-check-circle me-2"></i> Votre message a été envoyé avec succès !
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                `;
-                
-                // Insérer avant le formulaire ou dans le conteneur de flash messages
-                const flashContainer = document.querySelector('.container.mt-4');
-                if (flashContainer) {
-                    flashContainer.innerHTML = ''; // Vider les anciens messages
-                    flashContainer.appendChild(alertDiv);
-                    flashContainer.scrollIntoView({ behavior: 'smooth' });
-                }
+            // Réinitialiser les erreurs de champs précédentes
+            clearFieldErrors();
 
+            if (data && data.success) {
+                showAlert('success', 'Votre message a été envoyé avec succès !');
                 form.reset();
+                // Scroll to top so user sees the confirmation
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                throw new Error(data.error || 'Une erreur est survenue');
+                // Si le serveur renvoie des erreurs de champs, les afficher sous chaque champ
+                if (data && data.errors) {
+                    showFieldErrors(data.errors);
+                    // Focus sur le premier champ en erreur
+                    const firstKey = Object.keys(data.errors)[0];
+                    const firstField = form.querySelector(`[name$="[${firstKey}]"]`);
+                    if (firstField) firstField.focus();
+                } else if (data && data.error) {
+                    // Erreur générale, on l'affiche en haut
+                    showAlert('danger', data.error);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    showAlert('danger', 'Une erreur est survenue lors de l\'envoi.');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             }
         } catch (error) {
             console.error(error);
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-danger alert-dismissible fade show shadow-sm';
-            alertDiv.role = 'alert';
-            alertDiv.innerHTML = `
-                <i class="fas fa-exclamation-circle me-2"></i> ${error.message || 'Une erreur est survenue lors de l\'envoi.'}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            `;
-            
-            const flashContainer = document.querySelector('.container.mt-4');
-            if (flashContainer) {
-                flashContainer.innerHTML = '';
-                flashContainer.appendChild(alertDiv);
-                flashContainer.scrollIntoView({ behavior: 'smooth' });
-            }
+            showAlert('danger', error.message || 'Une erreur réseau est survenue.');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
         }
     });
 });
+
+    function showAlert(type, message) {
+        const flashContainer = document.querySelector('.container.mt-4');
+        if (!flashContainer) return;
+        flashContainer.innerHTML = '';
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show shadow-sm`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        flashContainer.appendChild(alertDiv);
+    }
+
+    function clearFieldErrors() {
+        const invalids = document.querySelectorAll('#contactForm .is-invalid');
+        invalids.forEach(el => el.classList.remove('is-invalid'));
+        const feedbacks = document.querySelectorAll('#contactForm .invalid-feedback');
+        feedbacks.forEach(fb => fb.innerHTML = '');
+    }
+
+    function showFieldErrors(errors) {
+        // errors: { fieldName: ['msg1','msg2'] }
+        Object.keys(errors).forEach(key => {
+            const msgs = errors[key] || [];
+            // Chercher le champ par name se terminant par [key]
+            const field = document.querySelector(`#contactForm [name$="[${key}]"]`);
+            if (field) {
+                field.classList.add('is-invalid');
+                // trouver le conteneur .invalid-feedback le plus proche
+                let feedback = field.closest('.form-group')?.querySelector('.invalid-feedback');
+                if (!feedback) {
+                    // fallback: chercher au parent direct
+                    feedback = field.parentElement?.querySelector('.invalid-feedback');
+                }
+                if (feedback) {
+                    feedback.innerHTML = msgs.map(m => `<div>${m}</div>`).join('');
+                }
+            } else {
+                // champ non trouvé : accumuler pour message général
+                const flashContainer = document.querySelector('.container.mt-4');
+                if (flashContainer && msgs.length) {
+                    showAlert('danger', msgs.join(' — '));
+                }
+            }
+        });
+    }
 </script>
 {% endblock %}

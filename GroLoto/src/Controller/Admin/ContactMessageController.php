@@ -697,6 +697,33 @@ class ContactMessageController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/mark-replied', name: 'admin_message_mark_replied', methods: ['POST'])]
+    public function markReplied(
+        ContactMessage $message,
+        Request $request,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        $currentUser = $this->getUser();
+        if (!$currentUser instanceof \App\Entity\Utilisateur) {
+            return $this->json(['success' => false, 'error' => 'Utilisateur non valide'], 403);
+        }
+
+        $mark = $request->request->get('mark', '1');
+        $mark = filter_var($mark, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+        if ($mark) {
+            $message->setReponduPar($currentUser);
+            $message->setReponduLe(new \DateTime());
+        } else {
+            $message->setReponduPar(null);
+            $message->setReponduLe(null);
+        }
+
+        $em->flush();
+
+        return $this->json(['success' => true, 'marked' => (bool) $mark]);
+    }
+
     private function extractSubject(string $message): string
     {
         if (preg_match('/^\[([^\]]+)\]/', $message, $matches)) {
