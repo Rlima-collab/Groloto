@@ -10,6 +10,7 @@ use App\Form\TacheAffectationType;
 use App\Repository\TacheRepository;
 use App\Repository\AffectationTacheRepository;
 use App\Repository\BenevoleRepository;
+use App\Repository\DisponibiliteWeekendRepository;
 use App\Service\NotificationService;
 use App\Service\BatchTaskAssignmentService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -384,6 +385,7 @@ class TacheController extends AbstractController
         TacheRepository $tacheRepository,
         BenevoleRepository $benevoleRepository,
         AffectationTacheRepository $affectationRepository,
+        DisponibiliteWeekendRepository $disponibiliteRepo,
         EntityManagerInterface $entityManager,
         NotificationService $notificationService
     ): Response {
@@ -481,6 +483,25 @@ class TacheController extends AbstractController
         
         $tousBenevoles = $qb->getQuery()->getResult();
 
+        // Déterminer le créneau horaire de la tâche (matin/après-midi/soir)
+        $tacheDebut = $tache->getDebut();
+        $tacheFin = $tache->getFin();
+        $weekend = $tache->getWeekend();
+        
+        $creneauTache = null;
+        if ($tacheDebut) {
+            $heure = (int) $tacheDebut->format('H');
+            if ($heure < 12) {
+                $creneauTache = 'matin';
+            } elseif ($heure < 18) {
+                $creneauTache = 'apres_midi';
+            } else {
+                $creneauTache = 'soir';
+            }
+        }
+        
+        $jourTache = $tacheDebut ? $tacheDebut->format('Y-m-d') : null;
+
         // Préparer les données pour la vue
         $benevolesData = [];
         foreach ($tousBenevoles as $benevole) {
@@ -504,11 +525,48 @@ class TacheController extends AbstractController
             } elseif ($estPrisAilleurs) {
                 $statut = 'indisponible';
             }
+            
+            // Vérifier les disponibilités renseignées par le bénévole
+            $disponibiliteInfo = null;
+            $matchCreneau = null;
+            $aRenseigneDispos = false;
+            
+            if ($weekend && $jourTache) {
+                // Chercher la disponibilité pour ce jour
+                $dispos = $disponibiliteRepo->findByBenevoleAndWeekend($benevole, $weekend);
+                
+                // Le bénévole a-t-il renseigné des disponibilités pour ce weekend ?
+                $aRenseigneDispos = !empty($dispos);
+                
+                foreach ($dispos as $dispo) {
+                    if ($dispo->getJour() && $dispo->getJour()->format('Y-m-d') === $jourTache) {
+                        $disponibiliteInfo = $dispo;
+                        
+                        // Vérifier si le créneau correspond
+                        if ($creneauTache) {
+                            if ($creneauTache === 'matin' && $dispo->isMatin()) {
+                                $matchCreneau = true;
+                            } elseif ($creneauTache === 'apres_midi' && $dispo->isApresMidi()) {
+                                $matchCreneau = true;
+                            } elseif ($creneauTache === 'soir' && $dispo->isSoir()) {
+                                $matchCreneau = true;
+                            } else {
+                                $matchCreneau = false;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
 
             $benevolesData[] = [
                 'benevole' => $benevole,
                 'statut' => $statut,
-                'affectation' => $affectationActuelle
+                'affectation' => $affectationActuelle,
+                'disponibilite' => $disponibiliteInfo,
+                'matchCreneau' => $matchCreneau,
+                'creneauTache' => $creneauTache,
+                'aRenseigneDispos' => $aRenseigneDispos
             ];
         }
 
