@@ -58,12 +58,15 @@
                     <label class="recu-form-label">Utilisateur destinataire <span class="required">*</span></label>
 
                     <div id="mecene-list" class="recu-user-list">
+                        <div class="recu-search-container" style="margin-bottom: 1rem;">
+                            <input type="text" id="search-mecene" class="recu-form-input" placeholder="Rechercher un mécène..." style="width: 100%;">
+                        </div>
                         <h4 class="recu-user-list-title">Mécènes disponibles</h4>
                         {% if mecenes is empty %}
                             <p style="color: #6b7280; text-align: center; padding: 2rem;">Aucun mécène disponible</p>
                         {% else %}
                             {% for mecene in mecenes %}
-                                <div class="recu-user-item" data-user-id="{{ mecene.id }}" data-type="mecene">
+                                <div class="recu-user-item" data-user-id="{{ mecene.id }}" data-type="mecene" data-search="{{ mecene.prenom|lower }} {{ mecene.nom|lower }} {{ mecene.email|lower }}">
                                     <div class="recu-user-avatar">
                                         {{ mecene.prenom|first|upper ~ mecene.nom|first|upper }}
                                     </div>
@@ -77,12 +80,15 @@
                     </div>
 
                     <div id="benevole-list" class="recu-user-list" style="display: none;">
+                        <div class="recu-search-container" style="margin-bottom: 1rem;">
+                            <input type="text" id="search-benevole" class="recu-form-input" placeholder="Rechercher un bénévole..." style="width: 100%;">
+                        </div>
                         <h4 class="recu-user-list-title">Bénévoles disponibles</h4>
                         {% if benevoles is empty %}
                             <p style="color: #6b7280; text-align: center; padding: 2rem;">Aucun bénévole disponible</p>
                         {% else %}
                             {% for benevole in benevoles %}
-                                <div class="recu-user-item" data-user-id="{{ benevole.id }}" data-type="benevole">
+                                <div class="recu-user-item" data-user-id="{{ benevole.id }}" data-type="benevole" data-search="{{ benevole.prenom|lower }} {{ benevole.nom|lower }} {{ benevole.email|lower }}">
                                     <div class="recu-user-avatar">
                                         {{ benevole.prenom|first|upper ~ benevole.nom|first|upper }}
                                     </div>
@@ -173,6 +179,32 @@ document.addEventListener('DOMContentLoaded', function() {
             item.classList.add('selected');
             selectedUserInput.value = userId;
         }
+    });
+
+    // Gestion de la recherche
+    const searchMecene = document.getElementById('search-mecene');
+    const searchBenevole = document.getElementById('search-benevole');
+
+    function filterUsers(searchInput, userList) {
+        const searchTerm = searchInput.value.toLowerCase();
+        const userItems = userList.querySelectorAll('.recu-user-item');
+
+        userItems.forEach(item => {
+            const searchText = item.dataset.search;
+            if (searchText.includes(searchTerm)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    searchMecene.addEventListener('input', function() {
+        filterUsers(searchMecene, meceneList);
+    });
+
+    searchBenevole.addEventListener('input', function() {
+        filterUsers(searchBenevole, benevoleList);
     });
 
     // Gestion du drag & drop
