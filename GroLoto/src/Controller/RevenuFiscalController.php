@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\ContactMessage;
 use App\Entity\Notification;
+use App\Entity\RecuFiscal;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,227 +20,220 @@ class RevenuFiscalController extends AbstractController
 {
     public function __construct(private EntityManagerInterface $em) {}
 
-    #[Route('/mecene/recu/send', name: 'mecene_recu_send', methods: ['POST'])]
-    #[IsGranted('ROLE_MECENE')]
-    public function sendFromMecene(Request $request, MailerInterface $mailer): Response
-    {
-        if (!$this->isCsrfTokenValid('send_recu_mecene', $request->request->get('_token'))) {
-            $this->addFlash('error', 'Token invalide.');
-            return $this->redirectToRoute('mecenes');
-        }
-
-        $user = $this->getUser();
-        if (!$user instanceof Utilisateur) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $nom = trim(($user->getPrenom() ?? '') . ' ' . ($user->getNom() ?? '')) ?: $user->getEmail();
-
-        // handle uploaded file
-        /** @var UploadedFile|null $file */
-        $file = $request->files->get('recu_file');
-        $publicPath = '';
-        if ($file instanceof UploadedFile) {
-            $targetDir = $this->getParameter('kernel.project_dir') . '/public/uploads/revenus_fiscaux';
-            if (!is_dir($targetDir)) {
-                @mkdir($targetDir, 0775, true);
-            }
-            $ext = $file->guessExtension() ?: 'pdf';
-            $filename = uniqid('recu_') . '.' . $ext;
-            try {
-                $file->move($targetDir, $filename);
-                $publicPath = '/uploads/revenus_fiscaux/' . $filename;
-            } catch (\Throwable $e) {
-                // ignore move errors
-            }
-        }
-
-        $messageText = 'Reçu fiscal (mécène) envoyé par ' . $nom;
-        if ($publicPath !== '') {
-            $messageText .= ' Fichier: ' . $publicPath;
-        }
-
-        $cm = new ContactMessage();
-        $cm->setNom($nom)
-            ->setEmail($user->getEmail())
-            ->setDestinataire('REVENU_FISCAL')
-            ->setMessage($messageText);
-
-        $this->em->persist($cm);
-        $this->em->flush();
-
-        // notifier tous les admins
-        $admins = $this->em->getRepository(Utilisateur::class)
-            ->createQueryBuilder('u')
-            ->join('u.role', 'r')
-            ->where('r.nom IN (:roles)')
-            ->setParameter('roles', ['ROLE_ADMIN', 'admin'])
-            ->getQuery()
-            ->getResult();
-
-        $adminEmails = [];
-        foreach ($admins as $adm) {
-            if ($adm->getEmail()) $adminEmails[] = $adm->getEmail();
-            try {
-                $notification = new Notification();
-                $notification->setDestinataire($adm)
-                    ->setType('revenu_fiscal')
-                    ->setMessage("Reçu fiscal envoyé par $nom")
-                    ->setLien('/admin/revenus-fiscaux')
-                    ->setLue(false);
-                $this->em->persist($notification);
-            } catch (\Throwable $e) {
-                // ignore notification errors
-            }
-        }
-        $this->em->flush();
-
-        if (!empty($adminEmails)) {
-            try {
-                $emailObj = (new Email())
-                    ->from($user->getEmail())
-                    ->to(...$adminEmails)
-                    ->subject('Reçu fiscal (mécène)')
-                    ->html(sprintf('Le mécène %s a envoyé son reçu fiscal. %s', htmlspecialchars($nom), $publicPath ? 'Téléchargement: <a href="' . $publicPath . '">' . $publicPath . '</a>' : ''));
-                $mailer->send($emailObj);
-            } catch (\Throwable $e) {
-                // ignore mail errors
-            }
-        }
-
-        $this->addFlash('success', 'Le reçu fiscal a été envoyé aux administrateurs.');
-        return $this->redirectToRoute('mecene_revenu_fiscal_index');
-    }
-
-    #[Route('/benevole/recu/send', name: 'benevole_recu_send', methods: ['POST'])]
-    #[IsGranted('ROLE_BENEVOLE')]
-    public function sendFromBenevole(Request $request, MailerInterface $mailer): Response
-    {
-        if (!$this->isCsrfTokenValid('send_recu_benevole', $request->request->get('_token'))) {
-            $this->addFlash('error', 'Token invalide.');
-            return $this->redirectToRoute('benevole_revenu_fiscal_index');
-        }
-
-        $user = $this->getUser();
-        if (!$user instanceof Utilisateur) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $nom = trim(($user->getPrenom() ?? '') . ' ' . ($user->getNom() ?? '')) ?: $user->getEmail();
-
-        // handle uploaded file
-        /** @var UploadedFile|null $file */
-        $file = $request->files->get('recu_file');
-        $publicPath = '';
-        if ($file instanceof UploadedFile) {
-            $targetDir = $this->getParameter('kernel.project_dir') . '/public/uploads/revenus_fiscaux';
-            if (!is_dir($targetDir)) {
-                @mkdir($targetDir, 0775, true);
-            }
-            $ext = $file->guessExtension() ?: 'pdf';
-            $filename = uniqid('recu_') . '.' . $ext;
-            try {
-                $file->move($targetDir, $filename);
-                $publicPath = '/uploads/revenus_fiscaux/' . $filename;
-            } catch (\Throwable $e) {
-                // ignore move errors
-            }
-        }
-
-        $messageText = 'Reçu fiscal (bénévole) envoyé par ' . $nom;
-        if ($publicPath !== '') {
-            $messageText .= ' Fichier: ' . $publicPath;
-        }
-
-        $cm = new ContactMessage();
-        $cm->setNom($nom)
-            ->setEmail($user->getEmail())
-            ->setDestinataire('REVENU_FISCAL')
-            ->setMessage($messageText);
-
-        $this->em->persist($cm);
-        $this->em->flush();
-
-        // notifier admins
-        $admins = $this->em->getRepository(Utilisateur::class)
-            ->createQueryBuilder('u')
-            ->join('u.role', 'r')
-            ->where('r.nom IN (:roles)')
-            ->setParameter('roles', ['ROLE_ADMIN', 'admin'])
-            ->getQuery()
-            ->getResult();
-
-        $adminEmails = [];
-        foreach ($admins as $adm) {
-            if ($adm->getEmail()) $adminEmails[] = $adm->getEmail();
-            try {
-                $notification = new Notification();
-                $notification->setDestinataire($adm)
-                    ->setType('revenu_fiscal')
-                    ->setMessage("Reçu fiscal envoyé par $nom")
-                    ->setLien('/admin/revenus-fiscaux')
-                    ->setLue(false);
-                $this->em->persist($notification);
-            } catch (\Throwable $e) {
-                // ignore
-            }
-        }
-        $this->em->flush();
-
-        if (!empty($adminEmails)) {
-            try {
-                $emailObj = (new Email())
-                    ->from($user->getEmail())
-                    ->to(...$adminEmails)
-                    ->subject('Reçu fiscal (bénévole)')
-                    ->html(sprintf('Le bénévole %s a envoyé son reçu fiscal. %s', htmlspecialchars($nom), $publicPath ? 'Téléchargement: <a href="' . $publicPath . '">' . $publicPath . '</a>' : ''));
-                $mailer->send($emailObj);
-            } catch (\Throwable $e) {
-                // ignore
-            }
-        }
-
-        $this->addFlash('success', 'Le reçu fiscal a été envoyé aux administrateurs.');
-        return $this->redirectToRoute('benevole_revenu_fiscal_index');
-    }
-
-    #[Route('/admin/revenus-fiscaux', name: 'admin_revenu_fiscal_index')]
+    #[Route('/admin/recus-fiscaux/envoyer', name: 'admin_recu_fiscal_send', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function adminIndex(Request $request): Response
+    public function sendRecuFiscal(Request $request, MailerInterface $mailer): Response
     {
-        $q = trim((string) $request->query->get('q', ''));
+        if ($request->isMethod('POST')) {
+            $destinataireId = $request->request->get('destinataire');
+            $type = $request->request->get('type');
+            $annee = (int) $request->request->get('annee');
 
-        $repo = $this->em->getRepository(ContactMessage::class);
-        $qb = $repo->createQueryBuilder('cm')
-            ->where('cm.destinataire = :dest')
-            ->setParameter('dest', 'REVENU_FISCAL')
-            ->orderBy('cm.createdAt', 'DESC');
+            if (!$this->isCsrfTokenValid('send_recu_fiscal', $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token invalide.');
+                return $this->redirectToRoute('admin_recu_fiscal_send');
+            }
 
-        if ($q !== '') {
-            $qb->andWhere('cm.nom LIKE :q OR cm.email LIKE :q OR cm.message LIKE :q')
-               ->setParameter('q', '%' . $q . '%');
+            $destinataire = $this->em->getRepository(Utilisateur::class)->find($destinataireId);
+            if (!$destinataire) {
+                $this->addFlash('error', 'Destinataire introuvable.');
+                return $this->redirectToRoute('admin_recu_fiscal_send');
+            }
+
+            // Vérifier que le type correspond au rôle de l'utilisateur (validation légère)
+            $roleNom = strtoupper($destinataire->getRole()->getNom());
+            $isValidRole = str_contains($roleNom, 'MECENE') || str_contains($roleNom, 'BENEVOLE') ||
+                           str_contains($roleNom, 'ROLE_MECENE') || str_contains($roleNom, 'ROLE_BENEVOLE');
+
+            if (!$isValidRole) {
+                $this->addFlash('error', 'L\'utilisateur n\'a pas un rôle valide pour recevoir un reçu fiscal.');
+                return $this->redirectToRoute('admin_recu_fiscal_send');
+            }
+
+            // Handle uploaded file
+            /** @var UploadedFile|null $file */
+            $file = $request->files->get('recu_file');
+            if (!$file instanceof UploadedFile) {
+                $this->addFlash('error', 'Aucun fichier sélectionné.');
+                return $this->redirectToRoute('admin_recu_fiscal_send');
+            }
+
+            $targetDir = $this->getParameter('kernel.project_dir') . '/public/uploads/recus_fiscaux';
+            if (!is_dir($targetDir)) {
+                @mkdir($targetDir, 0775, true);
+            }
+
+            $ext = $file->guessExtension() ?: 'pdf';
+            $filename = uniqid('recu_fiscal_') . '.' . $ext;
+
+            try {
+                $file->move($targetDir, $filename);
+                $publicPath = '/uploads/recus_fiscaux/' . $filename;
+            } catch (\Throwable $e) {
+                $this->addFlash('error', 'Erreur lors de l\'upload du fichier.');
+                return $this->redirectToRoute('admin_recu_fiscal_send');
+            }
+
+            // Créer le reçu fiscal
+            $recuFiscal = new RecuFiscal();
+            $recuFiscal->setDestinataire($destinataire)
+                ->setType($type)
+                ->setFichier($publicPath)
+                ->setAnnee($annee)
+                ->setEnvoyePar($this->getUser());
+
+            $this->em->persist($recuFiscal);
+
+            // Créer une notification
+            $notification = new Notification();
+            $notification->setDestinataire($destinataire)
+                ->setType('recu_fiscal')
+                ->setMessage("Votre reçu fiscal $type pour l'année $annee est disponible")
+                ->setLien('/' . $type . '/recus-fiscaux')
+                ->setLue(false);
+
+            $this->em->persist($notification);
+            $this->em->flush();
+
+            // Envoyer un email
+            try {
+                $emailObj = (new Email())
+                    ->from('noreply@groloto.fr')
+                    ->to($destinataire->getEmail())
+                    ->subject("Reçu fiscal $type - Année $annee")
+                    ->html(sprintf(
+                        'Bonjour,<br><br>Votre reçu fiscal %s pour l\'année %d est maintenant disponible.<br><br>Vous pouvez le télécharger depuis votre espace personnel.<br><br>Cordialement,<br>L\'équipe GroLoto',
+                        $type === 'mecene' ? 'mécène' : 'bénévole',
+                        $annee
+                    ));
+                $mailer->send($emailObj);
+            } catch (\Throwable $e) {
+                // Ignore mail errors
+            }
+
+            $this->addFlash('success', 'Le reçu fiscal a été envoyé avec succès.');
+            return $this->redirectToRoute('admin_recu_fiscal_send');
         }
 
-        $messages = $qb->getQuery()->getResult();
+        // GET request - afficher le formulaire
+        $mecs = $this->em->getRepository(Utilisateur::class)
+            ->createQueryBuilder('u')
+            ->join('u.role', 'r')
+            ->where('r.nom LIKE :role')
+            ->setParameter('role', '%MECENE%')
+            ->orderBy('u.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
 
-        return $this->render('admin/revenu_fiscal/index.html.twig', ['messages' => $messages, 'q' => $q]);
+        $bens = $this->em->getRepository(Utilisateur::class)
+            ->createQueryBuilder('u')
+            ->join('u.role', 'r')
+            ->where('r.nom LIKE :role')
+            ->setParameter('role', '%BENEVOLE%')
+            ->orderBy('u.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('admin/recu_fiscal/send.html.twig', [
+            'mecenes' => $mecs,
+            'benevoles' => $bens,
+            'current_year' => date('Y')
+        ]);
     }
 
-    #[Route('/mecene/revenus-fiscaux', name: 'mecene_revenu_fiscal_index')]
+    #[Route('/mecene/recus-fiscaux', name: 'mecene_recu_fiscal_index')]
     #[IsGranted('ROLE_MECENE')]
     public function meceneIndex(): Response
     {
         $user = $this->getUser();
-        $messages = $this->em->getRepository(ContactMessage::class)->findBy(['email' => $user->getEmail(), 'destinataire' => 'REVENU_FISCAL'], ['createdAt' => 'DESC']);
-        return $this->render('mecene/revenu_fiscal/index.html.twig', ['messages' => $messages]);
+        $recus = $this->em->getRepository(RecuFiscal::class)
+            ->findBy(['destinataire' => $user, 'type' => 'mecene'], ['createdAt' => 'DESC']);
+
+        return $this->render('mecene/revenu_fiscal/index.html.twig', ['recus' => $recus]);
     }
 
-    #[Route('/benevole/revenus-fiscaux', name: 'benevole_revenu_fiscal_index')]
+    #[Route('/benevole/recus-fiscaux', name: 'benevole_recu_fiscal_index')]
     #[IsGranted('ROLE_BENEVOLE')]
     public function benevoleIndex(): Response
     {
         $user = $this->getUser();
-        $messages = $this->em->getRepository(ContactMessage::class)->findBy(['email' => $user->getEmail(), 'destinataire' => 'REVENU_FISCAL'], ['createdAt' => 'DESC']);
-        return $this->render('benevole/revenu_fiscal/index.html.twig', ['messages' => $messages]);
+        $recus = $this->em->getRepository(RecuFiscal::class)
+            ->findBy(['destinataire' => $user, 'type' => 'benevole'], ['createdAt' => 'DESC']);
+
+        return $this->render('benevole/revenu_fiscal/index.html.twig', ['recus' => $recus]);
+    }
+
+    #[Route('/benevole/demande-recu-fiscal', name: 'benevole_recu_send', methods: ['POST'])]
+    #[IsGranted('ROLE_BENEVOLE')]
+    public function benevoleDemandeRecu(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('send_recu_benevole', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('benevole_mon_planning');
+        }
+
+        $user = $this->getUser();
+
+        // Envoyer une notification aux admins
+        $admins = $this->em->getRepository(Utilisateur::class)
+            ->createQueryBuilder('u')
+            ->join('u.role', 'r')
+            ->where('r.nom LIKE :role')
+            ->setParameter('role', '%ADMIN%')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($admins as $admin) {
+            $notification = new Notification();
+            $notification->setDestinataire($admin)
+                ->setType('demande_recu')
+                ->setMessage(sprintf('%s %s demande son reçu fiscal bénévole', $user->getPrenom(), $user->getNom()))
+                ->setLien('/admin/recus-fiscaux/envoyer')
+                ->setLue(false);
+
+            $this->em->persist($notification);
+        }
+
+        $this->em->flush();
+
+        $this->addFlash('success', 'Votre demande de reçu fiscal a été envoyée aux administrateurs.');
+        return $this->redirectToRoute('benevole_mon_planning');
+    }
+
+    #[Route('/mecene/demande-recu-fiscal', name: 'mecene_recu_send', methods: ['POST'])]
+    #[IsGranted('ROLE_MECENE')]
+    public function meceneDemandeRecu(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('send_recu_mecene', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('mecene_dashboard');
+        }
+
+        $user = $this->getUser();
+
+        // Envoyer une notification aux admins
+        $admins = $this->em->getRepository(Utilisateur::class)
+            ->createQueryBuilder('u')
+            ->join('u.role', 'r')
+            ->where('r.nom LIKE :role')
+            ->setParameter('role', '%ADMIN%')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($admins as $admin) {
+            $notification = new Notification();
+            $notification->setDestinataire($admin)
+                ->setType('demande_recu')
+                ->setMessage(sprintf('%s %s demande son reçu fiscal mécène', $user->getPrenom(), $user->getNom()))
+                ->setLien('/admin/recus-fiscaux/envoyer')
+                ->setLue(false);
+
+            $this->em->persist($notification);
+        }
+
+        $this->em->flush();
+
+        $this->addFlash('success', 'Votre demande de reçu fiscal a été envoyée aux administrateurs.');
+        return $this->redirectToRoute('mecene_dashboard');
     }
 }

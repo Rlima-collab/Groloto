@@ -58,9 +58,9 @@ class ProfileType extends AbstractType
                 ]
             ])
             ->add('currentPassword', PasswordType::class, [
-                'label' => 'Mot de passe actuel (requis pour modifier)',
+                'label' => 'Mot de passe actuel',
                 'mapped' => false,
-                'required' => true,
+                'required' => false,
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'Entrez votre mot de passe actuel'

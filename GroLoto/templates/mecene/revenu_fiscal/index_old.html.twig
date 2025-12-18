@@ -1,0 +1,252 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Reçus fiscaux - Mécène{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f3f4f6;
+            text-align: center;
+        }
+        .card-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .card-description {
+            color: #6b7280;
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Section reçus envoyés par l'admin */
+        .recu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        .recu-card {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .recu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        .recu-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+            transform: translateY(-2px);
+        }
+        .recu-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .recu-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: white;
+            flex-shrink: 0;
+            font-weight: 600;
+            text-align: center;
+        }
+        .recu-info h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .recu-meta {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        .recu-actions {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        .btn-primary {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        /* États vides */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+        .empty-state h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: #374151;
+        }
+
+        /* Stats */
+        .stats-bar {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .stat-content h4 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e40af;
+        }
+        .stat-content p {
+            margin: 0.25rem 0 0 0;
+            font-size: 0.9rem;
+            color: #3730a3;
+        }
+
+        @media (max-width: 768px) {
+            .recu-grid { grid-template-columns: 1fr; }
+            .stats-bar { flex-direction: column; text-align: center; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">Mes reçus fiscaux</h1>
+            <p class="card-description">
+                Consultez et téléchargez les reçus fiscaux officiels qui vous ont été envoyés par l’association.
+            </p>
+        </div>
+
+        {% if recus is defined and recus|length > 0 %}
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-icon">Statistiques</div>
+                    <div class="stat-content">
+                        <h4>{{ recus|length }}</h4>
+                        <p>Reçu{{ recus|length > 1 ? 's' : '' }} disponible{{ recus|length > 1 ? 's' : '' }}</p>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">Calendrier</div>
+                    <div class="stat-content">
+                        <h4>{{ recus|first.annee }}</h4>
+                        <p>Dernière année</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recu-grid">
+                {% for recu in recus %}
+                    <div class="recu-card">
+                        <div class="recu-header">
+                            <div class="recu-icon">Document</div>
+                            <div class="recu-info">
+                                <h3>Reçu fiscal {{ recu.annee }}</h3>
+                                <div class="recu-meta">
+                                    Envoyé le {{ recu.createdAt|date('d/m/Y à H:i') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="recu-actions">
+                            <a href="{{ asset(recu.fichier) }}" class="btn-primary" target="_blank">
+                                Télécharger le PDF
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">Aucun document</div>
+                <h3>Aucun reçu fiscal disponible pour le moment</h3>
+                <p>Les reçus fiscaux apparaîtront ici dès qu’ils auront été générés et envoyés par l’administration.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

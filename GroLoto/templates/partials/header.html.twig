@@ -64,6 +64,11 @@
         const settingsToggle = document.getElementById('settingsToggle');
         const settingsMenu = document.getElementById('settingsMenu');
 
+        // Only run notification code if user is logged in (elements exist)
+        if (!notificationBell || !notificationBadge) {
+            return;
+        }
+
         // Helper: fetch unread count and update badge
         async function updateBadge() {
             try {

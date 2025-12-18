@@ -11,6 +11,7 @@ use App\Repository\TacheRepository;
 use App\Repository\AffectationTacheRepository;
 use App\Repository\BenevoleRepository;
 use App\Service\NotificationService;
+use App\Service\BatchTaskAssignmentService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,8 +27,8 @@ class TacheController extends AbstractController
     #[Route('', name: 'tache_index')]
     public function index(Request $request, TacheRepository $tacheRepository, AffectationTacheRepository $affectationRepository): Response
     {
-        // Récupérer les paramètres de filtre
-        $filtre = $request->query->get('filtre', 'toutes'); // toutes, futures, en_cours, passees
+        // Récupérer les paramètres de filtre (défaut: futures)
+        $filtre = $request->query->get('filtre', 'futures'); // futures (défaut), toutes, en_cours, passees
         $tri = $request->query->get('tri', 'date_proche'); // date_proche, date_eloignee, titre
         
         // Récupérer les tâches selon le filtre
@@ -242,7 +243,7 @@ class TacheController extends AbstractController
     }
 
     #[Route('/{id}/duplicate', name: 'tache_duplicate')]
-    public function duplicate(int $id, TacheRepository $tacheRepository, EntityManagerInterface $entityManager): Response
+    public function duplicate(int $id, Request $request, TacheRepository $tacheRepository, EntityManagerInterface $entityManager): Response
     {
         $tacheSource = $tacheRepository->find($id);
 
@@ -251,31 +252,55 @@ class TacheController extends AbstractController
             return $this->redirectToRoute('tache_index');
         }
 
+        // Créer une nouvelle tâche pré-remplie avec les données de la source
         $tache = new Tache();
-        $tache->setTitre($tacheSource->getTitre());
+        $tache->setTitre($tacheSource->getTitre() . ' (copie)');
         $tache->setWeekend($tacheSource->getWeekend());
         $tache->setMaxPersonnes($tacheSource->getMaxPersonnes());
         $tache->setRemarque($tacheSource->getRemarque());
 
-        // Cloner les plages horaires
-        foreach ($tacheSource->getPlagesHoraires() as $plageSrc) {
-            $plage = new PlageHoraire();
-            $plage->setJour($plageSrc->getJour());
-            $plage->setHeureDebut($plageSrc->getHeureDebut());
-            $plage->setHeureFin($plageSrc->getHeureFin());
-            $plage->setMaxPersonnesPlage($plageSrc->getMaxPersonnesPlage());
-            $plage->setTache($tache);
-            $tache->addPlageHoraire($plage);
+        // Créer le formulaire avec les données pré-remplies
+        $form = $this->createForm(TacheType::class, $tache);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $formData = $request->request->all()['tache'] ?? [];
+            
+            // Créer une plage horaire avec le jour et les horaires spécifiés
+            if (isset($formData['jour_plage']) && !empty($formData['jour_plage'])) {
+                $plage = new PlageHoraire();
+                $plage->setJour(new \DateTime($formData['jour_plage']));
+                $plage->setHeureDebut(new \DateTime($formData['heure_debut_plage']));
+                $plage->setHeureFin(new \DateTime($formData['heure_fin_plage']));
+                $plage->setTache($tache);
+                $tache->addPlageHoraire($plage);
+            }
+            
+            // Synchroniser debut/fin avec les plages horaires
+            $tache = $this->syncTaskDates($tache);
+            
+            $entityManager->persist($tache);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La tâche a été dupliquée avec succès !');
+            return $this->redirectToRoute('tache_index');
         }
 
-        // Synchroniser debut/fin
-        $tache = $this->syncTaskDates($tache);
+        // Préparer les données des plages horaires de la source pour le template
+        $plagesSource = [];
+        foreach ($tacheSource->getPlagesHoraires() as $plage) {
+            $plagesSource[] = [
+                'jour' => $plage->getJour(),
+                'heureDebut' => $plage->getHeureDebut(),
+                'heureFin' => $plage->getHeureFin(),
+            ];
+        }
 
-        $entityManager->persist($tache);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'La tâche a été dupliquée avec succès!');
-        return $this->redirectToRoute('tache_edit', ['id' => $tache->getId()]);
+        return $this->render('taches/duplicate.html.twig', [
+            'form' => $form->createView(),
+            'tacheSource' => $tacheSource,
+            'plagesSource' => $plagesSource,
+        ]);
     }
 
     #[Route('/{id}/affectation', name: 'tache_affectation')]
@@ -541,5 +566,195 @@ class TacheController extends AbstractController
         $tache->setFin($fin);
         
         return $tache;
+    }
+
+    /**
+     * Page de gestion groupée des bénévoles
+     */
+    #[Route('/benevoles-management', name: 'tache_benevoles_management')]
+    public function benevolesManagement(
+        BenevoleRepository $benevoleRepo,
+        AffectationTacheRepository $affectationRepo
+    ): Response {
+        $benevoles = $benevoleRepo->findAll();
+        
+        // Pour chaque bénévole, compter ses tâches
+        $benevolesData = [];
+        foreach ($benevoles as $benevole) {
+            $user = $benevole->getUtilisateur();
+            if (!$user) continue;
+
+            $affectations = $affectationRepo->findBy(['benevole' => $benevole, 'statut' => 'assigne']);
+            
+            $benevolesData[] = [
+                'benevole' => $benevole,
+                'nom' => $user->getNom(),
+                'prenom' => $user->getPrenom(),
+                'email' => $user->getEmail(),
+                'nbTaches' => count($affectations)
+            ];
+        }
+
+        return $this->render('taches/benevoles_management.html.twig', [
+            'benevolesData' => $benevolesData
+        ]);
+    }
+
+    /**
+     * API : Récupère les tâches disponibles pour un bénévole (avec détection conflits)
+     */
+    #[Route('/api/benevole/{id}/available-tasks', name: 'tache_api_available_tasks', methods: ['GET'])]
+    public function getAvailableTasksForBenevole(
+        int $id,
+        BenevoleRepository $benevoleRepo,
+        TacheRepository $tacheRepo,
+        BatchTaskAssignmentService $batchService
+    ): JsonResponse {
+        $benevole = $benevoleRepo->find($id);
+        if (!$benevole) {
+            return $this->json(['error' => 'Bénévole non trouvé'], 404);
+        }
+
+        // Récupérer toutes les tâches futures
+        $now = new \DateTime();
+        $taches = $tacheRepo->createQueryBuilder('t')
+            ->where('t.debut > :now')
+            ->setParameter('now', $now)
+            ->orderBy('t.debut', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // Vérifier conflits
+        $tasksData = $batchService->getAvailableTasksWithConflicts($benevole, $taches);
+
+        // Formater pour JSON
+        $result = [];
+        foreach ($tasksData as $data) {
+            $tache = $data['tache'];
+            $result[] = [
+                'id' => $tache->getId(),
+                'titre' => $tache->getTitre(),
+                'debut' => $tache->getDebut()?->format('d/m/Y H:i'),
+                'fin' => $tache->getFin()?->format('d/m/Y H:i'),
+                'hasConflict' => $data['hasConflict'],
+                'weekendNom' => $tache->getWeekend()?->getNom()
+            ];
+        }
+
+        return $this->json($result);
+    }
+
+    /**
+     * Récupérer les tâches assignées à un bénévole (pour suppression)
+     */
+    #[Route('/api/benevole/{id}/assigned-tasks', name: 'tache_api_benevole_assigned', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function getAssignedTasksForBenevole(
+        int $id,
+        BenevoleRepository $benevoleRepo,
+        AffectationTacheRepository $affectationRepo
+    ): Response {
+        $benevole = $benevoleRepo->find($id);
+        if (!$benevole) {
+            return $this->json(['error' => 'Bénévole non trouvé'], 404);
+        }
+
+        // Récupérer toutes les affectations du bénévole
+        $affectations = $affectationRepo->findBy([
+            'benevole' => $benevole,
+            'statut' => 'assigne'
+        ]);
+
+        $result = [];
+        foreach ($affectations as $affectation) {
+            $tache = $affectation->getTache();
+            $result[] = [
+                'id' => $tache->getId(),
+                'titre' => $tache->getTitre(),
+                'debut' => $tache->getDebut()?->format('d/m/Y H:i'),
+                'fin' => $tache->getFin()?->format('d/m/Y H:i'),
+                'weekendNom' => $tache->getWeekend()?->getNom()
+            ];
+        }
+
+        return $this->json($result);
+    }
+
+    /**
+     * Assigner/proposer plusieurs tâches à un bénévole
+     */
+    #[Route('/benevole/{id}/batch-assign', name: 'tache_batch_assign', methods: ['POST'])]
+    public function batchAssignTasks(
+        int $id,
+        Request $request,
+        BenevoleRepository $benevoleRepo,
+        BatchTaskAssignmentService $batchService
+    ): Response {
+        $benevole = $benevoleRepo->find($id);
+        if (!$benevole) {
+            $this->addFlash('error', 'Bénévole non trouvé');
+            return $this->redirectToRoute('tache_benevoles_management');
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $tasksData = $data['tasks'] ?? [];
+
+        if (empty($tasksData)) {
+            $this->addFlash('warning', 'Aucune tâche sélectionnée');
+            return $this->redirectToRoute('tache_benevoles_management');
+        }
+
+        $admin = $this->getUser();
+        $stats = $batchService->batchAssignTasks($benevole, $tasksData, $admin);
+
+        if ($stats['success'] > 0) {
+            $this->addFlash('success', sprintf(
+                '%d tâche(s) traitée(s) avec succès',
+                $stats['success']
+            ));
+        }
+
+        if ($stats['conflicts'] > 0) {
+            $this->addFlash('warning', sprintf(
+                '%d tâche(s) ignorée(s) (conflit horaire)',
+                $stats['conflicts']
+            ));
+        }
+
+        if (!empty($stats['errors'])) {
+            foreach ($stats['errors'] as $error) {
+                $this->addFlash('error', $error);
+            }
+        }
+
+        return $this->json(['success' => true, 'stats' => $stats]);
+    }
+
+    /**
+     * Supprimer plusieurs tâches d'un bénévole
+     */
+    #[Route('/benevole/{id}/batch-remove', name: 'tache_batch_remove', methods: ['POST'])]
+    public function batchRemoveTasks(
+        int $id,
+        Request $request,
+        BenevoleRepository $benevoleRepo,
+        BatchTaskAssignmentService $batchService
+    ): Response {
+        $benevole = $benevoleRepo->find($id);
+        if (!$benevole) {
+            return $this->json(['error' => 'Bénévole non trouvé'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $tacheIds = $data['tache_ids'] ?? [];
+
+        $removed = $batchService->batchRemoveTasks($benevole, $tacheIds);
+
+        return $this->json([
+            'success' => true,
+            'count' => $removed,
+            'removed' => $removed,
+            'message' => sprintf('%d tâche(s) retirée(s)', $removed)
+        ]);
     }
 }

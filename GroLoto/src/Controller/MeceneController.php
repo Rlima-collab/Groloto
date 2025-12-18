@@ -367,7 +367,13 @@ class MeceneController extends AbstractController
             throw $this->createNotFoundException('Logo non trouvé');
         }
 
-        $logoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . $mecene->getLogo();
+        // Le logo est stocké avec le chemin relatif "uploads/logos/filename.ext"
+        $logoPath = $this->getParameter('kernel.project_dir') . '/public/' . ltrim($mecene->getLogo(), '/');
+
+        if (!file_exists($logoPath)) {
+            // Fallback: essayer avec juste le nom du fichier
+            $logoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . basename($mecene->getLogo());
+        }
 
         if (!file_exists($logoPath)) {
             throw $this->createNotFoundException('Fichier logo non trouvé');

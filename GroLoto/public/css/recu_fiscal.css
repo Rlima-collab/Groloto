@@ -1,0 +1,468 @@
+/* Layout principal */
+.recu-fiscal-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* Card principale */
+.recu-fiscal-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.recu-fiscal-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.recu-fiscal-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1a3c5a;
+    margin: 0 0 0.5rem 0;
+}
+
+.recu-fiscal-description {
+    color: #6b7280;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Sections du formulaire */
+.recu-form-section {
+    margin-bottom: 2rem;
+}
+
+.recu-form-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a3c5a;
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Groupes de formulaire */
+.recu-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.recu-form-label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.recu-form-label .required {
+    color: #dc2626;
+    margin-left: 0.25rem;
+}
+
+.recu-form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.recu-form-input:focus {
+    outline: none;
+    border-color: #1a3c5a;
+    box-shadow: 0 0 0 3px rgba(26, 60, 90, 0.1);
+}
+
+/* Radio buttons stylisés */
+.recu-radio-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.recu-radio-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recu-radio-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #1a3c5a;
+}
+
+.recu-radio-option label {
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+}
+
+/* Liste d'utilisateurs */
+.recu-user-list {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.recu-user-list-title {
+    margin: 0 0 1rem 0;
+    color: #374151;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.recu-user-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.recu-user-item:hover {
+    border-color: #1a3c5a;
+    background: #f9fafb;
+    transform: translateX(4px);
+}
+
+.recu-user-item.selected {
+    border-color: #1a3c5a;
+    background: #f0f4f8;
+    box-shadow: 0 2px 8px rgba(26, 60, 90, 0.15);
+}
+
+.recu-user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a3c5a, #2d5a7b);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.recu-user-info h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.recu-user-info p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* Zone de téléchargement de fichiers */
+.recu-file-upload-area {
+    border: 3px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f9fafb;
+}
+
+.recu-file-upload-area:hover {
+    border-color: #1a3c5a;
+    background: #f0f4f8;
+}
+
+.recu-file-upload-area.dragover {
+    border-color: #1a3c5a;
+    background: #e6f0f8;
+    border-style: solid;
+}
+
+.recu-upload-placeholder p {
+    margin: 0.5rem 0;
+    color: #6b7280;
+}
+
+.recu-upload-placeholder p:first-of-type {
+    font-weight: 600;
+    color: #374151;
+    font-size: 1.1rem;
+}
+
+.recu-file-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.recu-file-name {
+    font-weight: 600;
+    color: #1a3c5a;
+    font-size: 1rem;
+}
+
+/* Boutons */
+.recu-btn {
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.recu-btn-primary {
+    background: linear-gradient(135deg, #1a3c5a, #2d5a7b);
+    color: white;
+    box-shadow: 0 2px 8px rgba(26, 60, 90, 0.2);
+}
+
+.recu-btn-primary:hover {
+    background: linear-gradient(135deg, #153047, #234763);
+    box-shadow: 0 4px 12px rgba(26, 60, 90, 0.3);
+    transform: translateY(-1px);
+}
+
+.recu-btn-primary:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* États d'alerte */
+.recu-alert {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.recu-alert-success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+.recu-alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+/* Grille de reçus (pour les pages de liste) */
+.recu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.recu-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.recu-card:hover {
+    border-color: #1a3c5a;
+    box-shadow: 0 4px 12px rgba(26, 60, 90, 0.1);
+    transform: translateY(-2px);
+}
+
+.recu-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.recu-card-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #1a3c5a, #2d5a7b);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.recu-card-info h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.recu-card-meta {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.recu-card-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.recu-btn-download {
+    flex: 1;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #1a3c5a, #2d5a7b);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recu-btn-download:hover {
+    background: linear-gradient(135deg, #153047, #234763);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 60, 90, 0.2);
+}
+
+/* État vide */
+.recu-empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6b7280;
+}
+
+.recu-empty-state h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: #374151;
+}
+
+.recu-empty-state p {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Barre de statistiques */
+.recu-stats-bar {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.recu-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.recu-stat-icon {
+    width: 48px;
+    height: 48px;
+    background: #1a3c5a;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.recu-stat-content h4 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e40af;
+}
+
+.recu-stat-content p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.875rem;
+    color: #3730a3;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .recu-fiscal-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .recu-fiscal-card {
+        padding: 1.5rem;
+    }
+
+    .recu-fiscal-title {
+        font-size: 1.5rem;
+    }
+
+    .recu-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .recu-stats-bar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .recu-radio-group {
+        flex-direction: column;
+    }
+}
+
+/* Animation de chargement */
+@keyframes recu-loading {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.recu-loading-spinner {
+    border: 3px solid #f3f4f6;
+    border-top-color: #1a3c5a;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: recu-loading 0.6s linear infinite;
+}

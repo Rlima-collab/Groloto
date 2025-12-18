@@ -592,7 +592,8 @@ class ContactMessageController extends AbstractController
         
         $qb = $this->em->getRepository(\App\Entity\Utilisateur::class)
             ->createQueryBuilder('u')
-            ->select('u.email', 'u.prenom', 'u.nom', 'u.roles');
+            ->leftJoin('u.role', 'r')
+            ->select('u.email', 'u.prenom', 'u.nom', 'r.nom as roleName');
         
         if ($query) {
             $qb->where('u.email LIKE :query')
@@ -605,10 +606,13 @@ class ContactMessageController extends AbstractController
                    
         // Formater les données pour le JS
         $formattedUsers = array_map(function($user) {
-            $role = 'Utilisateur';
-            if (in_array('ROLE_ADMIN', $user['roles'])) $role = 'ROLE_ADMIN';
-            elseif (in_array('ROLE_MECENE', $user['roles'])) $role = 'ROLE_MECENE';
-            elseif (in_array('ROLE_BENEVOLE', $user['roles'])) $role = 'ROLE_BENEVOLE';
+            $roleName = $user['roleName'] ?? 'user';
+            $role = match ($roleName) {
+                'admin' => 'Admin',
+                'mecene' => 'Mécène',
+                'benevole' => 'Bénévole',
+                default => 'Utilisateur',
+            };
             
             return [
                 'email' => $user['email'],

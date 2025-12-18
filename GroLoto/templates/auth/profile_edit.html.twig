@@ -31,31 +31,34 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
 .alert-custom.info { background: #dbeafe; border-left: 4px solid #3b82f6; color: #1e40af; }
 .alert-custom.warning { background: #fef3c7; border-left: 4px solid #f59e0b; color: #92400e; }
 .alert-custom svg { width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; }
-.btn-group { display: flex; gap: 12px; justify-content: space-between; margin-top: 35px; padding-top: 30px; border-top: 1px solid #e5e7eb; flex-wrap: wrap; }
-.btn-custom { padding: 14px 28px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; }
-.btn-custom svg { width: 18px; height: 18px; }
-.btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); color: white; }
-.btn-secondary { background: #6b7280; color: white; }
-.btn-secondary:hover { background: #4b5563; color: white; }
-.info-card { background: white; border-radius: 12px; padding: 20px; border-left: 4px solid #3b82f6; }
-.info-card-title { font-size: 15px; font-weight: 600; color: #1f2937; margin-bottom: 12px; }
-.info-card-text { font-size: 13px; color: #6b7280; line-height: 1.6; margin: 0; }
-.profile-image-section { text-align: center; margin-bottom: 30px; padding: 25px; background: #f8fafc; border-radius: 12px; }
-.profile-image-preview { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 20px; border: 4px solid #e5e7eb; overflow: hidden; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 42px; font-weight: 700; }
+.btn-group { display: flex; gap: 12px; justify-content: flex-end; margin-top: 35px; padding-top: 20px; border-top: 1px solid #e5e7eb; flex-wrap: wrap; }
+.btn-custom { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.btn-custom svg { width: 16px; height: 16px; }
+.btn-primary { background: #2563eb; color: white; }
+.btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+.btn-secondary { background: white; color: #4b5563; border: 1px solid #d1d5db; }
+.btn-secondary:hover { background: #f3f4f6; color: #1f2937; border-color: #9ca3af; }
+.info-card { background: #f8fafc; border-radius: 8px; padding: 16px; border: 1px solid #e2e8f0; margin-top: 20px; }
+.info-card-title { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+.info-card-text { font-size: 13px; color: #64748b; line-height: 1.5; margin: 0; }
+.profile-image-section { text-align: center; margin-bottom: 30px; padding: 20px; background: white; border-radius: 12px; border: 1px solid #e5e7eb; }
+.profile-image-preview { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px; border: 3px solid #e5e7eb; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 32px; font-weight: 600; }
 .profile-image-preview img { width: 100%; height: 100%; object-fit: cover; }
-.file-input-wrapper { position: relative; display: inline-block; }
+.file-input-wrapper { position: relative; display: inline-flex; gap: 10px; align-items: center; justify-content: center; }
 .file-input-wrapper input[type="file"] { position: absolute; left: -9999px; }
-.file-input-label { padding: 10px 20px; background: #3b82f6; color: white; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-.file-input-label:hover { background: #2563eb; transform: translateY(-1px); }
+.file-input-label { padding: 8px 16px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.file-input-label:hover { background: #e2e8f0; color: #1e293b; border-color: #94a3b8; }
 .file-input-label svg { width: 16px; height: 16px; }
-.remove-image-btn { margin-left: 10px; padding: 10px 20px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-.remove-image-btn:hover { background: #dc2626; }
-.logo-section { margin-bottom: 30px; padding: 25px; background: #f8fafc; border-radius: 12px; border: 1px solid #e5e7eb; }
-.logo-preview { text-align: center; margin-bottom: 20px; padding: 20px; background: white; border-radius: 8px; border: 2px solid #e5e7eb; }
-.logo-image { max-width: 200px; max-height: 100px; object-fit: contain; }
-.remove-logo-btn { margin-left: 10px; padding: 10px 20px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-.remove-logo-btn:hover { background: #dc2626; }
+.remove-image-btn { padding: 8px 16px; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.remove-image-btn:hover { background: #fecaca; color: #7f1d1d; border-color: #fca5a5; }
+.logo-section { margin-bottom: 30px; padding: 20px; background: white; border-radius: 12px; border: 1px solid #e5e7eb; }
+.logo-preview { text-align: center; margin-bottom: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; }
+.logo-image { max-width: 150px; max-height: 80px; object-fit: contain; }
+.logo-actions { display: flex; gap: 10px; align-items: center; justify-content: center; }
+.logo-actions .file-input-label { padding: 10px 20px; min-height: 40px; }
+.remove-logo-btn { padding: 10px 20px; min-height: 40px; background: #f1f5f9; color: #dc2626; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.remove-logo-btn:hover { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+.remove-logo-btn svg { width: 16px; height: 16px; }
 @media (max-width: 768px) {
     .profile-container { margin: 20px auto; }
     .profile-header { padding: 25px 20px; }
@@ -68,6 +71,7 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
     .logo-section { padding: 20px; }
     .logo-preview { padding: 15px; }
     .logo-image { max-width: 150px; max-height: 75px; }
+    .logo-actions { flex-wrap: wrap; }
 }
 </style>
 {% endblock %}
@@ -97,7 +101,7 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
                 </div>
             {% endfor %}
 
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+            {{ form_start(form, {'attr': {'id': 'profile-edit-form', 'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
             
             <div class="alert-custom info">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -144,24 +148,80 @@ body { font-family: 'Inter', sans-serif; background: #f8f9fa; }
                 </h3>
                 {% if mecene.logo %}
                     <div class="logo-preview">
-                        <img src="{{ asset('uploads/logos/' ~ mecene.logo) }}" alt="Logo {{ mecene.organisation }}" class="logo-image">
+                        <img src="{{ asset(mecene.logo) }}" alt="Logo {{ mecene.organisation }}" class="logo-image">
                     </div>
                 {% endif %}
-                <div class="file-input-wrapper">
-                    <input type="file" id="logoInput" name="logo" accept=".png,.jpeg,.jpg" onchange="previewLogo(event)">
-                    <label for="logoInput" class="file-input-label">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        Choisir un logo
-                    </label>
+                <div class="logo-actions">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="logoInput" name="logo" accept=".png,.jpeg,.jpg" onchange="previewLogo(event)">
+                        <label for="logoInput" class="file-input-label">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Choisir un logo
+                        </label>
+                    </div>
                     {% if mecene.logo %}
-                        <button type="button" class="remove-logo-btn" onclick="removeLogo()">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            Supprimer le logo
-                        </button>
-                        <input type="hidden" name="removeLogo" id="removeLogoFlag" value="0">
+                    <button type="button" class="remove-logo-btn" onclick="deleteLogo()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        Supprimer le logo
+                    </button>
                     {% endif %}
                 </div>
                 <small class="form-text" style="display: block; margin-top: 10px;">PNG ou JPEG uniquement. Recommandé: 200x100px maximum.</small>
+            </div>
+
+            <!-- Section Adresse Postale Mécène -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 22px; height: 22px; color: #3b82f6;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Adresse de l'organisation
+                </div>
+                
+                <div class="form-group">
+                    <label for="adresse_postale">Adresse postale</label>
+                    <textarea id="adresse_postale" name="adresse_postale" class="form-control" rows="3" 
+                              placeholder="Entrez l'adresse complète de votre organisation...">{{ mecene.adressePostale|default('') }}</textarea>
+                    <small class="form-text">Adresse complète (rue, code postal, ville)</small>
+                </div>
+            </div>
+
+            <!-- Section Réseaux Sociaux Mécène -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 22px; height: 22px; color: #3b82f6;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                    </svg>
+                    Réseaux sociaux
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="instagram">
+                            <svg style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                            Instagram
+                        </label>
+                        <input type="url" id="instagram" name="instagram" class="form-control" 
+                               value="{{ mecene.instagram|default('') }}" 
+                               placeholder="https://instagram.com/votre-compte">
+                        <small class="form-text">URL complète de votre page Instagram</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="facebook">
+                            <svg style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                            Facebook
+                        </label>
+                        <input type="url" id="facebook" name="facebook" class="form-control" 
+                               value="{{ mecene.facebook|default('') }}" 
+                               placeholder="https://facebook.com/votre-page">
+                        <small class="form-text">URL complète de votre page Facebook</small>
+                    </div>
+                </div>
             </div>
             {% endif %}
 
@@ -354,26 +414,44 @@ function removeImage() {
 }
 
 function previewLogo(event) {
-    // Simple validation for logo
     const file = event.target.files[0];
-    if (file && !['image/png', 'image/jpeg'].includes(file.type)) {
-        alert('Le logo doit être au format PNG ou JPEG.');
-        event.target.value = '';
-        return;
+    if (file) {
+        // Validation simple
+        const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            alert('Le logo doit être au format PNG, JPEG ou WEBP.');
+            event.target.value = '';
+            return;
+        }
+
+        // Affichage de la prévisualisation
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const logoSection = document.querySelector('.logo-section');
+            let previewContainer = logoSection.querySelector('.logo-preview');
+            
+            if (!previewContainer) {
+                previewContainer = document.createElement('div');
+                previewContainer.className = 'logo-preview';
+                // Insérer avant les actions
+                const logoActions = logoSection.querySelector('.logo-actions');
+                logoSection.insertBefore(previewContainer, logoActions);
+            }
+            
+            previewContainer.innerHTML = '<img src="' + e.target.result + '" alt="Logo Preview" class="logo-image">';
+        };
+        reader.readAsDataURL(file);
     }
-    // Could add preview here if needed, but for now just validation
 }
 
-function removeLogo() {
-    if (confirm('Êtes-vous sûr de vouloir supprimer le logo de votre organisation ?')) {
-        document.getElementById('removeLogoFlag').value = '1';
-        document.getElementById('logoInput').value = '';
-        // Hide the current logo display if exists
-        const logoImg = document.querySelector('.profile-image-section img[alt*="Logo"]');
-        if (logoImg) {
-            logoImg.style.display = 'none';
-        }
-    }
+function deleteLogo() {
+    document.getElementById('delete-logo-form').submit();
 }
 </script>
+
+{% if mecene is defined and mecene and mecene.logo %}
+<form id="delete-logo-form" action="{{ path('app_profile_remove_logo') }}" method="post" style="display: none;">
+    <input type="hidden" name="_token" value="{{ csrf_token('remove_logo') }}">
+</form>
+{% endif %}
 {% endblock %}
