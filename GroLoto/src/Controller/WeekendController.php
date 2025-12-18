@@ -128,6 +128,7 @@ class WeekendController extends AbstractController
                     'fin' => $t->getFin()->format('Y-m-d\TH:i:s'),
                     'posteRequis' => $t->getPosteRequis(),
                     'maxPersonnes' => $t->getMaxPersonnes(),
+                    'nbAssignes' => count($t->getAffectations()),
                 ], $w->getTaches()->toArray()),
             ];
         }, $weekendRepo->findAll());
