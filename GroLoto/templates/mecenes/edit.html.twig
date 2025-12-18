@@ -186,8 +186,25 @@
 <div class="edit-container">
     <div class="edit-card">
         <div class="edit-header">
-            <h1>Modifier le mécène</h1>
-            <p>{{ mecene.organisation }}</p>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                {% if utilisateur and utilisateur.profileImage %}
+                    <img src="{{ asset(utilisateur.profileImage) }}" 
+                         alt="Photo de profil" 
+                         style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #006909; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                {% else %}
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #006909, #00a010); display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                        {{ utilisateur ? utilisateur.prenom|slice(0,1)|upper ~ utilisateur.nom|slice(0,1)|upper : '?' }}
+                    </div>
+                {% endif %}
+                <div>
+                    <h1>Modifier le mécène</h1>
+                    <p style="margin: 5px 0 0 0;">
+                        <strong>{{ utilisateur ? utilisateur.prenom ~ ' ' ~ utilisateur.nom : 'Contact inconnu' }}</strong>
+                        <span style="color: #888;"> — </span>
+                        {{ mecene.organisation }}
+                    </p>
+                </div>
+            </div>
         </div>
 
         {% for message in app.flashes('success') %}
@@ -264,20 +281,30 @@
         </div>
 
         <div class="form-section">
-            <h5>Logo</h5>
+            <h5>Logo de l'organisation</h5>
             
+            {% if mecene.logo %}
             <div class="form-group">
                 <label>Logo actuel</label>
-                {% if mecene.logo %}
                 <div style="margin-bottom: 15px;">
                     <img src="{{ asset(mecene.logo) }}" 
                          alt="Logo actuel" 
-                         style="max-width: 200px; max-height: 150px; border: 1px solid #ddd; border-radius: 8px; padding: 5px;">
+                         style="max-width: 200px; max-height: 150px; border: 1px solid #ddd; border-radius: 8px; padding: 5px; background: #f8f9fa;">
                 </div>
-                {% else %}
-                <div style="margin-bottom: 15px; color: #666;">Aucun logo défini</div>
-                {% endif %}
-                <div class="small-text">Laissez vide pour conserver le logo actuel.</div>
+            </div>
+            {% endif %}
+            
+            <div class="form-group">
+                {{ form_label(form.logo) }}
+                {{ form_widget(form.logo) }}
+                {{ form_errors(form.logo) }}
+                <div class="small-text">
+                    {% if mecene.logo %}
+                        Uploadez un nouveau fichier pour remplacer le logo actuel. Laissez vide pour conserver le logo existant.
+                    {% else %}
+                        Formats acceptés : PNG, JPEG. Taille maximale : 2 Mo.
+                    {% endif %}
+                </div>
             </div>
         </div>
 

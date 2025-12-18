@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Planning - {{ utilisateur.prenom }} {{ utilisateur.nom }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 9pt;
+            line-height: 1.4;
+            color: #333;
+            padding: 15px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #28a745;
+        }
+        
+        .header h1 {
+            color: #28a745;
+            font-size: 16pt;
+            margin-bottom: 3px;
+        }
+        
+        .header .benevole-name {
+            font-size: 11pt;
+            color: #555;
+            margin-bottom: 3px;
+        }
+        
+        .header .date-gen {
+            color: #888;
+            font-size: 8pt;
+        }
+        
+        .stats {
+            display: table;
+            width: 100%;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .stat {
+            display: table-cell;
+            width: 33.33%;
+            text-align: center;
+            padding: 8px 5px;
+            background: #f9f9f9;
+            border-right: 1px solid #ddd;
+        }
+        
+        .stat:last-child { border-right: none; }
+        
+        .stat-num {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .stat-label {
+            font-size: 7pt;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .section {
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            font-size: 10pt;
+            font-weight: bold;
+            margin: 12px 0 8px 0;
+            border-radius: 3px;
+        }
+        
+        .section.past { background: #6c757d; }
+        
+        .date-row {
+            background: #e8f5e9;
+            color: #28a745;
+            padding: 4px 8px;
+            font-size: 9pt;
+            font-weight: bold;
+            margin: 8px 0 5px 0;
+            border-left: 3px solid #28a745;
+        }
+        
+        .date-row.past {
+            background: #f0f0f0;
+            color: #666;
+            border-left-color: #999;
+        }
+        
+        .task {
+            border: 1px solid #e0e0e0;
+            border-left: 3px solid #28a745;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            page-break-inside: avoid;
+        }
+        
+        .task.past {
+            border-left-color: #999;
+            opacity: 0.8;
+        }
+        
+        .task-title {
+            font-weight: bold;
+            font-size: 10pt;
+            color: #222;
+            margin-bottom: 3px;
+        }
+        
+        .task-time {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 8pt;
+            font-weight: bold;
+        }
+        
+        .task.past .task-time { background: #999; }
+        
+        .task-info {
+            margin-top: 5px;
+            font-size: 8pt;
+            color: #555;
+        }
+        
+        .task-info span {
+            margin-right: 15px;
+        }
+        
+        .task-info strong { color: #333; }
+        
+        .note {
+            background: #fff8e1;
+            border-left: 2px solid #ffc107;
+            padding: 4px 8px;
+            margin-top: 5px;
+            font-size: 8pt;
+            color: #7a6200;
+        }
+        
+        .empty {
+            text-align: center;
+            color: #999;
+            padding: 15px;
+            font-style: italic;
+        }
+        
+        .footer {
+            margin-top: 15px;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #999;
+            font-size: 7pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Mon Planning</h1>
+        <div class="benevole-name">{{ utilisateur.prenom }} {{ utilisateur.nom }}</div>
+        <div class="date-gen">Généré le {{ date_generation|date('d/m/Y à H:i') }}</div>
+    </div>
+
+    <div class="stats">
+        <div class="stat" style="width: 100%;">
+            <div class="stat-num">{{ taches_futures|length }}</div>
+            <div class="stat-label">Tâches à venir</div>
+        </div>
+    </div>
+
+    {% if taches_futures|length > 0 %}
+        <div class="section">Mes tâches</div>
+        
+        {% set jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'] %}
+        {% set mois = ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'] %}
+        
+        {% set current_date = null %}
+        {% for tache in taches_futures %}
+            {% set task_date = tache.debut|date('Y-m-d') %}
+            {% if task_date != current_date %}
+                {% set current_date = task_date %}
+                {% set jour_semaine = jours[tache.debut|date('w')] %}
+                {% set jour = tache.debut|date('d') %}
+                {% set mois_nom = mois[tache.debut|date('n')] %}
+                {% set annee = tache.debut|date('Y') %}
+                <div class="date-row">{{ jour_semaine }} {{ jour }} {{ mois_nom }} {{ annee }}</div>
+            {% endif %}
+            
+            <div class="task">
+                <div class="task-title">{{ tache.titre }}</div>
+                <span class="task-time">{{ tache.debut|date('H:i') }} - {{ tache.fin|date('H:i') }}</span>
+                <div class="task-info">
+                    {% if tache.weekend %}<span><strong>Weekend:</strong> {{ tache.weekend.nom }}</span>{% endif %}
+                    {% if tache.posteRequis %}<span><strong>Poste:</strong> {{ tache.posteRequis }}</span>{% endif %}
+                </div>
+                {% if tache.remarque %}
+                    <div class="note">{{ tache.remarque }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="section">Tâches à venir</div>
+        <div class="empty">Aucune tâche à venir</div>
+    {% endif %}
+
+    <div class="footer">GroLoto - Planning bénévole</div>
+</body>
+</html>

@@ -421,6 +421,71 @@ class BenevoleController extends AbstractController
         ]);
     }
 
+    #[Route('/benevole/mon-planning/pdf', name: 'benevole_mon_planning_pdf')]
+    public function monPlanningPdf(
+        BenevoleRepository $benevoleRepository,
+        TacheRepository $tacheRepository
+    ): Response {
+        $user = $this->getUser();
+        $benevole = $benevoleRepository->findOneBy(['utilisateur' => $user]);
+
+        if (!$benevole) {
+            $this->addFlash('error', 'Vous devez être un bénévole pour accéder à cette page.');
+            return $this->redirectToRoute('benevoles');
+        }
+
+        // Récupérer toutes les tâches du bénévole (futures et passées)
+        $tachesFutures = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
+        $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
+
+        if (empty($tachesFutures) && empty($tachesRealisees)) {
+            $this->addFlash('warning', 'Vous n\'avez aucune tâche dans votre planning.');
+            return $this->redirectToRoute('benevole_mon_planning');
+        }
+
+        // Organiser les tâches par date
+        $tachesParDate = [];
+        foreach (array_merge($tachesFutures, $tachesRealisees) as $tache) {
+            $dateKey = $tache->getDebut()->format('Y-m-d');
+            if (!isset($tachesParDate[$dateKey])) {
+                $tachesParDate[$dateKey] = [];
+            }
+            $tachesParDate[$dateKey][] = $tache;
+        }
+        
+        // Trier par date
+        ksort($tachesParDate);
+
+        // Générer le HTML pour le PDF
+        $html = $this->renderView('benevoles/mon_planning_pdf.html.twig', [
+            'benevole' => $benevole,
+            'utilisateur' => $user,
+            'taches_futures' => $tachesFutures,
+            'taches_realisees' => $tachesRealisees,
+            'taches_par_date' => $tachesParDate,
+            'date_generation' => new \DateTime(),
+        ]);
+
+        // Créer le PDF avec Dompdf
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Générer le nom du fichier
+        $filename = sprintf(
+            'mon_planning_%s_%s.pdf',
+            str_replace(' ', '_', $user->getPrenom() . '_' . $user->getNom()),
+            (new \DateTime())->format('Y-m-d')
+        );
+
+        // Retourner le PDF
+        return new Response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
     #[Route('/benevoles/{id}/edit', name: 'benevole_edit')]
     #[IsGranted('ROLE_ADMIN')]
     public function edit(

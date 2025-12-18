@@ -50,7 +50,7 @@
                             <span>{{ weekend.dateDebut|date('d/m') }} → {{ weekend.dateFin|date('d/m') }}</span>
                         </div>
                         
-                        {% if weekend.description %}
+                        {% if weekend.description and isAdmin %}
                             <p class="weekend-card-description">{{ weekend.description|length > 100 ? weekend.description|slice(0, 100) ~ '...' : weekend.description }}</p>
                         {% endif %}
                         
@@ -229,7 +229,7 @@
                                     ${tache.maxPersonnes ? `
                                         <div class="task-meta-item">
                                             <i class="bi bi-people"></i>
-                                            ${tache.maxPersonnes} personne(s)
+                                            ${tache.nbAssignes || 0}/${tache.maxPersonnes} personne(s)
                                         </div>
                                     ` : ''}
                                 </div>
