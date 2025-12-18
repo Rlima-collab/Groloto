@@ -12,9 +12,9 @@
 {% block body %}
 <div class="taches-page">
 <div class="container" style="padding-top: calc(71px + 2rem);">
-    <div class="page-header">
-        <h1 class="page-title">Créer une nouvelle tâche</h1>
-        <a href="{{ path('tache_index') }}" class="btn btn-secondary">Retour à la liste</a>
+    <div class="page-header" style="display: flex; align-items: center; justify-content: center; position: relative;">
+        <a href="{{ path('tache_index') }}" class="btn btn-secondary" style="position: absolute; left: 0;">← Retour à la liste</a>
+        <h1 class="page-title" style="margin: 0 auto; text-align: center; width: 100%;">Créer une nouvelle tâche</h1>
     </div>
 
     <div style="max-width: 800px; margin: 0 auto;">
