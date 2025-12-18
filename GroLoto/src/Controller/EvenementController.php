@@ -113,14 +113,30 @@ class EvenementController extends AbstractController
     public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger, ?int $preselect_weekend = null): Response
     {
         $evenement = new Evenement();
-
-        // Définir la date par défaut à aujourd'hui
-        $evenement->setDateDebut(new \DateTime());
         
         $form = $this->createForm(EvenementType::class, $evenement);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Validation : vérifier que la date de l'événement est dans la période du weekend
+            $weekend = $evenement->getWeekend();
+            $dateEvenement = $evenement->getDateDebut();
+            
+            if ($weekend && $dateEvenement) {
+                $dateDebutWeekend = $weekend->getDateDebut();
+                $dateFinWeekend = $weekend->getDateFin();
+                
+                if ($dateEvenement < $dateDebutWeekend || $dateEvenement > $dateFinWeekend) {
+                    $this->addFlash('error', 'La date de l\'événement doit être comprise entre le ' . 
+                        $dateDebutWeekend->format('d/m/Y') . ' et le ' . $dateFinWeekend->format('d/m/Y') . 
+                        ' (période du week-end sélectionné).');
+                    return $this->render('evenement/create.html.twig', [
+                        'form' => $form->createView(),
+                        'preselect_weekend' => $preselect_weekend,
+                    ]);
+                }
+            }
+
             // Gestion de l'upload d'image
             $imageFile = $form->get('imageFile')->getData();
             if ($imageFile) {

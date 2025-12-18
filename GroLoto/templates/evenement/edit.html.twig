@@ -44,8 +44,8 @@
                 </select>
             </div>
 
-            {# Champ date supprimé, remplacé par champ caché pour garder compatibilité #}
-            <input type="hidden" id="evenement_date" name="evenement[date_debut]" value="{{ evenement.dateDebut ? evenement.dateDebut|date('Y-m-d') : '' }}">
+            {# Champ date caché pour la sélection JavaScript #}
+            {{ form_widget(form.date_debut, {'attr': {'id': 'evenement_date', 'type': 'hidden'}}) }}
 
             <div class="form-row mb-4">
                 <div class="form-col">
