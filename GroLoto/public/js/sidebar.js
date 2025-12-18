@@ -32,8 +32,9 @@ document.addEventListener('DOMContentLoaded', function () {
         let foundMatch = false;
         const allSubmenuLinks = document.querySelectorAll('.submenu a');
         
-        // D'abord, chercher une correspondance exacte
-        allSubmenuLinks.forEach(link => {
+        // Chercher une correspondance exacte uniquement
+        for (let i = 0; i < allSubmenuLinks.length; i++) {
+            const link = allSubmenuLinks[i];
             const href = link.getAttribute('href');
             if (href && href !== '#' && href !== '') {
                 // Correspondance exacte avec l'URL actuelle
@@ -46,28 +47,38 @@ document.addEventListener('DOMContentLoaded', function () {
                     parentNavLink.classList.add('active');
                     link.classList.add('active-page');
                     foundMatch = true;
+                    break; // S'arrêter dès qu'on trouve une correspondance
                 }
             }
-        });
+        }
         
-        // Si aucune correspondance exacte, chercher une correspondance partielle (pour les sous-pages)
+        // Si aucune correspondance exacte, chercher le meilleur match partiel (le plus long)
         if (!foundMatch) {
-            allSubmenuLinks.forEach(link => {
+            let bestMatch = null;
+            let bestMatchLength = 0;
+            
+            for (let i = 0; i < allSubmenuLinks.length; i++) {
+                const link = allSubmenuLinks[i];
                 const href = link.getAttribute('href');
                 if (href && href !== '#' && href !== '' && href !== '/') {
-                    // L'URL actuelle commence par le href (ex: /stocks/inventaire commence par /stocks)
-                    if (currentPath.startsWith(href) && currentPath.length > href.length) {
-                        const submenu = link.closest('.submenu');
-                        const parentNavItem = submenu.closest('.nav-item');
-                        const parentNavLink = parentNavItem.querySelector('.nav-link');
-                        
-                        submenu.classList.add('active');
-                        parentNavLink.classList.add('active');
-                        link.classList.add('active-page');
-                        foundMatch = true;
+                    // L'URL actuelle commence par le href
+                    if (currentPath.startsWith(href) && href.length > bestMatchLength) {
+                        bestMatch = link;
+                        bestMatchLength = href.length;
                     }
                 }
-            });
+            }
+            
+            if (bestMatch) {
+                const submenu = bestMatch.closest('.submenu');
+                const parentNavItem = submenu.closest('.nav-item');
+                const parentNavLink = parentNavItem.querySelector('.nav-link');
+                
+                submenu.classList.add('active');
+                parentNavLink.classList.add('active');
+                bestMatch.classList.add('active-page');
+                foundMatch = true;
+            }
         }
         
         // Si toujours aucune correspondance, vérifier les liens principaux
