@@ -238,9 +238,7 @@ class BenevoleController extends AbstractController
     #[Route('/benevole/mon-planning', name: 'benevole_mon_planning')]
     public function monPlanning(
         BenevoleRepository $benevoleRepository,
-        TacheRepository $tacheRepository,
-        AffectationTacheRepository $affectationRepository,
-        DemandeAnnulationRepository $demandeAnnulationRepository
+        TacheRepository $tacheRepository
     ): Response {
         $user = $this->getUser();
         $benevole = $benevoleRepository->findOneBy(['utilisateur' => $user]);
@@ -250,80 +248,28 @@ class BenevoleController extends AbstractController
             return $this->redirectToRoute('benevoles');
         }
 
-        // Récupérer les tâches du bénévole pour le calendrier
-        $tachesBrutes = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
-        if (empty($tachesBrutes)) {
-            $tachesBrutes = $tacheRepository->findTachesForBenevole($benevole->getId());
+        // Récupérer tous les weekends où le bénévole a des tâches
+        $weekendsBruts = $tacheRepository->findWeekendsForBenevole($benevole->getId());
+        
+        // Ajouter le nombre de tâches pour chaque weekend
+        $weekends = [];
+        foreach ($weekendsBruts as $weekend) {
+            $tachesWeekend = $tacheRepository->findTachesForBenevoleByWeekend($benevole->getId(), $weekend['id']);
+            $weekend['nb_taches'] = count($tachesWeekend);
+            $weekends[] = $weekend;
         }
-
-        $taches = [];
-        foreach ($tachesBrutes as $tache) {
-            $taches[] = [
-                'id' => $tache->getId(),
-                'title' => $tache->getTitre(),
-                'start' => $tache->getDebut()->format('Y-m-d\TH:i:s'),
-                'end' => $tache->getFin()->format('Y-m-d\TH:i:s'),
-                'backgroundColor' => '#1a3c5a',
-                'borderColor' => '#2b5d8a',
-                'extendedProps' => [
-                    'weekend' => $tache->getWeekend()?->getNom(),
-                    'poste_requis' => $tache->getPosteRequis(),
-                    'max_personnes' => $tache->getMaxPersonnes(),
-                    'remarques' => $tache->getRemarque()
-                ]
-            ];
-        }
-
-        // Tâches à venir avec les infos d'affectation et de demande d'annulation
-        $tachesProches = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
-        if (empty($tachesProches)) {
-            $tachesProches = $tacheRepository->findTachesForBenevole($benevole->getId());
-        }
-
-        $tachesProchesData = [];
-        foreach ($tachesProches as $tp) {
-            $affectation = $affectationRepository->findOneByTacheAndBenevole($tp, $benevole);
-            $demandeEnAttente = null;
-            if ($affectation) {
-                $demandeEnAttente = $demandeAnnulationRepository->findByAffectationEnAttente($affectation);
-            }
-            
-            $tachesProchesData[] = [
-                'id' => $tp->getId(),
-                'titre' => $tp->getTitre(),
-                'debut' => $tp->getDebut(),
-                'poste_requis' => $tp->getPosteRequis(),
-                'affectation_id' => $affectation ? $affectation->getId() : null,
-                'demande_annulation_en_attente' => $demandeEnAttente !== null,
-            ];
-        }
-
-        // Tâches réalisées
+        
+        // Calculer les statistiques
+        $totalWeekends = count($weekends);
+        $tachesFutures = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
         $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
-        $tachesRealiseesData = [];
-        foreach ($tachesRealisees as $tr) {
-            $tachesRealiseesData[] = [
-                'id' => $tr->getId(),
-                'titre' => $tr->getTitre(),
-                'debut' => $tr->getDebut(),
-                'fin' => $tr->getFin(),
-                'poste_requis' => $tr->getPosteRequis(),
-            ];
-        }
-
-        // Statistiques
-        $totalTaches = count($tachesBrutes);
-        $totalFutures = count($tachesProches);
-        $totalRealisees = count($tachesRealisees);
-
+        
         return $this->render('benevoles/mon_planning.html.twig', [
             'benevole' => $benevole,
-            'taches' => json_encode($taches),
-            'taches_proches' => $tachesProchesData,
-            'taches_realisees' => $tachesRealiseesData,
-            'total_taches' => $totalTaches,
-            'total_futures' => $totalFutures,
-            'total_realisees' => $totalRealisees,
+            'weekends' => $weekends,
+            'total_weekends' => $totalWeekends,
+            'total_taches_futures' => count($tachesFutures),
+            'total_taches_realisees' => count($tachesRealisees),
         ]);
     }
 
@@ -434,35 +380,19 @@ class BenevoleController extends AbstractController
             return $this->redirectToRoute('benevoles');
         }
 
-        // Récupérer toutes les tâches du bénévole (futures et passées)
-        $tachesFutures = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
-        $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
+        // Récupérer les tâches à venir
+        $taches = $tacheRepository->findTachesFuturesForBenevole($benevole->getId());
 
-        if (empty($tachesFutures) && empty($tachesRealisees)) {
-            $this->addFlash('warning', 'Vous n\'avez aucune tâche dans votre planning.');
+        if (empty($taches)) {
+            $this->addFlash('warning', 'Vous n\'avez aucune tâche à venir.');
             return $this->redirectToRoute('benevole_mon_planning');
         }
-
-        // Organiser les tâches par date
-        $tachesParDate = [];
-        foreach (array_merge($tachesFutures, $tachesRealisees) as $tache) {
-            $dateKey = $tache->getDebut()->format('Y-m-d');
-            if (!isset($tachesParDate[$dateKey])) {
-                $tachesParDate[$dateKey] = [];
-            }
-            $tachesParDate[$dateKey][] = $tache;
-        }
-        
-        // Trier par date
-        ksort($tachesParDate);
 
         // Générer le HTML pour le PDF
         $html = $this->renderView('benevoles/mon_planning_pdf.html.twig', [
             'benevole' => $benevole,
             'utilisateur' => $user,
-            'taches_futures' => $tachesFutures,
-            'taches_realisees' => $tachesRealisees,
-            'taches_par_date' => $tachesParDate,
+            'taches' => $taches,
             'date_generation' => new \DateTime(),
         ]);
 
@@ -474,9 +404,9 @@ class BenevoleController extends AbstractController
 
         // Générer le nom du fichier
         $filename = sprintf(
-            'mon_planning_%s_%s.pdf',
-            str_replace(' ', '_', $user->getPrenom() . '_' . $user->getNom()),
-            (new \DateTime())->format('Y-m-d')
+            'planning_%s_%s.pdf',
+            str_replace(' ', '_', $user->getPrenom()),
+            (new \DateTime())->format('d-m-Y')
         );
 
         // Retourner le PDF
