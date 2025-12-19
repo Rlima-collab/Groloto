@@ -228,6 +228,32 @@ class NotificationService
     }
 
     /**
+     * Notifier un bénévole qu'il a été retiré d'une tâche par l'admin
+     */
+    public function notifyBenevoleRetireDeTache(Utilisateur $benevole, string $tacheNom): void
+    {
+        $this->createNotification(
+            $benevole,
+            'retrait_tache',
+            "Vous avez été retiré(e) de la tâche \"{$tacheNom}\" par l'administrateur.",
+            '/benevole/mon-planning'
+        );
+    }
+
+    /**
+     * Notifier un bénévole qu'une tâche à laquelle il était affecté a été supprimée
+     */
+    public function notifyBenevoleTacheSupprimee(Utilisateur $benevole, string $tacheNom): void
+    {
+        $this->createNotification(
+            $benevole,
+            'suppression_tache',
+            "La tâche \"{$tacheNom}\" à laquelle vous étiez affecté(e) a été supprimée.",
+            '/benevole/mon-planning'
+        );
+    }
+
+    /**
      * Marquer une notification comme lue
      */
     public function markAsRead(Notification $notification): void
