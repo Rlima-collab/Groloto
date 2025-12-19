@@ -422,7 +422,12 @@
                         </div>
                         <div class="notification-actions">
                             {% if notif.lien %}
-                                <a href="{{ notif.lien }}" class="btn-view fetch-link">Voir</a>
+                                {% set is_admin_link = notif.lien starts with('/admin') %}
+                                {% if is_admin_link and not is_granted('ROLE_ADMIN') %}
+                                    <span class="btn-view disabled" title="Accès restreint">Voir</span>
+                                {% else %}
+                                    <a href="{{ notif.lien }}" class="btn-view fetch-link">Voir</a>
+                                {% endif %}
                             {% endif %}
                             {% if view != 'trash' and not notif.lue %}
                                 <button type="button" class="btn-mark-read" data-action="mark-read" title="Marquer comme lu">
