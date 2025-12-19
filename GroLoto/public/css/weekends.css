@@ -70,11 +70,11 @@
 .weekend-card {
     position: relative;
     background: #ffffff;
-    border-radius: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0,0,0,0.05);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
     text-decoration: none;
     color: inherit;
     display: flex;
@@ -86,8 +86,7 @@
 }
 
 .weekend-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
 }
 
 /* Image */
@@ -108,6 +107,139 @@
     height: 100%;
     object-fit: cover;
     transition: transform 0.5s ease;
+}
+
+/* Placeholder when no cover image is available */
+.weekend-card .image .placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 1rem;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+    color: #fff;
+}
+
+.weekend-card .image .placeholder-graphic {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 0.75rem;
+    background: rgba(255,255,255,0.08);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+}
+
+.weekend-card .image .placeholder-date {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.9);
+    background: rgba(0,0,0,0.12);
+    padding: 0.35rem 0.6rem;
+    border-radius: 6px;
+}
+
+/* Slight adjustment so placeholder content doesn't overlap card footer */
+.weekend-card .image .placeholder + .content {
+    padding-left: 2rem;
+}
+
+/* Improved hero for festivals list */
+.hero-section.dashboard-hero {
+    position: relative;
+    background: linear-gradient(90deg, #0ea5a4 0%, #6366f1 100%);
+    color: #fff;
+    padding: 3.5rem 2rem 3.5rem;
+    margin: -20px -20px 2rem -20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.12);
+    overflow: hidden;
+}
+
+.hero-section.dashboard-hero .hero-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.hero-section.dashboard-hero .hero-text {
+    flex: 1 1 60%;
+}
+
+.hero-section.dashboard-hero .hero-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem;
+}
+
+.hero-section.dashboard-hero .hero-description {
+    margin: 0;
+    color: rgba(255,255,255,0.92);
+    font-size: 1.05rem;
+}
+
+.hero-section.dashboard-hero .hero-cta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.hero-section.dashboard-hero .hero-cta .btn {
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+/* Duplicate placeholder rules for the .weekend-card-image variant used in disponibilites templates */
+.weekend-card-image .placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 1rem;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+    color: #fff;
+}
+
+.weekend-card-image .placeholder-graphic {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.6rem;
+    height: 3.6rem;
+    border-radius: 0.5rem;
+    background: rgba(255,255,255,0.08);
+    box-shadow: 0 6px 12px rgba(15, 23, 42, 0.12);
+}
+
+.weekend-card-image .placeholder-date {
+    position: absolute;
+    left: 1rem;
+    bottom: 0.75rem;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.95);
+    background: rgba(0,0,0,0.12);
+    padding: 0.35rem 0.6rem;
+    border-radius: 6px;
 }
 
 .weekend-card:hover .image img {
@@ -442,6 +574,79 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: normal;
+}
+
+/* =============== MODERN GRID STYLES =============== */
+.modern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.modern-weekend-card {
+    background: linear-gradient(135deg, #1e293b 60%, #334155 100%);
+    border-radius: 18px;
+    box-shadow: 0 6px 24px rgba(30,41,59,0.12);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+    padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.modern-weekend-card:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 12px 32px rgba(30,41,59,0.18);
+}
+.modern-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+}
+.modern-card-icon {
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modern-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    flex: 1;
+    color: #fff;
+}
+.modern-card-infos {
+    margin-bottom: 1.5rem;
+}
+.modern-card-date {
+    font-size: 1.05rem;
+    color: #cbd5e1;
+    font-weight: 500;
+}
+.modern-card-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
+}
+.modern-btn-card {
+    background: #38bdf8;
+    color: #1e293b;
+    border-radius: 6px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 2px 8px rgba(56,189,248,0.08);
+}
+.modern-btn-card:hover {
+    background: #0ea5e9;
+    color: #fff;
 }
 
 /* =============== RESPONSIVE =============== */

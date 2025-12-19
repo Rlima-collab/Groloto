@@ -45,6 +45,14 @@ class TacheType extends AbstractType
                 'placeholder' => 'Choisir un weekend',
                 'required' => true,
                 'attr' => ['class' => 'form-control'],
+                'choice_attr' => function(Weekend $w, $key, $index) {
+                    return [
+                        'data-start' => $w->getDateDebut()->format('Y-m-d'),
+                        'data-end' => $w->getDateFin()->format('Y-m-d'),
+                        'data-offset-before' => (string) $w->getTaskOffsetBefore(),
+                        'data-offset-after' => (string) $w->getTaskOffsetAfter(),
+                    ];
+                },
             ])
             // Plage horaire unique pour la création simple
             ->add('jour_plage', DateType::class, [

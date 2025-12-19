@@ -36,6 +36,64 @@
     margin-top: 2rem;
 }
 
+/* Specific layout adjustments for disponibilites list (centered cards, title clamping, centered buttons) */
+.weekends-grid.dispo-list {
+    justify-content: center; /* center the whole grid */
+    grid-template-columns: repeat(auto-fit, minmax(320px, 360px));
+}
+
+.weekends-grid.dispo-list .weekend-card {
+    max-width: 360px; /* fixed card width so centering is consistent */
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.weekends-grid.dispo-list .weekend-card-body {
+    padding: 1.25rem !important;
+}
+
+.weekends-grid.dispo-list .weekend-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2937 !important;
+    margin-bottom: 0.6rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* limit to 2 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+.weekends-grid.dispo-list .weekend-card-dates {
+    color: #6b7280;
+    margin-bottom: 1rem;
+}
+
+.weekends-grid.dispo-list .status-badge {
+    width: auto;
+    display: inline-flex;
+}
+
+.weekends-grid.dispo-list .weekend-card-footer {
+    justify-content: center; /* center the footer content */
+    gap: 1rem;
+}
+
+.weekends-grid.dispo-list .weekend-view-btn {
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+}
+
+.weekends-grid.dispo-list .weekend-card {
+    /* ensure consistent vertical sizing */
+    min-height: 220px;
+}
+
+.weekends-grid.dispo-list .weekend-card-image {
+    height: 120px; /* slightly smaller header to balance card */
+}
+
 /* =============================================
    WEEKEND CARD
    ============================================= */

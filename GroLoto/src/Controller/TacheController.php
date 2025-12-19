@@ -120,6 +120,22 @@ class TacheController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $formData = $request->request->all()['tache'] ?? [];
+
+            // Validation côté serveur : si un jour de plage est fourni, vérifier qu'il est dans la plage autorisée
+            $weekendSelected = $tache->getWeekend();
+            if ($weekendSelected && isset($formData['jour_plage']) && !empty($formData['jour_plage'])) {
+                $jourPlage = new \DateTime($formData['jour_plage']);
+                $before = $weekendSelected->getTaskOffsetBefore() ?? 2;
+                $after = $weekendSelected->getTaskOffsetAfter() ?? 3;
+                $minDate = (clone $weekendSelected->getDateDebut())->modify("-{$before} days");
+                $maxDate = (clone $weekendSelected->getDateFin())->modify("+{$after} days");
+                if ($jourPlage < $minDate || $jourPlage > $maxDate) {
+                    $this->addFlash('error', 'La date choisie pour la tâche doit être comprise entre ' . $minDate->format('d/m/Y') . ' et ' . $maxDate->format('d/m/Y') . '.');
+                    return $this->render('taches/new.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
+                }
+            }
             
             // Créer une plage horaire avec le jour et les horaires spécifiés
             if (isset($formData['jour_plage']) && !empty($formData['jour_plage'])) {

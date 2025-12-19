@@ -40,6 +40,12 @@ class Weekend
     #[ORM\OneToMany(mappedBy: 'weekend', targetEntity: Tache::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $taches;
 
+    #[ORM\Column(type: 'integer')]
+    private int $task_offset_before = 2;
+
+    #[ORM\Column(type: 'integer')]
+    private int $task_offset_after = 3;
+
     public function __construct()
     {
         $this->evenements = new ArrayCollection();
@@ -124,6 +130,28 @@ class Weekend
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+        return $this;
+    }
+
+    public function getTaskOffsetBefore(): int
+    {
+        return $this->task_offset_before;
+    }
+
+    public function setTaskOffsetBefore(int $days): self
+    {
+        $this->task_offset_before = $days;
+        return $this;
+    }
+
+    public function getTaskOffsetAfter(): int
+    {
+        return $this->task_offset_after;
+    }
+
+    public function setTaskOffsetAfter(int $days): self
+    {
+        $this->task_offset_after = $days;
         return $this;
     }
 

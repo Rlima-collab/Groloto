@@ -95,26 +95,20 @@ class DisponibiliteWeekendController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
-        // Générer tous les jours de la semaine (car les tâches peuvent avoir des dates différentes)
+        // Générer tous les jours dans la plage autorisée pour les tâches/disponibilités
+        // Utiliser les offsets configurés sur le weekend (admin configurable)
+        $before = $weekend->getTaskOffsetBefore() ?? 2; // jours avant
+        $after = $weekend->getTaskOffsetAfter() ?? 3;   // jours après
+
         $dateDebut = clone $weekend->getDateDebut();
         $dateFin = clone $weekend->getDateFin();
-        
-        // Étendre la période pour couvrir la semaine complète
-        // Trouver le lundi précédent ou égal à la date de début
-        $debutSemaine = clone $dateDebut;
-        while ($debutSemaine->format('N') != 1) { // 1 = Lundi
-            $debutSemaine->modify('-1 day');
-        }
-        
-        // Trouver le dimanche suivant ou égal à la date de fin
-        $finSemaine = clone $dateFin;
-        while ($finSemaine->format('N') != 7) { // 7 = Dimanche
-            $finSemaine->modify('+1 day');
-        }
-        
+
+        $minDate = (clone $dateDebut)->modify("-{$before} days");
+        $maxDate = (clone $dateFin)->modify("+{$after} days");
+
         $jours = [];
-        $current = clone $debutSemaine;
-        while ($current <= $finSemaine) {
+        $current = clone $minDate;
+        while ($current <= $maxDate) {
             $jours[] = clone $current;
             $current->modify('+1 day');
         }
@@ -161,6 +155,8 @@ class DisponibiliteWeekendController extends AbstractController
             'weekend' => $weekend,
             'jours' => $jours,
             'disposParJour' => $disposParJour,
+            'minDate' => $minDate,
+            'maxDate' => $maxDate,
         ]);
     }
 

@@ -55,6 +55,18 @@ class WeekendType extends AbstractType
                     'placeholder' => 'Description du weekend...'
                 ]
             ])
+            ->add('task_offset_before', IntegerType::class, [
+                'label' => 'Jours avant début (pour tâches/disponibilités)',
+                'required' => false,
+                'attr' => ['class' => 'w-full p-3 border rounded-lg', 'min' => 0],
+                'help' => 'Nombre de jours autorisés avant la date de début du weekend (ex: 2 pour J-2).',
+            ])
+            ->add('task_offset_after', IntegerType::class, [
+                'label' => 'Jours après fin (pour tâches/disponibilités)',
+                'required' => false,
+                'attr' => ['class' => 'w-full p-3 border rounded-lg', 'min' => 0],
+                'help' => 'Nombre de jours autorisés après la date de fin du weekend (ex: 3 pour J+3).',
+            ])
             ->add('cover_image', FileType::class, [
                 'label' => 'Image de couverture (optionnelle)',
                 'mapped' => false,

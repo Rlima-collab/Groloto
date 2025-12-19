@@ -40,6 +40,11 @@
                 {{ form_row(form.date_dimanche, {'attr': {'class': 'form-control'}}) }}
             </div>
 
+            <div class="grid-2 mb-4">
+                {{ form_row(form.task_offset_before, {'attr': {'class': 'form-control'}, 'help': 'Jours avant la date de début (ex: 2 pour J-2)'} ) }}
+                {{ form_row(form.task_offset_after, {'attr': {'class': 'form-control'}, 'help': 'Jours après la date de fin (ex: 3 pour J+3)'} ) }}
+            </div>
+
             <div class="mb-4">
                 {{ form_row(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Description du weekend...'}}) }}
             </div>

@@ -6,6 +6,7 @@
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/weekends.css') }}?v={{ 'now'|date('U') }}">
     <style>
         .dispo-hero {
             background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #3b82f6 100%);
@@ -166,6 +167,17 @@
             cursor: pointer;
             accent-color: #3b82f6;
             border-radius: 4px;
+        }
+
+        .out-of-range {
+            opacity: 0.55;
+            pointer-events: none;
+            background: #f3f4f6;
+        }
+
+        .out-of-range .jour-name,
+        .out-of-range .jour-date {
+            color: #9ca3af;
         }
         
         .jour-info {
@@ -342,152 +354,69 @@
 {% endblock %}
 
 {% block body %}
-<div class="dispo-hero">
-    <div class="dispo-hero-content">
-        <div class="breadcrumb-nav">
-            <a href="{{ path('benevole_disponibilites_index') }}">Mes disponibilités</a>
-            <span>/</span>
-            <span>{{ weekend.nom }}</span>
-        </div>
-        <h1>{{ weekend.nom }}</h1>
-        <div class="dates">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1 class="hero-title">{{ weekend.nom }}</h1>
+            <p class="hero-description">Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}</p>
         </div>
     </div>
 </div>
 
 <div class="dispo-card">
-    <div class="dispo-card-header">
-        <h2>
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-            </svg>
-            Indiquez vos disponibilités
-        </h2>
-    </div>
-    <div class="dispo-card-body">
-        <div class="dispo-instructions">
-            Cochez les créneaux où vous êtes disponible pour participer aux tâches de ce weekend. 
-            Les jours surlignés en jaune correspondent au weekend officiel.
-        </div>
+    <form method="post">
+        <table class="dispo-table">
+            <thead>
+                <tr>
+                    <th>Jour</th>
+                    <th>Matin</th>
+                    <th>Après-midi</th>
+                    <th>Soir</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for jour in jours %}
+                    <tr>
+                        <td>{{ jour|date('l, d/m/Y') }}</td>
+                        <td><input type="checkbox" class="dispo-checkbox" name="disponibilites[{{ jour|date('Y-m-d') }}][]" value="matin"></td>
+                        <td><input type="checkbox" class="dispo-checkbox" name="disponibilites[{{ jour|date('Y-m-d') }}][]" value="apres_midi"></td>
+                        <td><input type="checkbox" class="dispo-checkbox" name="disponibilites[{{ jour|date('Y-m-d') }}][]" value="soir"></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-        <form method="post">
-            <div style="overflow-x: auto;">
-                <table class="dispo-table">
-                    <thead>
-                        <tr>
-                            <th style="min-width: 160px;">Jour</th>
-                            <th style="min-width: 100px;">
-                                Matin
-                                <span class="creneau-label">8h - 12h</span>
-                            </th>
-                            <th style="min-width: 100px;">
-                                Après-midi
-                                <span class="creneau-label">12h - 18h</span>
-                            </th>
-                            <th style="min-width: 100px;">
-                                Soir
-                                <span class="creneau-label">18h - 23h</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% set joursFr = {
-                            'Monday': 'Lundi',
-                            'Tuesday': 'Mardi',
-                            'Wednesday': 'Mercredi',
-                            'Thursday': 'Jeudi',
-                            'Friday': 'Vendredi',
-                            'Saturday': 'Samedi',
-                            'Sunday': 'Dimanche'
-                        } %}
-                        {% for jour in jours %}
-                            {% set jourKey = jour|date('Y-m-d') %}
-                            {% set dispo = disposParJour[jourKey]|default(null) %}
-                            {% set jourAnglais = jour|date('l') %}
-                            {% set isWeekendDay = jour >= weekend.dateDebut and jour <= weekend.dateFin %}
-                            <tr{% if isWeekendDay %} class="weekend-day"{% endif %}>
-                                <td>
-                                    <div class="jour-info">
-                                        <span class="jour-name">{{ joursFr[jourAnglais] }}</span>
-                                        <span class="jour-date">{{ jour|date('d/m/Y') }}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <input type="checkbox" 
-                                           class="dispo-checkbox" 
-                                           name="disponibilites[{{ jourKey }}][]" 
-                                           value="matin"
-                                           {% if dispo and dispo.matin %}checked{% endif %}>
-                                </td>
-                                <td>
-                                    <input type="checkbox" 
-                                           class="dispo-checkbox" 
-                                           name="disponibilites[{{ jourKey }}][]" 
-                                           value="apres_midi"
-                                           {% if dispo and dispo.apresMidi %}checked{% endif %}>
-                                </td>
-                                <td>
-                                    <input type="checkbox" 
-                                           class="dispo-checkbox" 
-                                           name="disponibilites[{{ jourKey }}][]" 
-                                           value="soir"
-                                           {% if dispo and dispo.soir %}checked{% endif %}>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="dispo-actions">
+        <div class="dispo-card-footer" style="padding:1rem; border-top:1px solid #e5e7eb; display:flex; gap:0.75rem; justify-content:space-between; align-items:center; background:#fff;">
+            <div>
                 <button type="button" class="btn-action btn-action-select" onclick="selectAll()">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     Tout cocher
                 </button>
                 <button type="button" class="btn-action btn-action-deselect" onclick="deselectAll()">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     Tout décocher
                 </button>
             </div>
 
-            <div class="form-group-dispo">
-                <label for="remarque">Remarque (facultatif)</label>
-                <textarea name="remarque" 
-                          id="remarque" 
-                          rows="3" 
-                          placeholder="Ex : Je serai en retard le samedi matin, disponible à partir de 10h...">{% if disposParJour|length > 0 %}{{ (disposParJour|first).remarque }}{% endif %}</textarea>
+            <div style="display:flex; gap:0.75rem;">
+                <a href="{{ path('benevole_disponibilites_index') }}" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">Enregistrer</button>
             </div>
-
-            <div class="dispo-submit-row">
-                <button type="submit" class="btn-submit">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Enregistrer mes disponibilités
-                </button>
-                <a href="{{ path('benevole_disponibilites_index') }}" class="btn-cancel">
-                    Annuler
-                </a>
-            </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
+{% endblock %}
 
-<script>
-function selectAll() {
-    document.querySelectorAll('.dispo-checkbox').forEach(cb => cb.checked = true);
-}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function selectAll() {
+            document.querySelectorAll('.dispo-checkbox:not(:disabled)').forEach(cb => cb.checked = true);
+        }
 
-function deselectAll() {
-    document.querySelectorAll('.dispo-checkbox').forEach(cb => cb.checked = false);
-}
-</script>
+        function deselectAll() {
+            document.querySelectorAll('.dispo-checkbox:not(:disabled)').forEach(cb => cb.checked = false);
+        }
+    </script>
 {% endblock %}

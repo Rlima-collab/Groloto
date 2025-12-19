@@ -31,7 +31,18 @@
                         <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}">
                     {% endif %}
                 {% else %}
-                    <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="{{ weekend.nom }}">
+                    {# Better placeholder when no image: gradient box with initials and date #}
+                    {% set parts = weekend.nom is defined ? weekend.nom|split(' ') : [] %}
+                    {% set i1 = parts[0]|default('')|first %}
+                    {% set i2 = parts[1]|default('')|first %}
+                    {% set initials = (i1 ~ i2)|upper %}
+                    <div class="placeholder" title="{{ weekend.nom }}">
+                        <div class="placeholder-graphic">{{ initials }}</div>
+                        <div class="placeholder-date">
+                            {% if weekend.dateDebut %}{{ weekend.dateDebut|date('d/m/Y') }}{% endif %}
+                            {% if weekend.dateFin %} &ndash; {{ weekend.dateFin|date('d/m/Y') }}{% endif %}
+                        </div>
+                    </div>
                 {% endif %}
             </div>
             <div class="content">

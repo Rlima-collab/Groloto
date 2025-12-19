@@ -6,6 +6,8 @@
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/weekends.css') }}?v={{ 'now'|date('U') }}">
+    <link rel="stylesheet" href="{{ asset('css/weekends_cards.css') }}">
     <style>
         .dispo-hero {
             background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #3b82f6 100%);
@@ -299,134 +301,147 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .modern-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .modern-weekend-card {
+            background: #1f2937;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #374151;
+        }
+        
+        .modern-weekend-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .modern-card-header {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            background: #111827;
+        }
+        
+        .modern-card-icon {
+            width: 36px;
+            height: 36px;
+            background: #3b82f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+        
+        .modern-card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: white;
+            margin: 0;
+        }
+        
+        .modern-card-infos {
+            padding: 1.5rem;
+            background: #1f2937;
+        }
+        
+        .modern-card-date {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            margin: 0;
+        }
+        
+        .modern-card-footer {
+            padding: 1.5rem;
+            background: #111827;
+            text-align: center;
+        }
+        
+        .modern-btn-card {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: white;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.2s;
+        }
+        
+        .modern-btn-card:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-1px);
+        }
     </style>
 {% endblock %}
 
 {% block body %}
-<div class="dispo-hero">
-    <div class="dispo-hero-content">
-        <h1>Mes Disponibilités</h1>
-        <p>Indiquez vos disponibilités pour chaque weekend. Cela permettra aux organisateurs de vous assigner aux tâches qui correspondent à vos créneaux libres.</p>
-    </div>
-</div>
-
-<div class="filter-tabs">
-    <a href="{{ path('benevole_disponibilites_index', {filter: 'a_venir'}) }}" 
-       class="filter-tab {{ currentFilter == 'a_venir' ? 'active' : '' }}">
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
-        À venir
-    </a>
-    <a href="{{ path('benevole_disponibilites_index', {filter: 'passes'}) }}" 
-       class="filter-tab {{ currentFilter == 'passes' ? 'active' : '' }}">
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        Passés
-    </a>
-    <a href="{{ path('benevole_disponibilites_index', {filter: 'tous'}) }}" 
-       class="filter-tab {{ currentFilter == 'tous' ? 'active' : '' }}">
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-        </svg>
-        Tous
-    </a>
-</div>
-
-{% if weekendsData|length == 0 %}
-    <div class="empty-state">
-        <div class="empty-state-icon">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1 class="hero-title">Mes Disponibilités</h1>
+            <p class="hero-description">Indiquez vos disponibilités pour chaque weekend. Cela permettra aux organisateurs de vous assigner aux tâches qui correspondent à vos créneaux libres.</p>
         </div>
-        <h3>
-            {% if currentFilter == 'a_venir' %}
-                Aucun weekend à venir
-            {% elseif currentFilter == 'passes' %}
-                Aucun weekend passé
-            {% else %}
-                Aucun weekend disponible
-            {% endif %}
-        </h3>
-        <p>
-            {% if currentFilter == 'a_venir' %}
-                Il n'y a pas de weekend planifié pour le moment.
-            {% elseif currentFilter == 'passes' %}
-                Vous n'avez pas encore participé à des weekends.
-            {% else %}
-                Aucun weekend n'a été créé pour l'instant.
-            {% endif %}
-        </p>
     </div>
-{% else %}
-    <div class="weekends-grid">
-        {% for data in weekendsData %}
-            {% set weekend = data.weekend %}
-            {% set hasDispos = data.hasDisponibilites %}
-            {% set isPast = data.isPast %}
-            
-            <div class="weekend-card {{ isPast ? 'past' : '' }}">
-                <div class="weekend-card-image {{ weekend.coverImage ? '' : 'no-image' }}">
-                    {% if weekend.coverImage %}
-                        <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}">
-                        <div class="gradient-overlay"></div>
-                    {% endif %}
-                </div>
-                
-                <div class="weekend-card-body">
-                    <h3 class="weekend-card-title">{{ weekend.nom }}</h3>
-                    
-                    <div class="weekend-card-dates">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        <span>{{ weekend.dateDebut|date('d/m/Y') }} - {{ weekend.dateFin|date('d/m/Y') }}</span>
-                    </div>
+</div>
 
-                    {% if isPast %}
-                        <div class="status-badge past">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span>Weekend terminé</span>
-                        </div>
-                    {% elseif hasDispos %}
-                        <div class="status-badge completed">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <span>Disponibilités renseignées</span>
-                        </div>
-                    {% else %}
-                        <div class="status-badge pending">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                            </svg>
-                            <span>Disponibilités non renseignées</span>
-                        </div>
-                    {% endif %}
-
-                    {% if isPast %}
-                        <a href="{{ path('benevole_disponibilites_weekend', {id: weekend.id}) }}" 
-                           class="btn-card btn-card-secondary">
-                            Consulter mes disponibilités
-                        </a>
-                    {% elseif hasDispos %}
-                        <a href="{{ path('benevole_disponibilites_weekend', {id: weekend.id}) }}" 
-                           class="btn-card btn-card-secondary">
-                            Modifier mes disponibilités
-                        </a>
-                    {% else %}
-                        <a href="{{ path('benevole_disponibilites_weekend', {id: weekend.id}) }}" 
-                           class="btn-card btn-card-primary">
-                            Indiquer mes disponibilités
-                        </a>
-                    {% endif %}
-                </div>
+<div class="weekends-grid dispo-list">
+    {% for data in weekendsData %}
+        {% set weekend = data.weekend %}
+        {% set hasDispos = data.hasDisponibilites %}
+        {% set isPast = data.isPast %}
+        <div class="weekend-card {{ isPast ? 'past' : '' }}" data-weekend-id="{{ weekend.id }}">
+            <div class="weekend-card-image {% if not weekend.coverImage %}no-image{% endif %}">
+                {% if weekend.coverImage %}
+                    <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}">
+                {% else %}
+                    <i class="bi bi-calendar-event"></i>
+                {% endif %}
             </div>
-        {% endfor %}
-    </div>
-{% endif %}
+
+            <div class="weekend-card-body">
+                <h3 class="weekend-card-title">{{ weekend.nom }}</h3>
+
+                <div class="weekend-card-dates">
+                    <i class="bi bi-calendar-range"></i>
+                    <span>{{ weekend.dateDebut|date('d/m/Y') }} → {{ weekend.dateFin|date('d/m/Y') }}</span>
+                </div>
+
+                {% if isPast %}
+                    <div class="status-badge past">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Weekend terminé</span>
+                    </div>
+                {% elseif hasDispos %}
+                    <div class="status-badge completed">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Disponibilités renseignées</span>
+                    </div>
+                {% else %}
+                    <div class="status-badge pending">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>Disponibilités non renseignées</span>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <div class="weekend-card-footer">
+                <span class="weekend-status {{ isPast ? 'past' : 'upcoming' }}">
+                    <i class="bi bi-{{ isPast ? 'check-circle' : 'clock' }}"></i>
+                    {{ isPast ? 'Terminé' : 'À venir' }}
+                </span>
+                <a href="{{ path('benevole_disponibilites_weekend', {id: weekend.id}) }}" class="weekend-view-btn">Indiquer mes disponibilités <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
 {% endblock %}

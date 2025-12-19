@@ -48,6 +48,7 @@
                                 {{ form_label(form.jour_plage) }}
                                 {{ form_widget(form.jour_plage) }}
                                 {{ form_errors(form.jour_plage) }}
+                                    <small id="jourRangeHelp" class="form-text text-muted">Plage autorisée: —</small>
                             </div>
                             <div class="form-group">
                                 {{ form_label(form.heure_debut_plage) }}
@@ -96,5 +97,69 @@
     </div>
 </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const weekendSelect = document.querySelector('select[name$="[weekend]"]');
+        const jourInput = document.querySelector('input[name$="[jour_plage]"]');
+        const help = document.getElementById('jourRangeHelp');
+        // offsets will be read from the selected option if available
+        const defaultOffsetBefore = 2; // fallback J-2
+        const defaultOffsetAfter = 3;  // fallback J+3
+
+        function formatDate(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        function formatDisplay(d) {
+            return d.toLocaleDateString();
+        }
+
+        function applyRange() {
+            if (!weekendSelect || !jourInput) return;
+            const opt = weekendSelect.selectedOptions[0];
+            if (!opt) return;
+            const start = opt.dataset.start;
+            const end = opt.dataset.end;
+            if (!start || !end) {
+                jourInput.removeAttribute('min');
+                jourInput.removeAttribute('max');
+                if (help) help.textContent = 'Plage autorisée: —';
+                return;
+            }
+            const s = new Date(start + 'T00:00:00');
+            const e = new Date(end + 'T00:00:00');
+            const before = parseInt(opt.dataset.offsetBefore || defaultOffsetBefore, 10);
+            const after = parseInt(opt.dataset.offsetAfter || defaultOffsetAfter, 10);
+            const min = new Date(s);
+            min.setDate(min.getDate() - before);
+            const max = new Date(e);
+            max.setDate(max.getDate() + after);
+
+            jourInput.setAttribute('min', formatDate(min));
+            jourInput.setAttribute('max', formatDate(max));
+            if (help) help.textContent = `Plage autorisée: ${formatDisplay(min)} → ${formatDisplay(max)}`;
+
+            // if current value out of range, clear it
+            if (jourInput.value) {
+                const cur = new Date(jourInput.value + 'T00:00:00');
+                if (cur < min || cur > max) {
+                    jourInput.value = '';
+                }
+            }
+        }
+
+        if (weekendSelect) {
+            weekendSelect.addEventListener('change', applyRange);
+            applyRange();
+        }
+    });
+    </script>
 {% endblock %}
 
