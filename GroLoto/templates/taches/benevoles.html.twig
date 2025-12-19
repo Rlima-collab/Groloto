@@ -86,6 +86,7 @@
                                 <th>Téléphone</th>
                                 <th>Date d'affectation</th>
                                 <th>Statut</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -98,6 +99,14 @@
                                     <td>{{ data.affectation.dateAffectation|date('d/m/Y H:i') }}</td>
                                     <td>
                                         <span class="badge" style="background: #059669;">Assigné</span>
+                                    </td>
+                                    <td>
+                                        <form action="{{ path('tache_retirer_benevole', {'id': tache.id, 'benevoleId': data.benevole.id}) }}" method="POST" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer {{ data.utilisateur.prenom }} {{ data.utilisateur.nom }} de cette tâche ? Un notification lui sera envoyée.');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('retirer_benevole_' ~ tache.id ~ '_' ~ data.benevole.id) }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" style="background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+                                                Retirer
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -130,6 +139,7 @@
                                 <th>Téléphone</th>
                                 <th>Date de proposition</th>
                                 <th>Statut</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -142,6 +152,14 @@
                                     <td>{{ data.affectation.dateAffectation|date('d/m/Y H:i') }}</td>
                                     <td>
                                         <span class="badge" style="background: #f59e0b;">En attente</span>
+                                    </td>
+                                    <td>
+                                        <form action="{{ path('tache_retirer_benevole', {'id': tache.id, 'benevoleId': data.benevole.id}) }}" method="POST" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer {{ data.utilisateur.prenom }} {{ data.utilisateur.nom }} de cette tâche ? Une notification lui sera envoyée.');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('retirer_benevole_' ~ tache.id ~ '_' ~ data.benevole.id) }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" style="background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+                                                Retirer
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             {% endfor %}
