@@ -124,9 +124,10 @@ class TacheController extends AbstractController
             // Créer une plage horaire avec le jour et les horaires spécifiés
             if (isset($formData['jour_plage']) && !empty($formData['jour_plage'])) {
                 $plage = new PlageHoraire();
-                $plage->setJour(new \DateTime($formData['jour_plage']));
-                $plage->setHeureDebut(new \DateTime($formData['heure_debut_plage']));
-                $plage->setHeureFin(new \DateTime($formData['heure_fin_plage']));
+                $timezone = new \DateTimeZone('Europe/Paris');
+                $plage->setJour(new \DateTime($formData['jour_plage'], $timezone));
+                $plage->setHeureDebut(new \DateTime($formData['heure_debut_plage'], $timezone));
+                $plage->setHeureFin(new \DateTime($formData['heure_fin_plage'], $timezone));
                 $plage->setTache($tache);
                 $tache->addPlageHoraire($plage);
             }
@@ -343,9 +344,10 @@ class TacheController extends AbstractController
             // Créer une plage horaire avec le jour et les horaires spécifiés
             if (isset($formData['jour_plage']) && !empty($formData['jour_plage'])) {
                 $plage = new PlageHoraire();
-                $plage->setJour(new \DateTime($formData['jour_plage']));
-                $plage->setHeureDebut(new \DateTime($formData['heure_debut_plage']));
-                $plage->setHeureFin(new \DateTime($formData['heure_fin_plage']));
+                $timezone = new \DateTimeZone('Europe/Paris');
+                $plage->setJour(new \DateTime($formData['jour_plage'], $timezone));
+                $plage->setHeureDebut(new \DateTime($formData['heure_debut_plage'], $timezone));
+                $plage->setHeureFin(new \DateTime($formData['heure_fin_plage'], $timezone));
                 $plage->setTache($tache);
                 $tache->addPlageHoraire($plage);
             }
@@ -374,80 +376,6 @@ class TacheController extends AbstractController
             'form' => $form->createView(),
             'tacheSource' => $tacheSource,
             'plagesSource' => $plagesSource,
-        ]);
-    }
-
-    #[Route('/{id}/affectation', name: 'tache_affectation')]
-    public function affectation(
-        int $id,
-        Request $request,
-        TacheRepository $tacheRepository,
-        BenevoleRepository $benevoleRepository,
-        AffectationTacheRepository $affectationRepository,
-        EntityManagerInterface $entityManager
-    ): Response {
-        $tache = $tacheRepository->find($id);
-
-        if (!$tache) {
-            $this->addFlash('error', 'Tâche non trouvée.');
-            return $this->redirectToRoute('tache_index');
-        }
-
-        // Récupérer les affectations actuelles
-        $affectationsActuelles = $affectationRepository->findBy(['tache' => $tache]);
-        $benevolesActuels = [];
-        foreach ($affectationsActuelles as $affectation) {
-            $benevolesActuels[] = $affectation->getBenevole();
-        }
-
-        $form = $this->createForm(TacheAffectationType::class);
-        $form->get('benevoles')->setData($benevolesActuels);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $benevolesSelectionnes = $form->get('benevoles')->getData();
-
-            // Vérifier la limite de personnes
-            if ($tache->getMaxPersonnes() && count($benevolesSelectionnes) > $tache->getMaxPersonnes()) {
-                $this->addFlash('error', sprintf(
-                    'Vous ne pouvez pas assigner plus de %d bénévole(s) à cette tâche. Vous avez sélectionné %d bénévole(s).',
-                    $tache->getMaxPersonnes(),
-                    count($benevolesSelectionnes)
-                ));
-                
-                return $this->render('taches/affectation.html.twig', [
-                    'form' => $form->createView(),
-                    'tache' => $tache,
-                    'benevolesActuels' => $benevolesActuels,
-                ]);
-            }
-
-            // Supprimer toutes les affectations existantes
-            foreach ($affectationsActuelles as $affectation) {
-                $entityManager->remove($affectation);
-            }
-
-            // Créer les nouvelles affectations
-            foreach ($benevolesSelectionnes as $benevole) {
-                $affectation = new AffectationTache();
-                $affectation->setTache($tache);
-                $affectation->setBenevole($benevole);
-                $affectation->setUtilisateur($benevole->getUtilisateur());
-                $affectation->setDateAffectation(new \DateTime());
-                $affectation->setStatut('assigne'); // Statut par défaut
-                $entityManager->persist($affectation);
-            }
-
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Les affectations ont été mises à jour avec succès !');
-            return $this->redirectToRoute('tache_index');
-        }
-
-        return $this->render('taches/affectation.html.twig', [
-            'form' => $form->createView(),
-            'tache' => $tache,
-            'benevolesActuels' => $benevolesActuels,
         ]);
     }
 
