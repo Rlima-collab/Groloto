@@ -19,92 +19,109 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 class EvenementController extends AbstractController
 {
     #[Route('/evenements', name: 'app_evenements')]
-    public function index(EvenementRepository $evenementRepo, TacheRepository $tacheRepo, CsrfTokenManagerInterface $csrfTokenManager): Response
+    public function index(WeekendRepository $weekendRepo, EvenementRepository $evenementRepo, TacheRepository $tacheRepo, CsrfTokenManagerInterface $csrfTokenManager): Response
     {
         $isAdmin = $this->isGranted('ROLE_ADMIN');
-        $now = new \DateTime();
+        // Récupérer les weekends à partir d'aujourd'hui (pas les passés), triés par date croissante
+        $today = new \DateTime('today');
+        $weekends = $weekendRepo->findBy([], ['date_debut' => 'ASC']);
+        
+        // Filtrer pour garder seulement les weekends futurs ou en cours
+        $futureWeekends = array_filter($weekends, function($weekend) use ($today) {
+            return $weekend->getDateFin() >= $today;
+        });
+        
+        $weekendsData = [];
+        $totalEvenements = 0;
 
-        $evenements = $evenementRepo->findAll();
-        $evenementsPasses = [];
-        $evenementsFuturs = [];
-        $evenementsCeMois = [];
-
-        $debutMois = new \DateTime('first day of this month 00:00:00');
-        $finMois = new \DateTime('last day of this month 23:59:59');
-
-        foreach ($evenements as $evenement) {
-            if ($evenement->getDateFin() < $now) {
-                $evenementsPasses[] = $evenement;
-            } else {
-                $evenementsFuturs[] = $evenement;
-            }
-            if ($evenement->getDateDebut() >= $debutMois && $evenement->getDateDebut() <= $finMois) {
-                $evenementsCeMois[] = $evenement;
-            }
-        }
-
-        usort($evenementsPasses, fn($a, $b) => $b->getDateFin() <=> $a->getDateFin());
-        usort($evenementsFuturs, fn($a, $b) => $a->getDateDebut() <=> $b->getDateDebut());
-
-        $taches = $tacheRepo->findAll();
-        $calendrierData = [];
-
-        foreach ($taches as $tache) {
-            $calendrierData[] = [
-                'id' => 'tache_' . $tache->getId(),
-                'title' => $tache->getTitre() ?: 'Tâche',
-                'start' => $tache->getDebut()->format('Y-m-d\TH:i:s'),
-                'end' => $tache->getFin()->format('Y-m-d\TH:i:s'),
-                'backgroundColor' => '#3b82f6',
-                'borderColor' => '#3b82f6',
-                'className' => 'tache-event',
-                'extendedProps' => [
-                    'entity' => 'tache',
-                    'tacheId' => $tache->getId(),
-                ],
+        foreach ($futureWeekends as $weekend) {
+            $nbEvenements = $weekend->getEvenements()->count();
+            $totalEvenements += $nbEvenements;
+            
+            $weekendsData[] = [
+                'id' => $weekend->getId(),
+                'nom' => $weekend->getNom(),
+                'date_debut' => $weekend->getDateDebut(),
+                'date_fin' => $weekend->getDateFin(),
+                'description' => $weekend->getDescription(),
+                'cover_image' => $weekend->getCoverImage(),
+                'nb_evenements' => $nbEvenements
             ];
         }
 
-        foreach ($evenements as $evenement) {
-            $isPasse = $evenement->getDateFin() < $now;
-            $start = $evenement->getDateDebut()?->format('Y-m-d') . 'T09:00:00';
-            $end = $evenement->getDateFin()?->format('Y-m-d') . 'T18:00:00';
-
-            $calendrierData[] = [
-                'id' => 'evenement_' . $evenement->getId(),
-                'title' => $evenement->getNom(),
-                'start' => $start,
-                'end' => $end,
-                'backgroundColor' => $isPasse ? '#6b7280' : '#10b981',
-                'borderColor' => $isPasse ? '#6b7280' : '#10b981',
-                'className' => 'evenement-event',
-                'extendedProps' => [
-                    'entity' => 'evenement',
-                    'evenementId' => $evenement->getId(),
-                    'lieu' => $evenement->getLieu(),
-                    'description' => $evenement->getDescription(),
-                    'isAdmin' => $isAdmin,
-                    'editUrl' => $this->generateUrl('app_evenement_edit', ['id' => $evenement->getId()]),
-                    'deleteUrl' => $this->generateUrl('app_evenement_delete', ['id' => $evenement->getId()]),
-                    'csrfToken' => $csrfTokenManager->getToken('delete_evenement_' . $evenement->getId())->getValue(),
-                ],
-            ];
-        }
+        $totalWeekends = count($futureWeekends);
 
         return $this->render('evenements.html.twig', [
-            'evenements_passes' => $evenementsPasses,
-            'evenements_futurs' => $evenementsFuturs,
-            'evenements_ce_mois' => count($evenementsCeMois),
-            'taches' => json_encode($calendrierData),
-            'metriques' => [
-                'total' => count($evenements),
-                'futurs' => count($evenementsFuturs),
-                'passes' => count($evenementsPasses),
-                'taches_total' => count($taches)
-            ],
-            'tous_evenements' => $evenements,
-            'total_evenements' => count($evenements),
+            'weekends' => $weekendsData,
+            'total_weekends' => $totalWeekends,
+            'total_evenements' => $totalEvenements,
             'isAdmin' => $isAdmin,
+        ]);
+    }
+
+    #[Route('/evenements/weekend/{id}', name: 'app_evenements_weekend')]
+    public function weekendDetail(
+        int $id,
+        WeekendRepository $weekendRepo,
+        EntityManagerInterface $em
+    ): Response {
+        $weekend = $weekendRepo->find($id);
+        
+        if (!$weekend) {
+            $this->addFlash('error', 'Weekend non trouvé.');
+            return $this->redirectToRoute('app_evenements');
+        }
+        
+        $evenements = $weekend->getEvenements()->toArray();
+        
+        return $this->render('evenement/weekend_detail.html.twig', [
+            'weekend' => $weekend,
+            'evenements' => $evenements,
+        ]);
+    }
+
+    #[Route('/evenements/weekend/{id}/pdf', name: 'app_evenements_weekend_pdf')]
+    public function weekendPdf(
+        int $id,
+        WeekendRepository $weekendRepo
+    ): Response {
+        $weekend = $weekendRepo->find($id);
+        
+        if (!$weekend) {
+            $this->addFlash('error', 'Weekend non trouvé.');
+            return $this->redirectToRoute('app_evenements');
+        }
+        
+        $evenements = $weekend->getEvenements()->toArray();
+        
+        if (empty($evenements)) {
+            $this->addFlash('warning', 'Aucun événement pour ce weekend.');
+            return $this->redirectToRoute('app_evenements');
+        }
+        
+        // Générer le HTML pour le PDF
+        $html = $this->renderView('evenement/weekend_pdf.html.twig', [
+            'weekend' => $weekend,
+            'evenements' => $evenements,
+        ]);
+        
+        // Créer le PDF avec Dompdf
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        
+        // Générer le nom du fichier
+        $filename = sprintf(
+            'evenements_%s_%s.pdf',
+            str_replace(' ', '_', $weekend->getNom()),
+            $weekend->getDateDebut()->format('d-m-Y')
+        );
+        
+        // Retourner le PDF
+        return new Response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
 

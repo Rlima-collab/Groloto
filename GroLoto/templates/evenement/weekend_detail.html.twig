@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Planning - {{ weekend.nom }}{% endblock %}
+{% block title %}Événements - {{ weekend.nom }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -20,10 +20,10 @@
             Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}
         </p>
         <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
-            <a href="{{ path('benevole_mon_planning') }}" class="btn-login">
-                <i class="bi bi-arrow-left"></i> Retour à mes weekends
+            <a href="{{ path('app_evenements') }}" class="btn-login">
+                <i class="bi bi-arrow-left"></i> Retour aux weekends
             </a>
-            <a href="{{ path('benevole_planning_weekend_pdf', {id: weekend.id}) }}" class="btn-download">
+            <a href="{{ path('app_evenements_weekend_pdf', {id: weekend.id}) }}" class="btn-download">
                 <i class="bi bi-download"></i> Télécharger en PDF
             </a>
         </div>
@@ -42,7 +42,7 @@
 
     <div class="card">
         <div class="card-header">
-            <h5 class="card-title">Mon Planning - {{ taches|length }} tâche{{ taches|length > 1 ? 's' : '' }}</h5>
+            <h5 class="card-title">Événements - {{ evenements|length }} événement{{ evenements|length > 1 ? 's' : '' }}</h5>
         </div>
         <div class="card-content">
             {% if weekend.description %}
@@ -61,13 +61,13 @@
             <div id="timeline-view" style="display: none;">
                 <div class="planning-timeline">
                 {% set currentDate = null %}
-                {% for tache in taches %}
-                    {% set tacheDate = tache.debut|date('Y-m-d') %}
-                    {% if currentDate != tacheDate %}
-                        {% set currentDate = tacheDate %}
+                {% for evenement in evenements %}
+                    {% set evenementDate = evenement.dateDebut|date('Y-m-d') %}
+                    {% if currentDate != evenementDate %}
+                        {% set currentDate = evenementDate %}
                         <div class="date-separator">
                             <span class="date-badge">
-                                {{ tache.debut|date('l d F Y')|capitalize }}
+                                {{ evenement.dateDebut|date('l d F Y')|capitalize }}
                             </span>
                         </div>
                     {% endif %}
@@ -76,36 +76,41 @@
                         <div class="tache-time">
                             <div class="time-badge">
                                 <i class="bi bi-clock"></i>
-                                {{ tache.debut|date('H:i') }}
+                                {% if evenement.heureDebut %}
+                                    {{ evenement.heureDebut|date('H:i') }}
+                                {% else %}
+                                    --:--
+                                {% endif %}
                             </div>
                             <div class="time-line"></div>
                         </div>
                         <div class="tache-content">
                             <div class="tache-card">
-                                <h4 class="tache-title">{{ tache.titre }}</h4>
+                                <h4 class="tache-title">{{ evenement.nom }}</h4>
                                 <div class="tache-details">
                                     <span class="detail-item">
                                         <i class="bi bi-hourglass-split"></i>
-                                        {{ tache.debut|date('H:i') }} - {{ tache.fin|date('H:i') }}
-                                        <small>({{ ((tache.fin.timestamp - tache.debut.timestamp) / 3600)|number_format(1) }}h)</small>
+                                        {% if evenement.heureDebut %}
+                                            {{ evenement.heureDebut|date('H:i') }}
+                                            {% if evenement.heureFin %}
+                                                - {{ evenement.heureFin|date('H:i') }}
+                                                <small>({{ ((evenement.heureFin.timestamp - evenement.heureDebut.timestamp) / 60)|number_format(0) }}min)</small>
+                                            {% endif %}
+                                        {% else %}
+                                            Horaire non spécifié
+                                        {% endif %}
                                     </span>
-                                    {% if tache.posteRequis %}
+                                    {% if evenement.lieu %}
                                         <span class="detail-item">
-                                            <i class="bi bi-person-badge"></i>
-                                            {{ tache.posteRequis }}
-                                        </span>
-                                    {% endif %}
-                                    {% if tache.maxPersonnes %}
-                                        <span class="detail-item">
-                                            <i class="bi bi-people"></i>
-                                            {{ tache.maxPersonnes }} personne{{ tache.maxPersonnes > 1 ? 's' : '' }} max
+                                            <i class="bi bi-geo-alt"></i>
+                                            {{ evenement.lieu }}
                                         </span>
                                     {% endif %}
                                 </div>
-                                {% if tache.remarque %}
+                                {% if evenement.description %}
                                     <div class="tache-remarque">
                                         <i class="bi bi-chat-left-text"></i>
-                                        <span>{{ tache.remarque }}</span>
+                                        <span>{{ evenement.description }}</span>
                                     </div>
                                 {% endif %}
                             </div>
@@ -120,18 +125,20 @@
                 <div class="summary-stats">
                     <div class="stat-item">
                         <i class="bi bi-list-check"></i>
-                        <span>{{ taches|length }} tâche{{ taches|length > 1 ? 's' : '' }}</span>
+                        <span>{{ evenements|length }} événement{{ evenements|length > 1 ? 's' : '' }}</span>
                     </div>
-                    <div class="stat-item">
-                        <i class="bi bi-hourglass"></i>
-                        <span>
-                            {% set totalHeures = 0 %}
-                            {% for tache in taches %}
-                                {% set totalHeures = totalHeures + ((tache.fin.timestamp - tache.debut.timestamp) / 3600) %}
-                            {% endfor %}
-                            {{ totalHeures|number_format(1) }}h au total
-                        </span>
-                    </div>
+                    {% set totalMinutes = 0 %}
+                    {% for evenement in evenements %}
+                        {% if evenement.heureFin %}
+                            {% set totalMinutes = totalMinutes + ((evenement.heureFin.timestamp - evenement.heureDebut.timestamp) / 60) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if totalMinutes > 0 %}
+                        <div class="stat-item">
+                            <i class="bi bi-hourglass"></i>
+                            <span>{% if totalMinutes >= 60 %}{{ (totalMinutes / 60)|number_format(1) }}h{% else %}{{ totalMinutes|number_format(0) }}min{% endif %} au total</span>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -464,36 +471,49 @@ let calendarStart, calendarEnd;
 
 // Préparer les événements pour FullCalendar
 const events = [
-    {% for tache in taches %}
+    {% for evenement in evenements %}
     {
-        id: {{ tache.id }},
-        title: '{{ tache.titre|e('js') }}',
-        start: '{{ tache.debut|date('Y-m-d\\TH:i:s') }}',
-        end: '{{ tache.fin|date('Y-m-d\\TH:i:s') }}',
-        backgroundColor: '#1a3c5a',
-        borderColor: '#2b5d8a',
+        id: {{ evenement.id }},
+        title: '{{ evenement.nom|e('js') }}',
+        start: '{{ evenement.dateDebut|date('Y-m-d') }}T{% if evenement.heureDebut %}{{ evenement.heureDebut|date('H:i:s') }}{% else %}10:00:00{% endif %}',
+        durationMinutes: {{ evenement.dureeMinutes|default(60) }},
+        backgroundColor: '#10b981',
+        borderColor: '#059669',
         extendedProps: {
-            poste: '{{ tache.posteRequis|default('')|e('js') }}',
-            maxPersonnes: {{ tache.maxPersonnes|default(0) }},
-            remarque: '{{ tache.remarque|default('')|e('js') }}'
+            lieu: '{{ evenement.lieu|default('')|e('js') }}',
+            description: '{{ evenement.description|default('')|e('js') }}'
         }
     }{{ not loop.last ? ',' : '' }}
     {% endfor %}
 ];
 
-// Calculer la date de début (première tâche ou début du weekend)
+// Calculer dynamiquement la fin des événements (gère le passage à minuit)
+const eventsWithEnd = events.map(e => {
+    try {
+        const startDate = new Date(e.start);
+        const minutes = (typeof e.durationMinutes === 'number' && e.durationMinutes > 0) ? e.durationMinutes : 60;
+        const endDate = new Date(startDate.getTime() + minutes * 60000);
+        // FullCalendar accepte ISO sans timezone; on coupe à yyyy-MM-ddTHH:mm:ss
+        const endStr = endDate.toISOString().slice(0,19);
+        return { ...e, end: endStr };
+    } catch (_) {
+        return e;
+    }
+});
+
+// Calculer la date de début (premier événement ou début du weekend)
 const weekendStart = new Date('{{ weekend.dateDebut|date('Y-m-d') }}');
 const weekendEnd = new Date('{{ weekend.dateFin|date('Y-m-d') }}');
 
 if (events.length > 0) {
-    const firstTaskDate = new Date(events[0].start);
-    const lastTaskDate = new Date(events[events.length - 1].end);
+    const firstEventDate = new Date(events[0].start);
+    const lastEventDate = new Date(events[events.length - 1].end);
     
-    // Prendre la date la plus précoce entre la première tâche et le début du weekend
-    calendarStart = firstTaskDate < weekendStart ? firstTaskDate : weekendStart;
+    // Prendre la date la plus précoce entre le premier événement et le début du weekend
+    calendarStart = firstEventDate < weekendStart ? firstEventDate : weekendStart;
     
-    // Prendre la date la plus tardive entre la dernière tâche et la fin du weekend
-    calendarEnd = lastTaskDate > weekendEnd ? lastTaskDate : weekendEnd;
+    // Prendre la date la plus tardive entre le dernier événement et la fin du weekend
+    calendarEnd = lastEventDate > weekendEnd ? lastEventDate : weekendEnd;
 } else {
     calendarStart = weekendStart;
     calendarEnd = weekendEnd;
@@ -523,15 +543,10 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             slotMinTime: '00:00:00',
             slotMaxTime: '24:00:00',
-            slotLabelFormat: {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            },
             allDaySlot: false,
             nowIndicator: true,
             dayHeaderFormat: { weekday: 'long', day: 'numeric', month: 'long' },
-            events: events,
+            events: eventsWithEnd,
             eventClick: function(info) {
                 const props = info.event.extendedProps;
                 let details = info.event.title + '\n\n';
@@ -541,9 +556,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const duration = (info.event.end - info.event.start) / (1000 * 60 * 60);
                 details += '⏱️  Durée: ' + duration.toFixed(1) + 'h\n';
                 
-                if (props.poste) details += '\n👤 Poste: ' + props.poste;
-                if (props.maxPersonnes) details += '\n👥 Max: ' + props.maxPersonnes + ' personne(s)';
-                if (props.remarque) details += '\n\n💬 ' + props.remarque;
+                if (props.lieu) details += '\n📍 Lieu: ' + props.lieu;
+                if (props.description) details += '\n\n💬 ' + props.description;
                 
                 alert(details);
             },
@@ -552,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     html: '<div style="padding: 2px 4px; font-size: 0.85rem;">' +
                           '<strong>' + arg.event.title + '</strong><br>' +
                           '<small>' + arg.timeText + '</small>' +
-                          (arg.event.extendedProps.poste ? '<br><small>📍 ' + arg.event.extendedProps.poste + '</small>' : '') +
+                          (arg.event.extendedProps.lieu ? '<br><small>📍 ' + arg.event.extendedProps.lieu + '</small>' : '') +
                           '</div>'
                 };
             },
