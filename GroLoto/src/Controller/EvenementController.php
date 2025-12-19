@@ -22,12 +22,19 @@ class EvenementController extends AbstractController
     public function index(WeekendRepository $weekendRepo, EvenementRepository $evenementRepo, TacheRepository $tacheRepo, CsrfTokenManagerInterface $csrfTokenManager): Response
     {
         $isAdmin = $this->isGranted('ROLE_ADMIN');
-        // Récupérer tous les weekends
-        $weekends = $weekendRepo->findAll();
+        // Récupérer les weekends à partir d'aujourd'hui (pas les passés), triés par date croissante
+        $today = new \DateTime('today');
+        $weekends = $weekendRepo->findBy([], ['date_debut' => 'ASC']);
+        
+        // Filtrer pour garder seulement les weekends futurs ou en cours
+        $futureWeekends = array_filter($weekends, function($weekend) use ($today) {
+            return $weekend->getDateFin() >= $today;
+        });
+        
         $weekendsData = [];
         $totalEvenements = 0;
 
-        foreach ($weekends as $weekend) {
+        foreach ($futureWeekends as $weekend) {
             $nbEvenements = $weekend->getEvenements()->count();
             $totalEvenements += $nbEvenements;
             
@@ -42,7 +49,7 @@ class EvenementController extends AbstractController
             ];
         }
 
-        $totalWeekends = count($weekends);
+        $totalWeekends = count($futureWeekends);
 
         return $this->render('evenements.html.twig', [
             'weekends' => $weekendsData,
