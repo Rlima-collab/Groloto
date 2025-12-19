@@ -102,9 +102,15 @@
                 items.forEach(item => {
                     const el = document.createElement('div');
                     el.className = 'notification-item';
+                    // Tronquer le message si trop long
+                    const maxLength = 60;
+                    let displayMessage = item.message;
+                    if (displayMessage.length > maxLength) {
+                        displayMessage = displayMessage.substring(0, maxLength) + '...';
+                    }
                     el.innerHTML = `
                         <div class="notification-item-body">
-                            <div class="notification-text">${escapeHtml(item.message)}</div>
+                            <div class="notification-text">${escapeHtml(displayMessage)}</div>
                             <div class="notification-meta">${item.createdAt}</div>
                         </div>
                         <div class="notification-actions">

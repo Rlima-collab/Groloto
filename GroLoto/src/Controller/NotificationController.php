@@ -38,12 +38,17 @@ class NotificationController extends AbstractController
         $notifications = $notificationRepo->findUnreadByUser($user);
         $data = [];
         foreach ($notifications as $notification) {
+            // S'assurer que la date est en timezone Europe/Paris
+            $createdAt = $notification->getCreatedAt();
+            if ($createdAt instanceof \DateTime) {
+                $createdAt->setTimezone(new \DateTimeZone('Europe/Paris'));
+            }
             $data[] = [
                 'id' => $notification->getId(),
                 'message' => $notification->getMessage(),
                 'type' => $notification->getType(),
                 'lien' => $notification->getLien(),
-                'createdAt' => $notification->getCreatedAt()->format('d/m/Y H:i'),
+                'createdAt' => $createdAt->format('d/m/Y H:i'),
             ];
         }
         return new JsonResponse($data);
