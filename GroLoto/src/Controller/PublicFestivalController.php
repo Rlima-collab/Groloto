@@ -13,9 +13,20 @@ class PublicFestivalController extends AbstractController
     #[Route('/festivals', name: 'public_festivals')]
     public function index(EntityManagerInterface $em): Response
     {
-        $weekends = $em->getRepository(Weekend::class)->findAll();
+        // Récupérer les weekends à partir d'aujourd'hui (pas les passés), triés par date croissante
+        $today = new \DateTime('today');
+        $weekends = $em->getRepository(Weekend::class)->findBy(
+            [],
+            ['date_debut' => 'ASC']
+        );
+        
+        // Filtrer pour garder seulement les weekends futurs ou en cours
+        $futureWeekends = array_filter($weekends, function(Weekend $weekend) use ($today) {
+            return $weekend->getDateFin() >= $today;
+        });
+        
         return $this->render('public_festivals/index.html.twig', [
-            'weekends' => $weekends,
+            'weekends' => $futureWeekends,
         ]);
     }
 

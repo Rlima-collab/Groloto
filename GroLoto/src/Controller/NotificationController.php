@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -14,12 +15,26 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class NotificationController extends AbstractController
 {
     #[Route('/notifications', name: 'app_notifications')]
-    public function index(NotificationRepository $notificationRepo): Response
+    public function index(NotificationRepository $notificationRepo, Request $request): Response
     {
         $user = $this->getUser();
-        $notifications = $notificationRepo->findByUser($user);
+        $view = $request->query->get('view', 'inbox');
+
+        if ($view === 'trash') {
+            $notifications = $notificationRepo->createQueryBuilder('n')
+                ->where('n.destinataire = :user')
+                ->andWhere('n.type = :type')
+                ->setParameter('user', $user)
+                ->setParameter('type', 'corbeille')
+                ->orderBy('n.createdAt', 'DESC')
+                ->getQuery()
+                ->getResult();
+        } else {
+            $notifications = $notificationRepo->findByUser($user);
+        }
         return $this->render('notification/index.html.twig', [
             'notifications' => $notifications,
+            'view' => $view,
         ]);
     }
 
@@ -38,12 +53,17 @@ class NotificationController extends AbstractController
         $notifications = $notificationRepo->findUnreadByUser($user);
         $data = [];
         foreach ($notifications as $notification) {
+            // S'assurer que la date est en timezone Europe/Paris
+            $createdAt = $notification->getCreatedAt();
+            if ($createdAt instanceof \DateTime) {
+                $createdAt->setTimezone(new \DateTimeZone('Europe/Paris'));
+            }
             $data[] = [
                 'id' => $notification->getId(),
                 'message' => $notification->getMessage(),
                 'type' => $notification->getType(),
                 'lien' => $notification->getLien(),
-                'createdAt' => $notification->getCreatedAt()->format('d/m/Y H:i'),
+                'createdAt' => $createdAt->format('d/m/Y H:i'),
             ];
         }
         return new JsonResponse($data);
@@ -65,6 +85,28 @@ class NotificationController extends AbstractController
     {
         $user = $this->getUser();
         $notificationRepo->markAllAsReadByUser($user);
+        $em->flush();
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/notifications/{id}/corbeille', name: 'app_notification_trash', methods: ['POST'])]
+    public function trash(Notification $notification, EntityManagerInterface $em): JsonResponse
+    {
+        if ($notification->getDestinataire() !== $this->getUser()) {
+            return new JsonResponse(['error' => 'Accès refusé'], 403);
+        }
+        $notification->setType('corbeille');
+        $em->flush();
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/notifications/{id}/supprimer', name: 'app_notification_delete', methods: ['POST'])]
+    public function delete(Notification $notification, EntityManagerInterface $em): JsonResponse
+    {
+        if ($notification->getDestinataire() !== $this->getUser()) {
+            return new JsonResponse(['error' => 'Accès refusé'], 403);
+        }
+        $em->remove($notification);
         $em->flush();
         return new JsonResponse(['success' => true]);
     }

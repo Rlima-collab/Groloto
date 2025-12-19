@@ -87,7 +87,7 @@
             background: white;
             border: 1px solid var(--border);
             border-radius: 12px;
-            overflow: hidden;
+            overflow: visible; /* allow menus to overflow the card */
             transition: all 0.3s ease;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
@@ -196,6 +196,73 @@
             stroke: currentColor;
             stroke-width: 2.5;
         }
+
+        /* --- NAV ET MENU --- */
+        .notif-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .notif-nav .nav-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-light);
+            background: transparent;
+            border: 1px solid transparent;
+        }
+
+        .notif-nav .nav-item.active {
+            background: white;
+            color: var(--text);
+            border-color: var(--border);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            font-weight: 600;
+        }
+
+        .more { position: relative; }
+        .more-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            font-size: 18px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+        .more-menu {
+            position: absolute;
+            right: 0;
+            top: 36px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            min-width: 140px; /* wider so labels fit */
+            z-index: 10050; /* must be above other UI elements */
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .more-menu .menu-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 8px 10px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .more-menu .menu-item:hover { background: #f3f4f6; }
 
         /* === CONTENU DÉROULANT === */
         .notification-content {
@@ -313,6 +380,11 @@
         </div>
     </div>
 
+    <nav class="notif-nav">
+        <a href="{{ path('app_notifications', {'view':'inbox'}) }}" class="nav-item {{ view != 'trash' ? 'active' : '' }}">Notifications reçues</a>
+        <a href="{{ path('app_notifications', {'view':'trash'}) }}" class="nav-item {{ view == 'trash' ? 'active' : '' }}">Corbeille</a>
+    </nav>
+
     {% if notifications|length > 0 %}
         <div class="notifications-list">
             {% for notif in notifications %}
@@ -350,13 +422,30 @@
                         </div>
                         <div class="notification-actions">
                             {% if notif.lien %}
-                                <a href="{{ notif.lien }}" class="btn-view">Voir</a>
+                                {% set is_admin_link = notif.lien starts with('/admin') %}
+                                {% if is_admin_link and not is_granted('ROLE_ADMIN') %}
+                                    <span class="btn-view disabled" title="Accès restreint">Voir</span>
+                                {% else %}
+                                    <a href="{{ notif.lien }}" class="btn-view fetch-link">Voir</a>
+                                {% endif %}
                             {% endif %}
-                            {% if not notif.lue %}
-                                <button type="button" class="btn-mark-read" data-action="mark-read">
+                            {% if view != 'trash' and not notif.lue %}
+                                <button type="button" class="btn-mark-read" data-action="mark-read" title="Marquer comme lu">
                                     <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                 </button>
                             {% endif %}
+
+                            <div class="more">
+                                <button class="more-btn" aria-expanded="false" title="Plus d'actions">⋯</button>
+                                <div class="more-menu" role="menu" style="display:none;">
+                                    {% if view == 'trash' %}
+                                        <button class="menu-item text-danger" data-action="delete" title="Supprimer">Supprimer</button>
+                                    {% else %}
+                                        <button class="menu-item" data-action="trash" title="Corbeille">Corbeille</button>
+                                        <button class="menu-item text-danger" data-action="delete" title="Supprimer">Supprimer</button>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -417,6 +506,44 @@
                     e.stopPropagation();
                     const card = this.closest('.notification-card');
                     markAsRead(card.dataset.id, card);
+                });
+            });
+
+            // Toggle more-menu
+            document.querySelectorAll('.more-btn').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const menu = this.nextElementSibling;
+                    const open = menu.style.display === 'block';
+                    // close all
+                    document.querySelectorAll('.more-menu').forEach(m => m.style.display = 'none');
+                    if (!open) menu.style.display = 'block';
+                });
+            });
+
+            // close menus on outside click
+            document.addEventListener('click', function () {
+                document.querySelectorAll('.more-menu').forEach(m => m.style.display = 'none');
+            });
+
+            // Intercept "Voir" links to avoid navigating to nonexistent routes
+            document.querySelectorAll('.fetch-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const href = this.getAttribute('href');
+                    if (!href) return;
+                    // Use HEAD to check existence without requesting full resource
+                    fetch(href, { method: 'HEAD' })
+                        .then(res => {
+                            if (res.ok) {
+                                // open in new tab to avoid interfering with current list UI
+                                window.open(href, '_blank');
+                            } else {
+                                alert('Lien introuvable ou inaccessible.');
+                            }
+                        })
+                        .catch(() => alert('Erreur réseau lors de la vérification du lien.'));
                 });
             });
 
@@ -497,6 +624,48 @@
                     card.querySelector('[data-action="mark-read"]')?.remove();
                 });
             }
+               // Mettre en corbeille
+               document.querySelectorAll('[data-action="trash"]').forEach(btn => {
+                   btn.addEventListener('click', function (e) {
+                       e.stopPropagation();
+                       const card = this.closest('.notification-card');
+                       moveToTrash(card.dataset.id, card);
+                   });
+               });
+
+               // Supprimer définitivement
+               document.querySelectorAll('[data-action="delete"]').forEach(btn => {
+                   btn.addEventListener('click', function (e) {
+                       e.stopPropagation();
+                       const card = this.closest('.notification-card');
+                       deleteNotification(card.dataset.id, card);
+                   });
+               });
+
+               function moveToTrash(id, card) {
+                   fetch(`{{ path('app_notification_trash', {'id':'ID'}) }}`.replace('ID', id), {
+                       method: 'POST',
+                       headers: {
+                           'X-Requested-With': 'XMLHttpRequest'
+                       }
+                   })
+                   .then(() => {
+                       card.remove();
+                   });
+               }
+
+               function deleteNotification(id, card) {
+                   if (!confirm('Supprimer définitivement cette notification ?')) return;
+                   fetch(`{{ path('app_notification_delete', {'id':'ID'}) }}`.replace('ID', id), {
+                       method: 'POST',
+                       headers: {
+                           'X-Requested-With': 'XMLHttpRequest'
+                       }
+                   })
+                   .then(() => {
+                       card.remove();
+                   });
+               }
         });
     </script>
 {% endblock %}
