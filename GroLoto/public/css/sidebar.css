@@ -259,6 +259,23 @@
     color: #ffffff;
 }
 
+/* Ensure main content is offset to the right of the fixed sidebar */
+.main-content {
+    margin-left: 250px;
+    transition: margin-left 0.3s ease;
+}
+
+/* When sidebar is collapsed, reduce the left offset */
+body.sidebar-collapsed .main-content {
+    margin-left: 60px;
+}
+
+/* Small screens: remove offset so layout stacks naturally */
+@media (max-width: 768px) {
+    .main-content { margin-left: 0; }
+    .site-header { left: 0; }
+}
+
 .submenu li a.active-page {
     background-color: rgba(108, 99, 255, 0.5);
     color: #ffffff;

@@ -5,11 +5,16 @@
 {{ parent() }}
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* Reset limité au container de la messagerie uniquement */
+.chat-container, .chat-container * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Inter', sans-serif; background: #ffffff; color: #0f1724; }
-main.content { padding: 0 !important; margin: 0 !important; height: calc(100vh - 70px); overflow: hidden; padding-top: 70px !important; }
+/* Cacher le footer sur la page messagerie */
+.footer-dark, footer { display: none !important; }
+/* Layout principal de la messagerie */
+.main-content { min-height: 100vh; display: flex; flex-direction: column; }
+main.content { padding: 0 !important; margin: 0 !important; flex: 1; overflow: hidden; margin-top: 70px !important; height: calc(100vh - 70px); }
 main.content .container-fluid { padding: 0 !important; height: 100%; }
-.chat-container { display: flex; height: 100%; padding: 0; gap: 0; background: #f8f9fa; margin: 0; }
+.chat-container { display: flex; height: 100%; padding: 0; gap: 0; background: #f8f9fa; margin: 0; position: relative; }
 .chat-sidebar { width: 350px; background: linear-gradient(135deg, #07112a 0%, #0f2a5a 100%); border: none; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
 .chat-sidebar-header { padding: 20px; background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); }
 .chat-sidebar-header h2 { font-size: 20px; font-weight: 600; color: white; margin-bottom: 8px; }

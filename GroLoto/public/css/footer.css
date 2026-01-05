@@ -95,3 +95,14 @@
         text-align: center;
     }
 }
+
+/* Reserve de l'espace au bas des pages pour le footer afin d'éviter qu'il ne chevauche le contenu */
+.content {
+    padding-bottom: 220px;
+    box-sizing: border-box;
+}
+
+/* Si le footer est plus petit sur mobile, réduire l'espace réservé */
+@media (max-width: 767px) {
+    .content { padding-bottom: 160px; }
+}
