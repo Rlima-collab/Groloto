@@ -5,12 +5,13 @@
 {% block stylesheets %}
     {{ parent() }}
     <link href="{{ asset('css/modele.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/stocks/stocks-common.css') }}" rel="stylesheet">
     <link href="{{ asset('css/benevoles/benevoles-common.css') }}" rel="stylesheet">
     <link href="{{ asset('css/benevoles/benevoles-list.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
-<div class="hero-section benevoles-hero">
+<div class="hero-section stocks-hero">
     <div class="shine"></div>
     <div class="hero-content">
         <h1 class="hero-title">Événements par Weekend</h1>
@@ -34,11 +35,7 @@
 </div>
 
 <div class="container">
-    <div class="card">
-        <div class="card-header">
-            <h5 class="card-title">Weekends</h5>
-        </div>
-        <div class="card-content">
+    <div class="weekends-section">
             {% if weekends is not empty %}
                 <div class="weekends-grid">
                     {% for weekend in weekends %}
@@ -55,7 +52,7 @@
                                 </div>
                             {% else %}
                                 <div class="weekend-image-empty">
-                                    <i class="bi bi-image"></i>
+                                    <i class="bi bi-calendar-event"></i>
                                 </div>
                             {% endif %}
                             <div class="weekend-content">
@@ -93,180 +90,9 @@
                     <p>Aucun weekend n'est enregistré pour le moment.</p>
                 </div>
             {% endif %}
-        </div>
     </div>
 </div>
 
-<style>
-.weekends-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1rem;
-}
-
-.weekend-card {
-    background: white;
-    border: 2px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 0;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-}
-
-.weekend-card:hover {
-    border-color: #0f172a;
-    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.15);
-    transform: translateY(-6px);
-}
-
-.weekend-image {
-    position: relative;
-    width: 100%;
-    height: 220px;
-    overflow: hidden;
-}
-
-.weekend-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.weekend-card:hover .weekend-image img {
-    transform: scale(1.08);
-}
-
-.weekend-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
-}
-
-.weekend-image-empty {
-    width: 100%;
-    height: 220px;
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 4rem;
-    color: #cbd5e1;
-}
-
-.weekend-content {
-    padding: 1.5rem;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.weekend-header {
-    margin-bottom: 1rem;
-}
-
-.weekend-header h3 {
-    margin: 0 0 0.5rem 0;
-    color: #0f172a;
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.weekend-date {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #64748b;
-    font-size: 0.9rem;
-}
-
-.weekend-date i {
-    color: #2563eb;
-}
-
-.weekend-description {
-    color: #64748b;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    margin-bottom: 1rem;
-    flex-grow: 1;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.weekend-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 1rem;
-    border-top: 1px solid #e2e8f0;
-}
-
-.weekend-stats {
-    display: flex;
-    gap: 0.75rem;
-}
-
-.stat-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.4rem 0.8rem;
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #475569;
-}
-
-.stat-badge i {
-    color: #2563eb;
-}
-
-.btn-primary {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.btn-primary:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
-}
-
-.empty-state {
-    text-align: center;
-    padding: 3rem 1rem;
-}
-
-.empty-state h3 {
-    margin: 1rem 0 0.5rem 0;
-    color: #334155;
-    font-size: 1.25rem;
-}
-
-.empty-state p {
-    color: #64748b;
-    font-size: 0.95rem;
-}
-</style>
+<link rel="stylesheet" href="{{ asset('css/evenements.css') }}">
 
 {% endblock %}

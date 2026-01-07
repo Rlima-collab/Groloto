@@ -6,39 +6,7 @@
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/recu_fiscal.css') }}">
-    <style>
-        /* Override pour les bénévoles avec une couleur verte */
-        .recu-card::before {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-        .recu-card:hover {
-            border-color: #10b981;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
-        }
-        .recu-card-icon {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-        .recu-stats-bar {
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            border-color: #bbf7d0;
-        }
-        .recu-stat-icon {
-            background: #10b981;
-        }
-        .recu-stat-content h4 {
-            color: #166534;
-        }
-        .recu-stat-content p {
-            color: #14532d;
-        }
-        .recu-btn-download {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-        .recu-btn-download:hover {
-            background: linear-gradient(135deg, #059669, #047857);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
 {% endblock %}
 
 {% block body %}

@@ -1,708 +1,1152 @@
-/* =============== WEEKENDS PUBLIC PAGE - HERO SECTION =============== */
-.hero-section.weekend-hero {
-    position: relative;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    color: #fff;
-    padding: 4rem 2rem 5rem;
-    margin: -20px -20px 3rem -20px; /* Negative margin to pull to edges, positive bottom margin */
+/**
+ * ========================================================================
+ * WEEKENDS CSS - Styles pour les pages de gestion des weekends
+ * ========================================================================
+ * Ce fichier contient tous les styles extraits des templates weekend.
+ * Organisation :
+ *   1. Styles communs (utilitaires, alertes, animations)
+ *   2. Page Create - Création de weekend
+ *   3. Page Created - Confirmation de création
+ *   4. Page Details - Détails d'un weekend
+ *   5. Page Edit - Modification de weekend
+ *   6. Page Liste - Liste des weekends
+ *   7. Responsive Design
+ * ========================================================================
+ */
+
+/* ========================================================================
+   1. STYLES COMMUNS - Utilitaires et composants partagés
+   ======================================================================== */
+
+/* --- Utilitaires de mise en page --- */
+.ml-3 {
+    margin-left: 1rem;
+}
+
+.mt-8 {
+    margin-top: 2rem;
+}
+
+.text-muted {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* --- Grilles --- */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-col {
+    flex: 1;
+}
+
+/* --- Alertes --- */
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+.alert svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.alert-success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #10b981;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #ef4444;
+}
+
+.alert-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+/* --- Animations --- */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* ========================================================================
+   2. PAGE CREATE - Styles pour la création de weekend
+   ======================================================================== */
+
+/* Les styles de create utilisent principalement les utilitaires communs */
+
+
+/* ========================================================================
+   3. PAGE CREATED - Styles pour la confirmation de création
+   ======================================================================== */
+
+/* --- En-tête de succès --- */
+.success-header {
     text-align: center;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-radius: 12px;
+    margin-bottom: 2rem;
 }
 
-.hero-section.weekend-hero::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 60%),
-                radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.15), transparent 60%);
-    pointer-events: none;
+.success-icon {
+    width: 80px;
+    height: 80px;
+    color: #10b981;
+    margin-bottom: 1.5rem;
 }
 
-.hero-section.weekend-hero::after {
-    display: none;
+.success-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #065f46;
+    margin-bottom: 0.75rem;
 }
 
-.hero-section.weekend-hero .shine {
-    display: none; /* Removing the shine animation for a cleaner look */
+/* --- Informations du weekend créé --- */
+.weekend-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #047857;
+    margin-bottom: 0.5rem;
 }
 
-.hero-section.weekend-hero .hero-content {
-    /* Removed max-width constraint to match dashboard style */
-    position: relative;
-    z-index: 2;
+.weekend-dates {
+    font-size: 1rem;
+    color: #059669;
+    font-weight: 500;
+}
+
+.weekend-description-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #047857;
+    line-height: 1.6;
+    border-left: 3px solid #10b981;
+}
+
+/* --- Prochaines étapes --- */
+.next-steps {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.next-steps h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+}
+
+.step-description {
+    color: #475569;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+/* --- Boutons de la page created --- */
+.btn-primary {
+    display: inline-block;
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b2d45 100%);
+    color: #fff;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.05rem;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(13, 27, 42, 0.3);
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #0d1b2a;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.btn-secondary:hover {
+    background: #f1f5f9;
+    border-color: #0d1b2a;
+}
+
+/* ========================================================================
+   4. PAGE DETAILS - Styles pour les détails d'un weekend
+   ======================================================================== */
+
+/* --- Hero section détails --- */
+.weekend-detail-hero {
+    min-height: 350px;
+}
+
+.hero-breadcrumb {
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.hero-breadcrumb a {
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.hero-breadcrumb a:hover {
+    color: white;
+}
+
+.hero-breadcrumb span {
+    color: #cbd5e1;
+    margin: 0 0.5rem;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.hero-actions svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 0.5rem;
+}
+
+.btn-secondary-outline {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+    transform: translateY(-2px);
+}
+
+.btn-login svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 0.5rem;
+}
+
+/* --- Conteneur des détails --- */
+.details-container {
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 3rem 2rem;
 }
 
-/* Override Bootstrap/.container-fluid horizontal padding when showing weekends pages
-   Keeps other pages using .container-fluid untouched because the selector targets
-   container-fluid that contains weekends-specific elements only. */
-.container-fluid > .hero-section.weekend-hero,
-.container-fluid > .hero-section.dashboard-hero,
-.container-fluid > .weekends-grid,
-.container-fluid > .weekend-banner,
-.container-fluid > .weekend-content {
-    padding-left: 0;
-    padding-right: 0;
-    max-width: 100%;
+/* --- Carte de description --- */
+.description-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Remove specific hero styles that might conflict with dashboard.css */
-.hero-section.weekend-hero .hero-title,
-.hero-section.weekend-hero .hero-description,
-.hero-section.weekend-hero .hero-content {
-    /* Resetting these so dashboard.css takes precedence if classes are mixed, 
-       or just removing them if we are fully switching to dashboard-hero structure */
+.description-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* =============== WEEKENDS GRID & CARTES =============== */
-.weekends-grid {
+.description-content {
+    color: #334155;
+    line-height: 1.8;
+    font-size: 1rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* --- Grille des détails --- */
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* --- Cartes de détails --- */
+.details-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.details-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b2d45 100%);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.card-header svg {
+    width: 24px;
+    height: 24px;
+}
+
+.card-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+/* --- Lignes d'information --- */
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #475569;
+}
+
+.info-value {
+    color: #0d1b2a;
+    font-weight: 500;
+}
+
+/* --- Message vide --- */
+.empty-message {
+    color: #94a3b8;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+/* --- Bouton d'ajout --- */
+.btn-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 0.875rem 1.5rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06);
+    width: 100%;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.25), 0 4px 6px -2px rgba(16, 185, 129, 0.15);
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    color: white;
+}
+
+.btn-add:active {
+    transform: translateY(0);
+}
+
+/* --- Liste des éléments --- */
+.list-items {
     display: flex;
     flex-direction: column;
+    gap: 1rem;
+}
+
+.list-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.list-item:hover {
+    background: #f1f5f9;
+}
+
+.item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
     align-items: center;
-    gap: 2.5rem;
-    padding: 0 2rem 4rem;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.event-icon {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.task-icon {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.item-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.item-content {
+    flex: 1;
+}
+
+.item-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0d1b2a;
+    margin-bottom: 0.25rem;
+}
+
+.item-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+/* --- Zone de danger --- */
+.danger-zone {
+    background: #fef2f2;
+    border: 2px solid #fecaca;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.danger-zone h3 {
+    color: #991b1b;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.danger-zone p {
+    color: #b91c1c;
+    margin-bottom: 1.5rem;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+/* ========================================================================
+   5. PAGE EDIT - Styles pour la modification de weekend
+   ======================================================================== */
+
+/* --- Image actuelle --- */
+.current-image p {
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.5rem;
+}
+
+/* --- Aide de formulaire --- */
+.form-help {
+    display: block;
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+/* ========================================================================
+   6. PAGE LISTE - Styles pour la liste des weekends
+   ======================================================================== */
+
+/* --- Conteneur personnalisé --- */
+.container-custom {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+/* --- État vide --- */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    color: #cbd5e1;
+    margin: 0 auto 1.5rem;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Grille des weekends --- */
+.weekends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
     max-width: 1400px;
     margin: 0 auto;
 }
 
+/* --- Carte de weekend --- */
 .weekend-card {
-    position: relative;
-    background: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    background: white;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
-    text-decoration: none;
-    color: inherit;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
-    flex-direction: row; /* Horizontal layout */
-    height: auto;
-    width: 100%;
-    max-width: 900px; /* Limit width but allow stretching */
-    min-height: 220px;
+    flex-direction: column;
+    border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .weekend-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* --- Image de la carte weekend --- */
+.weekend-card-image {
+    width: 100%;
+    height: 160px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b2d45 100%);
+}
+
+.weekend-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.weekend-card:hover .weekend-card-image img {
     transform: scale(1.05);
 }
 
-/* Image */
-.weekend-card .image {
-    width: 40%; /* Fixed width for image part */
-    min-width: 300px;
-    /* height: auto; removed to allow flex stretch */
-    overflow: hidden;
-    position: relative;
-    background-color: #f1f5f9; /* Fallback color if image is missing */
+.weekend-card-no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.weekend-card .image img {
+.weekend-card-no-image svg {
+    width: 80px;
+    height: 80px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.weekend-card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+}
+
+/* --- Contenu de la carte weekend --- */
+.weekend-card-content {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.weekend-card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.weekend-card-dates {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    background: #f8fafc;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.weekend-card-dates svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: #3b82f6;
+}
+
+.weekend-card-description {
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    flex: 1;
+}
+
+/* --- Statistiques de la carte --- */
+.weekend-card-stats {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.stat-item svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: #94a3b8;
+}
+
+/* --- Actions de la carte weekend --- */
+.weekend-card-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: auto;
+}
+
+.btn-view {
+    flex: 1;
+    padding: 0.625rem 1rem;
+    background: white;
+    color: #0f172a;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+}
+
+.btn-view svg {
+    width: 16px;
+    height: 16px;
+    color: #64748b;
+    transition: color 0.2s ease;
+}
+
+.btn-view:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+    transform: translateY(-1px);
+}
+
+.btn-view:hover svg {
+    color: #0f172a;
+}
+
+.btn-edit {
+    padding: 0.625rem;
+    background: #eff6ff;
+    color: #3b82f6;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    flex-shrink: 0;
+    border: 1px solid #dbeafe;
+}
+
+.btn-edit:hover {
+    background: #dbeafe;
+    color: #2563eb;
+    transform: translateY(-1px);
+}
+
+.btn-edit svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ========================================================================
+   7. RESPONSIVE DESIGN
+   ======================================================================== */
+
+@media (max-width: 768px) {
+    /* Grilles */
+    .form-row,
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    /* Page Details */
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Page Liste */
+    .weekends-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .weekend-card-stats {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
+
+/* ================================================
+   PUBLIC FESTIVALS - Carte de festival public
+   ================================================ */
+
+/* Supprimer le style de lien par défaut */
+a.weekend-card {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+/* Image de la carte */
+.weekend-card .card-image {
+    width: 100%;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.weekend-card .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.weekend-card:hover .card-image img {
+    transform: scale(1.05);
+}
+
+/* Placeholder quand pas d'image */
+.weekend-card .card-placeholder {
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    gap: 0.75rem;
+}
+
+.weekend-card .card-placeholder i {
+    font-size: 3rem;
+    opacity: 0.6;
+}
+
+.weekend-card .card-placeholder .placeholder-date {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+/* Corps de la carte */
+.weekend-card .card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background: #ffffff;
+}
+
+.weekend-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.4;
+}
+
+.weekend-card .card-dates {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+}
+
+.weekend-card .card-dates i {
+    color: #3b82f6;
+}
+
+.weekend-card .card-description {
+    color: #64748b;
+    line-height: 1.5;
+    font-size: 0.9rem;
+    margin: 0 0 1rem 0;
+    flex: 1;
+}
+
+.weekend-card .card-action {
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.weekend-card .card-action span {
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: gap 0.2s ease;
+}
+
+.weekend-card:hover .card-action span {
+    gap: 0.75rem;
+    color: #2563eb;
+}
+
+/* État vide - Aucun festival */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state .empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-state .empty-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.75rem 0;
+}
+
+.empty-state p {
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Anciens styles (compatibilité) */
+.weekend-card .image,
+.weekend-card .placeholder,
+.weekend-card .content {
+    display: none;
+}
+    color: inherit;
+}
+
+/* Banner sans image - fond bleu nuit */
+.weekend-banner.no-image {
+    background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%);
+}
+
+.weekend-banner.no-image .banner-overlay {
+    background: linear-gradient(to bottom, rgba(10, 22, 40, 0.3) 0%, rgba(10, 22, 40, 0.7) 100%);
+}
+
+/* Banner placeholder - fond bleu nuit avec icône */
+.weekend-banner .banner-placeholder {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-}
-
-/* Placeholder when no cover image is available */
-.weekend-card .image .placeholder {
-    width: 100%;
-    height: 100%;
-    min-height: 220px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 1rem;
-    box-sizing: border-box;
-    background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
-    color: #fff;
-}
-
-.weekend-card .image .placeholder-graphic {
-    font-size: 2.5rem;
-    font-weight: 800;
-    letter-spacing: -1px;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 4.5rem;
-    height: 4.5rem;
-    border-radius: 0.75rem;
-    background: rgba(255,255,255,0.08);
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
-}
-
-.weekend-card .image .placeholder-date {
-    position: absolute;
-    left: 1rem;
-    bottom: 1rem;
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.9);
-    background: rgba(0,0,0,0.12);
-    padding: 0.35rem 0.6rem;
-    border-radius: 6px;
-}
-
-/* Slight adjustment so placeholder content doesn't overlap card footer */
-.weekend-card .image .placeholder + .content {
-    padding-left: 2rem;
-}
-
-/* Improved hero for festivals list */
-.hero-section.dashboard-hero {
-    position: relative;
-    background: linear-gradient(90deg, #0ea5a4 0%, #6366f1 100%);
-    color: #fff;
-    padding: 3.5rem 2rem 3.5rem;
-    margin: -20px -20px 2rem -20px;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.12);
-    overflow: hidden;
-}
-
-.hero-section.dashboard-hero .hero-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-}
-
-.hero-section.dashboard-hero .hero-text {
-    flex: 1 1 60%;
-}
-
-.hero-section.dashboard-hero .hero-title {
-    font-size: 2.4rem;
-    font-weight: 800;
-    margin: 0 0 0.5rem;
-}
-
-.hero-section.dashboard-hero .hero-description {
-    margin: 0;
-    color: rgba(255,255,255,0.92);
-    font-size: 1.05rem;
-}
-
-.hero-section.dashboard-hero .hero-cta {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.hero-section.dashboard-hero .hero-cta .btn {
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-}
-
-/* Duplicate placeholder rules for the .weekend-card-image variant used in disponibilites templates */
-.weekend-card-image .placeholder {
-    width: 100%;
-    height: 100%;
-    min-height: 140px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 1rem;
-    box-sizing: border-box;
-    background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
-    color: #fff;
-}
-
-.weekend-card-image .placeholder-graphic {
-    font-size: 1.8rem;
-    font-weight: 800;
-    letter-spacing: -1px;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 3.6rem;
-    height: 3.6rem;
-    border-radius: 0.5rem;
-    background: rgba(255,255,255,0.08);
-    box-shadow: 0 6px 12px rgba(15, 23, 42, 0.12);
-}
-
-.weekend-card-image .placeholder-date {
-    position: absolute;
-    left: 1rem;
-    bottom: 0.75rem;
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.95);
-    background: rgba(0,0,0,0.12);
-    padding: 0.35rem 0.6rem;
-    border-radius: 6px;
-}
-
-.weekend-card:hover .image img {
-    transform: scale(1.05);
-}
-
-/* Contenu */
-.weekend-card .content {
-    padding: 2rem;
-    flex: 1;
+    background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%);
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Center content vertically */
-    background: #ffffff;
-    min-width: 0;
-    width: 60%; /* Remaining width */
-}
-
-.weekend-card h3 {
-    font-size: 1.75rem;
-    margin: 0 0 0.5rem;
-    color: #1e293b;
-    font-weight: 700;
-    line-height: 1.3;
-    letter-spacing: -0.5px;
-    word-break: break-word;
-}
-
-.weekend-card p {
-    color: #64748b;
-    margin: 0 0 1.5rem;
-    line-height: 1.6;
-    font-size: 1.05rem;
-    flex-grow: 0; /* Don't stretch paragraph in row layout */
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    word-break: break-word; /* Prevent long words from overflowing */
-    overflow-wrap: break-word; /* Standard property */
-    word-wrap: break-word; /* Legacy property */
-    max-height: 5em; /* Fallback height limit approx 3 lines */
-}
-
-/* Dates */
-.weekend-card .dates {
-    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: #3b82f6;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    justify-content: center;
+    color: white;
+    gap: 1rem;
+    z-index: 0;
 }
 
-.weekend-card .dates i {
-    font-size: 1rem;
+.weekend-banner .banner-placeholder i {
+    font-size: 4rem;
+    opacity: 0.5;
 }
 
-/* Bouton "Lire plus" */
-.weekend-card .read-more {
+.weekend-banner .banner-placeholder .placeholder-date {
+    font-size: 1.25rem;
+    opacity: 0.7;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+.weekend-banner.no-image {
+    min-height: 300px;
     position: relative;
+}
+
+.weekend-banner.no-image .banner-content {
+    position: relative;
+    z-index: 2;
+}
+
+.weekend-banner.no-image .banner-overlay {
+    z-index: 1;
+}
+
+/* Header du festival (titre en dessous du banner) */
+.weekend-header {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: white;
+}
+
+.weekend-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.75rem 0;
+}
+
+.weekend-header .weekend-description {
+    color: #64748b;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 0 0 1rem 0;
+}
+
+.weekend-header .weekend-dates {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
-    font-weight: 600;
+    color: #3b82f6;
     font-size: 0.95rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 9999px;
-    text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    align-self: flex-start;
-    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06);
-    margin-top: auto;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 500;
 }
 
-.weekend-card .read-more::before {
-    display: none;
-}
-
-.weekend-card .read-more:hover {
-    gap: 0.75rem;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2), 0 4px 6px -2px rgba(37, 99, 235, 0.1);
-    transform: translateY(-2px);
-}
-
-.weekend-card .read-more i {
+.weekend-header .weekend-dates i {
     font-size: 1.1rem;
-    transition: transform 0.3s ease;
 }
 
-.weekend-card:hover .read-more i {
-    transform: translateX(4px);
+/* Message aucun événement */
+.no-events {
+    text-align: center;
+    padding: 4rem 2rem;
+    margin: 2rem auto;
+    max-width: 600px;
+    background: #f8fafc;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
 }
 
-/* Clean up card header & footer */
-.weekend-card .card-header {
-    background: transparent;
-    padding: 0;
-    text-align: left;
-}
-
-.weekend-card .card-header h3 {
-    margin: 0;
-    padding: 0;
-}
-
-.weekend-card .card-footer {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #f1f5f9;
+.no-events .no-events-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%);
+    border-radius: 50%;
     display: flex;
-    justify-content: flex-start;
-    background: transparent;
-    width: 100%;
+    align-items: center;
+    justify-content: center;
 }
 
-/* =============== WEEKEND DETAIL PAGE =============== */
+.no-events .no-events-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.no-events h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 1rem 0;
+}
+
+.no-events p {
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Banner du festival - taille fixe */
 .weekend-banner {
     position: relative;
     width: 100%;
-    height: 600px;
+    height: 300px;
     overflow: hidden;
-    background-color: #1a1a1a;
-    padding-left: 0; /* neutralize global container padding */
-    padding-right: 0;
+    background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%);
+}
+
+.weekend-banner .banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
 }
 
 .weekend-banner .back-button {
     position: absolute;
     top: 1rem;
     left: 1rem;
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 50px;
-    height: 50px;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 50%;
-    color: white;
-    font-size: 1.5rem;
+    color: #1e293b;
     text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    z-index: 10;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .weekend-banner .back-button:hover {
-    background: rgba(26, 60, 90, 0.8);
-    transform: translateX(-5px);
-    box-shadow: 0 6px 20px rgba(26, 60, 90, 0.5);
+    background: white;
+    transform: scale(1.05);
 }
 
 .weekend-banner .back-button i {
-    transition: transform 0.3s ease;
-}
-
-.weekend-banner .back-button:hover i {
-    transform: translateX(-3px);
-}
-
-.weekend-banner .banner-image {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    object-fit: cover;
-    opacity: 0.8;
-    transition: opacity 0.3s ease;
-}
-
-.weekend-banner .banner-overlay {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(to bottom,
-        rgba(0,0,0,0.2) 0%,
-        rgba(0,0,0,0.4) 50%,
-        rgba(0,0,0,0.8) 100%
-    );
-    pointer-events: none;
-}
-
-.weekend-banner .banner-content {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 4rem;
-    color: white;
-    z-index: 2;
-}
-
-.weekend-banner .content-box {
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 2.5rem;
-    border-radius: 20px;
-    max-width: 800px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.weekend-banner h1 {
-    font-size: 3.5rem;
-    margin: 0 0 1rem;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-.weekend-banner p {
-    font-size: 1.2rem;
-    line-height: 1.6;
-    margin: 0;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    opacity: 0.9;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    display: -webkit-box;
-    -webkit-line-clamp: 5; /* Limit to 5 lines in hero */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.weekend-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    /* remove horizontal padding so layout fits image widths better */
-    padding: 4rem 0;
-}
-
-.events-timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 4rem;
-    margin-top: 2rem;
-}
-
-.event-row {
-    display: grid;
-    gap: 3rem;
-    align-items: center;
-    width: 100%;
-}
-
-.event-row.left-image {
-    /* larger image column for a more visual layout */
-    grid-template-columns: minmax(320px, 45%) 55%;
-}
-
-.event-row.right-image {
-    grid-template-columns: 55% minmax(320px, 45%);
-}
-
-.event-row.right-image .event-image { order: 2; }
-.event-row.right-image .event-details { 
-    order: 1; 
-    text-align: right; 
-}
-.event-row.right-image .event-info { justify-content: flex-end; }
-
-.event-image {
-    overflow: hidden;
-    border-radius: 1rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-}
-
-.event-image img {
-    width: 100%;
-    aspect-ratio: 16/9;
-    height: auto;
-    object-fit: cover;
-    transition: none; /* remove hover zoom */
-}
-
-.event-details h2 {
-    font-size: 2rem;
-    color: #1a1f3a;
-    margin: 0 0 1rem;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-.event-info {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
-    font-size: 1.1rem;
-    color: #1a3c5a; /* darker to improve contrast */
-    flex-wrap: wrap;
-}
-
-.event-info i {
-    color: #1a3c5a;
-    margin-right: 0.5rem;
-}
-
-.event-date {
-    font-weight: 600;
-    color: #1a3c5a;
-    display: flex;
-    align-items: center;
-}
-
-.event-time {
-    display: flex;
-    align-items: center;
-}
-
-.event-time .duration {
-    color: #888;
-    font-size: 0.9em;
-    margin-left: 0.5rem;
-}
-
-.event-location {
-    display: flex;
-    align-items: center;
-}
-
-.event-description {
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: #444;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
-}
-
-/* =============== MODERN GRID STYLES =============== */
-.modern-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-}
-
-.modern-weekend-card {
-    background: linear-gradient(135deg, #1e293b 60%, #334155 100%);
-    border-radius: 18px;
-    box-shadow: 0 6px 24px rgba(30,41,59,0.12);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    min-height: 220px;
-    padding: 1.5rem 1.2rem 1.2rem 1.2rem;
-    position: relative;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.modern-weekend-card:hover {
-    transform: translateY(-6px) scale(1.03);
-    box-shadow: 0 12px 32px rgba(30,41,59,0.18);
-}
-.modern-card-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.2rem;
-}
-.modern-card-icon {
-    background: rgba(255,255,255,0.08);
-    border-radius: 10px;
-    padding: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.modern-card-title {
     font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    flex: 1;
-    color: #fff;
-}
-.modern-card-infos {
-    margin-bottom: 1.5rem;
-}
-.modern-card-date {
-    font-size: 1.05rem;
-    color: #cbd5e1;
-    font-weight: 500;
-}
-.modern-card-footer {
-    margin-top: auto;
-    display: flex;
-    justify-content: flex-end;
-}
-.modern-btn-card {
-    background: #38bdf8;
-    color: #1e293b;
-    border-radius: 6px;
-    padding: 0.5rem 1.2rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s;
-    box-shadow: 0 2px 8px rgba(56,189,248,0.08);
-}
-.modern-btn-card:hover {
-    background: #0ea5e9;
-    color: #fff;
-}
-
-/* =============== RESPONSIVE =============== */
-@media (max-width: 992px) {
-    .weekend-banner { height: 500px; }
-    .weekend-banner h1 { font-size: 2.5rem; }
-    .event-row.left-image,
-    .event-row.right-image {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-    .event-row.right-image .event-details { order: 2; text-align: left; }
-    .event-row.right-image .event-info { justify-content: flex-start; }
-    .event-image img { height: 300px; }
-    
-    /* Stack cards vertically on smaller screens */
-    .weekend-card {
-        flex-direction: column;
-        max-width: 500px;
-    }
-    .weekend-card .image {
-        width: 100%;
-        height: 200px;
-    }
-    .weekend-card .content {
-        width: 100%;
-    }
-}
-
-@media (max-width: 768px) {
-    .hero-title { font-size: 2.3rem; }
-    .hero-description { font-size: 1.1rem; }
-    .weekend-banner { height: 400px; }
-    .weekend-banner .banner-content { padding: 2rem; }
-    .weekend-banner h1 { font-size: 2rem; }
-    .weekend-content { padding: 2rem 1rem; }
-    .events-timeline { gap: 3rem; }
-    .weekends-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-        padding: 1.5rem;
-    }
-    .weekend-card .image { height: 250px; }
-    .weekend-card .content { padding: 1.5rem; }
-    .weekend-card h3 { font-size: 1.6rem; }
-    .weekend-card p { font-size: 1rem; }
-    .weekend-card .read-more {
-        padding: 0.65rem 1.3rem;
-        font-size: 0.95rem;
-    }
-}
-
-@media (max-width: 640px) {
-    .weekends-grid {
-        padding: 1rem;
-        gap: 1.5rem;
-    }
-    .weekend-card .image { height: 220px; }
 }
