@@ -1,0 +1,76 @@
+MCD 1 - Utilisateurs et Authentification
+
+PARAMETRE: id, cle, valeur, date_modification
+
+ROLE: id, nom, description
+UTILISATEUR: id, email, mot_de_passe, prenom, nom, telephone, profile_image, date_creation, date_modification
+appartenir, 11 UTILISATEUR, 1N ROLE
+
+NOTIFICATION: id, type, message, lien, lue, created_at, reponse
+recevoir, 1N NOTIFICATION, 0N UTILISATEUR
+
+CONTACT_MESSAGE: id, nom, email, destinataire, message, created_at, lu, reponse, repondu_le, cloturee, masquee_pour
+repondre_a, 0N CONTACT_MESSAGE, 01 CONTACT_MESSAGE
+repondre_message, 0N CONTACT_MESSAGE, 0N UTILISATEUR
+
+BENEVOLE: id, remarque, disponibilites, actif
+etre_benevole, 01 UTILISATEUR, 11 BENEVOLE
+
+MECENE: id, organisation, siret, adresse_postale, logo, instagram, facebook
+etre_mecene, 0N UTILISATEUR, 11 MECENE
+
+MESSENGER_MESSAGES: id, body, headers, queue_name, created_at, available_at, delivered_at
+
+MCD 2 - Bénévoles et Tâches
+
+BENEVOLE: id, remarque, disponibilites, actif
+
+TACHE: id, titre, poste_requis, debut, fin, max_personnes, remarque
+PLAGE_HORAIRE, 1N TACHE: jour, heure_debut, heure_fin, max_personnes_plage
+
+DEMANDE_TACHE, 0N BENEVOLE, 0N TACHE: date_demande, statut, message_benevole, message_admin, date_reponse
+AFFECTATION_TACHE, 0N BENEVOLE, 0N TACHE: date_affectation, statut, remarque
+
+WEEKEND: id, nom, date_debut, date_fin, task_offset_before, task_offset_after, cover_image, description, date_creation
+declarer_dispo_weekend, 0N BENEVOLE, 0N WEEKEND: jour, matin, apres_midi, soir, remarque, date_creation
+planifier_tache_weekend, 1N WEEKEND, 0N TACHE
+
+EVENEMENT: id, nom, description, date_debut, date_fin, lieu, heure_debut, duree_minutes, image, date_creation
+DISPONIBILITE_BENEVOLE, 0N BENEVOLE, 0N EVENEMENT: debut, fin, remarque, date_creation
+lier_tache_event, 0N EVENEMENT, 0N TACHE
+
+MCD 3 - Mécènes et Dons
+
+MECENE: id, organisation, siret, adresse_postale, logo, instagram, facebook
+
+CONVENTION, 01 MECENE: nom_modele, url_pdf, date_signature, methode_signature, date_creation
+
+WEEKEND: id, nom, date_debut, date_fin, task_offset_before, task_offset_after, cover_image, description, date_creation
+LOT, 0N MECENE, 0N WEEKEND: titre, description, quantite, valeur_estimee, date_creation
+
+EVENEMENT: id, nom, description, date_debut, date_fin, lieu, heure_debut, duree_minutes, image, date_creation
+INSCRIPTION_MECENE, 0N MECENE, 0N EVENEMENT: description_don, montant_estime, statut, date_inscription, remarques, remarque_acceptation, nom_don, categorie, quantite, valeur_unitaire, remarque_refus, adresse_postale, type_don
+
+MCD 4 - Événements et Communication
+
+WEEKEND: id, nom, date_debut, date_fin, task_offset_before, task_offset_after, cover_image, description, date_creation
+
+EVENEMENT: id, nom, description, date_debut, date_fin, lieu, heure_debut, duree_minutes, image, date_creation
+inclure_evenement, 0N WEEKEND, 0N EVENEMENT
+
+COMMUNICATION, 0N EVENEMENT: titre, type, date_prevue, statut, budget, remarque, date_creation
+
+HELLOASSO, 0N EVENEMENT: id_externe, prenom, nom, email, telephone, type_ticket, date_achat, date_import
+
+UTILISATEUR: id, email, mot_de_passe, prenom, nom, telephone, profile_image, date_creation, date_modification
+HISTORIQUE_EVENEMENT, 1N EVENEMENT, 0N UTILISATEUR: action, description, date_action
+
+MCD 5 - Gestion du Stock
+
+STOCK: id, nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque, derniere_modif, source, date_retour, preteur
+
+UTILISATEUR: id, email, mot_de_passe, prenom, nom, telephone, profile_image, date_creation, date_modification
+
+EVENEMENT: id, nom, description, date_debut, date_fin, lieu, heure_debut, duree_minutes, image, date_creation
+
+HISTORIQUE_STOCK, 1N STOCK, 0N UTILISATEUR, 0N EVENEMENT: type_changement, quantite, raison, date_creation
