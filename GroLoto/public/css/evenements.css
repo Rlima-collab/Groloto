@@ -611,3 +611,772 @@
 }
 
 
+/* ===========================================
+   SECTION: UTILITAIRES ET ESPACEMENTS
+   (Depuis create.html.twig et edit.html.twig)
+   =========================================== */
+
+.ml-3 {
+    margin-left: 1rem;
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
+
+.mt-3 {
+    margin-top: 1rem;
+}
+
+.mt-8 {
+    margin-top: 2rem;
+}
+
+.text-muted {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* ===========================================
+   SECTION: FORMULAIRES - LAYOUT EN GRILLE
+   (Depuis create.html.twig et edit.html.twig)
+   =========================================== */
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-col {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===========================================
+   SECTION: FILTRES ET CARTE DE FILTRES
+   (Depuis liste.html.twig)
+   =========================================== */
+
+.filters-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.filter-icon {
+    width: 20px;
+    height: 20px;
+    color: #3b82f6;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background: white;
+    color: #1f2937;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.filter-select:hover {
+    border-color: #cbd5e1;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* ===========================================
+   SECTION: RÉSUMÉ DES RÉSULTATS
+   (Depuis liste.html.twig)
+   =========================================== */
+
+.results-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 4px solid #3b82f6;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.summary-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+/* ===========================================
+   SECTION: ÉTAT VIDE (EMPTY STATE)
+   (Depuis liste.html.twig)
+   =========================================== */
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    color: #cbd5e1;
+    margin: 0 auto 1.5rem;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+/* ===========================================
+   SECTION: CARTES WEEKEND - FOOTER ET ACTIONS
+   (Depuis liste.html.twig)
+   =========================================== */
+
+.weekend-card-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.weekend-card-footer > div:first-child {
+    flex: 1 1 auto;
+}
+
+.weekend-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}
+
+.weekend-card-footer form {
+    margin: 0;
+}
+
+.weekend-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecdd3;
+    padding: 0.45rem 0.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.weekend-delete-btn:hover {
+    background: #fecdd3;
+    color: #7f1d1d;
+    border-color: #fca5a5;
+}
+
+.weekend-delete-btn i {
+    font-size: 0.9rem;
+}
+
+.weekend-view-btn {
+    white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+    .weekend-actions {
+        flex-basis: 100%;
+        justify-content: flex-start;
+        margin-top: 0.25rem;
+    }
+}
+
+/* ===========================================
+   SECTION: BOUTONS DE VUE (CALENDRIER/TIMELINE)
+   (Depuis weekend_detail.html.twig)
+   =========================================== */
+
+.btn-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    color: #1a3c5a;
+    border: 2px solid #1a3c5a;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0 0.5rem;
+}
+
+.btn-view:hover {
+    background: #f8fafc;
+    transform: translateY(-2px);
+}
+
+.btn-view.active {
+    background: #1a3c5a;
+    color: white;
+}
+
+.btn-view i {
+    font-size: 1.1rem;
+}
+
+/* ===========================================
+   SECTION: FULLCALENDAR - PERSONNALISATION
+   (Depuis weekend_detail.html.twig)
+   =========================================== */
+
+.fc {
+    font-family: inherit;
+}
+
+.fc-event {
+    cursor: pointer;
+}
+
+.fc-event:hover {
+    opacity: 0.9;
+}
+
+.fc-toolbar-title {
+    color: #1a3c5a;
+    font-weight: 600;
+}
+
+.fc-button {
+    background-color: #1a3c5a !important;
+    border-color: #1a3c5a !important;
+}
+
+.fc-button:hover {
+    background-color: #2b5d8a !important;
+}
+
+.fc-button-active {
+    background-color: #2b5d8a !important;
+}
+
+/* ===========================================
+   SECTION: BOUTON DE TÉLÉCHARGEMENT
+   (Depuis weekend_detail.html.twig)
+   =========================================== */
+
+.btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-download:hover {
+    background: #15803d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+/* ===========================================
+   SECTION: INFORMATIONS DU WEEKEND
+   (Depuis weekend_detail.html.twig)
+   =========================================== */
+
+.weekend-info {
+    background: #f8fafc;
+    border-left: 4px solid #1a3c5a;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+}
+
+.weekend-info h6 {
+    color: #1a3c5a;
+    font-weight: 600;
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.weekend-info p {
+    color: #475569;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ===========================================
+   SECTION: TIMELINE - PLANNING
+   (Depuis weekend_detail.html.twig)
+   =========================================== */
+
+.planning-timeline {
+    position: relative;
+    margin: 2rem 0;
+}
+
+.date-separator {
+    text-align: center;
+    margin: 2rem 0 1.5rem;
+}
+
+.date-badge {
+    background: #1a3c5a;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-block;
+}
+
+/* ===========================================
+   SECTION: TIMELINE - ÉLÉMENTS DE TÂCHE
+   (Depuis weekend_detail.html.twig)
+   =========================================== */
+
+.tache-item {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.tache-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+}
+
+.time-badge {
+    background: #1a3c5a;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-align: center;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.time-badge i {
+    font-size: 1rem;
+}
+
+.time-line {
+    width: 2px;
+    flex-grow: 1;
+    background: #e2e8f0;
+    margin-top: 0.5rem;
+}
+
+.tache-item:last-child .time-line {
+    display: none;
+}
+
+.tache-content {
+    flex: 1;
+}
+
+.tache-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.tache-card:hover {
+    box-shadow: 0 4px 12px rgba(26, 60, 90, 0.1);
+    border-color: #1a3c5a;
+}
+
+.tache-title {
+    color: #1a3c5a;
+    font-size: 1.3rem;
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+}
+
+.tache-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.detail-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.detail-item i {
+    color: #1a3c5a;
+    font-size: 1rem;
+}
+
+.detail-item small {
+    color: #94a3b8;
+    margin-left: 0.25rem;
+}
+
+.tache-remarque {
+    background: #fef3c7;
+    border-left: 3px solid #f59e0b;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: start;
+}
+
+.tache-remarque i {
+    color: #f59e0b;
+    font-size: 1.1rem;
+    margin-top: 0.1rem;
+}
+
+.tache-remarque span {
+    color: #92400e;
+    flex: 1;
+    line-height: 1.5;
+}
+
+/* ===========================================
+   SECTION: RÉSUMÉ DU PLANNING
+   (Depuis weekend_detail.html.twig)
+   =========================================== */
+
+.planning-summary {
+    background: #f1f5f9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.planning-summary h6 {
+    color: #1a3c5a;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+}
+
+.summary-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #475569;
+    font-size: 1rem;
+}
+
+.stat-item i {
+    color: #1a3c5a;
+    font-size: 1.3rem;
+}
+
+/* ===========================================
+   SECTION: STYLES D'IMPRESSION
+   (Depuis weekend_detail.html.twig)
+   =========================================== */
+
+@media print {
+    .hero-section,
+    .btn-login,
+    .btn-download,
+    nav,
+    footer,
+    .card-header {
+        display: none !important;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    .card {
+        border: none;
+        box-shadow: none;
+    }
+
+    .tache-card {
+        page-break-inside: avoid;
+    }
+
+    .date-separator {
+        page-break-after: avoid;
+    }
+}
+
+@media (max-width: 768px) {
+    .tache-item {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .time-line {
+        display: none;
+    }
+
+    .tache-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* ===========================================
+   SECTION: GRILLE DES WEEKENDS
+   (Depuis evenements.html.twig)
+   =========================================== */
+
+.weekends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.weekend-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.weekend-card:hover {
+    border-color: #0f172a;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.15);
+    transform: translateY(-6px);
+}
+
+/* ===========================================
+   SECTION: IMAGE DES WEEKENDS
+   (Depuis evenements.html.twig)
+   =========================================== */
+
+.weekend-image {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+}
+
+.weekend-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.weekend-card:hover .weekend-image img {
+    transform: scale(1.08);
+}
+
+.weekend-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+}
+
+.weekend-image-empty {
+    width: 100%;
+    height: 220px;
+    background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.weekend-image-empty i {
+    font-size: 3rem;
+}
+
+/* ===========================================
+   SECTION: CONTENU DES WEEKENDS
+   (Depuis evenements.html.twig)
+   =========================================== */
+
+.weekend-content {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.weekend-header {
+    margin-bottom: 1rem;
+}
+
+.weekend-header h3 {
+    margin: 0 0 0.5rem 0;
+    color: #0f172a;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.weekend-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.weekend-date i {
+    color: #2563eb;
+}
+
+.weekend-description {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ===========================================
+   SECTION: FOOTER DES WEEKENDS
+   (Depuis evenements.html.twig)
+   =========================================== */
+
+.weekend-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.weekend-stats {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.stat-badge i {
+    color: #2563eb;
+}
+
+/* ===========================================
+   SECTION: BOUTON PRIMAIRE
+   (Depuis evenements.html.twig)
+   =========================================== */
+
+.btn-primary {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-primary:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+}

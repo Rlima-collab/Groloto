@@ -129,36 +129,7 @@
     </div>
 </div>
 
-<style>
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.task-item {
-    padding: 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 10px;
-    background: white;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-
-.task-item:not(.disabled):hover {
-    border-color: #3b82f6;
-    box-shadow: 0 4px 12px rgba(59,130,246,0.15);
-}
-
-.task-item.selected {
-    border-color: #10b981;
-    background: #f0fdf4;
-}
-
-.task-item.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: #f3f4f6;
-}
-</style>
+<link rel="stylesheet" href="{{ asset('css/taches.css') }}">
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

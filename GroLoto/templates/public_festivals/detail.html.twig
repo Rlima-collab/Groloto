@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block body %}
-<div class="weekend-banner">
+<div class="weekend-banner {% if not weekend.coverImage %}no-image{% endif %}">
     <a href="{{ path('public_festivals') }}" class="back-button" title="Retour à la liste">
         <i class="bi bi-arrow-left"></i>
     </a>
@@ -20,14 +20,19 @@
             <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}" class="banner-image">
         {% endif %}
     {% else %}
-        <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="{{ weekend.nom }}" class="banner-image">
-    {% endif %}
-    <div class="banner-overlay"></div>
-    <div class="banner-content">
-        <div class="content-box">
-            <h1>{{ weekend.nom }}</h1>
-            <p>{{ weekend.description }}</p>
+        <div class="banner-placeholder">
+            <i class="bi bi-calendar-event"></i>
+            <span class="placeholder-date">{{ weekend.dateDebut|date('d M Y') }}</span>
         </div>
+    {% endif %}
+</div>
+
+<div class="weekend-header">
+    <h1>{{ weekend.nom }}</h1>
+    <p class="weekend-description">{{ weekend.description }}</p>
+    <div class="weekend-dates">
+        <i class="bi bi-calendar3"></i>
+        <span>Du {{ weekend.dateDebut|date('d/m/Y') }}{% if weekend.dateFin %} au {{ weekend.dateFin|date('d/m/Y') }}{% endif %}</span>
     </div>
 </div>
 
@@ -83,8 +88,10 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="alert alert-info" style="text-align: center; padding: 3rem; margin: 2rem 0;">
-            <i class="bi bi-calendar-x" style="font-size: 2rem; display: block; margin-bottom: 1rem;"></i>
+        <div class="no-events">
+            <div class="no-events-icon">
+                <i class="bi bi-calendar-x"></i>
+            </div>
             <h3>Aucun événement programmé</h3>
             <p>Les événements de ce festival seront bientôt annoncés.</p>
         </div>

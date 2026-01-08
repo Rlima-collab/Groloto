@@ -22,53 +22,45 @@
 <div class="weekends-grid">
     {% for weekend in weekends %}
         <a href="{{ path('public_festival_detail', {'id': weekend.id}) }}" class="weekend-card">
-            <div class="image">
+            <div class="card-image">
                 {% if weekend.coverImage %}
-                    {# handle both stored filenames and full paths that may already include 'uploads/' #}
                     {% if weekend.coverImage matches('/^uploads\\//') or weekend.coverImage matches('/^images\\//') %}
                         <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}">
                     {% else %}
                         <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}">
                     {% endif %}
                 {% else %}
-                    {# Better placeholder when no image: gradient box with initials and date #}
-                    {% set parts = weekend.nom is defined ? weekend.nom|split(' ') : [] %}
-                    {% set i1 = parts[0]|default('')|first %}
-                    {% set i2 = parts[1]|default('')|first %}
-                    {% set initials = (i1 ~ i2)|upper %}
-                    <div class="placeholder" title="{{ weekend.nom }}">
-                        <div class="placeholder-graphic">{{ initials }}</div>
-                        <div class="placeholder-date">
-                            {% if weekend.dateDebut %}{{ weekend.dateDebut|date('d/m/Y') }}{% endif %}
-                            {% if weekend.dateFin %} &ndash; {{ weekend.dateFin|date('d/m/Y') }}{% endif %}
-                        </div>
+                    <div class="card-placeholder">
+                        <i class="bi bi-calendar-event"></i>
+                        <span class="placeholder-date">
+                            {% if weekend.dateDebut %}{{ weekend.dateDebut|date('d M Y') }}{% endif %}
+                        </span>
                     </div>
                 {% endif %}
             </div>
-            <div class="content">
-                <div class="card-header">
-                    <h3>{{ weekend.nom }}</h3>
-                    {% if weekend.dateDebut %}
-                        <div class="dates">
-                            <i class="bi bi-calendar-event"></i>
-                            Du {{ weekend.dateDebut|date('d/m/Y') }}
-                            {% if weekend.dateFin %}
-                                au {{ weekend.dateFin|date('d/m/Y') }}
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                </div>
-                <p>{{ weekend.description }}</p>
-                <div class="card-footer">
-                    <span class="read-more">En savoir plus <i class="bi bi-arrow-right"></i></span>
+            <div class="card-body">
+                <h3 class="card-title">{{ weekend.nom }}</h3>
+                {% if weekend.dateDebut %}
+                    <div class="card-dates">
+                        <i class="bi bi-calendar3"></i>
+                        <span>{{ weekend.dateDebut|date('d/m/Y') }}{% if weekend.dateFin %} - {{ weekend.dateFin|date('d/m/Y') }}{% endif %}</span>
+                    </div>
+                {% endif %}
+                {% if weekend.description %}
+                    <p class="card-description">{{ weekend.description|length > 100 ? weekend.description|slice(0, 100) ~ '...' : weekend.description }}</p>
+                {% endif %}
+                <div class="card-action">
+                    <span>Découvrir <i class="bi bi-arrow-right"></i></span>
                 </div>
             </div>
         </a>
     {% else %}
-        <div class="alert alert-info" style="text-align: center; padding: 3rem; grid-column: 1/-1;">
-            <i class="bi bi-calendar-x" style="font-size: 2.5rem; display: block; margin-bottom: 1.5rem;"></i>
-            <h3>Aucun festival disponible</h3>
-            <p>Les prochains festivals seront bientôt annoncés. Revenez nous voir prochainement !</p>
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="bi bi-calendar-x"></i>
+            </div>
+            <h3>Aucun festival à venir</h3>
+            <p>Les prochains festivals seront bientôt annoncés.<br>Revenez nous voir prochainement !</p>
         </div>
     {% endfor %}
 </div>
