@@ -1,0 +1,156 @@
+@startuml
+' Class diagram for GroLoto (generated from src/*)
+skinparam classAttributeIconSize 0
+left to right direction
+skinparam packageStyle rectangle
+
+package "Authentification" {
+  class Utilisateur {
+    +id: int
+    +email: string
+    +prenom: string
+    +nom: string
+  }
+
+  class Role {
+    +id: int
+    +nom: string
+  }
+
+  class Notification {
+    +id: int
+    +type: string
+    +message: text
+    +lien: string
+    +lue: bool
+  }
+}
+
+package "Bénévoles" {
+  class Benevole {
+    +id: int
+    +remarque: text
+    +actif: bool
+  }
+
+  class DisponibiliteBenevole {
+    +id: int
+    +debut: datetime
+    +fin: datetime
+  }
+
+  class DisponibiliteWeekend {
+    +id: int
+    +jour: date
+    +matin: bool
+    +apresMidi: bool
+    +soir: bool
+  }
+
+  class AffectationTache {
+    +id: int
+    +date_affectation: datetime
+    +statut: string
+    +remarque: text
+  }
+}
+
+package "Événements" {
+  class Weekend {
+    +id: int
+    +nom: string
+    +date_debut: date
+    +date_fin: date
+  }
+
+  class Evenement {
+    +id: int
+    +nom: string
+    +date_debut: date
+    +lieu: string
+  }
+
+  class Tache {
+    +id: int
+    +titre: string
+    +debut: datetime
+    +fin: datetime
+    +maxPersonnes: int
+  }
+
+  class PlageHoraire {
+    +id: int
+    +jour: date
+    +heureDebut: time
+    +heureFin: time
+  }
+
+  class Creneau {
+    +id: int
+    +titre: string
+    +debut: datetime
+    +fin: datetime
+  }
+}
+
+package "Stocks" {
+  class Stock {
+    +id: int
+    +nom: string
+    +quantite: int
+  }
+
+  class HistoriqueStock {
+    +id: int
+    +type_changement: string
+    +quantite: int
+    +raison: text
+  }
+}
+
+package "Mécènes" {
+  class Mecene {
+    +id: int
+    +organisation: string
+  }
+
+  class InscriptionMecene {
+    +id: int
+    +statut: string
+    +montant_estime: float
+  }
+}
+
+' Relations (multiplicities simplified)
+Utilisateur --> Role : "many-to-one"
+Notification --> Utilisateur : "destinataire"
+
+Benevole --> Utilisateur : "one-to-one"
+DisponibiliteBenevole --> Benevole
+DisponibiliteBenevole --> Evenement
+
+DisponibiliteWeekend --> Benevole
+DisponibiliteWeekend --> Weekend
+
+Weekend "1" -- "0..*" Evenement
+Weekend "1" -- "0..*" Tache
+Evenement "1" -- "0..*" Tache
+Tache "1" -- "0..*" PlageHoraire
+Tache "1" -- "0..*" AffectationTache
+AffectationTache --> Benevole
+AffectationTache --> Utilisateur
+
+Evenement "1" -- "0..*" Creneau
+
+Stock "1" -- "0..*" HistoriqueStock
+HistoriqueStock --> Evenement
+HistoriqueStock --> Utilisateur
+
+Mecene "1" -- "0..*" InscriptionMecene
+InscriptionMecene --> Evenement
+
+note right of Tache
+  Tâches liées aux événements et weekend
+end note
+
+@enduml
