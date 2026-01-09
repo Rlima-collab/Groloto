@@ -136,7 +136,7 @@ class Tache
         return $this->weekend;
     }
 
-    public function setWeekend(Weekend $weekend): self
+    public function setWeekend(?Weekend $weekend): self
     {
         $this->weekend = $weekend;
         return $this;
