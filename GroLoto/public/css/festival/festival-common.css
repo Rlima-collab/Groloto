@@ -1,5 +1,15 @@
 /* =============== WEEKEND PAGES - STYLES COMMUNS =============== */
 
+/* Wrapper pour enlever les marges du container-fluid */
+.full-width-hero {
+    margin-left: calc(-1 * var(--bs-gutter-x, 0.75rem));
+    margin-right: calc(-1 * var(--bs-gutter-x, 0.75rem));
+    margin-top: calc(-1 * var(--bs-gutter-y, 0));
+    width: calc(100% + 2 * var(--bs-gutter-x, 0.75rem));
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+
 /* Hero Section - Bleu Nocturne */
 .hero-section.weekend-hero {
     background: linear-gradient(145deg, #1a1f3a, #2d3561, #1e2749);
@@ -11,6 +21,7 @@
     text-align: center;
     position: relative;
     overflow: hidden;
+    width: 100%;
 }
 
 .hero-section.weekend-hero::before {

@@ -144,11 +144,11 @@
 		<div class="modal-header">Nouveau message Admin</div>
 		<div style="position: relative;">
 			<input type="text" id="modalRecipient" class="modal-input" placeholder="Email du destinataire (ou cliquez sur 'Tous les bénévoles')" autocomplete="off">
-			<div id="autocompleteList" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #d1d5db; border-top: none; max-height: 200px; overflow-y: auto; z-index: 1000; display: none;"></div>
-			<div style="display:flex; gap:15px; margin-top:15px; margin-bottom: 15px;">
-				<button type="button" id="modalAllBenevoles" class="modal-btn" style="background: linear-gradient(135deg,#10b981 0%,#059669 100%); color:white;">Tous les bénévoles</button>
-				<button type="button" id="modalAllMecenes" class="modal-btn" style="background: linear-gradient(135deg,#3b82f6 0%,#2563eb 100%); color:white;">Tous les mécènes</button>
-			</div>
+			<div id="autocompleteList" style="position: absolute; top: calc(100% + 1px); left: 0; right: 0; background: white; border: 1px solid #d1d5db; border-top: none; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; z-index: 1000; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+		</div>
+		<div style="display:flex; gap:15px; margin-top:15px; margin-bottom: 15px;">
+			<button type="button" id="modalAllBenevoles" class="modal-btn" style="background: linear-gradient(135deg,#10b981 0%,#059669 100%); color:white;">Tous les bénévoles</button>
+			<button type="button" id="modalAllMecenes" class="modal-btn" style="background: linear-gradient(135deg,#3b82f6 0%,#2563eb 100%); color:white;">Tous les mécènes</button>
 		</div>
 		<input type="text" id="modalSubject" class="modal-input" placeholder="Sujet de la conversation" autocomplete="off">
 		<div class="modal-actions">
@@ -194,17 +194,10 @@
 const adminEmail = '{{ adminEmail|default('admin@groloto.local') }}';
 const currentUserName = '{{ app.user ? (app.user.prenom ~ ' ' ~ app.user.nom)|e('js') : 'Admin' }}';
 const currentUserProfileImage = '{{ app.user.profileImage|default('')|e('js') }}';
-let currentConversationId = null;
-let currentSubject = '';
-let currentRecipient = '';
-let currentRecipientEmail = '';
-let currentRecipientName = ''; // Nom complet du destinataire
-let currentRecipientRole = ''; // Rôle du destinataire
-let currentRecipientProfileImage = ''; // Image de profil du destinataire
-let currentOtherEmail = ''; // Email de l'interlocuteur (pour l'alignement des messages)
+// Variables déjà déclarées dans messaging.js : currentConversationId, currentSubject, currentRecipient, etc.
 
 // Système de confirmation modal
-let confirmCallback = null;
+// confirmCallback déjà déclaré dans messaging.js
 
 function showConfirm(title, message, onConfirm) {
 	const modal = document.getElementById('confirmModal');

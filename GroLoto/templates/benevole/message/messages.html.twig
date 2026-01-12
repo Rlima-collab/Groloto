@@ -151,11 +151,9 @@ const adminEmail = '{{ adminEmail|default('admin@groloto.local') }}';
 const currentUserName = '{{ app.user ? (app.user.prenom ~ ' ' ~ app.user.nom)|e('js') : 'Vous' }}';
 const currentUserProfileImage = '{{ app.user.profileImage|default('')|e('js') }}';
 const adminProfileImage = ''; // L'image de l'admin sera récupérée via l'API
-let currentConversationId = null;
-let currentSubject = '';
-
-// Système de confirmation modal
-let confirmCallback = null;
+// currentConversationId, currentSubject et confirmCallback déjà déclarés dans messaging.js
+currentConversationId = null;
+currentSubject = '';
 
 function showConfirm(title, message, onConfirm) {
 	const modal = document.getElementById('confirmModal');
