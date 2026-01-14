@@ -65,9 +65,9 @@ class CommunicationTest extends TestCase
         
         $this->assertEquals('brouillon', $com->getStatut());
         
-        $result = $com->setStatut('publie');
+        $result = $com->setStatut('fait');
         $this->assertSame($com, $result);
-        $this->assertEquals('publie', $com->getStatut());
+        $this->assertEquals('fait', $com->getStatut());
     }
 
     public function testGetSetBudget(): void

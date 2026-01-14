@@ -21,9 +21,9 @@
     </div>
 </div>
 
-<div class="dispo-card">
+<div class="dispo-card" style="max-width: 100%; width: 100%; margin: 2rem auto; padding: 0;">
     <form method="post">
-        <table class="dispo-table">
+        <table class="dispo-table" style="width: 100%;">
             <thead>
                 <tr>
                     <th>Jour</th>
@@ -34,8 +34,11 @@
             </thead>
             <tbody>
                 {% for jour in jours %}
+                    {% set joursFr = {'Monday': 'Lundi', 'Tuesday': 'Mardi', 'Wednesday': 'Mercredi', 'Thursday': 'Jeudi', 'Friday': 'Vendredi', 'Saturday': 'Samedi', 'Sunday': 'Dimanche'} %}
+                    {% set jourEnglais = jour|date('l') %}
+                    {% set jourFrancais = joursFr[jourEnglais] ?? jourEnglais %}
                     <tr>
-                        <td>{{ jour|date('l, d/m/Y') }}</td>
+                        <td><strong>{{ jourFrancais }}</strong>, {{ jour|date('d/m/Y') }}</td>
                         <td><input type="checkbox" class="dispo-checkbox" name="disponibilites[{{ jour|date('Y-m-d') }}][]" value="matin"></td>
                         <td><input type="checkbox" class="dispo-checkbox" name="disponibilites[{{ jour|date('Y-m-d') }}][]" value="apres_midi"></td>
                         <td><input type="checkbox" class="dispo-checkbox" name="disponibilites[{{ jour|date('Y-m-d') }}][]" value="soir"></td>

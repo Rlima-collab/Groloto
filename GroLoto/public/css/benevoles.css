@@ -36,11 +36,13 @@
 
 .dispo-table {
     width: 100%;
+    max-width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     overflow: hidden;
+    table-layout: fixed;
 }
 
 .dispo-table th,
@@ -62,6 +64,8 @@
 .dispo-table th:first-child,
 .dispo-table td:first-child {
     text-align: left;
+    width: 40%;
+    font-weight: 600;
 }
 
 .dispo-table tbody tr:last-child td {
@@ -194,6 +198,9 @@
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     overflow: hidden;
+    max-width: 100%;
+    width: 100%;
+    margin: 2rem auto;
 }
 
 .dispo-card-header {

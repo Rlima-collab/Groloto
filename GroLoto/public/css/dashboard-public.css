@@ -355,6 +355,10 @@ font-size: 0.9375rem;
 color: #6b7280;
 line-height: 1.7;
 margin: 0;
+word-wrap: break-word;
+overflow-wrap: break-word;
+white-space: normal;
+max-width: 100%;
 }
 /* Empty State */
 .empty-state {

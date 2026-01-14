@@ -787,25 +787,29 @@ items.forEach(item => {
 			if (cc) gmailUrl += '&cc=' + cc;
 			sendEmailBtn.setAttribute('href', gmailUrl);
 			sendEmailBtn.setAttribute('target', '_blank');
-			sendEmailBtn.style.display = 'inline-block';
-			externalUserNotice.style.display = 'block';
-
-			// Si l'utilisateur est externe (non enregistré), masquer la zone d'envoi interne
+			
+			// Si l'utilisateur est externe (non enregistré), afficher le bouton email et masquer la zone d'envoi interne
 			if (otherRole === 'Externe' || otherRole === 'externe') {
+				sendEmailBtn.style.display = 'inline-block';
+				externalUserNotice.style.display = 'block';
 				chatInput.style.display = 'none';
 				sendBtn.style.display = 'none';
+				// Afficher checkbox pour marquer comme répondu
+				document.getElementById('markRepliedContainer').style.display = 'block';
+				// Synchroniser l'état de la checkbox selon si déjà marqué
+				const markCb = document.getElementById('markRepliedCheckbox');
+				if (reponduPar && reponduPar.trim() !== '') {
+					markCb.checked = true;
+				} else {
+					markCb.checked = false;
+				}
 			} else {
+				// Utilisateur connecté : masquer bouton email et afficher messagerie interne
+				sendEmailBtn.style.display = 'none';
+				externalUserNotice.style.display = 'none';
+				document.getElementById('markRepliedContainer').style.display = 'none';
 				chatInput.style.display = '';
 				sendBtn.style.display = 'inline-block';
-			}
-			// Afficher checkbox pour marquer comme répondu
-			document.getElementById('markRepliedContainer').style.display = 'block';
-			// Synchroniser l'état de la checkbox selon si déjà marqué
-			const markCb = document.getElementById('markRepliedCheckbox');
-			if (reponduPar && reponduPar.trim() !== '') {
-				markCb.checked = true;
-			} else {
-				markCb.checked = false;
 			}
 		} else {
 			sendEmailBtn.style.display = 'none';

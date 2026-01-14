@@ -73,114 +73,151 @@
             {% if inscriptions|length > 0 %}
                 <div class="inscriptions-list benevoles-grid">
                     {% for inscription in inscriptions %}
-                        <div class="inscription-card benevole-card" data-statut="{{ inscription.statut }}">
-                            <div class="benevole-header">
-                                <div style="flex: 1;">
-                                    <h3 class="benevole-name">{{ inscription.mecene.organisation }}</h3>
-                                    <p style="margin: 0.25rem 0 0 0; color: #6b7280; font-size: 0.9rem;">
-                                        {{ inscription.mecene.utilisateur.prenom }} {{ inscription.mecene.utilisateur.nom }} • {{ inscription.mecene.utilisateur.email }}
-                                    </p>
-                                </div>
-                                <span class="badge status 
-                                    {% if inscription.statut == 'accepte' %}success
-                                    {% elseif inscription.statut == 'refuse' %}danger
-                                    {% else %}warning{% endif %}">
-                                    {% if inscription.statut == 'accepte' %}Acceptée
-                                    {% elseif inscription.statut == 'refuse' %}Refusée
-                                    {% else %}En attente{% endif %}
-                                </span>
-                            </div>
-                            
-                            <div style="padding: 0.75rem; background: #f8f9fa; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #0d1b2a;">
-                                <strong style="color: #1a3c5a; font-size: 1rem;">Événement: {{ inscription.evenement.nom }}</strong>
-                                <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">
-                                    <strong>Date:</strong> {{ inscription.evenement.dateDebut|date('d/m/Y') }}
-                                    {% if inscription.evenement.lieu %}
-                                        • <strong>Lieu:</strong> {{ inscription.evenement.lieu }}
-                                    {% endif %}
-                                </div>
-                            </div>
-                            
-                            <div class="benevole-info">
-                                <div class="info-item" style="grid-column: 1 / -1;">
-                                    <span class="info-text">
-                                        <strong>Type de don:</strong> 
-                                        {% if inscription.typeDon == 'lots' %}
-                                            <span class="badge status success" style="background: #10b981; margin-left: 0.5rem;">🎁 Don pour les lots</span>
-                                        {% else %}
-                                            <span class="badge status pending" style="background: #3b82f6; margin-left: 0.5rem;">🎪 Don pour le fonctionnement du festival</span>
-                                        {% endif %}
+                        <div class="inscription-card benevole-card" data-statut="{{ inscription.statut }}" style="background: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.07); overflow: hidden; border: 1px solid #e5e7eb;">
+                            <!-- Header avec organisation et statut -->
+                            <div style="background: linear-gradient(135deg, #0d1b2a 0%, #1b3a52 100%); padding: 1.5rem; color: white;">
+                                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink: 0;">
+                                                <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/>
+                                            </svg>
+                                            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700;">{{ inscription.mecene.organisation }}</h3>
+                                        </div>
+                                        <p style="margin: 0; opacity: 0.9; font-size: 0.875rem;">
+                                            👤 {{ inscription.mecene.utilisateur.prenom }} {{ inscription.mecene.utilisateur.nom }}
+                                        </p>
+                                        <p style="margin: 0.25rem 0 0 0; opacity: 0.8; font-size: 0.813rem;">
+                                            ✉️ {{ inscription.mecene.utilisateur.email }}
+                                        </p>
+                                    </div>
+                                    <span style="{% if inscription.statut == 'accepte' %}background: #10b981; {% elseif inscription.statut == 'refuse' %}background: #ef4444; {% else %}background: #f59e0b; {% endif %} color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.813rem; font-weight: 600; white-space: nowrap;">
+                                        {% if inscription.statut == 'accepte' %}✓ Acceptée
+                                        {% elseif inscription.statut == 'refuse' %}✗ Refusée
+                                        {% else %}⏳ En attente{% endif %}
                                     </span>
                                 </div>
+                            </div>
 
-                                {% if inscription.nomDon %}
-                                <div class="info-item" style="grid-column: 1 / -1; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #16a34a; padding: 1rem; border-radius: 8px;">
-                                    <div>
-                                        <span style="display: block; font-size: 0.875rem; color: #15803d; font-weight: 600; margin-bottom: 0.25rem;">Article pour le stock</span>
-                                        <span style="font-weight: 600; font-size: 1.1rem; color: #006909;">{{ inscription.nomDon }}</span>
-                                        {% if inscription.categorie %}
-                                            <span class="badge status success" style="margin-left: 0.5rem; font-size: 0.75rem;">
-                                                {% if inscription.categorie == 'bar' %}Bar
-                                                {% elseif inscription.categorie == 'resto' %}Resto
-                                                {% elseif inscription.categorie == 'deco' %}Déco
-                                                {% else %}Autre{% endif %}
-                                            </span>
+                            <div style="padding: 1.5rem;">
+                                <!-- Événement -->
+                                <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; border-left: 4px solid #3b82f6;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#3b82f6">
+                                            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5zm2 4h10v2H7v-2z"/>
+                                        </svg>
+                                        <strong style="color: #1e40af; font-size: 1.05rem;">{{ inscription.evenement.nom }}</strong>
+                                    </div>
+                                    <div style="font-size: 0.875rem; color: #1e40af; display: flex; flex-wrap: wrap; gap: 1rem;">
+                                        <span>📅 {{ inscription.evenement.dateDebut|date('d/m/Y') }}</span>
+                                        {% if inscription.evenement.lieu %}
+                                            <span>📍 {{ inscription.evenement.lieu }}</span>
                                         {% endif %}
                                     </div>
                                 </div>
 
-                                <div class="info-item">
-                                    <span class="info-text"><strong>Quantité:</strong> {{ inscription.quantite }}</span>
+                                <!-- Type de don -->
+                                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                                    {% if inscription.typeDon == 'lots' %}
+                                        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 0.75rem 1.5rem; border-radius: 30px; border: 2px solid #10b981; display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="font-size: 1.5rem;">🎁</span>
+                                            <span style="color: #065f46; font-weight: 600;">Don pour les lots</span>
+                                        </div>
+                                    {% else %}
+                                        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 0.75rem 1.5rem; border-radius: 30px; border: 2px solid #f59e0b; display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="font-size: 1.5rem;">🎪</span>
+                                            <span style="color: #92400e; font-weight: 600;">Don pour le fonctionnement</span>
+                                        </div>
+                                    {% endif %}
                                 </div>
 
-                                {% if inscription.valeurUnitaire %}
-                                <div class="info-item">
-                                    <span class="info-text"><strong>Valeur unitaire:</strong> {{ inscription.valeurUnitaire|number_format(2, ',', ' ') }} €</span>
+                                <!-- Article pour le stock (si existant) -->
+                                {% if inscription.nomDon %}
+                                <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 2px solid #16a34a; padding: 1.25rem; border-radius: 12px; margin-bottom: 1rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#15803d">
+                                            <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm13.5-9l1.96 2.5H17V9h2.5zm-1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>
+                                        </svg>
+                                        <span style="color: #15803d; font-weight: 600; font-size: 0.875rem;">📦 Article pour le stock</span>
+                                    </div>
+                                    <div style="font-size: 1.25rem; font-weight: 700; color: #15803d; margin-bottom: 0.5rem;">{{ inscription.nomDon }}</div>
+                                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; font-size: 0.875rem; color: #065f46;">
+                                        {% if inscription.categorie %}
+                                            <span style="background: #16a34a; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+                                                {% if inscription.categorie == 'bar' %}🍺 Bar
+                                                {% elseif inscription.categorie == 'resto' %}🍽️ Resto
+                                                {% elseif inscription.categorie == 'deco' %}🎨 Déco
+                                                {% else %}📦 Autre{% endif %}
+                                            </span>
+                                        {% endif %}
+                                        <span><strong>Quantité:</strong> {{ inscription.quantite }}</span>
+                                        {% if inscription.valeurUnitaire %}
+                                            <span><strong>Valeur unitaire:</strong> {{ inscription.valeurUnitaire|number_format(2, ',', ' ') }} €</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 {% endif %}
-                                {% endif %}
 
-                                <div class="info-item" style="grid-column: 1 / -1;">
-                                    <span class="info-text"><strong>Description du don:</strong> {{ inscription.descriptionDon }}</span>
+                                <!-- Description du don -->
+                                <div style="background: #f9fafb; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid #6b7280;">
+                                    <div style="font-size: 0.813rem; color: #6b7280; font-weight: 600; margin-bottom: 0.5rem;">💬 Description du don</div>
+                                    <div style="color: #374151; line-height: 1.5;">{{ inscription.descriptionDon }}</div>
                                 </div>
 
-                                {% if inscription.montantEstime %}
-                                <div class="info-item">
-                                    <span class="info-text"><strong>Valeur totale estimée:</strong> <span style="font-size: 1.25rem; color: #059669; font-weight: 700;">{{ inscription.montantEstime|number_format(2, ',', ' ') }} €</span></span>
+                                <!-- Informations supplémentaires -->
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 1rem;">
+                                    {% if inscription.montantEstime %}
+                                    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 1rem; border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 0.75rem; color: #92400e; font-weight: 600; margin-bottom: 0.25rem;">💰 Valeur estimée</div>
+                                        <div style="font-size: 1.5rem; font-weight: 700; color: #92400e;">{{ inscription.montantEstime|number_format(2, ',', ' ') }} €</div>
+                                    </div>
+                                    {% endif %}
+                                    <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 0.75rem; color: #6b7280; font-weight: 600; margin-bottom: 0.25rem;">📅 Date de soumission</div>
+                                        <div style="font-size: 0.875rem; font-weight: 600; color: #374151;">{{ inscription.dateInscription|date('d/m/Y à H:i') }}</div>
+                                    </div>
                                 </div>
-                                {% endif %}
 
+                                <!-- Remarques -->
                                 {% if inscription.remarques %}
-                                <div class="info-item" style="grid-column: 1 / -1;">
-                                    <span class="info-text"><strong>Remarques:</strong> {{ inscription.remarques }}</span>
+                                <div style="background: #fffbeb; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #fbbf24;">
+                                    <div style="font-size: 0.813rem; color: #92400e; font-weight: 600; margin-bottom: 0.5rem;">💡 Remarques du mécène</div>
+                                    <div style="color: #92400e; font-size: 0.875rem;">{{ inscription.remarques }}</div>
                                 </div>
                                 {% endif %}
 
+                                <!-- Adresse de livraison -->
                                 {% if inscription.adressePostale %}
-                                <div class="info-item" style="grid-column: 1 / -1;">
-                                    <span class="info-text"><strong>📍 Adresse de livraison:</strong> <br>{{ inscription.adressePostale|nl2br }}</span>
+                                <div style="background: #fef2f2; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #fca5a5;">
+                                    <div style="font-size: 0.813rem; color: #991b1b; font-weight: 600; margin-bottom: 0.5rem;">📍 Adresse de livraison</div>
+                                    <div style="color: #991b1b; font-size: 0.875rem;">{{ inscription.adressePostale|nl2br }}</div>
                                 </div>
                                 {% endif %}
 
-                                <div class="info-item">
-                                    <span class="info-text"><strong>Date de soumission:</strong> {{ inscription.dateInscription|date('d/m/Y à H:i') }}</span>
+                                <!-- Actions -->
+                                {% if inscription.statut == 'en_attente' %}
+                                <div style="display: flex; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                                    <button type="button" style="flex: 1; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" onclick="confirmAccepter({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('accepter_inscription_' ~ inscription.id) }}')">
+                                        ✓ Accepter
+                                    </button>
+                                    <button type="button" style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 0.75rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" onclick="confirmRefuser({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('refuser_inscription_' ~ inscription.id) }}')">
+                                        ✗ Refuser
+                                    </button>
                                 </div>
+                                {% elseif inscription.statut == 'accepte' %}
+                                <div style="padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                                    <button type="button" style="width: 100%; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 0.75rem; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="openOptionsRefuser(this, {{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('refuser_inscription_' ~ inscription.id) }}')">
+                                        ⚙️ Options
+                                    </button>
+                                </div>
+                                {% elseif inscription.statut == 'refuse' %}
+                                <div style="padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                                    <button type="button" style="width: 100%; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 0.75rem; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="openOptions(this, '{{ csrf_token('accepter_inscription_' ~ inscription.id) }}', '{{ path('admin_inscription_accepter', {'id': inscription.id}) }}', {{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}')">
+                                        ⚙️ Options
+                                    </button>
+                                </div>
+                                {% endif %}
                             </div>
-                            
-                            {% if inscription.statut == 'en_attente' %}
-                            <div class="benevole-actions">
-                                <button type="button" class="btn btn-small btn-primary" onclick="confirmAccepter({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('accepter_inscription_' ~ inscription.id) }}')">Accepter</button>
-                                <button type="button" class="btn btn-small btn-danger" onclick="confirmRefuser({{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('refuser_inscription_' ~ inscription.id) }}')">Refuser</button>
-                            </div>
-                            {% elseif inscription.statut == 'accepte' %}
-                            <div class="benevole-actions">
-                                <button type="button" class="btn btn-small btn-secondary no-hover" onclick="openOptionsRefuser(this, {{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}', '{{ csrf_token('refuser_inscription_' ~ inscription.id) }}')">Options</button>
-                            </div>
-                            {% elseif inscription.statut == 'refuse' %}
-                            <div class="benevole-actions">
-                                <button class="btn btn-small btn-secondary no-hover" type="button" onclick="openOptions(this, '{{ csrf_token('accepter_inscription_' ~ inscription.id) }}', '{{ path('admin_inscription_accepter', {'id': inscription.id}) }}', {{ inscription.id }}, '{{ inscription.mecene.organisation|e('js') }}')">Options</button>
-                            </div>
-                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>

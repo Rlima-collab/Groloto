@@ -198,6 +198,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const meceneCards = Array.from(document.querySelectorAll('.benevole-card'));
     const gridContainer = document.querySelector('.benevoles-grid');
     const countCurrent = document.getElementById('countCurrent');
+    const paginationContainer = document.getElementById('paginationContainer');
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+    const currentPageSpan = document.getElementById('currentPage');
+    const totalPagesSpan = document.getElementById('totalPages');
     
     let currentPage = 1;
     let filteredCards = [];
@@ -212,8 +217,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         meceneCards.forEach(card => {
             const name = card.querySelector('.benevole-name').textContent.toLowerCase();
-            const organisation = card.querySelector('.info-text strong:contains("Organisation")').parentElement.textContent.toLowerCase();
-            const email = card.querySelector('.info-text strong:contains("Email")').parentElement.textContent.toLowerCase();
+            const infoTexts = card.querySelectorAll('.info-text');
+            let organisation = '';
+            let email = '';
+            
+            infoTexts.forEach(info => {
+                const text = info.textContent.toLowerCase();
+                if (text.includes('organisation')) organisation = text;
+                if (text.includes('email')) email = text;
+            });
             
             const matchesSearch = !searchTerm || 
                 name.includes(searchTerm) || 
@@ -246,8 +258,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Mettre à jour la pagination
     function updatePagination() {
-        if (itemsPerPage === 'all') {
-            paginationContainer.style.display = 'none';
+        if (itemsPerPage === 'all' || !paginationContainer) {
+            if (paginationContainer) paginationContainer.style.display = 'none';
             return;
         }
         
@@ -265,18 +277,18 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', filterSearch);
     
     // Pagination
-    prevPageBtn.addEventListener('click', () => {
-        if (currentPage > 1) displayPage(currentPage - 1);
-    });
+    if (prevPageBtn) {
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) displayPage(currentPage - 1);
+        });
+    }
     
-    nextPageBtn.addEventListener('click', () => {
-        const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
-        if (currentPage < totalPages) displayPage(currentPage + 1);
-    });
-
-    // Initialisation
-    filterSearch();
-});
+    if (nextPageBtn) {
+        nextPageBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+            if (currentPage < totalPages) displayPage(currentPage + 1);
+        });
+    }
 
     // Initialisation
     filterSearch();
@@ -308,7 +320,6 @@ function confirmDeleteMecene(button) {
         form.submit();
     }
 }
-</script>
 </script>
 {% endblock %}
 
