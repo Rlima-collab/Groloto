@@ -19,41 +19,48 @@
     </div>
 </div>
 
-<div class="weekends-grid">
+<div class="festivals-container">
     {% for weekend in weekends %}
-        <a href="{{ path('public_festival_detail', {'id': weekend.id}) }}" class="weekend-card">
-            <div class="card-image">
+        <article class="festival-card">
+            <div class="festival-image-wrapper">
+                {% set showPlaceholder = true %}
                 {% if weekend.coverImage %}
-                    {% if weekend.coverImage matches('/^uploads\\//') or weekend.coverImage matches('/^images\\//') %}
-                        <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}">
+                    {% if weekend.coverImage matches('/^https?:\\/\\//')  %}
+                        <img src="{{ weekend.coverImage }}" alt="{{ weekend.nom }}" class="festival-image" onerror="this.style.display='none';this.parentElement.querySelector('.festival-placeholder').style.display='flex';">
+                        {% set showPlaceholder = false %}
+                    {% elseif weekend.coverImage matches('/^uploads\\//') or weekend.coverImage matches('/^images\\//') %}
+                        <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}" class="festival-image" onerror="this.style.display='none';this.parentElement.querySelector('.festival-placeholder').style.display='flex';">
+                        {% set showPlaceholder = false %}
                     {% else %}
-                        <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}">
+                        <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}" class="festival-image" onerror="this.style.display='none';this.parentElement.querySelector('.festival-placeholder').style.display='flex';">
+                        {% set showPlaceholder = false %}
                     {% endif %}
-                {% else %}
-                    <div class="card-placeholder">
-                        <i class="bi bi-calendar-event"></i>
-                        <span class="placeholder-date">
-                            {% if weekend.dateDebut %}{{ weekend.dateDebut|date('d M Y') }}{% endif %}
-                        </span>
-                    </div>
                 {% endif %}
-            </div>
-            <div class="card-body">
-                <h3 class="card-title">{{ weekend.nom }}</h3>
-                {% if weekend.dateDebut %}
-                    <div class="card-dates">
-                        <i class="bi bi-calendar3"></i>
-                        <span>{{ weekend.dateDebut|date('d/m/Y') }}{% if weekend.dateFin %} - {{ weekend.dateFin|date('d/m/Y') }}{% endif %}</span>
-                    </div>
-                {% endif %}
-                {% if weekend.description %}
-                    <p class="card-description">{{ weekend.description|length > 100 ? weekend.description|slice(0, 100) ~ '...' : weekend.description }}</p>
-                {% endif %}
-                <div class="card-action">
-                    <span>Découvrir <i class="bi bi-arrow-right"></i></span>
+                <div class="festival-placeholder" {% if not showPlaceholder %}style="display: none;"{% endif %}>
+                    <i class="bi bi-calendar-event"></i>
+                    <span class="placeholder-date">{{ weekend.dateDebut|date('d M Y') }}</span>
+                </div>
+                <div class="festival-overlay"></div>
+                <div class="festival-date-badge">
+                    <span class="date-day">{{ weekend.dateDebut|date('d') }}</span>
+                    <span class="date-month">{{ weekend.dateDebut|date('M') }}</span>
                 </div>
             </div>
-        </a>
+            <div class="festival-content">
+                <h3 class="festival-title">{{ weekend.nom }}</h3>
+                <div class="festival-dates">
+                    <i class="bi bi-calendar-event"></i>
+                    <span>{{ weekend.dateDebut|date('d/m/Y') }}{% if weekend.dateFin %} - {{ weekend.dateFin|date('d/m/Y') }}{% endif %}</span>
+                </div>
+                {% if weekend.description %}
+                    <p class="festival-description">{{ weekend.description|length > 120 ? weekend.description|slice(0, 120) ~ '...' : weekend.description }}</p>
+                {% endif %}
+                <a href="{{ path('public_festival_detail', {'id': weekend.id}) }}" class="festival-button">
+                    Découvrir le festival
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </article>
     {% else %}
         <div class="empty-state">
             <div class="empty-icon">
@@ -64,4 +71,202 @@
         </div>
     {% endfor %}
 </div>
+
+<style>
+.festivals-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 2rem;
+    padding: 3rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.festival-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.festival-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.festival-image-wrapper {
+    position: relative;
+    height: 260px;
+    overflow: hidden;
+}
+
+.festival-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.festival-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b3a52 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.festival-placeholder i {
+    font-size: 80px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.placeholder-date {
+    font-size: 24px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.festival-card:hover .festival-image {
+    transform: scale(1.08);
+}
+
+.festival-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%);
+    pointer-events: none;
+}
+
+.festival-date-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 12px 16px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.date-day {
+    display: block;
+    font-size: 28px;
+    font-weight: 800;
+    color: #1a1a1a;
+    line-height: 1;
+}
+
+.date-month {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
+.festival-content {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.festival-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+.festival-dates {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.festival-dates i {
+    color: #4A90E2;
+    font-size: 16px;
+}
+
+.festival-description {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 20px;
+    flex: 1;
+}
+
+.festival-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b3a52 100%);
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    align-self: flex-start;
+}
+
+.festival-button:hover {
+    background: linear-gradient(135deg, #1b3a52 0%, #0d1b2a 100%);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(13, 27, 42, 0.5);
+}
+
+.festival-button i {
+    transition: transform 0.3s ease;
+}
+
+.festival-button:hover i {
+    transform: translateX(4px);
+}
+
+@media (max-width: 1200px) {
+    .festivals-container {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+        padding: 2rem 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .festivals-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1.5rem 1rem;
+    }
+    
+    .festival-image-wrapper {
+        height: 220px;
+    }
+    
+    .festival-title {
+        font-size: 20px;
+    }
+}
+</style>
 {% endblock %}

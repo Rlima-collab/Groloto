@@ -438,34 +438,167 @@ INSERT INTO MECENE (id_utilisateur, organisation, siret, adresse_postale, instag
   (17, 'Supermarché Bio Nature', '56789012345678', '156 Route de la Santé, 86000 Poitiers', NULL, NULL),
   (18, 'Garage Auto Vitesse', '67890123456789', '78 Zone Industrielle Nord, 86000 Poitiers', NULL, 'https://facebook.com/garagevitesse');
 
-INSERT INTO WEEKEND (nom, date_debut, date_fin) VALUES
-  ('Weekend Groloto 2024', '2024-11-15', '2024-11-17'),
-  ('Weekend Groloto 2025', '2025-11-14', '2025-11-16'),
-  ('Weekend Solidaire Printemps 2025', '2025-03-21', '2025-03-23'),
-  ('Weekend Caritatif Été 2025', '2025-06-20', '2025-06-22'),
-  ('Weekend Groloto 2026', '2026-11-13', '2026-11-15');
+INSERT INTO WEEKEND (nom, date_debut, date_fin, task_offset_before, task_offset_after, cover_image, description) VALUES
+  ('Weekend Groloto 2024', '2024-11-15', '2024-11-17', 2, 3, '/uploads/covers/weekend-2024.jpg', 'Premier grand weekend Groloto avec loto caritatif et soirée dansante'),
+  ('Weekend Groloto 2025', '2025-11-14', '2025-11-16', 2, 3, '/uploads/covers/weekend-2025.jpg', 'Édition 2025 du weekend Groloto - Programme enrichi avec brunch et concert'),
+  ('Weekend Solidaire Printemps 2025', '2025-03-21', '2025-03-23', 1, 2, '/uploads/covers/printemps-2025.jpg', 'Weekend thématique printemps avec loto nature et atelier jardinage'),
+  ('Weekend Caritatif Été 2025', '2025-06-20', '2025-06-22', 3, 3, '/uploads/covers/ete-2025.jpg', 'Grande fête d''été en plein air au parc de Blossac'),
+  ('Weekend Groloto 2026', '2026-11-13', '2026-11-15', 2, 3, NULL, 'Prochain weekend Groloto annuel - Planification en cours'),
+  ('Weekend de la Galette 2025', '2025-01-17', '2025-01-19', 1, 1, '/uploads/covers/galette-2025.jpg', 'Weekend festif autour de la galette des rois avec jeux et animations'),
+  ('Weekend Carnaval 2025', '2025-02-28', '2025-03-02', 2, 2, '/uploads/covers/carnaval-2025.jpg', 'Weekend masqué avec défilé, concours de déguisements et bal costumé'),
+  ('Weekend Pâques Solidaire 2025', '2025-04-19', '2025-04-21', 1, 2, '/uploads/covers/paques-2025.jpg', 'Chasse aux œufs géante, brunch et activités familiales'),
+  ('Weekend Fête de la Musique 2025', '2025-06-20', '2025-06-22', 2, 2, '/uploads/covers/musique-2025.jpg', 'Concerts gratuits, scène ouverte et animations musicales'),
+  ('Weekend de la Rentrée 2025', '2025-09-12', '2025-09-14', 2, 3, '/uploads/covers/rentree-2025.jpg', 'Forum associatif, vide-grenier et brocante solidaire'),
+  ('Weekend Halloween 2025', '2025-10-31', '2025-11-02', 2, 2, '/uploads/covers/halloween-2025.jpg', 'Soirée d''épouvante, jeux effrayants et concours du meilleur costume'),
+  ('Weekend Téléthon 2025', '2025-12-05', '2025-12-07', 3, 2, '/uploads/covers/telethon-2025.jpg', 'Mobilisation exceptionnelle pour le Téléthon avec challenges sportifs'),
+  ('Weekend Marché de Noël 2025', '2025-12-19', '2025-12-21', 2, 3, '/uploads/covers/noel-2025.jpg', 'Marché de Noël artisanal, vin chaud et animations pour enfants'),
+  ('Weekend Galette 2026', '2026-01-16', '2026-01-18', 1, 1, '/uploads/covers/galette-2026.jpg', 'Nouvelle édition du weekend galette avec programme renouvelé - Dégustation de galettes artisanales, jeux traditionnels et soirée conviviale'),
+  ('Weekend Saint-Valentin Solidaire 2026', '2026-02-13', '2026-02-15', 2, 2, '/uploads/covers/valentin-2026.jpg', 'Weekend romantique et caritatif avec dîner aux chandelles, bal des amoureux et collecte pour les personnes isolées'),
+  ('Weekend du Printemps 2026', '2026-03-27', '2026-03-29', 2, 2, '/uploads/covers/printemps-2026.jpg', 'Weekend célébrant l''arrivée du printemps avec marché aux fleurs, ateliers jardinage bio et randonnée nature guidée'),
+  ('Weekend Pâques 2026', '2026-04-03', '2026-04-05', 2, 3, '/uploads/covers/paques-2026.jpg', 'Grande chasse aux œufs dans le parc, brunch pascal familial, ateliers créatifs pour enfants et marché artisanal de Pâques'),
+  ('Weekend Fête du Travail 2026', '2026-05-01', '2026-05-03', 1, 2, '/uploads/covers/1er-mai-2026.jpg', 'Célébration du 1er mai avec marché solidaire, vente de muguet au profit de l''association et concert populaire gratuit'),
+  ('Weekend Festival de l''Été 2026', '2026-06-19', '2026-06-21', 3, 3, '/uploads/covers/festival-ete-2026.jpg', 'Grand festival estival avec concerts, food trucks, activités nautiques et spectacles de rue - 3 jours de festivités en plein air'),
+  ('Weekend Fête Nationale 2026', '2026-07-13', '2026-07-15', 2, 2, '/uploads/covers/14juillet-2026.jpg', 'Weekend patriotique avec bal populaire du 13 juillet, feu d''artifice, défilé et activités familiales pour célébrer le 14 juillet'),
+  ('Weekend Rentrée Solidaire 2026', '2026-09-04', '2026-09-06', 2, 3, '/uploads/covers/rentree-2026.jpg', 'Forum des associations de rentrée, vide-grenier géant, collecte de fournitures scolaires et concert de rentrée'),
+  ('Weekend Vendanges Caritatives 2026', '2026-09-25', '2026-09-27', 2, 2, '/uploads/covers/vendanges-2026.jpg', 'Weekend thématique autour du vin avec dégustation responsable, loto des vendanges, repas du terroir et animation folklorique'),
+  ('Weekend Halloween 2026', '2026-10-30', '2026-11-01', 2, 2, '/uploads/covers/halloween-2026.jpg', 'Frissons garantis avec parcours hanté, soirée costumée, chasse aux bonbons pour enfants et projection de films d''horreur cultes'),
+  ('Weekend Téléthon 2026', '2026-12-04', '2026-12-06', 3, 2, '/uploads/covers/telethon-2026.jpg', 'Mobilisation totale pour le Téléthon avec marathon, tournois sportifs, vente de crêpes et grand concert solidaire'),
+  ('Weekend Marché de Noël 2026', '2026-12-18', '2026-12-20', 2, 3, '/uploads/covers/noel-2026.jpg', 'Village de Noël féérique avec chalets artisanaux, patinoire, rencontre avec le Père Noël et concerts de chants traditionnels');
 
-INSERT INTO EVENEMENT (id_weekend, nom, description, date_debut, date_fin, lieu, heure_debut, duree_minutes) VALUES
-  -- Événements du Weekend 2024
-  (1, 'Groloto 2024', 'Loto caritatif annuel édition 2024', '2024-11-16', '2024-11-16', 'Salle des fêtes de Poitiers', '14:00:00', 300),
-  (1, 'Soirée dansante 2024', 'Bal populaire après le loto', '2024-11-16', '2024-11-16', 'Salle des fêtes de Poitiers', '20:00:00', 240),
-  -- Événements du Weekend 2025
-  (2, 'Groloto 2025', 'Loto caritatif annuel édition 2025 - Plus de lots que jamais!', '2025-11-15', '2025-11-15', 'Salle des fêtes de Poitiers', '14:00:00', 360),
-  (2, 'Brunch solidaire', 'Brunch participatif pour lancer le weekend', '2025-11-14', '2025-11-14', 'Maison des associations', '10:00:00', 180),
-  (2, 'Concert de clôture', 'Concert avec artistes locaux', '2025-11-15', '2025-11-15', 'Salle des fêtes de Poitiers', '20:00:00', 180),
+INSERT INTO EVENEMENT (id_weekend, nom, description, date_debut, date_fin, lieu, heure_debut, duree_minutes, image) VALUES
+  -- Événements du Weekend 2024 (id_weekend = 1)
+  (1, 'Groloto 2024', 'Loto caritatif annuel édition 2024', '2024-11-16', '2024-11-16', 'Salle des fêtes de Poitiers', '14:00:00', 300, '/uploads/events/groloto-2024.jpg'),
+  (1, 'Soirée dansante 2024', 'Bal populaire après le loto', '2024-11-16', '2024-11-16', 'Salle des fêtes de Poitiers', '20:00:00', 240, '/uploads/events/bal-2024.jpg'),
+  -- Événements du Weekend 2025 (id_weekend = 2)
+  (2, 'Groloto 2025', 'Loto caritatif annuel édition 2025 - Plus de lots que jamais!', '2025-11-15', '2025-11-15', 'Salle des fêtes de Poitiers', '14:00:00', 360, '/uploads/events/groloto-2025.jpg'),
+  (2, 'Brunch solidaire', 'Brunch participatif pour lancer le weekend', '2025-11-14', '2025-11-14', 'Maison des associations', '10:00:00', 180, '/uploads/events/brunch-2025.jpg'),
+  (2, 'Concert de clôture', 'Concert avec artistes locaux', '2025-11-15', '2025-11-15', 'Salle des fêtes de Poitiers', '20:00:00', 180, '/uploads/events/concert-2025.jpg'),
   -- Événements hors weekend
-  (NULL, 'Tournoi de belote 2025', 'Compétition amicale avec lots pour les gagnants', '2025-01-18', '2025-01-18', 'Maison des associations', '14:00:00', 240),
-  (NULL, 'Soirée quizz caritative', 'Quiz généraliste pour récolter des fonds', '2025-02-15', '2025-02-15', 'Bar Le Central', '19:00:00', 180),
-  (NULL, 'Vide-grenier Groloto', 'Vide-grenier pour collecter des fonds', '2025-04-12', '2025-04-12', 'Place du marché', '08:00:00', 480),
-  (NULL, 'Randonnée solidaire', 'Marche de 10km au profit de l''association', '2025-05-24', '2025-05-24', 'Forêt de Moulière', '09:00:00', 300),
-  (NULL, 'Brocante caritative', 'Vente d''objets donnés au profit de l''association', '2025-09-06', '2025-09-06', 'Parking du supermarché', '07:00:00', 600),
-  -- Événements Weekend Printemps 2025
-  (3, 'Loto de printemps', 'Petit loto printanier avec lots nature', '2025-03-22', '2025-03-22', 'Salle polyvalente', '15:00:00', 180),
-  (3, 'Atelier jardinage', 'Initiation au jardinage bio', '2025-03-22', '2025-03-22', 'Jardins partagés', '10:00:00', 120),
-  -- Événements Weekend Été 2025
-  (4, 'Fête de l''été', 'Grande fête en plein air', '2025-06-21', '2025-06-21', 'Parc de Blossac', '14:00:00', 480),
-  (4, 'Concert champêtre', 'Concert en plein air avec pique-nique', '2025-06-21', '2025-06-21', 'Parc de Blossac', '19:00:00', 180),
-  (4, 'Tombola géante', 'Tombola avec lots exceptionnels', '2025-06-22', '2025-06-22', 'Parc de Blossac', '11:00:00', 120);
+  (NULL, 'Tournoi de belote 2025', 'Compétition amicale avec lots pour les gagnants', '2025-01-18', '2025-01-18', 'Maison des associations', '14:00:00', 240, NULL),
+  (NULL, 'Soirée quizz caritative', 'Quiz généraliste pour récolter des fonds', '2025-02-15', '2025-02-15', 'Bar Le Central', '19:00:00', 180, NULL),
+  (NULL, 'Vide-grenier Groloto', 'Vide-grenier pour collecter des fonds', '2025-04-12', '2025-04-12', 'Place du marché', '08:00:00', 480, NULL),
+  (NULL, 'Randonnée solidaire', 'Marche de 10km au profit de l''association', '2025-05-24', '2025-05-24', 'Forêt de Moulière', '09:00:00', 300, NULL),
+  (NULL, 'Brocante caritative', 'Vente d''objets donnés au profit de l''association', '2025-09-06', '2025-09-06', 'Parking du supermarché', '07:00:00', 600, NULL),
+  -- Événements Weekend Printemps 2025 (id_weekend = 3)
+  (3, 'Loto de printemps', 'Petit loto printanier avec lots nature', '2025-03-22', '2025-03-22', 'Salle polyvalente', '15:00:00', 180, '/uploads/events/loto-printemps.jpg'),
+  (3, 'Atelier jardinage', 'Initiation au jardinage bio', '2025-03-22', '2025-03-22', 'Jardins partagés', '10:00:00', 120, NULL),
+  -- Événements Weekend Été 2025 (id_weekend = 4)
+  (4, 'Fête de l''été', 'Grande fête en plein air', '2025-06-21', '2025-06-21', 'Parc de Blossac', '14:00:00', 480, '/uploads/events/fete-ete.jpg'),
+  (4, 'Concert champêtre', 'Concert en plein air avec pique-nique', '2025-06-21', '2025-06-21', 'Parc de Blossac', '19:00:00', 180, NULL),
+  (4, 'Tombola géante', 'Tombola avec lots exceptionnels', '2025-06-22', '2025-06-22', 'Parc de Blossac', '11:00:00', 120, NULL),
+  -- Événements Weekend Galette 2025 (id_weekend = 6)
+  (6, 'Grand tirage de la galette', 'Dégustation de galettes et tirage des rois', '2025-01-18', '2025-01-18', 'Salle municipale', '14:00:00', 180, '/uploads/events/galette.jpg'),
+  (6, 'Atelier pâtisserie enfants', 'Les enfants préparent leur propre galette', '2025-01-18', '2025-01-18', 'Cuisine associative', '10:00:00', 120, NULL),
+  (6, 'Soirée jeux de société', 'Tournoi de jeux de plateau en équipe', '2025-01-18', '2025-01-18', 'Salle municipale', '20:00:00', 240, NULL),
+  -- Événements Weekend Carnaval 2025 (id_weekend = 7)
+  (7, 'Défilé de carnaval', 'Grand défilé dans les rues du centre-ville', '2025-03-01', '2025-03-01', 'Centre-ville de Poitiers', '14:00:00', 120, '/uploads/events/defile-carnaval.jpg'),
+  (7, 'Concours de déguisements', 'Compétition pour le meilleur costume avec prix', '2025-03-01', '2025-03-01', 'Place du marché', '16:00:00', 90, NULL),
+  (7, 'Bal masqué', 'Soirée dansante en costume', '2025-03-01', '2025-03-01', 'Salle des fêtes', '20:00:00', 300, '/uploads/events/bal-masque.jpg'),
+  (7, 'Atelier maquillage', 'Maquillage artistique gratuit pour tous', '2025-03-01', '2025-03-01', 'Stand place du marché', '13:00:00', 180, NULL),
+  -- Événements Weekend Pâques 2025 (id_weekend = 8)
+  (8, 'Chasse aux œufs géante', 'Chasse aux œufs dans le parc pour petits et grands', '2025-04-20', '2025-04-20', 'Parc de Blossac', '10:00:00', 120, '/uploads/events/chasse-oeufs.jpg'),
+  (8, 'Brunch de Pâques', 'Brunch pascal en plein air', '2025-04-20', '2025-04-20', 'Parc de Blossac', '11:00:00', 150, NULL),
+  (8, 'Atelier décoration d''œufs', 'Activité créative pour enfants', '2025-04-20', '2025-04-20', 'Chapiteau animations', '14:00:00', 120, NULL),
+  (8, 'Spectacle de marionnettes', 'Conte de Pâques pour les enfants', '2025-04-20', '2025-04-20', 'Scène plein air', '16:00:00', 60, NULL),
+  -- Événements Weekend Fête de la Musique 2025 (id_weekend = 9)
+  (9, 'Concert rock local', 'Groupes de rock de la région', '2025-06-21', '2025-06-21', 'Scène principale place du marché', '18:00:00', 180, '/uploads/events/concert-rock.jpg'),
+  (9, 'Scène jazz', 'Soirée jazz et blues', '2025-06-21', '2025-06-21', 'Terrasse bar Le Central', '20:00:00', 240, NULL),
+  (9, 'Scène ouverte', 'Musiciens amateurs bienvenus', '2025-06-21', '2025-06-21', 'Scène secondaire', '14:00:00', 300, NULL),
+  (9, 'Atelier percussion', 'Initiation aux percussions africaines', '2025-06-21', '2025-06-21', 'Chapiteau animations', '15:00:00', 90, NULL),
+  -- Événements Weekend Rentrée 2025 (id_weekend = 10)
+  (10, 'Forum des associations', 'Découverte des associations locales', '2025-09-13', '2025-09-13', 'Salle polyvalente', '10:00:00', 360, '/uploads/events/forum-asso.jpg'),
+  (10, 'Vide-grenier de rentrée', 'Braderie pour faire de bonnes affaires', '2025-09-13', '2025-09-13', 'Parking municipal', '08:00:00', 480, NULL),
+  (10, 'Brocante solidaire', 'Vente au profit des associations', '2025-09-13', '2025-09-13', 'Place du marché', '09:00:00', 420, NULL),
+  (10, 'Concert de rentrée', 'Concert pop-rock pour bien commencer l''année', '2025-09-13', '2025-09-13', 'Salle des fêtes', '20:00:00', 180, NULL),
+  -- Événements Weekend Halloween 2025 (id_weekend = 11)
+  (11, 'Soirée d''épouvante', 'Soirée effrayante avec maison hantée', '2025-10-31', '2025-10-31', 'Ancienne usine désaffectée', '19:00:00', 240, '/uploads/events/halloween.jpg'),
+  (11, 'Concours meilleur costume', 'Qui sera le plus effrayant?', '2025-10-31', '2025-10-31', 'Place centrale', '18:00:00', 60, NULL),
+  (11, 'Chasse aux bonbons', 'Pour les enfants dans le quartier', '2025-10-31', '2025-10-31', 'Centre-ville', '17:00:00', 120, NULL),
+  (11, 'Projection film d''horreur', 'Classique du cinéma d''épouvante', '2025-10-31', '2025-10-31', 'Cinéma municipal', '21:00:00', 120, NULL),
+  -- Événements Weekend Téléthon 2025 (id_weekend = 12)
+  (12, 'Marathon Téléthon', 'Course solidaire de 10km', '2025-12-06', '2025-12-06', 'Parc de Blossac', '09:00:00', 180, '/uploads/events/marathon.jpg'),
+  (12, 'Tournoi de foot', 'Tournoi inter-associations', '2025-12-06', '2025-12-06', 'Stade municipal', '14:00:00', 300, NULL),
+  (12, 'Zumba géante', 'Session de Zumba collective', '2025-12-06', '2025-12-06', 'Place du marché', '11:00:00', 90, NULL),
+  (12, 'Vente de crêpes', 'Stand crêpes au profit du Téléthon', '2025-12-06', '2025-12-06', 'Stand place centrale', '10:00:00', 480, NULL),
+  (12, 'Concert caritatif', 'Concert de soutien au Téléthon', '2025-12-06', '2025-12-06', 'Salle des fêtes', '20:00:00', 180, NULL),
+  -- Événements Weekend Marché de Noël 2025 (id_weekend = 13)
+  (13, 'Marché de Noël artisanal', 'Chalets avec artisans locaux', '2025-12-20', '2025-12-21', 'Place du marché', '10:00:00', 600, '/uploads/events/marche-noel.jpg'),
+  (13, 'Rencontre avec le Père Noël', 'Photos avec le Père Noël', '2025-12-20', '2025-12-21', 'Chalet central', '14:00:00', 240, NULL),
+  (13, 'Atelier décorations de Noël', 'Création de décorations avec les enfants', '2025-12-20', '2025-12-20', 'Chapiteau animations', '14:00:00', 120, NULL),
+  (13, 'Concert de chants de Noël', 'Chorales et chants traditionnels', '2025-12-20', '2025-12-20', 'Scène place du marché', '18:00:00', 90, NULL),
+  (13, 'Patinoire de Noël', 'Patinoire éphémère en plein air', '2025-12-20', '2025-12-21', 'Esplanade', '10:00:00', 720, '/uploads/events/patinoire.jpg'),
+  -- Événements Weekend Galette 2026 (id_weekend = 14)
+  (14, 'Grand tirage de la galette 2026', 'Dégustation de galettes des rois artisanales avec tirage au sort des fèves dorées - Animation musicale avec accordéoniste', '2026-01-17', '2026-01-17', 'Salle municipale Saint-Cyprien', '14:30:00', 180, '/uploads/events/galette-2026-tirage.jpg'),
+  (14, 'Atelier confection galettes', 'Atelier pâtisserie pour petits et grands - Apprenez à préparer votre propre galette avec un chef pâtissier professionnel', '2026-01-17', '2026-01-17', 'Cuisine pédagogique Maison des associations', '10:00:00', 150, '/uploads/events/atelier-galette.jpg'),
+  (14, 'Tournoi de pétanque des rois', 'Compétition amicale de pétanque avec couronnes pour les vainqueurs - Lots gourmands à gagner', '2026-01-17', '2026-01-17', 'Boulodrome municipal', '14:00:00', 240, NULL),
+  (14, 'Soirée jeux de cartes conviviale', 'Belote, tarot et autres jeux traditionnels - Ambiance chaleureuse autour d''une galette et d''un verre de cidre', '2026-01-17', '2026-01-17', 'Café associatif Le Relais', '20:00:00', 180, NULL),
+  -- Événements Weekend Saint-Valentin 2026 (id_weekend = 15)
+  (15, 'Dîner aux chandelles solidaire', 'Repas romantique préparé par des chefs bénévoles - Menu gastronomique 3 services avec accord mets-vins - Bénéfices reversés aux personnes isolées', '2026-02-14', '2026-02-14', 'Restaurant Le Gourmet', '19:30:00', 180, '/uploads/events/diner-chandelles.jpg'),
+  (15, 'Bal des amoureux', 'Soirée dansante sur les plus belles chansons d''amour - DJ et animation - Photobooth romantique gratuit', '2026-02-14', '2026-02-14', 'Salle des fêtes décorée', '21:00:00', 240, '/uploads/events/bal-amoureux.jpg'),
+  (15, 'Atelier création de cartes Saint-Valentin', 'Confection de cartes artisanales destinées aux personnes âgées en EHPAD - Matériel fourni - Moment créatif et solidaire', '2026-02-14', '2026-02-14', 'Maison des associations', '14:00:00', 120, NULL),
+  (15, 'Vente de roses solidaires', 'Stand de vente de roses au profit de l''association - Possibilité de faire livrer vos roses dans Poitiers', '2026-02-14', '2026-02-14', 'Place du marché Notre-Dame', '09:00:00', 480, NULL),
+  -- Événements Weekend Printemps 2026 (id_weekend = 16)
+  (16, 'Marché aux fleurs printanier', 'Grand marché de plantes, fleurs et arbustes avec producteurs locaux - Conseils jardinage gratuits - Vente au profit de l''association', '2026-03-28', '2026-03-28', 'Parvis de l''Hôtel de Ville', '09:00:00', 420, '/uploads/events/marche-fleurs.jpg'),
+  (16, 'Atelier jardinage bio et permaculture', 'Initiation au jardinage écologique - Création d''un potager en carrés - Techniques de compostage - Animé par un expert permaculteur', '2026-03-28', '2026-03-28', 'Jardins partagés du Porteau', '14:00:00', 180, '/uploads/events/atelier-jardinage.jpg'),
+  (16, 'Randonnée nature guidée', 'Balade de 12km à travers les sentiers du bois de Saint-Pierre - Découverte de la faune et flore printanière avec guide naturaliste - Pique-nique tiré du sac', '2026-03-29', '2026-03-29', 'Départ parking Bois de Saint-Pierre', '09:30:00', 240, '/uploads/events/rando-printemps.jpg'),
+  (16, 'Bourse aux plantes', 'Échange et troc de graines, boutures et plants entre jardiniers amateurs - Gratuit et convivial', '2026-03-28', '2026-03-28', 'Maison de quartier des Trois-Cités', '10:00:00', 180, NULL),
+  -- Événements Weekend Pâques 2026 (id_weekend = 17)
+  (17, 'Grande chasse aux œufs du parc', 'Plus de 5000 œufs cachés dans le parc de Blossac pour une chasse géante - Plusieurs zones par tranche d''âge - Lots et chocolats à gagner', '2026-04-05', '2026-04-05', 'Parc de Blossac', '10:00:00', 150, '/uploads/events/chasse-oeufs-2026.jpg'),
+  (17, 'Brunch pascal familial', 'Grand brunch en plein air avec produits locaux - Formule buffet à volonté - Animation musicale douce - Réservation recommandée', '2026-04-05', '2026-04-05', 'Terrasse du Parc de Blossac', '11:00:00', 180, '/uploads/events/brunch-paques.jpg'),
+  (17, 'Ateliers créatifs pour enfants', 'Décoration d''œufs, bricolages de Pâques, maquillage lapin - Plusieurs ateliers simultanés - Encadrement par animateurs diplômés', '2026-04-05', '2026-04-05', 'Chapiteaux animations', '14:00:00', 180, '/uploads/events/ateliers-paques.jpg'),
+  (17, 'Marché artisanal de Pâques', 'Artisans locaux proposant créations chocolatées, décorations printanières et produits du terroir - Démonstrations en direct', '2026-04-04', '2026-04-05', 'Place du Marché Notre-Dame', '10:00:00', 600, NULL),
+  (17, 'Spectacle de clowns Les Joyeux Lapins', 'Spectacle comique familial avec jonglage, acrobaties et magie - Gratuit pour tous - Durée 45 minutes', '2026-04-05', '2026-04-05', 'Scène du parc', '16:00:00', 60, NULL),
+  -- Événements Weekend Fête du Travail 2026 (id_weekend = 18)
+  (18, 'Marché solidaire du 1er mai', 'Stands associatifs, artisans locaux et producteurs engagés dans le commerce équitable - Restauration sur place', '2026-05-01', '2026-05-01', 'Place du Maréchal Leclerc', '10:00:00', 420, '/uploads/events/marche-1mai.jpg'),
+  (18, 'Vente de muguet caritatif', 'Brins de muguet vendus au profit de l''association - Distribution dans tout le centre-ville - Bénévoles mobilisés', '2026-05-01', '2026-05-01', 'Divers points de vente centre-ville', '08:00:00', 540, '/uploads/events/muguet.jpg'),
+  (18, 'Concert populaire gratuit', 'Groupe de musique folk et chanson française - Ambiance conviviale et familiale - Apportez vos couvertures pour vous installer', '2026-05-01', '2026-05-01', 'Parc de Blossac scène principale', '18:00:00', 180, '/uploads/events/concert-1mai.jpg'),
+  (18, 'Défilé des associations', 'Défilé festif des associations poitevines avec fanfares et chars décorés - Parcours dans le centre historique', '2026-05-01', '2026-05-01', 'Départ Place d''Armes', '15:00:00', 120, NULL),
+  -- Événements Weekend Festival Été 2026 (id_weekend = 19)
+  (19, 'Scène rock et électro', 'Têtes d''affiche rock française et DJ sets électro - Scène principale - Buvette et restauration sur place', '2026-06-20', '2026-06-20', 'Parc de Blossac grande scène', '18:00:00', 360, '/uploads/events/scene-rock.jpg'),
+  (19, 'Village des food trucks', 'Plus de 15 food trucks proposant cuisines du monde, spécialités régionales et desserts gourmands - Espace tables et chaises', '2026-06-19', '2026-06-21', 'Esplanade du parc', '12:00:00', 600, '/uploads/events/foodtrucks.jpg'),
+  (19, 'Activités nautiques sur le Clain', 'Initiation paddle, canoë-kayak, pédalo - Encadrement par moniteurs diplômés - Gilets fournis - Gratuit sur inscription', '2026-06-20', '2026-06-21', 'Base nautique du Clain', '10:00:00', 480, '/uploads/events/nautique.jpg'),
+  (19, 'Spectacles de rue itinérants', 'Jongleurs, cracheurs de feu, échassiers et musiciens ambulants - Déambulations dans tout le festival', '2026-06-19', '2026-06-21', 'Parc de Blossac divers espaces', '14:00:00', 420, NULL),
+  (19, 'Scène jazz et world music', 'Concerts jazz, reggae, musiques du monde - Scène ombragée - Ambiance lounge avec transats', '2026-06-20', '2026-06-21', 'Scène jardin du parc', '15:00:00', 300, '/uploads/events/scene-jazz.jpg'),
+  (19, 'Zone enfants avec structures gonflables', 'Châteaux gonflables géants, parcours d''obstacles, trampolines - Surveillance assurée - Gratuit pour les enfants', '2026-06-19', '2026-06-21', 'Prairie du parc', '10:00:00', 600, NULL),
+  -- Événements Weekend 14 Juillet 2026 (id_weekend = 20)
+  (20, 'Bal populaire du 13 juillet', 'Soirée dansante traditionnelle avec orchestre - Répertoire varié des années 60 à aujourd''hui - Entrée gratuite', '2026-07-13', '2026-07-13', 'Place d''Armes', '21:00:00', 240, '/uploads/events/bal-14juillet.jpg'),
+  (20, 'Grand feu d''artifice', 'Spectacle pyrotechnique exceptionnel de 30 minutes tiré depuis les bords du Clain - Meilleur point de vue au parc de Blossac', '2026-07-14', '2026-07-14', 'Parc de Blossac', '23:00:00', 30, '/uploads/events/feu-artifice.jpg'),
+  (20, 'Défilé militaire et civil', 'Défilé des pompiers, associations patriotiques et fanfares - Cérémonie aux monuments aux morts', '2026-07-14', '2026-07-14', 'Avenue du Général de Gaulle', '10:00:00', 90, NULL),
+  (20, 'Village associatif tricolore', 'Stands d''associations, jeux pour enfants, maquillage aux couleurs de la France - Buvette et restauration', '2026-07-14', '2026-07-14', 'Parvis de l''Hôtel de Ville', '14:00:00', 360, NULL),
+  (20, 'Concert militaire', 'Concert de la musique des équipages de la Flotte - Répertoire classique et variété française', '2026-07-14', '2026-07-14', 'Église Notre-Dame la Grande', '18:00:00', 90, NULL),
+  -- Événements Weekend Rentrée 2026 (id_weekend = 21)
+  (21, 'Forum des associations rentrée 2026', 'Plus de 80 associations présentes - Démonstrations, initiations gratuites - Stands d''information et inscriptions', '2026-09-05', '2026-09-05', 'Parc des expositions', '10:00:00', 420, '/uploads/events/forum-rentree.jpg'),
+  (21, 'Vide-grenier géant de rentrée', 'Plus de 200 exposants - Brocante, vêtements, jouets, livres - Buvette et petite restauration', '2026-09-06', '2026-09-06', 'Parking du stade Rébeilleau', '07:00:00', 540, '/uploads/events/vide-grenier-rentree.jpg'),
+  (21, 'Collecte fournitures scolaires', 'Collecte de fournitures neuves ou occasion pour les familles dans le besoin - Distribution gratuite sur justificatif', '2026-09-05', '2026-09-06', 'Maison des associations', '10:00:00', 480, NULL),
+  (21, 'Concert de rentrée gratuit', 'Groupe de pop-rock local Les Échos de Poitiers - Concert tout public - Buvette associative', '2026-09-05', '2026-09-05', 'Salle des fêtes', '20:30:00', 150, '/uploads/events/concert-rentree.jpg'),
+  (21, 'Ateliers découverte activités', 'Essais gratuits : danse, arts martiaux, yoga, théâtre, peinture - Inscriptions possibles sur place', '2026-09-05', '2026-09-05', 'Complexe sportif municipal', '14:00:00', 240, NULL),
+  -- Événements Weekend Vendanges 2026 (id_weekend = 22)
+  (22, 'Loto des vendanges', 'Loto caritatif avec lots gourmands et bouteilles de vin du Haut-Poitou - Dégustation gratuite de raisins', '2026-09-26', '2026-09-26', 'Salle polyvalente', '14:30:00', 240, '/uploads/events/loto-vendanges.jpg'),
+  (22, 'Dégustation responsable de vins locaux', 'Présentation des vignobles du Haut-Poitou avec 5 vignerons - Dégustation commentée - Stand de vente - Crachoirs et eau disponibles', '2026-09-26', '2026-09-26', 'Chapiteau place du marché', '15:00:00', 180, '/uploads/events/degustation-vins.jpg'),
+  (22, 'Repas du terroir', 'Menu traditionnel poitevin - Chèvre chaud, mique poitevine, farci, tarte aux poires - Vin local inclus - Sur réservation', '2026-09-26', '2026-09-26', 'Restaurant Le Terroir', '19:30:00', 180, '/uploads/events/repas-terroir.jpg'),
+  (22, 'Animation folklorique', 'Groupe de danse folklorique Les Sabots Poitevins - Démonstrations et initiation publique - Costumes traditionnels', '2026-09-26', '2026-09-26', 'Place Charles de Gaulle', '17:00:00', 120, NULL),
+  (22, 'Marché des producteurs', 'Producteurs locaux de vin, fromages, charcuteries, confitures - Produits du terroir poitevin - Vente directe', '2026-09-26', '2026-09-27', 'Halles du marché', '09:00:00', 480, NULL),
+  -- Événements Weekend Halloween 2026 (id_weekend = 23)
+  (23, 'Parcours hanté de l''ancienne usine', 'Parcours terrifiant dans l''usine désaffectée - Zombies et créatures effrayantes - Déconseillé -12 ans - Entrée 5€', '2026-10-31', '2026-10-31', 'Ancienne usine Michelin', '19:00:00', 300, '/uploads/events/parcours-hante.jpg'),
+  (23, 'Soirée costumée Halloween', 'Grande fête déguisée avec DJ - Concours du costume le plus effrayant (lots à gagner) - Bar à cocktails horrifiques', '2026-10-31', '2026-10-31', 'Salle des fêtes décorée', '21:00:00', 300, '/uploads/events/soiree-halloween.jpg'),
+  (23, 'Chasse aux bonbons quartier centre', 'Pour les 3-12 ans - Parcours fléché dans les commerces participants - Seau de bonbons à récupérer - Gratuit', '2026-10-31', '2026-10-31', 'Centre-ville historique', '17:00:00', 150, '/uploads/events/chasse-bonbons.jpg'),
+  (23, 'Projection Shining en version restaurée', 'Film culte de Stanley Kubrick - Ciné-débat après la séance - Bar et pop-corn disponibles - Tarif réduit 4€', '2026-10-31', '2026-10-31', 'Cinéma le Dietrich', '20:30:00', 150, NULL),
+  (23, 'Atelier maquillage horrifique', 'Atelier gratuit de maquillage zombie, vampire, sorcière - Animé par une maquilleuse professionnelle - Sur inscription', '2026-10-31', '2026-10-31', 'Maison de quartier', '14:00:00', 180, NULL),
+  -- Événements Weekend Téléthon 2026 (id_weekend = 24)
+  (24, 'Marathon du Téléthon', 'Course solidaire 10km, 21km et 42km - Inscriptions 10€ reversés au Téléthon - Ravitaillement et médaille pour tous', '2026-12-05', '2026-12-05', 'Départ Place du Maréchal Leclerc', '09:00:00', 360, '/uploads/events/marathon-telethon.jpg'),
+  (24, 'Tournoi de foot inter-associations', 'Championnat à 7 joueurs - 16 équipes d''associations - Buvette et tombola - Entrée gratuite pour les spectateurs', '2026-12-05', '2026-12-05', 'Stade Jacques Bouvard', '14:00:00', 360, '/uploads/events/tournoi-foot.jpg'),
+  (24, 'Zumba géante sur la place', 'Session collective de Zumba - Participation libre 2€ - Ambiance garantie - Tous niveaux bienvenus', '2026-12-05', '2026-12-05', 'Place du Marché Notre-Dame', '11:00:00', 90, '/uploads/events/zumba-telethon.jpg'),
+  (24, 'Stand crêpes non-stop 24h', 'Vente de crêpes salées et sucrées pendant 24h - Bénévoles en relais - 100% des bénéfices pour le Téléthon', '2026-12-05', '2026-12-06', 'Stand chapiteau place centrale', '10:00:00', 1440, NULL),
+  (24, 'Grand concert solidaire', 'Artistes locaux et régionaux - Variété française et rock - Entrée 8€ reversés au Téléthon - Buvette sur place', '2026-12-05', '2026-12-05', 'Salle du Confort Moderne', '20:00:00', 240, '/uploads/events/concert-telethon.jpg'),
+  (24, 'Challenge sportif collectif', 'Relais natation, vélo, course à pied - Par équipes de 5 - Inscription 50€ par équipe - Goûter et boissons offerts', '2026-12-06', '2026-12-06', 'Complexe sportif La Pépinière', '10:00:00', 240, NULL),
+  -- Événements Weekend Marché Noël 2026 (id_weekend = 25)
+  (25, 'Village de Noël artisanal', '50 chalets d''artisans créateurs - Idées cadeaux, décorations, gastronomie - Ambiance féerique avec illuminations', '2026-12-19', '2026-12-20', 'Place du Marché Notre-Dame', '10:00:00', 660, '/uploads/events/village-noel-2026.jpg'),
+  (25, 'Patinoire de Noël en plein air', 'Patinoire éphémère 20x40m - Location de patins incluse - Tarif 6€/heure - Musique de Noël - Vin chaud en buvette', '2026-12-19', '2026-12-20', 'Esplanade François Mitterrand', '10:00:00', 720, '/uploads/events/patinoire-2026.jpg'),
+  (25, 'Rencontre avec le Père Noël', 'Photos gratuites avec le Père Noël - Distribution de papillotes - Petits cadeaux pour les enfants sages - Boîte aux lettres magique', '2026-12-19', '2026-12-20', 'Chalet central du marché', '14:00:00', 300, '/uploads/events/pere-noel-2026.jpg'),
+  (25, 'Atelier création couronnes de Noël', 'Confection de couronnes avec éléments naturels - Matériel fourni - Animé par fleuriste - Participation 8€', '2026-12-19', '2026-12-19', 'Chapiteau animations', '14:00:00', 150, NULL),
+  (25, 'Concert chants traditionnels de Noël', 'Chorales Cœur de Poitiers et Les Petits Chanteurs - Répertoire de Noël international - Gratuit', '2026-12-19', '2026-12-19', 'Scène place du marché', '18:00:00', 90, '/uploads/events/chants-noel.jpg'),
+  (25, 'Projection La Belle et le Clochard', 'Ciné en plein air familial - Couvertures et boissons chaudes disponibles - Gratuit sur inscription', '2026-12-20', '2026-12-20', 'Parc de Blossac', '19:00:00', 120, NULL),
+  (25, 'Manège et petits trains de Noël', 'Manège ancien et train touristique décoré - Tour du centre historique illuminé - Tarif 3€', '2026-12-19', '2026-12-20', 'Centre-ville', '14:00:00', 480, NULL);
 
 INSERT INTO HISTORIQUE_EVENEMENT (id_evenement, action, description, id_utilisateur, date_action) VALUES
   (1, 'creation', 'Création de l''événement Groloto 2024', 1, '2024-09-01 10:00:00'),

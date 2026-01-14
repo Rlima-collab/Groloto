@@ -15,18 +15,15 @@ class PublicFestivalController extends AbstractController
     {
         // Récupérer les weekends à partir d'aujourd'hui (pas les passés), triés par date croissante
         $today = new \DateTime('today');
-        $weekends = $em->getRepository(Weekend::class)->findBy(
-            [],
-            ['date_debut' => 'ASC']
-        );
-        
-        // Filtrer pour garder seulement les weekends futurs ou en cours
-        $futureWeekends = array_filter($weekends, function(Weekend $weekend) use ($today) {
-            return $weekend->getDateFin() >= $today;
-        });
+        $weekends = $em->getRepository(Weekend::class)->createQueryBuilder('w')
+            ->where('w.date_fin >= :today')
+            ->setParameter('today', $today)
+            ->orderBy('w.date_debut', 'ASC')
+            ->getQuery()
+            ->getResult();
         
         return $this->render('public_festivals/index.html.twig', [
-            'weekends' => $futureWeekends,
+            'weekends' => $weekends,
         ]);
     }
 
