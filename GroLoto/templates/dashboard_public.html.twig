@@ -1,0 +1,145 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Groloto{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard-public.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="public-dashboard">
+    <!-- Hero Section -->
+    <div class="dashboard-hero">
+        <div class="shine"></div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    Bienvenue sur Groloto
+                </h1>
+                <p class="hero-description">
+                    Le loto solidaire du GROWEEKEND, alliant humour, fête et générosité au profit de la Ligue contre le cancer.
+                </p>
+            </div>
+            <div class="hero-actions">
+                <a href="{{ path('app_register_benevole') }}" class="btn-hero btn-secondary">
+                    <i class="bi bi-person-plus"></i> Devenir bénévole
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrics Section -->
+    <div class="content-wrapper">
+
+        <!-- Upcoming Events Section -->
+        <div class="events-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="bi bi-calendar-event"></i> Prochains Événements
+                </h2>
+                <p class="section-description">Découvrez nos événements à venir et rejoignez-nous !</p>
+            </div>
+
+            {% if upcoming_events|length > 0 %}
+                <div class="events-grid">
+                    {% for event in upcoming_events %}
+                        <div class="event-card">
+                            <div class="event-header">
+                                <h3 class="event-title">{{ event.nom }}</h3>
+                                <span class="event-badge">À venir</span>
+                            </div>
+                            <div class="event-details">
+                                <div class="event-detail">
+                                    <i class="bi bi-calendar3"></i>
+                                    <span>{{ event.dateDebut|date('d/m/Y à H:i') }}</span>
+                                </div>
+                                {% if event.lieu %}
+                                <div class="event-detail">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                    <span>{{ event.lieu }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% if event.description %}
+                            <p class="event-description">
+                                {{ event.description|slice(0, 150) }}{% if event.description|length > 150 %}...{% endif %}
+                            </p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-calendar-x" style="font-size: 3rem; color: #9ca3af;"></i>
+                    <h3>Aucun événement à venir</h3>
+                    <p>Revenez bientôt pour découvrir nos prochains événements !</p>
+                </div>
+            {% endif %}
+        </div>
+
+
+        <!-- About Section -->
+        <div class="about-section">
+            <div class="about-grid">
+                <div class="about-card">
+                    <div class="about-icon">
+                        <i class="bi bi-heart-fill"></i>
+                    </div>
+                    <h3 class="about-title">Notre Mission</h3>
+                    <p class="about-text">
+                        Organiser des événements solidaires pour soutenir la Ligue contre le cancer 
+                        tout en créant des moments de convivialité et de partage.
+                    </p>
+                </div>
+                
+                <div class="about-card">
+                    <div class="about-icon">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <h3 class="about-title">Nos Valeurs</h3>
+                    <p class="about-text">
+                        Solidarité, générosité, humour et bonne humeur au service d'une noble cause. 
+                        Ensemble, nous faisons la différence !
+                    </p>
+                </div>
+                
+                <div class="about-card">
+                    <div class="about-icon">
+                        <i class="bi bi-trophy-fill"></i>
+                    </div>
+                    <h3 class="about-title">Notre Impact</h3>
+                    <p class="about-text">
+                        Grâce à nos événements et à l'engagement de nos bénévoles et mécènes, 
+                        nous contribuons activement à la lutte contre le cancer.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        
+        <!-- CTA Section -->
+        <div class="cta-section">
+            <div class="cta-card">
+                <div class="cta-icon">
+                    <i class="bi bi-hand-thumbs-up-fill"></i>
+                </div>
+                <h2 class="cta-title">Rejoignez l'aventure Groloto !</h2>
+                <p class="cta-description">
+                    Devenez bénévole et participez à nos événements solidaires. 
+                    Ensemble, faisons la différence au profit de la Ligue contre le cancer.
+                </p>
+                <div class="cta-actions">
+                    <a href="{{ path('app_register_benevole') }}" class="btn-cta btn-primary">
+                        <i class="bi bi-person-plus-fill"></i> Devenir bénévole
+                    </a>
+                    <a href="{{ path('app_contact') }}" class="btn-cta btn-secondary">
+                        <i class="bi bi-envelope-fill"></i> Nous contacter
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

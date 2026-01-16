@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Planning - {{ utilisateur.prenom }}</title>
+    <style>
+        @page {
+            margin: 18px 16px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page {
+            padding: 0 6px;
+        }
+
+        .header {
+            text-align: center;
+            margin: 0 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #28a745;
+        }
+
+        .header h1 {
+            color: #28a745;
+            margin: 0 0 4px 0;
+            font-size: 18px;
+        }
+
+        .header-info {
+            color: #666;
+            font-size: 10px;
+        }
+
+        .date-row {
+            background: #e8f5e9;
+            color: #28a745;
+            padding: 6px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            margin: 10px 0 6px 0;
+            border-left: 4px solid #28a745;
+            page-break-after: avoid;
+        }
+
+        .task {
+            border-left: 4px solid #28a745;
+            padding: 8px 9px;
+            margin: 0 0 8px 0;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            page-break-inside: avoid;
+        }
+
+        .task-title {
+            font-weight: bold;
+            font-size: 12px;
+            color: #222;
+            margin: 0 0 4px 0;
+        }
+
+        .task-time {
+            background: #28a745;
+            color: white;
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .task-details {
+            margin-top: 4px;
+            font-size: 10px;
+            color: #555;
+        }
+
+        .footer {
+            margin-top: 18px;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #999;
+            font-size: 9px;
+            page-break-inside: avoid;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+    <div class="header">
+        <h1>Mon Planning</h1>
+        <div class="header-info">
+            {{ utilisateur.prenom }} {{ utilisateur.nom }} | {{ taches|length }} tâche(s) | Généré le {{ date_generation|date('d/m/Y') }}
+        </div>
+    </div>
+
+    {% set jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'] %}
+    {% set mois = ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'] %}
+    
+    {% set current_date = null %}
+    {% for tache in taches %}
+        {% set task_date = tache.debut|date('Y-m-d') %}
+        {% if task_date != current_date %}
+            {% set current_date = task_date %}
+            <div class="date-row">
+                {{ jours[tache.debut|date('w')] }} {{ tache.debut|date('d') }} {{ mois[tache.debut|date('n')] }} {{ tache.debut|date('Y') }}
+            </div>
+        {% endif %}
+        
+        <div class="task">
+            <div class="task-title">{{ tache.titre }}</div>
+            <span class="task-time">{{ tache.debut|date('H:i') }} - {{ tache.fin|date('H:i') }}</span>
+            {% if tache.weekend %}<span style="font-size: 10px; color: #666;">{{ tache.weekend.nom }}</span>{% endif %}
+            <div class="task-details">
+                {% if tache.posteRequis %}<strong>Poste:</strong> {{ tache.posteRequis }}{% endif %}
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="footer">GroLoto - Planning bénévole</div>
+    </div>
+</body>
+</html>

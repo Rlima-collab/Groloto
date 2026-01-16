@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Disponibilités - {{ weekend.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/weekends.css') }}?v={{ 'now'|date('U') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1 class="hero-title">{{ weekend.nom }}</h1>
+            <p class="hero-description">Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="dispo-card" style="max-width: 100%; width: 100%; margin: 2rem auto; padding: 0;">
+    <form method="post">
+        <table class="dispo-table" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Jour</th>
+                    <th>Matin</th>
+                    <th>Après-midi</th>
+                    <th>Soir</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for jour in jours %}
+                    {% set joursFr = {'Monday': 'Lundi', 'Tuesday': 'Mardi', 'Wednesday': 'Mercredi', 'Thursday': 'Jeudi', 'Friday': 'Vendredi', 'Saturday': 'Samedi', 'Sunday': 'Dimanche'} %}
+                    {% set jourEnglais = jour|date('l') %}
+                    {% set jourFrancais = joursFr[jourEnglais] ?? jourEnglais %}
+                    <tr>
+                        <td><strong>{{ jourFrancais }}</strong>, {{ jour|date('d/m/Y') }}</td>
+                        <td><input type="checkbox" class="dispo-checkbox" name="disponibilites[{{ jour|date('Y-m-d') }}][]" value="matin"></td>
+                        <td><input type="checkbox" class="dispo-checkbox" name="disponibilites[{{ jour|date('Y-m-d') }}][]" value="apres_midi"></td>
+                        <td><input type="checkbox" class="dispo-checkbox" name="disponibilites[{{ jour|date('Y-m-d') }}][]" value="soir"></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="dispo-card-footer" style="padding:1rem; border-top:1px solid #e5e7eb; display:flex; gap:0.75rem; justify-content:space-between; align-items:center; background:#fff;">
+            <div>
+                <button type="button" class="btn-action btn-action-select" onclick="selectAll()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Tout cocher
+                </button>
+                <button type="button" class="btn-action btn-action-deselect" onclick="deselectAll()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    Tout décocher
+                </button>
+            </div>
+
+            <div style="display:flex; gap:0.75rem;">
+                <a href="{{ path('benevole_disponibilites_index') }}" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">Enregistrer</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function selectAll() {
+            document.querySelectorAll('.dispo-checkbox:not(:disabled)').forEach(cb => cb.checked = true);
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.dispo-checkbox:not(:disabled)').forEach(cb => cb.checked = false);
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Planning Événements - {{ weekend.nom }}</title>
+    <style>
+        @page {
+            margin: 16mm 14mm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            color: #1e293b;
+            line-height: 1.4;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .header-info {
+            font-size: 11px;
+            opacity: 0.9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-group {
+            display: inline-block;
+        }
+
+        .info-label {
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .description-box {
+            background: #f8fafc;
+            border-left: 4px solid #2563eb;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+
+        .description-box p {
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .date-section {
+            margin-bottom: 14px;
+            page-break-inside: avoid;
+        }
+
+        .date-header {
+            background: #0f172a;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .evenement-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            page-break-inside: avoid;
+        }
+
+        .evenement-card:hover {
+            border-color: #cbd5e1;
+        }
+
+        .evenement-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+
+        .evenement-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .meta-item {
+            font-size: 10px;
+            color: #64748b;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .evenement-description {
+            color: #475569;
+            font-size: 10px;
+            line-height: 1.5;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .type-badge {
+            display: inline-block;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 600;
+            color: #475569;
+            margin-top: 6px;
+        }
+
+        .summary-box {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            page-break-inside: avoid;
+        }
+
+        .summary-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+
+        .summary-content {
+            color: #475569;
+            font-size: 10px;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 8mm;
+            left: 14mm;
+            right: 14mm;
+            text-align: center;
+            font-size: 9px;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 6px;
+        }
+
+        .no-events {
+            text-align: center;
+            padding: 24px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ weekend.nom }}</h1>
+        <div class="header-info">
+            <div class="info-group">
+                <span class="info-label">Période:</span>
+                <span>{{ weekend.dateDebut|date('d/m/Y') }} - {{ weekend.dateFin|date('d/m/Y') }}</span>
+            </div>
+            <div class="info-group">
+                <span class="info-label">Événements:</span>
+                <span>{{ evenements|length }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% if weekend.description %}
+        <div class="description-box">
+            <p>{{ weekend.description }}</p>
+        </div>
+    {% endif %}
+
+    {% if evenements is not empty %}
+        {% set evenementsByDate = {} %}
+        {% for evenement in evenements %}
+            {% set dateKey = evenement.dateDebut|date('Y-m-d') %}
+            {% if evenementsByDate[dateKey] is not defined %}
+                {% set evenementsByDate = evenementsByDate|merge({(dateKey): []}) %}
+            {% endif %}
+            {% set evenementsByDate = evenementsByDate|merge({(dateKey): evenementsByDate[dateKey]|merge([evenement])}) %}
+        {% endfor %}
+
+        {% for dateKey, dateEvenements in evenementsByDate %}
+            <div class="date-section">
+                <div class="date-header">
+                    {{ dateEvenements[0].dateDebut|date('l d F Y')|capitalize }}
+                </div>
+
+                {% for evenement in dateEvenements %}
+                    <div class="evenement-card">
+                        <div class="evenement-title">{{ evenement.nom }}</div>
+                        
+                        <div class="evenement-meta">
+                            <span class="meta-item">
+                                <span class="meta-label">Horaire:</span>
+                                {{ evenement.dateDebut|date('H\\hi') }}
+                                {% if evenement.dateFin and evenement.dateFin != evenement.dateDebut %}
+                                    - {{ evenement.dateFin|date('H\\hi') }}
+                                {% endif %}
+                            </span>
+                            
+                            {% if evenement.lieu %}
+                                <span class="meta-item">
+                                    <span class="meta-label">Lieu:</span>
+                                    {{ evenement.lieu }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        {% if evenement.description %}
+                            <div class="evenement-description">
+                                {{ evenement.description }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div class="summary-box">
+            <div class="summary-title">Résumé</div>
+            <div class="summary-content">
+                Ce planning comprend <strong>{{ evenements|length }} événement{{ evenements|length > 1 ? 's' : '' }}</strong>
+                pour le weekend du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}.
+            </div>
+        </div>
+    {% else %}
+        <div class="no-events">
+            <p>Aucun événement n'est prévu pour ce weekend.</p>
+        </div>
+    {% endif %}
+
+    <div class="footer">
+        Planning généré le {{ "now"|date('d/m/Y à H\\hi') }}
+    </div>
+</body>
+</html>

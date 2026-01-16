@@ -1,37 +1,108 @@
 <?php
-// src/Entity/Mecene.php
 namespace App\Entity;
 
+use App\Repository\MeceneRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Utilisateur;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="MECENE")
- */
+#[ORM\Entity(repositoryClass: MeceneRepository::class)]
+#[ORM\Table(name: 'MECENE')]
 class Mecene
 {
-    /** @ORM\Id @ORM\GeneratedValue @ORM\Column(type="integer") */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer")]
+    private ?int $id = null;
 
-    /** @ORM\OneToOne(targetEntity="Utilisateur") 
-     *  @ORM\JoinColumn(name="id_utilisateur", referencedColumnName="id", nullable=true)
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(name: "id_utilisateur", referencedColumnName: "id", nullable: true)]
+    private ?Utilisateur $utilisateur = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $organisation = null;
+
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    private ?string $siret = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $adresse_postale = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $logo = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $instagram = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $facebook = null;
+
+    #[ORM\OneToMany(targetEntity: Lot::class, mappedBy: 'mecene')]
+    private Collection $lots;
+
+    public function __construct()
+    {
+        $this->lots = new ArrayCollection();
+    }
+
+    public function getId(): ?int { return $this->id; }
+
+    public function getUtilisateur(): ?Utilisateur { return $this->utilisateur; }
+    public function setUtilisateur(?Utilisateur $utilisateur): self 
+    { $this->utilisateur = $utilisateur; return $this; }
+
+    public function getOrganisation(): string { return $this->organisation; }
+    public function setOrganisation(string $organisation): self 
+    { $this->organisation = $organisation; return $this; }
+
+    public function getSiret(): string { return $this->siret; }
+    public function setSiret(string $siret): self 
+    { $this->siret = $siret; return $this; }
+
+    public function getAdressePostale(): ?string { return $this->adresse_postale; }
+    public function setAdressePostale(?string $adresse_postale): self 
+    { $this->adresse_postale = $adresse_postale; return $this; }
+
+    public function getLogo(): ?string { return $this->logo; }
+    public function setLogo(?string $logo): self 
+    { $this->logo = $logo; return $this; }
+
+    public function getInstagram(): ?string { return $this->instagram; }
+    public function setInstagram(?string $instagram): self 
+    { $this->instagram = $instagram; return $this; }
+
+    public function getFacebook(): ?string { return $this->facebook; }
+    public function setFacebook(?string $facebook): self 
+    { $this->facebook = $facebook; return $this; }
+
+    /**
+     * @return Collection<int, Lot>
      */
-    private $utilisateur;
+    public function getLots(): Collection
+    {
+        return $this->lots;
+    }
 
-    /** @ORM\Column(type="string", nullable=true) */
-    private $organisation;
+    public function addLot(Lot $lot): self
+    {
+        if (!$this->lots->contains($lot)) {
+            $this->lots->add($lot);
+            $lot->setMecene($this);
+        }
 
-    /** @ORM\Column(type="string", nullable=true) */
-    private $nom_contact;
+        return $this;
+    }
 
-    /** @ORM\Column(type="string", nullable=true) */
-    private $email_contact;
+    public function removeLot(Lot $lot): self
+    {
+        if ($this->lots->removeElement($lot)) {
+            // set the owning side to null (unless already changed)
+            if ($lot->getMecene() === $this) {
+                $lot->setMecene(null);
+            }
+        }
 
-    /** @ORM\Column(type="string", nullable=true) */
-    private $telephone_contact;
-
-    /** @ORM\Column(type="text", nullable=true) */
-    private $adresse;
-
-    // getters & setters
+        return $this;
+    }
 }

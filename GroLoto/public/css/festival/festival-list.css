@@ -1,0 +1,404 @@
+/* =============== PAGE LISTE WEEKENDS - STYLES SPÉCIFIQUES =============== */
+
+/* Metrics Cards - Style sobre identique au Tableau de Bord */
+.metric-card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+.metric-card h3 {
+    font-size: 1.2rem;
+    color: #1a3c5a;
+    margin-bottom: 10px;
+}
+
+.metric-card .metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1a3c5a;
+    margin: 0;
+}
+
+.metric-card .metric-detail,
+.metric-card .metric-change {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-top: 5px;
+}
+
+/* Event Items - Bleu Accent */
+.event-item.blue-night-accent {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-left: 4px solid #0d1b2a;
+    background: linear-gradient(90deg, rgba(13, 27, 42, 0.05), transparent);
+    border-radius: 0 8px 8px 0;
+    transition: all 0.3s ease;
+}
+
+.event-item.blue-night-accent:hover {
+    background: linear-gradient(90deg, rgba(13, 27, 42, 0.1), transparent);
+    border-left-color: #0a1419;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(13, 27, 42, 0.1);
+}
+
+.event-item.blue-night-accent .event-date {
+    background-color: #0d1b2a;
+    color: #fff;
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 60px;
+    box-shadow: 0 2px 8px rgba(13, 27, 42, 0.2);
+}
+
+.event-item.blue-night-accent .event-month {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    opacity: 0.9;
+    color: #fff;
+}
+
+.event-item.blue-night-accent .event-day {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.event-item.blue-night-accent .event-details {
+    flex: 1;
+}
+
+.event-item.blue-night-accent .event-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.25rem 0;
+}
+
+.event-item.blue-night-accent .event-time {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* History Items - Bleu Nocturne */
+.history-item.blue-night-accent {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-left: 4px solid #0d1b2a;
+    background: linear-gradient(90deg, rgba(13, 27, 42, 0.03), transparent);
+    border-radius: 0 12px 12px 0;
+    transition: all 0.3s ease;
+}
+
+.history-item.blue-night-accent:hover {
+    background: linear-gradient(90deg, rgba(13, 27, 42, 0.08), transparent);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(13, 27, 42, 0.08);
+}
+
+.history-item.blue-night-accent .history-date {
+    background-color: #0d1b2a;
+    color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 70px;
+    height: fit-content;
+}
+
+.history-item.blue-night-accent .history-day {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+}
+
+.history-item.blue-night-accent .history-month {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+    opacity: 0.9;
+    color: #fff;
+}
+
+.history-item.blue-night-accent .history-details {
+    flex: 1;
+}
+
+.history-item.blue-night-accent .history-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+}
+
+.history-item.blue-night-accent .history-description {
+    font-size: 0.9375rem;
+    color: #64748b;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.5;
+}
+
+.history-item.blue-night-accent .history-meta {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* Calendar customization */
+#calendar {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    min-height: 600px;
+}
+
+.fc {
+    font-family: inherit;
+}
+
+.fc .fc-button-primary {
+    background: #0d1b2a !important;
+    border-color: #0d1b2a !important;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    text-transform: capitalize;
+}
+
+.fc .fc-button-primary:hover {
+    background: #0a1419 !important;
+    border-color: #0a1419 !important;
+}
+
+.fc .fc-button-primary:disabled {
+    background: #6b7280 !important;
+    border-color: #6b7280 !important;
+    opacity: 0.6;
+}
+
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    background: #0a1419 !important;
+    border-color: #0a1419 !important;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.fc .fc-col-header-cell {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    padding: 0.75rem 0.25rem;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.fc .fc-daygrid-day-number {
+    color: #1e293b;
+    font-weight: 600;
+    padding: 0.5rem;
+}
+
+.fc .fc-day-today {
+    background-color: rgba(13, 27, 42, 0.05) !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+    background: #0d1b2a;
+    color: #fff;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* FullCalendar event styles */
+.fc-event {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 6px;
+    border: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.fc-event:hover {
+    filter: brightness(0.9);
+    transform: scale(1.02);
+}
+
+.fc-daygrid-event {
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: 1px 2px;
+}
+
+.fc-event-title {
+    font-weight: 600;
+}
+
+/* View toggle buttons */
+.calendar-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    justify-content: center;
+}
+
+/* Dashboard grid pour la liste */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Metrics grid - Style sobre Dashboard */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+/* Event cards dans la liste */
+.events-list {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.events-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.events-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.events-list::-webkit-scrollbar-thumb {
+    background: #0d1b2a;
+    border-radius: 4px;
+}
+
+.events-list::-webkit-scrollbar-thumb:hover {
+    background: #0a1419;
+}
+
+/* Event cards container */
+.event-card {
+    transition: transform 0.2s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-2px);
+}
+
+/* History section */
+.full-width-container {
+    margin-top: 2rem;
+}
+
+.history-section {
+    margin-top: 2rem;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Card content styling */
+.card-content {
+    padding: 1.5rem;
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #64748b;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Action Buttons */
+.btn-edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #eff6ff;
+    color: #3b82f6;
+    transition: all 0.2s ease;
+    text-decoration: none !important;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.btn-edit:hover {
+    background: #3b82f6;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.btn-edit.danger {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.btn-edit.danger:hover {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+

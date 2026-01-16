@@ -1,0 +1,110 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gérer les bénévoles - {{ tache.titre }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-forms.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="taches-page">
+<div class="container" style="padding-top: calc(71px + 2rem);">
+    <div class="page-header" style="display: flex; align-items: center; justify-content: center; position: relative;">
+        <a href="{{ path('tache_index') }}" class="btn btn-secondary" style="position: absolute; left: 0;">← Retour à la liste</a>
+        <h1 class="page-title" style="margin: 0 auto; text-align: center; width: 100%;">Gérer les bénévoles</h1>
+    </div>
+
+    <div style="max-width: 900px; margin: 0 auto;">
+        <div class="card alert-info">
+            <div class="card-content">
+                <h3>{{ tache.titre }}</h3>
+                <div>
+                    <p><strong>Période :</strong> {{ tache.debut|date('d/m/Y H:i') }} - {{ tache.fin|date('d/m/Y H:i') }}</p>
+                    <div class="stats-row">
+                        <span class="stat-badge assigned">
+                            <i class="bi bi-person-check"></i> {{ nbAssignes }} assigné{{ nbAssignes > 1 ? 's' : '' }}
+                        </span>
+                        <span class="stat-badge pending">
+                            <i class="bi bi-hourglass-split"></i> {{ nbProposees }} proposition{{ nbProposees > 1 ? 's' : '' }} en attente
+                        </span>
+                        {% if tache.maxPersonnes %}
+                            <span class="stat-badge max">
+                                <i class="bi bi-people"></i> Max: {{ tache.maxPersonnes }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h4><i class="bi bi-info-circle me-1"></i> Comment ça marche ?</h4>
+            <p><strong>Assigner :</strong> Le bénévole est directement affecté à la tâche.<br>
+               <strong>Proposer :</strong> Le bénévole reçoit une notification et peut accepter ou refuser.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Liste des bénévoles</h2>
+                <form method="get" action="{{ path('tache_proposer', {id: tache.id}) }}" class="search-form" style="margin-top: 1rem;">
+                    <div style="display: flex; gap: 1rem;">
+                        <input type="text" name="q" value="{{ search }}" placeholder="Rechercher un bénévole (nom, prénom, email)..." class="form-control" style="flex: 1;" autocomplete="off">
+                    </div>
+                </form>
+            </div>
+            
+            <div class="card-content">
+                <div class="benevoles-list" id="benevoles-list-container">
+                    {% include 'taches/_benevoles_list.html.twig' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="q"]');
+        const listContainer = document.getElementById('benevoles-list-container');
+        let timeoutId;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeoutId);
+            const query = this.value;
+            
+            timeoutId = setTimeout(() => {
+                const currentUrl = new URL(window.location.href);
+                if (query) {
+                    currentUrl.searchParams.set('q', query);
+                } else {
+                    currentUrl.searchParams.delete('q');
+                }
+                window.history.replaceState({}, '', currentUrl);
+
+                const fetchUrl = new URL(window.location.href);
+                fetchUrl.searchParams.set('q', query);
+                fetchUrl.searchParams.set('ajax', '1');
+                
+                fetch(fetchUrl)
+                    .then(response => response.text())
+                    .then(html => {
+                        listContainer.innerHTML = html;
+                    })
+                    .catch(error => console.error('Error:', error));
+            }, 300);
+        });
+        
+        const searchForm = document.querySelector('.search-form');
+        if(searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+            });
+        }
+    });
+</script>
+{% endblock %}

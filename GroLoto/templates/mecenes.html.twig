@@ -1,0 +1,325 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Mécènes{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mecenes.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section benevoles-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Mécènes</h1>
+        <p class="hero-description">Partenaires, lots et conventions pour vos événements caritatifs.</p>
+        <a href="#liste-mecenes" class="btn-login">Voir les mécènes</a>
+    </div>
+</div>
+
+<br>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <h3>Total mécènes</h3>
+        <p class="metric-value">{{ metriques.total }}</p>
+        <p class="metric-detail">Mécènes actifs</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Nouveaux ce mois</h3>
+        <p class="metric-value">{{ metriques.nouveaux }}</p>
+        <p class="metric-detail">Inscriptions récentes</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Lots disponibles</h3>
+        <p class="metric-value">{{ metriques.disponibles }}</p>
+        <p class="metric-detail">Contributions offertes</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card main-card" id="liste-mecenes">
+        <div class="card-header">
+            <h2 class="card-title">Liste des Mécènes</h2>
+            <p class="card-description">Gestion des mécènes et partenaires</p>
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="header-actions">
+                <a href="{{ path('mecenes_download_logos', app.request.query.all|merge({'weekend': weekend_filtre ? weekend_filtre.id : null})) }}" class="btn btn-primary">Télécharger tous les logos</a>
+                <a href="{{ path('mecenes_export_social_csv', app.request.query.all|merge({'weekend': weekend_filtre ? weekend_filtre.id : null})) }}" class="btn btn-secondary">Exporter en CSV les réseaux sociaux</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Barre de recherche et filtres -->
+        <div class="search-filter-section">
+            <form method="GET" id="filtersForm">
+                <div class="search-bar-container">
+                    <input type="text" id="searchInput" name="search" class="search-input" placeholder="Rechercher par nom, organisation, email..." value="{{ app.request.query.get('search') }}">
+                </div>
+                
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="sortBy" class="filter-label">Trier par :</label>
+                        <select id="sortBy" name="sort" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
+                            <option value="nom-asc" {% if app.request.query.get('sort') == 'nom-asc' %}selected{% endif %}>Nom (A-Z)</option>
+                            <option value="nom-desc" {% if app.request.query.get('sort') == 'nom-desc' %}selected{% endif %}>Nom (Z-A)</option>
+                            <option value="organisation-asc" {% if app.request.query.get('sort') == 'organisation-asc' %}selected{% endif %}>Organisation (A-Z)</option>
+                            <option value="organisation-desc" {% if app.request.query.get('sort') == 'organisation-desc' %}selected{% endif %}>Organisation (Z-A)</option>
+                            <option value="date-desc" {% if app.request.query.get('sort') == 'date-desc' or not app.request.query.get('sort') %}selected{% endif %}>Date (Plus récent)</option>
+                            <option value="date-asc" {% if app.request.query.get('sort') == 'date-asc' %}selected{% endif %}>Date (Plus ancien)</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="itemsPerPage" class="filter-label">Afficher :</label>
+                        <select id="itemsPerPage" name="per_page" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
+                            <option value="10" {% if app.request.query.get('per_page') == '10' or not app.request.query.get('per_page') %}selected{% endif %}>10 par page</option>
+                            <option value="20" {% if app.request.query.get('per_page') == '20' %}selected{% endif %}>20 par page</option>
+                            <option value="50" {% if app.request.query.get('per_page') == '50' %}selected{% endif %}>50 par page</option>
+                            <option value="all" {% if app.request.query.get('per_page') == 'all' %}selected{% endif %}>Tous</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <button type="button" id="resetFilters" class="btn-reset-filters" onclick="resetFilters()">Réinitialiser</button>
+                    </div>
+                </div>
+            </form>
+
+            <div id="resultsCount" class="results-count">
+                Affichage de <span id="countCurrent">{{ mecenes|length }}</span> mécène(s)
+            </div>
+        </div>
+
+        <div class="card-content">
+            {% if mecenes|length > 0 %}
+                <div class="benevoles-grid">
+                    {% for mecene in mecenes %}
+                        <div class="benevole-card">
+                            <div class="benevole-header">
+                                <h3 class="benevole-name">
+                                    {{ mecene.utilisateur.prenom }} {{ mecene.utilisateur.nom }}
+                                </h3>
+                                <span class="badge status success">Actif</span>
+                            </div>
+                            
+                            <div class="benevole-info">
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Organisation:</strong> {{ mecene.organisation }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Email:</strong> {{ mecene.utilisateur.email }}</span>
+                                </div>
+                                {% if mecene.utilisateur.telephone %}
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Téléphone:</strong> {{ mecene.utilisateur.telephone }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="info-item">
+                                    <span class="info-text"><strong>SIRET:</strong> {{ mecene.siret }}</span>
+                                </div>
+                                {% if mecene.logo %}
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Logo:</strong></span>
+                                    <br>
+                                    <img src="{{ asset(mecene.logo) }}" alt="Logo {{ mecene.organisation }}" class="mecene-logo">
+                                </div>
+                                {% endif %}
+                                <div class="info-item">
+                                    <span class="info-text"><strong>Inscrit le:</strong> {{ mecene.utilisateur.dateCreation|date('d/m/Y') }}</span>
+                                </div>
+                            </div>
+                            
+                            {% if is_granted('ROLE_ADMIN') %}
+                            <div class="benevole-actions">
+                                <a href="{{ path('mecene_voir_lots', {'id': mecene.id}) }}" class="btn btn-small btn-primary">Voir lots</a>
+                                <a href="{{ path('mecene_edit', {'id': mecene.id}) }}" class="btn btn-small btn-secondary">Modifier</a>
+                                {% if mecene.logo %}
+                                <a href="{{ path('mecene_download_logo', {'id': mecene.id}) }}" class="btn btn-small btn-info" target="_blank">Télécharger logo</a>
+                                {% endif %}
+                                <button type="button" 
+                                        class="btn btn-small btn-danger" 
+                                        data-mecene-id="{{ mecene.id }}"
+                                        data-mecene-nom="{{ mecene.organisation }}"
+                                        data-csrf-token="{{ csrf_token('delete_mecene_' ~ mecene.id) }}"
+                                        onclick="confirmDeleteMecene(this)">Supprimer</button>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="benevole-social-links">
+                                {% if mecene.instagram %}
+                                <a href="{{ mecene.instagram }}" target="_blank" class="social-link instagram" title="Instagram">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                    </svg>
+                                </a>
+                                {% endif %}
+                                {% if mecene.facebook %}
+                                <a href="{{ mecene.facebook }}" target="_blank" class="social-link facebook" title="Facebook">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                    </svg>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination-container" id="paginationContainer">
+                    <button id="prevPage" class="pagination-button">Précédent</button>
+                    <span class="pagination-info">
+                        Page <span id="currentPage">1</span> sur <span id="totalPages">1</span>
+                    </span>
+                    <button id="nextPage" class="pagination-button">Suivant</button>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>Aucun mécène trouvé</h3>
+                    <p>Commencez par ajouter des mécènes à votre base de données.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const meceneCards = Array.from(document.querySelectorAll('.benevole-card'));
+    const gridContainer = document.querySelector('.benevoles-grid');
+    const countCurrent = document.getElementById('countCurrent');
+    const paginationContainer = document.getElementById('paginationContainer');
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+    const currentPageSpan = document.getElementById('currentPage');
+    const totalPagesSpan = document.getElementById('totalPages');
+    
+    let currentPage = 1;
+    let filteredCards = [];
+    let itemsPerPage = {{ app.request.query.get('per_page') ?: 10 }};
+    if (itemsPerPage === 'all') itemsPerPage = meceneCards.length;
+
+    // Fonction de recherche en temps réel
+    function filterSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        filteredCards = [];
+        
+        meceneCards.forEach(card => {
+            const name = card.querySelector('.benevole-name').textContent.toLowerCase();
+            const infoTexts = card.querySelectorAll('.info-text');
+            let organisation = '';
+            let email = '';
+            
+            infoTexts.forEach(info => {
+                const text = info.textContent.toLowerCase();
+                if (text.includes('organisation')) organisation = text;
+                if (text.includes('email')) email = text;
+            });
+            
+            const matchesSearch = !searchTerm || 
+                name.includes(searchTerm) || 
+                organisation.includes(searchTerm) || 
+                email.includes(searchTerm);
+            
+            if (matchesSearch) {
+                filteredCards.push(card);
+            }
+        });
+        
+        displayPage(1);
+        updatePagination();
+    }
+
+    // Afficher une page spécifique
+    function displayPage(page) {
+        currentPage = page;
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = itemsPerPage === 'all' ? filteredCards.length : startIndex + itemsPerPage;
+        
+        meceneCards.forEach(card => card.style.display = 'none');
+        
+        filteredCards.slice(startIndex, endIndex).forEach(card => {
+            card.style.display = 'block';
+        });
+        
+        countCurrent.textContent = filteredCards.length;
+    }
+
+    // Mettre à jour la pagination
+    function updatePagination() {
+        if (itemsPerPage === 'all' || !paginationContainer) {
+            if (paginationContainer) paginationContainer.style.display = 'none';
+            return;
+        }
+        
+        const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+        currentPageSpan.textContent = currentPage;
+        totalPagesSpan.textContent = totalPages;
+        
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages;
+        
+        paginationContainer.style.display = totalPages > 1 ? 'flex' : 'none';
+    }
+
+    // Événements
+    searchInput.addEventListener('input', filterSearch);
+    
+    // Pagination
+    if (prevPageBtn) {
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) displayPage(currentPage - 1);
+        });
+    }
+    
+    if (nextPageBtn) {
+        nextPageBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+            if (currentPage < totalPages) displayPage(currentPage + 1);
+        });
+    }
+
+    // Initialisation
+    filterSearch();
+});
+
+// Fonction pour réinitialiser les filtres
+function resetFilters() {
+    window.location.href = '{{ path('mecenes') }}';
+}
+
+// Fonction de confirmation de suppression
+function confirmDeleteMecene(button) {
+    const meceneId = button.getAttribute('data-mecene-id');
+    const meceneName = button.getAttribute('data-mecene-nom');
+    const csrfToken = button.getAttribute('data-csrf-token');
+    
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le mécène "${meceneName}" ? Cette action est irréversible.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/mecene/${meceneId}/delete`;
+        
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '_token';
+        tokenInput.value = csrfToken;
+        
+        form.appendChild(tokenInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}
+

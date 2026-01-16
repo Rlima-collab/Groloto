@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription Bénévole{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/register.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    
+    <script src="{{ asset('js/register.js') }}" defer></script>
+{% endblock %}
+
+{% block body %}
+<div class="registration-form-container">
+    <div class="registration-form-card">
+        <div class="registration-form-header benevole">
+            <h4>Inscription Bénévole</h4>
+        </div>
+        <div class="registration-form-body">
+            {% for message in app.flashes('success') %}
+                <div class="registration-alert alert-success">{{ message }}</div>
+            {% endfor %}
+
+            {% if errors is defined and errors %}
+                <div class="registration-alert alert-danger">
+                    <ul>
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate id="registerForm">
+                <div class="registration-row">
+                    <div class="registration-col">
+                        <div class="registration-form-group">
+                            <label for="prenom" class="registration-form-label">Prénom *</label>
+                            <input type="text" name="prenom" id="prenom" class="registration-form-control benevole-focus" required value="{{ app.request.request.get('prenom') }}">
+                        </div>
+                    </div>
+                    <div class="registration-col">
+                        <div class="registration-form-group">
+                            <label for="nom" class="registration-form-label">Nom *</label>
+                            <input type="text" name="nom" id="nom" class="registration-form-control benevole-focus" required value="{{ app.request.request.get('nom') }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="registration-form-group">
+                    <label for="email" class="registration-form-label">Email *</label>
+                    <input type="email" name="email" id="email" class="registration-form-control benevole-focus" required value="{{ app.request.request.get('email') }}">
+                </div>
+
+                <div class="registration-form-group">
+                    <label for="telephone" class="registration-form-label">Téléphone *</label>
+                    <input type="tel" name="telephone" id="telephone" class="registration-form-control benevole-focus" required placeholder="06 12 34 56 78" value="{{ app.request.request.get('telephone') }}">
+                </div>
+
+                <div class="registration-row">
+                    <div class="registration-col">
+                        <div class="registration-form-group" id="password-group">
+                            <label for="password" class="registration-form-label">Mot de passe *</label>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="password" name="password" id="password" class="registration-form-control benevole-focus" required minlength="6" autocomplete="new-password" style="padding-right: 45px; width: 100%;">
+                                <button type="button" class="toggle-password-btn" data-target="password" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #6b7280; padding: 8px; display: flex; align-items: center; justify-content: center; line-height: 1;" title="Afficher/masquer le mot de passe">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; display: block;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <small class="registration-form-text">Au moins 6 caractères</small>
+                        </div>
+                    </div>
+                    <div class="registration-col">
+                        <div class="registration-form-group">
+                            <label for="confirm_password" class="registration-form-label">Confirmer le mot de passe *</label>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="password" name="confirm_password" id="confirm_password" class="registration-form-control benevole-focus" required autocomplete="new-password" style="padding-right: 45px; width: 100%;">
+                                <button type="button" class="toggle-password-btn" data-target="confirm_password" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #6b7280; padding: 8px; display: flex; align-items: center; justify-content: center; line-height: 1;" title="Afficher/masquer le mot de passe">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; display: block;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="registration-form-group">
+                    <label for="remarque" class="registration-form-label">Remarque (facultatif)</label>
+                    <textarea name="remarque" id="remarque" class="registration-form-control benevole-focus" rows="3" maxlength="500" placeholder="Ex : Je suis dispo tous les mercredis après-midi">{{ app.request.request.get('remarque') }}</textarea>
+                </div>
+
+                <button class="registration-submit-btn benevole" type="submit">
+                    <span class="btn-text">S'inscrire comme Bénévole</span>
+                    <span class="btn-loader" style="display: none;">⏳</span>
+                </button>
+            </form>
+
+            <div class="registration-login-link">
+                <p>Déjà un compte ? 
+                    <a href="{{ path('app_login') }}" class="benevole-link">Se connecter</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButtons = document.querySelectorAll('.toggle-password-btn');
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.dataset.target;
+            const input = document.getElementById(targetId);
+            
+            if (input) {
+                const type = input.type === 'password' ? 'text' : 'password';
+                input.type = type;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

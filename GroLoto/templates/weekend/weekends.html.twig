@@ -1,0 +1,504 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Weekends{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('css/modele.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/weekends_cards.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Weekends</h1>
+        <p class="hero-description">Organisez et planifiez vos événements caritatifs avec efficacité</p>
+        {% if isAdmin %}
+            <a href="{{ path('app_weekend_create') }}" class="btn-login">Créer un weekend</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
+<div class="weekends-container">
+    {% if weekends|length > 0 %}
+        <div class="weekends-grid">
+            {% for weekend in weekends %}
+                {% set now = date() %}
+                {% set isPast = weekend.dateFin < now %}
+                {% set nbEvenements = weekend.evenements|length %}
+                {% set nbTaches = weekend.taches|length %}
+                
+                <div class="weekend-card" data-weekend-id="{{ weekend.id }}">
+                    <div class="weekend-card-image">
+                        {% if weekend.coverImage is not empty %}
+                            <img src="{{ asset(weekend.coverImage) }}" alt="Image du weekend {{ weekend.id }}">
+                        {% else %}
+                            <i class="bi bi-calendar-event"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="weekend-card-body">
+                        <h3 class="weekend-card-title">{{ weekend.nom }}</h3>
+                        
+                        <div class="weekend-card-dates">
+                            <i class="bi bi-calendar-range"></i>
+                            <span>{{ weekend.dateDebut|date('d/m') }} → {{ weekend.dateFin|date('d/m') }}</span>
+                        </div>
+                        
+                        {% if weekend.description and isAdmin %}
+                            <p class="weekend-card-description">{{ weekend.description|length > 100 ? weekend.description|slice(0, 100) ~ '...' : weekend.description }}</p>
+                        {% endif %}
+                        
+                        <div class="weekend-card-info">
+                            <div class="weekend-info-item">
+                                <i class="bi bi-calendar-check"></i>
+                                <div class="value">{{ nbEvenements }}</div>
+                                <div class="label">Événement{{ nbEvenements > 1 ? 's' : '' }}</div>
+                            </div>
+                            
+                            <div class="weekend-info-item">
+                                <i class="bi bi-list-check"></i>
+                                <div class="value">{{ nbTaches }}</div>
+                                <div class="label">Tâche{{ nbTaches > 1 ? 's' : '' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="weekend-card-footer">
+                        <span class="weekend-status {{ isPast ? 'past' : 'upcoming' }}">
+                            <i class="bi bi-{{ isPast ? 'check-circle' : 'clock' }}"></i>
+                            {{ isPast ? 'Terminé' : 'À venir' }}
+                        </span>
+                        <button class="weekend-view-btn" onclick="openWeekendDetail({{ weekend.id }})">
+                            Planning
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-weekends">
+            <i class="bi bi-calendar-x"></i>
+            <h3>Aucun weekend planifié</h3>
+            <p>Commencez par créer votre premier weekend</p>
+        </div>
+    {% endif %}
+</div>
+</div>
+
+<!-- Modal détail weekend -->
+<div class="weekend-detail-modal" id="weekendDetailModal">
+    <div class="weekend-detail-content" id="weekendDetailContent">
+        <!-- Contenu dynamique chargé par JavaScript -->
+    </div>
+</div>
+
+<!-- Données pour JavaScript -->
+<script>
+    window.allWeekendsData = {{ weekendsForJs|raw }};
+    console.log('Weekends data loaded:', window.allWeekendsData);
+</script>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script>
+        let weekendCalendar = null;
+        
+        function openWeekendDetail(weekendId) {
+            console.log('Opening weekend detail for ID:', weekendId);
+            console.log('Available weekends:', window.allWeekendsData);
+            
+            const weekend = window.allWeekendsData.find(w => w.id === weekendId);
+            if (!weekend) {
+                console.error('Weekend not found with ID:', weekendId);
+                return;
+            }
+            
+            console.log('Found weekend:', weekend);
+            
+            const modal = document.getElementById('weekendDetailModal');
+            const content = document.getElementById('weekendDetailContent');
+            
+            // Construire le contenu HTML
+            let html = `
+                <div class="weekend-detail-header">
+                    <button class="weekend-detail-close" onclick="closeWeekendDetail()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                    <h2 class="weekend-detail-title">${weekend.nom}</h2>
+                    <div class="weekend-detail-dates">
+                        <i class="bi bi-calendar-range"></i>
+                        ${formatDate(weekend.dateDebut)} → ${formatDate(weekend.dateFin)}
+                    </div>
+                    ${weekend.description ? `
+                        <div class="weekend-description-modal">
+                            ${weekend.description}
+                        </div>
+                    ` : ''}
+                    ${weekend.coverImage ? `
+                        <div class="weekend-cover" style="margin-top:1rem;">
+                            <img src="/${weekend.coverImage}" alt="Cover" style="width:100%; max-height:260px; object-fit:cover; border-radius:8px;" />
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="weekend-detail-body">
+            `;
+            
+            // Section Planning
+            html += `
+                <div class="weekend-detail-section">
+                    <h3 class="weekend-detail-section-title">
+                        <i class="bi bi-calendar3"></i>
+                        Planning du weekend
+                    </h3>
+                    <div class="weekend-planning-calendar">
+                        <div id="weekendCalendar"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Section Événements
+            html += `
+                <div class="weekend-detail-section">
+                    <h3 class="weekend-detail-section-title">
+                        <i class="bi bi-calendar-check"></i>
+                        Événements associés
+                    </h3>
+            `;
+            
+            if (weekend.evenements && weekend.evenements.length > 0) {
+                html += '<div class="events-grid">';
+                weekend.evenements.forEach(event => {
+                    html += `
+                        <div class="event-item-detail">
+                            <h4>${event.nom}</h4>
+                            <p><i class="bi bi-calendar"></i> ${formatDate(event.dateDebut)}</p>
+                            ${event.lieu ? `<p><i class="bi bi-geo-alt"></i> ${event.lieu}</p>` : ''}
+                            ${event.description ? `<p><i class="bi bi-info-circle"></i> ${event.description}</p>` : ''}
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            } else {
+                html += `
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-x"></i>
+                        <p>Aucun événement associé à ce weekend</p>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            
+            // Section Tâches
+            html += `
+                <div class="weekend-detail-section">
+                    <h3 class="weekend-detail-section-title">
+                        <i class="bi bi-list-check"></i>
+                        Tâches planifiées
+                    </h3>
+            `;
+            
+            if (weekend.taches && weekend.taches.length > 0) {
+                html += '<div class="tasks-list">';
+                weekend.taches.forEach(tache => {
+                    html += `
+                        <div class="task-item-detail">
+                            <div class="task-item-info">
+                                <h4>${tache.titre}</h4>
+                                <div class="task-item-meta">
+                                    <div class="task-meta-item">
+                                        <i class="bi bi-clock"></i>
+                                        ${formatDateTime(tache.debut)} → ${formatDateTime(tache.fin)}
+                                    </div>
+                                    ${tache.posteRequis ? `
+                                        <div class="task-meta-item">
+                                            <i class="bi bi-person-badge"></i>
+                                            ${tache.posteRequis}
+                                        </div>
+                                    ` : ''}
+                                    ${tache.maxPersonnes ? `
+                                        <div class="task-meta-item">
+                                            <i class="bi bi-people"></i>
+                                            ${tache.nbAssignes || 0}/${tache.maxPersonnes} personne(s)
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            } else {
+                html += `
+                    <div class="empty-state">
+                        <i class="bi bi-list"></i>
+                        <p>Aucune tâche planifiée pour ce weekend</p>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            html += '</div>'; // Close weekend-detail-body
+            
+            content.innerHTML = html;
+            modal.classList.add('active');
+            
+            // Initialiser le calendrier après un court délai
+            setTimeout(() => initWeekendCalendar(weekend), 100);
+        }
+        
+        function initWeekendCalendar(weekend) {
+            const calendarEl = document.getElementById('weekendCalendar');
+            if (!calendarEl) return;
+            
+            // Détruire l'instance précédente si elle existe
+            if (weekendCalendar) {
+                weekendCalendar.destroy();
+            }
+            
+            // Préparer les événements du calendrier
+            const events = [];
+            
+            // Ajouter les événements
+            if (weekend.evenements && weekend.evenements.length > 0) {
+                weekend.evenements.forEach(event => {
+                    // Si on a une heure de début et une durée, créer un événement avec heure
+                    if (event.heureDebut && event.dureeMinutes) {
+                        // Créer la date/heure de début
+                        const startDateTime = event.dateDebut + 'T' + event.heureDebut;
+                        
+                        // Calculer la date/heure de fin
+                        const startDate = new Date(startDateTime);
+                        const endDate = new Date(startDate.getTime() + event.dureeMinutes * 60000);
+                        const endDateTime = endDate.toISOString();
+                        
+                        events.push({
+                            title: event.nom,
+                            start: startDateTime,
+                            end: endDateTime,
+                            backgroundColor: '#0d1b2a',
+                            borderColor: '#0d1b2a',
+                            textColor: '#ffffff',
+                            classNames: ['event-evenement'],
+                            extendedProps: {
+                                type: 'evenement',
+                                description: event.description,
+                                lieu: event.lieu
+                            }
+                        });
+                    } else {
+                        // Sinon, événement affiché sur une plage horaire par défaut (8h-18h)
+                        const startDateTime = event.dateDebut + 'T08:00:00';
+                        const endDateTime = event.dateDebut + 'T18:00:00';
+                        
+                        events.push({
+                            title: event.nom,
+                            start: startDateTime,
+                            end: endDateTime,
+                            backgroundColor: '#0d1b2a',
+                            borderColor: '#0d1b2a',
+                            textColor: '#ffffff',
+                            classNames: ['event-evenement'],
+                            extendedProps: {
+                                type: 'evenement',
+                                description: event.description,
+                                lieu: event.lieu
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // Ajouter les tâches avec une couleur uniforme
+            if (weekend.taches && weekend.taches.length > 0) {
+                weekend.taches.forEach(tache => {
+                    events.push({
+                        title: tache.titre,
+                        start: tache.debut,
+                        end: tache.fin,
+                        backgroundColor: '#6b7280',
+                        borderColor: '#4b5563',
+                        textColor: '#ffffff',
+                        classNames: ['event-tache'],
+                        extendedProps: {
+                            type: 'tache',
+                            posteRequis: tache.posteRequis,
+                            maxPersonnes: tache.maxPersonnes
+                        }
+                    });
+                });
+            }
+            
+            // Trouver la date la plus ancienne (événements ou tâches)
+            let earliestDate = new Date(weekend.dateDebut);
+            
+            // Vérifier les événements
+            if (weekend.evenements && weekend.evenements.length > 0) {
+                weekend.evenements.forEach(event => {
+                    const eventDate = new Date(event.dateDebut);
+                    if (eventDate < earliestDate) {
+                        earliestDate = eventDate;
+                    }
+                });
+            }
+            
+            // Vérifier les tâches
+            if (weekend.taches && weekend.taches.length > 0) {
+                weekend.taches.forEach(tache => {
+                    const tacheDate = new Date(tache.debut);
+                    if (tacheDate < earliestDate) {
+                        earliestDate = tacheDate;
+                    }
+                });
+            }
+            
+            // Formater la date pour FullCalendar (YYYY-MM-DD)
+            const initialDateStr = earliestDate.toISOString().split('T')[0];
+            
+            // Déterminer le premier jour de la semaine en fonction de la date la plus ancienne
+            const dayOfWeek = earliestDate.getDay(); // 0 = dimanche, 1 = lundi, etc.
+            
+            // Créer le calendrier
+            weekendCalendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                initialDate: initialDateStr,
+                locale: 'fr',
+                height: 'auto',
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'timeGridWeek,timeGridDay,listWeek'
+                },
+                buttonText: {
+                    week: 'Semaine',
+                    day: 'Jour',
+                    list: 'Liste'
+                },
+                slotMinTime: '06:00:00',
+                slotMaxTime: '23:00:00',
+                slotDuration: '01:00:00',
+                slotLabelInterval: '01:00',
+                allDaySlot: false,
+                weekends: true,
+                firstDay: dayOfWeek, // Commence au jour de la première tâche
+                expandRows: true,
+                eventMinHeight: 50,
+                slotEventOverlap: false,
+                events: events,
+                eventContent: function(arg) {
+                    const props = arg.event.extendedProps;
+                    const isEvent = props.type === 'evenement';
+                    
+                    let iconHtml = '';
+                    if (isEvent) {
+                        iconHtml = '<i class="bi bi-calendar-event me-1"></i>';
+                    } else if (props.posteRequis) {
+                        const iconMap = {
+                            'accueil': 'bi-door-open',
+                            'bar': 'bi-cup-straw',
+                            'technique': 'bi-tools',
+                            'cuisine': 'bi-egg-fried'
+                        };
+                        const icon = iconMap[props.posteRequis.toLowerCase()] || 'bi-check-circle';
+                        iconHtml = `<i class="bi ${icon} me-1"></i>`;
+                    }
+                    
+                    let content = `<div class="fc-event-content-custom">
+                        <div class="fc-event-title-custom">${iconHtml}${arg.event.title}</div>`;
+                    
+                    if (props.type === 'tache' && props.posteRequis) {
+                        content += `<div class="fc-event-meta"><span class="badge-poste">${props.posteRequis}</span>`;
+                        if (props.maxPersonnes) {
+                            content += ` <span class="badge-personnes"><i class="bi bi-people-fill"></i> ${props.maxPersonnes}</span>`;
+                        }
+                        content += `</div>`;
+                    }
+                    
+                    if (props.type === 'evenement' && props.lieu) {
+                        content += `<div class="fc-event-meta"><i class="bi bi-geo-alt-fill"></i> ${props.lieu}</div>`;
+                    }
+                    
+                    content += `</div>`;
+                    
+                    return { html: content };
+                },
+                eventClick: function(info) {
+                    const event = info.event;
+                    const props = event.extendedProps;
+                    
+                    let msg = `${event.title}\n`;
+                    msg += `De ${event.start.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}`;
+                    if (event.end) msg += ` à ${event.end.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}`;
+                    
+                    if (props.type === 'evenement') {
+                        if (props.description) msg += `\n\n${props.description}`;
+                        if (props.lieu) msg += `\nLieu: ${props.lieu}`;
+                    } else if (props.type === 'tache') {
+                        if (props.posteRequis) msg += `\n\nPoste: ${props.posteRequis}`;
+                        if (props.maxPersonnes) msg += `\nCapacité: ${props.maxPersonnes} personne(s)`;
+                    }
+                    
+                    alert(msg);
+                },
+                nowIndicator: true,
+                navLinks: true
+            });
+            
+            weekendCalendar.render();
+        }
+        
+        function closeWeekendDetail() {
+            const modal = document.getElementById('weekendDetailModal');
+            modal.classList.remove('active');
+            
+            // Détruire le calendrier
+            if (weekendCalendar) {
+                weekendCalendar.destroy();
+                weekendCalendar = null;
+            }
+        }
+        
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            });
+        }
+        
+        function formatDateTime(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Fermer le modal en cliquant en dehors
+        document.getElementById('weekendDetailModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeWeekendDetail();
+            }
+        });
+        
+        // Fermer le modal avec la touche Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeWeekendDetail();
+            }
+        });
+    </script>
+{% endblock %}

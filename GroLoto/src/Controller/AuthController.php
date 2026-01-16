@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Utilisateur;
 use App\Entity\Role;
 use App\Repository\RoleRepository;
+use App\Form\ProfileType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,6 +13,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class AuthController extends AbstractController
@@ -42,20 +45,22 @@ class AuthController extends AbstractController
         throw new \LogicException('Cette méthode peut être vide - elle sera interceptée par la clé logout dans votre firewall.');
     }
 
-    #[Route('/register', name: 'app_register')]
-    public function register(
+    
+
+    #[Route('/register', name: 'app_register_choice')]
+    public function registerChoice(): Response
+    {
+        return $this->render('auth/register_choice.html.twig');
+    }
+
+    #[Route('/register/benevole', name: 'app_register_benevole')]
+    public function registerBenevole(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
         RoleRepository $roleRepository,
-        ValidatorInterface $validator
+        TokenStorageInterface $tokenStorage
     ): Response {
-        // Si l'utilisateur est déjà connecté, rediriger vers le dashboard
-        if ($this->getUser()) {
-            return $this->redirectToRoute('dashboard');
-        }
-
-        $user = new Utilisateur();
         $errors = [];
 
         if ($request->isMethod('POST')) {
@@ -65,74 +70,589 @@ class AuthController extends AbstractController
             $prenom = $request->request->get('prenom');
             $nom = $request->request->get('nom');
             $telephone = $request->request->get('telephone');
-            $roleId = $request->request->get('role');
+            $remarque = $request->request->get('remarque');
+            $postAll = $request->request->all();
+            $postedDispos = isset($postAll['disponibilites']) && is_array($postAll['disponibilites']) ? $postAll['disponibilites'] : [];
 
-            // Validation des données
-            if (empty($email)) {
-                $errors[] = 'L\'email est obligatoire';
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = 'L\'email n\'est pas valide';
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "Email invalide";
             }
-
-            if (empty($password)) {
-                $errors[] = 'Le mot de passe est obligatoire';
-            } elseif (strlen($password) < 6) {
-                $errors[] = 'Le mot de passe doit contenir au moins 6 caractères';
+            if (empty($password) || strlen($password) < 6) {
+                $errors[] = "Le mot de passe doit faire au moins 6 caractères";
             }
-
             if ($password !== $confirmPassword) {
-                $errors[] = 'Les mots de passe ne correspondent pas';
+                $errors[] = "Les mots de passe ne correspondent pas";
             }
 
-            if (empty($roleId)) {
-                $errors[] = 'Vous devez sélectionner un rôle';
-            }
-
-            // Vérifier si l'email n'existe pas déjà
-            $existingUser = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
-            if ($existingUser) {
-                $errors[] = 'Cette adresse email est déjà utilisée';
-            }
-
-            // Si pas d'erreurs, créer l'utilisateur
             if (empty($errors)) {
-                $role = $roleRepository->find($roleId);
-                if (!$role) {
-                    $errors[] = 'Rôle invalide';
+                $existingUser = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
+                if ($existingUser) {
+                    $errors[] = "Cet email est déjà utilisé, merci d'en choisir un autre.";
                 } else {
-                    $user->setEmail($email);
-                    $user->setMotDePasse($userPasswordHasher->hashPassword($user, $password));
-                    $user->setPrenom($prenom);
-                    $user->setNom($nom);
-                    $user->setTelephone($telephone);
-                    $user->setRole($role);
-                    $user->setDateCreation(new \DateTime());
-                    $user->setDateModification(new \DateTime());
-
-                    // Valider l'entité
-                    $validationErrors = $validator->validate($user);
-                    if (count($validationErrors) > 0) {
-                        foreach ($validationErrors as $error) {
-                            $errors[] = $error->getMessage();
-                        }
+                    $role = $roleRepository->findOneBy(['nom' => 'benevole']);
+                    if (!$role) {
+                        $errors[] = "Rôle bénévole introuvable";
                     } else {
-                        $entityManager->persist($user);
-                        $entityManager->flush();
+                        $user = new Utilisateur();
+                        $user->setEmail($email);
+                        $user->setMotDePasse($userPasswordHasher->hashPassword($user, $password));
+                        $user->setPrenom($prenom);
+                        $user->setNom($nom);
+                        $user->setTelephone($telephone);
+                        $user->setRole($role);
+                        $user->setDateCreation(new \DateTime());
+                        $user->setDateModification(new \DateTime());
 
-                        $this->addFlash('success', 'Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.');
-                        return $this->redirectToRoute('app_login');
+                        try {
+                            $entityManager->persist($user);
+                            $entityManager->flush();
+
+                            $benevole = new \App\Entity\Benevole();
+                            $benevole->setUtilisateur($user);
+                            $benevole->setRemarque($remarque);
+                            $benevole->setActif(true);
+                            if (!is_array($postedDispos)) { $postedDispos = []; }
+                            $benevole->setDisponibilites($postedDispos);
+
+                            $entityManager->persist($benevole);
+                            $entityManager->flush();
+
+                            $this->addFlash('success', 'Compte bénévole créé avec succès !');
+                            
+                            // Connecter automatiquement l'utilisateur
+                            $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+                            $tokenStorage->setToken($token);
+                            
+                            return $this->redirectToRoute('dashboard');
+                        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+                            $errors[] = "Cet email est déjà utilisé, merci d'en choisir un autre.";
+                        }
                     }
                 }
             }
         }
 
-        // Récupérer tous les rôles pour le formulaire
-        $roles = $roleRepository->findAll();
-
-        return $this->render('auth/register.html.twig', [
-            'user' => $user,
-            'roles' => $roles,
+        return $this->render('auth/register_benevole.html.twig', [
             'errors' => $errors,
         ]);
     }
+
+
+
+    #[Route('/register/mecene', name: 'app_register_mecene')]
+    public function registerMecene(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface $entityManager,
+        RoleRepository $roleRepository,
+        TokenStorageInterface $tokenStorage
+    ): Response {
+        $errors = [];
+
+        if ($request->isMethod('POST')) {
+            $email = $request->request->get('email');
+            $password = $request->request->get('password');
+            $confirmPassword = $request->request->get('confirm_password');
+            $prenom = $request->request->get('prenom');
+            $nom = $request->request->get('nom');
+            $telephone = $request->request->get('telephone');
+            $organisation = $request->request->get('organisation');
+            $siret = $request->request->get('siret');
+            $adressePostale = $request->request->get('adresse_postale');
+            $logoFile = $request->files->get('logo');
+            $instagram = $request->request->get('instagram');
+            $facebook = $request->request->get('facebook');
+
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "Email invalide";
+            }
+            if (empty($password) || strlen($password) < 6) {
+                $errors[] = "Le mot de passe doit faire au moins 6 caractères";
+            }
+            if ($password !== $confirmPassword) {
+                $errors[] = "Les mots de passe ne correspondent pas";
+            }
+            if (empty($organisation)) {
+                $errors[] = "L'organisation est obligatoire";
+            }
+            if (empty($adressePostale)) {
+                $errors[] = "L'adresse postale est obligatoire";
+            }
+            if (empty($siret) || !preg_match('/^[0-9]{14}$/', $siret)) {
+                $errors[] = "Le numéro SIRET doit contenir exactement 14 chiffres";
+            }
+            if ($logoFile && !in_array($logoFile->getMimeType(), ['image/png', 'image/jpeg'])) {
+                $errors[] = "Le logo doit être au format PNG ou JPEG";
+            }
+
+            if (empty($errors)) {
+                $existingUser = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
+                if ($existingUser) {
+                    $errors[] = "Cet email est déjà utilisé, merci d'en choisir un autre.";
+                } else {
+                    $role = $roleRepository->findOneBy(['nom' => 'mecene']);
+                    if (!$role) {
+                        $errors[] = "Rôle mécène introuvable";
+                    } else {
+                        $user = new Utilisateur();
+                        $user->setEmail($email);
+                        $user->setMotDePasse($userPasswordHasher->hashPassword($user, $password));
+                        $user->setPrenom($prenom);
+                        $user->setNom($nom);
+                        $user->setTelephone($telephone);
+                        $user->setRole($role);
+                        $user->setDateCreation(new \DateTime());
+                        $user->setDateModification(new \DateTime());
+
+                        try {
+                            $entityManager->persist($user);
+                            $entityManager->flush();
+
+                            $mecene = new \App\Entity\Mecene();
+                            $mecene->setUtilisateur($user);
+                            $mecene->setOrganisation($organisation);
+                            $mecene->setSiret($siret);
+                            $mecene->setAdressePostale($adressePostale);
+                            $mecene->setInstagram($instagram);
+                            $mecene->setFacebook($facebook);
+
+                            // Handle logo upload
+                            if ($logoFile) {
+                                $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/';
+                                if (!is_dir($uploadDir)) {
+                                    mkdir($uploadDir, 0755, true);
+                                }
+                                $filename = uniqid() . '.' . $logoFile->guessExtension();
+                                $logoFile->move($uploadDir, $filename);
+                                $mecene->setLogo('uploads/logos/' . $filename);
+                            }
+
+                            $entityManager->persist($mecene);
+                            $entityManager->flush();
+
+                            $this->addFlash('success', 'Compte mécène créé avec succès !');
+                            
+                            // Connecter automatiquement l'utilisateur
+                            $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+                            $tokenStorage->setToken($token);
+                            
+                            return $this->redirectToRoute('dashboard');
+                        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+                            $errors[] = "Cet email est déjà utilisé, merci d'en choisir un autre.";
+                        }
+                    }
+                }
+            }
+        }
+
+        return $this->render('auth/register_mecene.html.twig', [
+            'errors' => $errors,
+        ]);
+    }
+
+
+    #[Route('/profile', name: 'app_profile')]
+    public function profile(EntityManagerInterface $entityManager): Response
+    {
+        // Vérifier que l'utilisateur est connecté
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        $user = $this->getUser();
+        // Préparer les disponibilités si bénévole
+        $dispos = [];
+        $benevoleRemark = null;
+        $benevole = null;
+        $mecene = null;
+        
+        $roleName = strtolower($user->getRole()?->getNom() ?? '');
+        
+        if ($roleName === 'benevole') {
+            $benevole = $entityManager->getRepository(\App\Entity\Benevole::class)
+                ->findOneBy(['utilisateur' => $user]);
+            if ($benevole) {
+                $dispos = $benevole->getDisponibilites();
+                $benevoleRemark = $benevole->getRemarque();
+            }
+        } elseif ($roleName === 'mecene') {
+            $mecene = $entityManager->getRepository(\App\Entity\Mecene::class)
+                ->findOneBy(['utilisateur' => $user]);
+        }
+        
+        return $this->render('auth/profile.html.twig', [
+            'user' => $user,
+            'dispos' => $dispos,
+            'benevoleRemark' => $benevoleRemark,
+            'benevole' => $benevole,
+            'mecene' => $mecene,
+        ]);
+    }
+
+    #[Route('/profile/remove-logo', name: 'app_profile_remove_logo', methods: ['POST'])]
+    public function removeProfileLogo(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+        $roleName = strtolower($user->getRole()?->getNom() ?? '');
+        
+        if ($roleName !== 'mecene') {
+            $this->addFlash('error', 'Action non autorisée.');
+            return $this->redirectToRoute('app_profile_edit');
+        }
+        
+        // Vérifier le token CSRF
+        $token = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('remove_logo', $token)) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('app_profile_edit');
+        }
+        
+        $mecene = $entityManager->getRepository(\App\Entity\Mecene::class)
+            ->findOneBy(['utilisateur' => $user]);
+        
+        if ($mecene && $mecene->getLogo()) {
+            $logoPath = $this->getParameter('kernel.project_dir') . '/public/' . ltrim($mecene->getLogo(), '/');
+            if (!file_exists($logoPath)) {
+                $logoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . basename($mecene->getLogo());
+            }
+            if (file_exists($logoPath)) {
+                unlink($logoPath);
+            }
+            $mecene->setLogo(null);
+            $entityManager->flush();
+            $this->addFlash('success', 'Le logo a été supprimé avec succès.');
+        } else {
+            $this->addFlash('info', 'Aucun logo à supprimer.');
+        }
+        
+        return $this->redirectToRoute('app_profile_edit');
+    }
+
+    #[Route('/profile/edit', name: 'app_profile_edit')]
+    public function editProfile(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher
+    ): Response {
+        // Vérifier que l'utilisateur est connecté
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+        
+        $form = $this->createForm(ProfileType::class, $user);
+        $form->handleRequest($request);
+
+        // Préparer les disponibilités pour les bénévoles
+        $benevole = null;
+        $mecene = null;
+        $dispos = [];
+        $roleName = strtolower($user->getRole()?->getNom() ?? '');
+        if ($roleName === 'benevole') {
+            $benevole = $entityManager->getRepository(\App\Entity\Benevole::class)
+                ->findOneBy(['utilisateur' => $user]);
+            if ($benevole) {
+                $dispos = $benevole->getDisponibilites();
+            }
+        } elseif ($roleName === 'mecene') {
+            $mecene = $entityManager->getRepository(\App\Entity\Mecene::class)
+                ->findOneBy(['utilisateur' => $user]);
+        }
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Récupérer le mot de passe actuel
+            $currentPassword = $form->get('currentPassword')->getData();
+            
+            // Vérifier le mot de passe actuel pour toute modification
+            if (empty($currentPassword) || !$passwordHasher->isPasswordValid($user, $currentPassword)) {
+                $this->addFlash('error', 'Veuillez entrer votre mot de passe actuel pour valider les modifications.');
+                return $this->render('auth/profile_edit.html.twig', [
+                    'form' => $form->createView(),
+                    'user' => $user,
+                    'dispos' => $dispos,
+                    'mecene' => $mecene ?? null,
+                ]);
+            }
+            
+            // Gérer l'upload de l'image de profil
+            $profileImageFile = $request->files->get('profileImage');
+            if ($profileImageFile) {
+                // Vérifier le type et la taille du fichier
+                $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                $maxFileSize = 2 * 1024 * 1024; // 2 Mo
+                
+                if (!in_array($profileImageFile->getMimeType(), $allowedMimeTypes)) {
+                    $this->addFlash('error', 'Le fichier doit être une image (JPG, PNG ou GIF).');
+                    return $this->render('auth/profile_edit.html.twig', [
+                        'form' => $form->createView(),
+                        'user' => $user,
+                        'dispos' => $dispos,
+                    ]);
+                }
+                
+                if ($profileImageFile->getSize() > $maxFileSize) {
+                    $this->addFlash('error', 'L\'image est trop volumineuse (maximum 2 Mo).');
+                    return $this->render('auth/profile_edit.html.twig', [
+                        'form' => $form->createView(),
+                        'user' => $user,
+                        'dispos' => $dispos,
+                    ]);
+                }
+                
+                // Supprimer l'ancienne image si elle existe
+                if ($user->getProfileImage()) {
+                    $oldImagePath = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/' . $user->getProfileImage();
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+                
+                // Générer un nom unique pour le fichier
+                $newFilename = uniqid() . '.' . $profileImageFile->guessExtension();
+                
+                // Déplacer le fichier vers le dossier d'upload
+                $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles';
+                if (!is_dir($uploadsDirectory)) {
+                    mkdir($uploadsDirectory, 0777, true);
+                }
+                
+                try {
+                    $profileImageFile->move($uploadsDirectory, $newFilename);
+                    $user->setProfileImage($newFilename);
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
+                }
+            }
+
+            // Récupérer les données du formulaire pour changement de mot de passe
+            $newPassword = $form->get('newPassword')->getData();
+            $confirmPassword = $form->get('confirmPassword')->getData();
+
+            // Si un nouveau mot de passe est fourni, le valider et le mettre à jour
+            if (!empty($newPassword)) {
+                if ($newPassword !== $confirmPassword) {
+                    $this->addFlash('error', 'Les nouveaux mots de passe ne correspondent pas.');
+                    return $this->render('auth/profile_edit.html.twig', [
+                        'form' => $form->createView(),
+                        'user' => $user,
+                        'dispos' => $dispos,
+                        'mecene' => $mecene ?? null,
+                    ]);
+                }
+
+                if (strlen($newPassword) < 6) {
+                    $this->addFlash('error', 'Le nouveau mot de passe doit contenir au moins 6 caractères.');
+                    return $this->render('auth/profile_edit.html.twig', [
+                        'form' => $form->createView(),
+                        'user' => $user,
+                        'dispos' => $dispos,
+                        'mecene' => $mecene ?? null,
+                    ]);
+                }
+
+                // Hasher et enregistrer le nouveau mot de passe
+                $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+                $user->setMotDePasse($hashedPassword);
+            }
+
+            // Vérifier si l'email a changé et s'il n'est pas déjà utilisé
+            $originalEmail = $entityManager->getUnitOfWork()->getOriginalEntityData($user)['email'] ?? null;
+            if ($user->getEmail() !== $originalEmail) {
+                $existingUser = $entityManager->getRepository(Utilisateur::class)
+                    ->findOneBy(['email' => $user->getEmail()]);
+                
+                if ($existingUser && $existingUser->getId() !== $user->getId()) {
+                    $this->addFlash('error', 'Cette adresse email est déjà utilisée par un autre compte.');
+                    return $this->render('auth/profile_edit.html.twig', [
+                        'form' => $form->createView(),
+                        'user' => $user,
+                        'dispos' => $dispos,
+                        'mecene' => $mecene ?? null,
+                    ]);
+                }
+            }
+
+            // Sauvegarder les disponibilités (bénévole uniquement)
+            if ($roleName === 'benevole') {
+                if (!$benevole) {
+                    // Créer l'entité si manquante par cohérence
+                    $benevole = new \App\Entity\Benevole();
+                    $benevole->setUtilisateur($user);
+                    $entityManager->persist($benevole);
+                }
+                $postAll = $request->request->all();
+                $postedDispos = isset($postAll['disponibilites']) && is_array($postAll['disponibilites']) ? $postAll['disponibilites'] : [];
+                $benevole->setDisponibilites($postedDispos);
+
+                // Mettre à jour la note/remarque du bénévole si fournie
+                $remarque = isset($postAll['remarque']) ? (string)$postAll['remarque'] : '';
+                // Normaliser (trim) et limiter longueur côté contrôleur de manière basique
+                $remarque = trim($remarque);
+                if ($remarque === '') {
+                    // Autoriser remarque vide
+                    $benevole->setRemarque(null);
+                } else {
+                    // Optionnel: tronquer très long texte pour éviter abus
+                    $benevole->setRemarque(mb_substr($remarque, 0, 1000));
+                }
+            }
+
+            // Gérer l'upload du logo pour les mécènes
+            if ($roleName === 'mecene') {
+                if (!$mecene) {
+                    $mecene = new \App\Entity\Mecene();
+                    $mecene->setUtilisateur($user);
+                    $entityManager->persist($mecene);
+                }
+
+                $logoFile = $request->files->get('logo');
+                if ($logoFile) {
+                    // Vérification basique de l'erreur d'upload
+                    if ($logoFile->getError() !== UPLOAD_ERR_OK) {
+                        $this->addFlash('error', 'Erreur lors du téléchargement du logo. Code erreur : ' . $logoFile->getError());
+                        return $this->render('auth/profile_edit.html.twig', [
+                            'form' => $form->createView(),
+                            'user' => $user,
+                            'dispos' => $dispos,
+                            'mecene' => $mecene ?? null,
+                        ]);
+                    }
+
+                    // Vérification du type MIME (ajout de jpg et webp au cas où)
+                    $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+                    
+                    try {
+                        $mimeType = $logoFile->getMimeType();
+                    } catch (\Exception $e) {
+                        // Fallback si getMimeType échoue (ex: fichier temporaire introuvable)
+                        $mimeType = $logoFile->getClientMimeType();
+                    }
+
+                    if (!in_array($mimeType, $allowedMimeTypes)) {
+                        $this->addFlash('error', 'Le logo doit être au format PNG, JPEG ou WEBP.');
+                        return $this->render('auth/profile_edit.html.twig', [
+                            'form' => $form->createView(),
+                            'user' => $user,
+                            'dispos' => $dispos,
+                            'mecene' => $mecene ?? null,
+                        ]);
+                    }
+
+                    // Supprimer l'ancien logo si existe
+                    if ($mecene->getLogo()) {
+                        $oldLogoPath = $this->getParameter('kernel.project_dir') . '/public/' . ltrim($mecene->getLogo(), '/');
+                        if (!file_exists($oldLogoPath)) {
+                            $oldLogoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . basename($mecene->getLogo());
+                        }
+                        if (file_exists($oldLogoPath)) {
+                            unlink($oldLogoPath);
+                        }
+                    }
+
+                    // Générer nom unique
+                    try {
+                        $extension = $logoFile->guessExtension();
+                    } catch (\Exception $e) {
+                        $extension = null;
+                    }
+                    
+                    if (!$extension) {
+                        $extension = $logoFile->getClientOriginalExtension();
+                    }
+                    $newFilename = uniqid() . '.' . $extension;
+
+                    // Créer dossier si nécessaire
+                    $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/logos';
+                    if (!is_dir($uploadsDirectory)) {
+                        mkdir($uploadsDirectory, 0777, true);
+                    }
+
+                    try {
+                        if (!file_exists($logoFile->getPathname())) {
+                             throw new \Exception("Fichier temporaire introuvable (" . $logoFile->getPathname() . ")");
+                        }
+                        $logoFile->move($uploadsDirectory, $newFilename);
+                        $mecene->setLogo('uploads/logos/' . $newFilename);
+                    } catch (\Exception $e) {
+                        $this->addFlash('error', 'Erreur lors de l\'upload du logo : ' . $e->getMessage());
+                    }
+                }
+
+                // Gérer suppression logo
+                if ($request->request->get('removeLogo') === '1') {
+                    if ($mecene->getLogo()) {
+                        $logoPath = $this->getParameter('kernel.project_dir') . '/public/' . ltrim($mecene->getLogo(), '/');
+                        if (!file_exists($logoPath)) {
+                            $logoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . basename($mecene->getLogo());
+                        }
+                        if (file_exists($logoPath)) {
+                            unlink($logoPath);
+                        }
+                        $mecene->setLogo(null);
+                    }
+                }
+
+                // Gérer les réseaux sociaux
+                $instagram = $request->request->get('instagram');
+                $facebook = $request->request->get('facebook');
+                
+                // Valider et nettoyer les URLs
+                if ($instagram) {
+                    $instagram = trim($instagram);
+                    if (!empty($instagram) && !filter_var($instagram, FILTER_VALIDATE_URL)) {
+                        $this->addFlash('error', 'L\'URL Instagram n\'est pas valide.');
+                        return $this->render('auth/profile_edit.html.twig', [
+                            'form' => $form->createView(),
+                            'user' => $user,
+                            'dispos' => $dispos,
+                            'mecene' => $mecene ?? null,
+                        ]);
+                    }
+                }
+                
+                if ($facebook) {
+                    $facebook = trim($facebook);
+                    if (!empty($facebook) && !filter_var($facebook, FILTER_VALIDATE_URL)) {
+                        $this->addFlash('error', 'L\'URL Facebook n\'est pas valide.');
+                        return $this->render('auth/profile_edit.html.twig', [
+                            'form' => $form->createView(),
+                            'user' => $user,
+                            'dispos' => $dispos,
+                            'mecene' => $mecene ?? null,
+                        ]);
+                    }
+                }
+                
+                $mecene->setInstagram($instagram ?: null);
+                $mecene->setFacebook($facebook ?: null);
+
+                // Gérer l'adresse postale
+                $adressePostale = $request->request->get('adresse_postale');
+                if ($adressePostale !== null) {
+                    $adressePostale = trim($adressePostale);
+                    $mecene->setAdressePostale($adressePostale ?: null);
+                }
+            }
+
+            // Mettre à jour la date de modification
+            $user->setDateModification(new \DateTime());
+
+            try {
+                $entityManager->flush();
+                $this->addFlash('success', 'Votre profil a été mis à jour avec succès !');
+                return $this->redirectToRoute('app_profile');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors de la mise à jour de votre profil.');
+            }
+        }
+
+        return $this->render('auth/profile_edit.html.twig', [
+            'form' => $form->createView(),
+            'user' => $user,
+            'dispos' => $dispos,
+            'mecene' => $mecene ?? null,
+        ]);
+    }
+
 }

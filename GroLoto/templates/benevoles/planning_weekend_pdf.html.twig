@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Planning - {{ weekend.nom }}</title>
+    <style>
+        @page { margin: 14px 12px; }
+        body { font-family: Arial, sans-serif; font-size: 11px; line-height: 1.5; color: #111827; margin: 0; padding: 0; }
+        .page { padding: 10px 8px; }
+
+        .header { text-align: center; margin: 0 0 14px 0; padding-bottom: 8px; border-bottom: 2px solid #0f172a; }
+        .header h1 { margin: 0 0 4px 0; font-size: 18px; color: #0f172a; letter-spacing: 0.3px; }
+        .header .dates { font-size: 11px; color: #475569; }
+        .header .benevole { font-size: 10px; color: #6b7280; }
+
+        .section-title { background: #0f172a; color: #fff; padding: 6px 8px; font-weight: bold; font-size: 11px; margin: 12px 0 6px 0; page-break-after: avoid; }
+        .block { border: 1px solid #e2e8f0; padding: 9px; margin: 0 0 10px 0; page-break-inside: avoid; background: #f8fafc; }
+        .block-text { font-size: 10px; color: #334155; margin: 0; }
+
+        .task { border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; padding: 9px; margin: 0 0 8px 0; page-break-inside: avoid; background: #fff; }
+        .task-head { display: flex; justify-content: space-between; align-items: center; margin: 0 0 6px 0; }
+        .task-title { font-weight: bold; color: #0f172a; font-size: 11px; margin: 0; }
+        .task-time { background: #2563eb; color: #fff; padding: 2px 8px; font-size: 10px; font-weight: bold; }
+        .task-row { font-size: 10px; color: #334155; margin: 2px 0; }
+        .task-label { font-weight: bold; color: #0f172a; }
+
+        .summary { border: 1px solid #e2e8f0; padding: 10px; margin-top: 10px; page-break-inside: avoid; background: #f8fafc; }
+        .summary-title { font-weight: bold; color: #0f172a; font-size: 11px; margin: 0 0 8px 0; }
+        .summary-row { font-size: 10px; color: #334155; margin: 2px 0; }
+        .summary-label { font-weight: bold; color: #0f172a; }
+
+        .footer { margin-top: 14px; padding-top: 8px; border-top: 1px solid #e5e7eb; text-align: center; color: #94a3b8; font-size: 9px; page-break-inside: avoid; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <h1>{{ weekend.nom }}</h1>
+            <div class="dates">Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}</div>
+            <div class="benevole">Planning de : {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}</div>
+        </div>
+
+        {% if weekend.description %}
+            <div class="section-title">Description du weekend</div>
+            <div class="block">
+                <p class="block-text">{{ weekend.description|nl2br }}</p>
+            </div>
+        {% endif %}
+
+        {% set currentDate = null %}
+        {% for tache in taches %}
+            {% set tacheDate = tache.debut|date('Y-m-d') %}
+            {% if currentDate != tacheDate %}
+                {% set currentDate = tacheDate %}
+                <div class="section-title">{{ tache.debut|date('d/m/Y') }}</div>
+            {% endif %}
+
+            <div class="task">
+                <div class="task-head">
+                    <p class="task-title">{{ tache.titre }}</p>
+                    <span class="task-time">{{ tache.debut|date('H:i') }} - {{ tache.fin|date('H:i') }}</span>
+                </div>
+                {% if tache.posteRequis %}
+                    <div class="task-row"><span class="task-label">Poste :</span> {{ tache.posteRequis }}</div>
+                {% endif %}
+                {% set duree = (tache.fin.timestamp - tache.debut.timestamp) / 3600 %}
+                <div class="task-row"><span class="task-label">Durée :</span> {{ duree|number_format(1) }} h</div>
+                {% if tache.maxPersonnes %}
+                    <div class="task-row"><span class="task-label">Équipe :</span> {{ tache.maxPersonnes }} personne{{ tache.maxPersonnes > 1 ? 's' : '' }} maximum</div>
+                {% endif %}
+                {% if tache.remarque %}
+                    <div class="task-row"><span class="task-label">Remarque :</span> {{ tache.remarque }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <div class="summary">
+            <p class="summary-title">Résumé</p>
+            <div class="summary-row"><span class="summary-label">Nombre de tâches :</span> {{ taches|length }}</div>
+            {% set totalHeures = 0 %}
+            {% for tache in taches %}
+                {% set totalHeures = totalHeures + ((tache.fin.timestamp - tache.debut.timestamp) / 3600) %}
+            {% endfor %}
+            <div class="summary-row"><span class="summary-label">Heures totales :</span> {{ totalHeures|number_format(1) }} h</div>
+        </div>
+
+        <div class="footer">Document généré le {{ "now"|date('d/m/Y \à H:i') }} - GroLoto Planning</div>
+    </div>
+</body>
+</html>

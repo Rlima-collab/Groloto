@@ -1,0 +1,107 @@
+<ul class="nav-list">
+    <li class="nav-item">
+        <a href="{{ path('dashboard') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_dashboard.png') }}" alt="Tableau de bord">
+            </span>
+            <span class="nav-text">Tableau de bord</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('app_weekends') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_weekend.png') }}" alt="Weekend">
+            </span>
+            <span class="nav-text">Weekends</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="{{ path('app_weekend_create') }}">Créer weekend</a></li>
+            <li><a href="{{ path('app_weekend_liste') }}">Modifier un weekend</a></li>
+            <li><a href="{{ path('app_weekends') }}">Planning des weekends</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('app_evenements') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="Evenement">
+            </span>
+            <span class="nav-text">Évènements</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="{{ path('app_evenements_create') }}">Créer événement</a></li>
+            <li><a href="{{ path('app_evenements_liste') }}">Modifier événement</a></li>
+            <li><a href="{{ path('app_evenements') }}">Voir les événements</a></li>
+        </ul>
+    </li>
+
+    <li class="nav-item">
+        <a href="{{ path('benevoles') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_benevole.png') }}" alt="Bénévoles">
+            </span>
+            <span class="nav-text">Bénévoles</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a href="{{ path('benevoles') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_tache.png') }}" alt="Bénévoles">
+            </span>
+            <span class="nav-text">Tâches</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="{{ path('tache_index') }}">Gérer les tâches</a></li>
+            <li><a href="{{ path('admin_demandes_annulations') }}">Demandes d'annulation</a></li>
+        </ul>
+    </li>
+
+    <li class="nav-item">
+        <a href="{{ path('mecenes') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_mecene.png') }}" alt="Mécènes & Lots">
+            </span>
+            <span class="nav-text">Mécènes & Lots</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="{{ path('mecenes') }}">Gérer les mécènes</a></li>
+            <li><a href="{{ path('admin_inscriptions') }}">Gestion des inscriptions</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('stocks') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_stock.png') }}" alt="Stocks">
+            </span>
+            <span class="nav-text">Stocks</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="{{ path('stocks_inventaire') }}">Inventaire</a></li>
+            <li><a href="{{ path('stocks_mouvements') }}">Mouvements</a></li>
+            <li><a href="{{ path('stocks_historique') }}">Historique</a></li>
+            <li><a href="{{ path('stocks_gerer') }}">Gérer les stocks</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('public_index') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_public.png') }}" alt="Public">
+            </span>
+            <span class="nav-text">Public</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="{{ path('public_participants') }}">Participants</a></li>
+            <li><a href="{{ path('public_analyses') }}">Analyses</a></li>
+            <li><a href="{{ path('public_import') }}">Import</a></li>
+            <li><a href="{{ path('admin_recu_fiscal_send') }}">Reçus fiscaux</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('admin_messages') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_contact.png') }}" alt="Contact">
+            </span>
+            <span class="nav-text">Messagerie</span>
+        </a>
+    </li>
+</ul>

@@ -1,0 +1,121 @@
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <h3 class="mb-3" style="color: #0d1b2a; font-weight: 600;">
+            <i class="bi bi-plus-circle me-2"></i>Ajouter un mouvement de stock
+        </h3>
+        <p class="text-muted mb-4">Enregistrer une entrée ou sortie de stock</p>
+
+        <form method="post" action="{{ path('stock_ajouter_mouvement') }}">
+            <div class="row g-3">
+                <!-- Article -->
+                <div class="col-md-6">
+                    <label for="article" class="form-label fw-semibold">
+                        <i class="bi bi-box-seam me-1"></i>Article <span class="text-danger">*</span>
+                    </label>
+                    <select id="article" name="article" class="form-select" required>
+                        <option value="" selected>Sélectionner un article...</option>
+                        {% for item in stock_items %}
+                            <option value="{{ item.id }}" 
+                                    data-quantite="{{ item.quantite }}" 
+                                    data-unite="{{ item.unite }}">
+                                {{ item.nom }} (Stock: {{ item.quantite }} {{ item.unite }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div id="stock-info" class="alert alert-info mt-2" style="display: none;">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Stock actuel : <strong id="stock-quantite">0</strong> <span id="stock-unite"></span>
+                    </div>
+                </div>
+
+                <!-- Type de mouvement -->
+                <div class="col-md-6">
+                    <label for="type" class="form-label fw-semibold">
+                        <i class="bi bi-arrow-left-right me-1"></i>Type de mouvement <span class="text-danger">*</span>
+                    </label>
+                    <select id="type" name="type" class="form-select" required>
+                        <option value="" selected>Choisir le type...</option>
+                        <option value="entree">➕ Entrée (ajout au stock)</option>
+                        <option value="sortie">➖ Sortie (retrait du stock)</option>
+                    </select>
+                </div>
+
+                <!-- Quantité -->
+                <div class="col-md-6">
+                    <label for="quantite" class="form-label fw-semibold">
+                        <i class="bi bi-calculator me-1"></i>Quantité <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" 
+                           id="quantite" 
+                           name="quantite" 
+                           class="form-control" 
+                           min="1" 
+                           value="1" 
+                           required
+                           placeholder="Ex: 10">
+                </div>
+
+                <!-- Raison -->
+                <div class="col-md-6">
+                    <label for="raison" class="form-label fw-semibold">
+                        <i class="bi bi-chat-left-text me-1"></i>Raison/Motif <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           id="raison" 
+                           name="raison" 
+                           class="form-control" 
+                           required
+                           placeholder="Ex: Don mécène, Événement du 15/11, Inventaire">
+                </div>
+
+                <!-- Notes (optionnel) -->
+                <div class="col-12">
+                    <label for="notes" class="form-label fw-semibold">
+                        <i class="bi bi-pencil me-1"></i>Notes complémentaires <small class="text-muted">(optionnel)</small>
+                    </label>
+                    <textarea id="notes" 
+                              name="notes" 
+                              class="form-control" 
+                              rows="3"
+                              placeholder="Informations supplémentaires..."></textarea>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="col-12">
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-night-blue">
+                            <i class="bi bi-check-lg me-1"></i>Enregistrer le mouvement
+                        </button>
+                        <button type="reset" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i>Réinitialiser
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const articleSelect = document.getElementById('article');
+    const stockInfo = document.getElementById('stock-info');
+    const stockQuantite = document.getElementById('stock-quantite');
+    const stockUnite = document.getElementById('stock-unite');
+
+    articleSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            const quantite = selectedOption.getAttribute('data-quantite');
+            const unite = selectedOption.getAttribute('data-unite');
+            
+            stockQuantite.textContent = quantite;
+            stockUnite.textContent = unite;
+            stockInfo.style.display = 'block';
+        } else {
+            stockInfo.style.display = 'none';
+        }
+    });
+});
+</script>

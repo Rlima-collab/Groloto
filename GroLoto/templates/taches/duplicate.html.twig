@@ -1,0 +1,121 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dupliquer une tâche{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-forms.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="taches-page">
+<div class="container" style="padding-top: calc(71px + 2rem);">
+    <div class="page-header" style="display: flex; align-items: center; justify-content: center; position: relative;">
+        <a href="{{ path('tache_index') }}" class="btn btn-secondary" style="position: absolute; left: 0;">← Retour à la liste</a>
+        <h1 class="page-title" style="margin: 0 auto; text-align: center; width: 100%;">Dupliquer une tâche</h1>
+    </div>
+
+    <div style="max-width: 800px; margin: 0 auto;">
+        {# Info sur la tâche source #}
+        <div class="card" style="margin-bottom: 1.5rem; border-left: 4px solid #8b5cf6;">
+            <div class="card-content" style="padding: 1rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: #8b5cf6;">
+                    <i class="bi bi-info-circle"></i> Duplication de : {{ tacheSource.titre }}
+                </h4>
+                <p style="margin: 0; color: #6b7280; font-size: 0.9rem;">
+                    Les informations ci-dessous sont pré-remplies avec les données de la tâche source. 
+                    Modifiez-les si nécessaire avant de valider.
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Informations de la nouvelle tâche</h2>
+                <p class="card-description">Vérifiez et modifiez les détails si nécessaire</p>
+            </div>
+            <div class="card-content">
+                {{ form_start(form) }}
+                    <div class="form-grid">
+                        <div class="form-group required full-width">
+                            {{ form_label(form.titre) }}
+                            {{ form_widget(form.titre) }}
+                            {{ form_errors(form.titre) }}
+                        </div>
+
+                        <div class="form-group required full-width">
+                            {{ form_label(form.weekend) }}
+                            {{ form_widget(form.weekend) }}
+                            {{ form_errors(form.weekend) }}
+                            <small class="form-text">Le weekend auquel cette tâche est rattachée</small>
+                        </div>
+                    </div>
+
+                    {# Plages horaires existantes de la source #}
+                    {% if plagesSource|length > 0 %}
+                    <div style="background: #f0fdf4; padding: 1rem; border-radius: 0.375rem; margin: 1.5rem 0; border: 1px solid #86efac;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: #166534;">
+                            📋 Plages horaires de la tâche source (pour référence)
+                        </label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            {% for plage in plagesSource %}
+                                <span class="badge" style="background: #22c55e; padding: 0.5rem 0.75rem;">
+                                    {{ plage.jour|date('d/m/Y') }} : {{ plage.heureDebut|date('H:i') }} - {{ plage.heureFin|date('H:i') }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {# Nouvelle plage horaire #}
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 0.375rem; margin: 1.5rem 0;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 1rem; color: #1f2937;">📅 Nouvelle plage horaire</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                {{ form_label(form.jour_plage) }}
+                                {{ form_widget(form.jour_plage) }}
+                                {{ form_errors(form.jour_plage) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(form.heure_debut_plage) }}
+                                {{ form_widget(form.heure_debut_plage) }}
+                                {{ form_errors(form.heure_debut_plage) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(form.heure_fin_plage) }}
+                                {{ form_widget(form.heure_fin_plage) }}
+                                {{ form_errors(form.heure_fin_plage) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            {{ form_label(form.maxPersonnes) }}
+                            {{ form_widget(form.maxPersonnes) }}
+                            {{ form_errors(form.maxPersonnes) }}
+                            <small class="form-text">Limite globale de bénévoles</small>
+                        </div>
+
+                        <div class="form-group full-width">
+                            {{ form_label(form.remarque) }}
+                            {{ form_widget(form.remarque) }}
+                            {{ form_errors(form.remarque) }}
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-copy"></i> Dupliquer la tâche
+                        </button>
+                        <a href="{{ path('tache_index') }}" class="btn btn-secondary">Annuler</a>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

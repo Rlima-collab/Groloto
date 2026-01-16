@@ -1,5 +1,4 @@
 <?php
-// src/Entity/Role.php
 namespace App\Entity;
 
 use App\Repository\RoleRepository;

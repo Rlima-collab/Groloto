@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Weekends{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Weekends</h1>
+        <p class="hero-description">Consultez et gérez tous les weekends d'événements caritatifs.</p>
+        {% if isAdmin %}
+            <a href="{{ path('app_weekend_create') }}" class="btn-login">Créer un nouveau weekend</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container-custom">
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            {{ message }}
+        </div>
+    {% endfor %}
+    
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-error">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% if weekends is empty %}
+        <div class="empty-state">
+            <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            {% if isAdmin %}
+                <h3>Aucun weekend enregistré</h3>
+                <p>Commencez par créer votre premier weekend d'événements.</p>
+                <a href="{{ path('app_weekend_create') }}" class="btn-login">
+                    Créer un weekend
+                </a>
+            {% else %}
+                <h3>Aucun événement à venir</h3>
+                <p>Il n'y a pas de weekends planifiés pour le moment. Restez à l'écoute pour nos prochaines annonces !</p>
+                <div style="margin-top: 1.5rem;">
+                    <a href="{{ path('app_home') }}" class="btn-secondary" style="padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 8px; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; transition: all 0.2s;">
+                        Retour à l'accueil
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="weekends-grid">
+            {% for weekend in weekends %}
+                <div class="weekend-card">
+                    {% if weekend.coverImage %}
+                        <div class="weekend-card-image">
+                            <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}">
+                            <div class="weekend-card-overlay"></div>
+                        </div>
+                    {% else %}
+                        <div class="weekend-card-image weekend-card-no-image">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="weekend-card-content">
+                        <h3 class="weekend-card-title">{{ weekend.nom }}</h3>
+                        
+                        <div class="weekend-card-dates">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}</span>
+                        </div>
+
+                        {% if weekend.description %}
+                        <p class="weekend-card-description">
+                            {% if weekend.description|length > 120 %}
+                                {{ weekend.description|slice(0, 120) }}...
+                            {% else %}
+                                {{ weekend.description }}
+                            {% endif %}
+                        </p>
+                        {% endif %}
+
+                        <div class="weekend-card-stats">
+                            <div class="stat-item">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <span>{{ weekend.evenements|length }} événement(s)</span>
+                            </div>
+                            <div class="stat-item">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                <span>{{ weekend.taches|length }} tâche(s)</span>
+                            </div>
+                        </div>
+
+                        <div class="weekend-card-actions">
+                            <a href="{{ path('app_weekend_details', {'id': weekend.id}) }}" class="btn-view">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                Voir les détails
+                            </a>
+                            {% if isAdmin %}
+                            <a href="{{ path('app_weekend_edit', {'id': weekend.id}) }}" class="btn-edit" title="Modifier">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<link rel="stylesheet" href="{{ asset('css/weekends.css') }}">
+{% endblock %}

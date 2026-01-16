@@ -1,0 +1,192 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Tâches{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/taches.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="tasks-container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>Gestion des tâches</h1>
+        <div class="header-buttons">
+            <a href="{{ path('tache_benevoles_management') }}" class="btn-outline">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Gestion bénévoles
+            </a>
+            <a href="{{ path('tache_new') }}" class="btn-primary">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Nouvelle tâche
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filters-bar">
+        <div class="filter-group">
+            <span class="filter-label">Statut</span>
+            <div class="filter-buttons">
+                <a href="{{ path('tache_index', {filtre: 'toutes', tri: triActif}) }}" 
+                   class="filter-btn {{ filtreActif == 'toutes' ? 'active' : '' }}">Toutes</a>
+                <a href="{{ path('tache_index', {filtre: 'futures', tri: triActif}) }}" 
+                   class="filter-btn {{ filtreActif == 'futures' ? 'active' : '' }}">À venir</a>
+                <a href="{{ path('tache_index', {filtre: 'en_cours', tri: triActif}) }}" 
+                   class="filter-btn {{ filtreActif == 'en_cours' ? 'active' : '' }}">En cours</a>
+                <a href="{{ path('tache_index', {filtre: 'passees', tri: triActif}) }}" 
+                   class="filter-btn {{ filtreActif == 'passees' ? 'active' : '' }}">Terminées</a>
+            </div>
+        </div>
+        
+        <div class="filter-group">
+            <span class="filter-label">Tri</span>
+            <div class="filter-buttons">
+                <a href="{{ path('tache_index', {filtre: filtreActif, tri: 'date_proche'}) }}" 
+                   class="filter-btn {{ triActif == 'date_proche' ? 'active' : '' }}">Date ↑</a>
+                <a href="{{ path('tache_index', {filtre: filtreActif, tri: 'date_eloignee'}) }}" 
+                   class="filter-btn {{ triActif == 'date_eloignee' ? 'active' : '' }}">Date ↓</a>
+                <a href="{{ path('tache_index', {filtre: filtreActif, tri: 'titre'}) }}" 
+                   class="filter-btn {{ triActif == 'titre' ? 'active' : '' }}">A-Z</a>
+            </div>
+        </div>
+        
+        <span class="task-count"><strong>{{ tachesData|length }}</strong> tâche{{ tachesData|length > 1 ? 's' : '' }}</span>
+    </div>
+    
+    <!-- Tasks List -->
+    {% if tachesData|length > 0 %}
+        <div class="tasks-grid">
+            {% for data in tachesData %}
+                {% set tache = data.tache %}
+                {% set now = date() %}
+                {% set isPast = tache.fin < now %}
+                {% set isFuture = tache.debut > now %}
+                {% set isFull = tache.maxPersonnes and data.nbAssignes >= tache.maxPersonnes %}
+                
+                <div class="task-card {{ isPast ? 'past' : '' }}">
+                    <!-- Main Info -->
+                    <div class="task-main">
+                        <div class="task-title">{{ tache.titre }}</div>
+                        <div class="task-meta">
+                            {% if tache.weekend %}
+                                <span class="task-weekend">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    {{ tache.weekend.nom }}
+                                </span>
+                            {% endif %}
+                            {% if tache.posteRequis %}
+                                <span>Poste: {{ tache.posteRequis }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="task-status">
+                        {% if isPast %}
+                            <span class="status-pill past">Terminée</span>
+                        {% elseif isFuture %}
+                            <span class="status-pill future">À venir</span>
+                        {% else %}
+                            <span class="status-pill current">En cours</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- DateTime -->
+                    <div class="task-datetime">
+                        <div class="task-date">{{ tache.debut|date('d/m/Y') }}</div>
+                        <div class="task-time">{{ tache.debut|date('H:i') }} - {{ tache.fin|date('H:i') }}</div>
+                    </div>
+                    
+                    <!-- Places -->
+                    <div class="task-places">
+                        {% if tache.maxPersonnes %}
+                            <div class="places-display {{ isFull ? 'full' : '' }}">
+                                {{ data.nbAssignes }}/{{ tache.maxPersonnes }}
+                            </div>
+                            <div class="places-label">
+                                {% if isFull %}Complet{% else %}places{% endif %}
+                            </div>
+                        {% else %}
+                            <div class="places-display">{{ data.nbAssignes }}</div>
+                            <div class="places-label">bénévole{{ data.nbAssignes > 1 ? 's' : '' }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="task-actions">
+                        <a href="{{ path('tache_edit', {'id': tache.id}) }}" class="action-btn" data-tooltip="Modifier">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </a>
+                        <a href="{{ path('tache_duplicate', {'id': tache.id}) }}" class="action-btn" data-tooltip="Dupliquer">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                        </a>
+                        <a href="{{ path('tache_benevoles', {'id': tache.id}) }}" class="action-btn" data-tooltip="Bénévoles">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </a>
+                        {% if not isFull %}
+                            <a href="{{ path('tache_proposer', {'id': tache.id}) }}" class="action-btn" data-tooltip="Assigner">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                </svg>
+                            </a>
+                        {% endif %}
+                        <button type="button" class="action-btn danger" data-tooltip="Supprimer"
+                                onclick="confirmDelete('{{ tache.id }}', '{{ tache.titre|e('js') }}', '{{ csrf_token('delete_tache_' ~ tache.id) }}')">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            <h3>Aucune tâche trouvée</h3>
+            <p>Commencez par créer des tâches pour vos événements.</p>
+            <a href="{{ path('tache_new') }}" class="btn-primary">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Créer une tâche
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function confirmDelete(tacheId, tacheTitre, csrfToken) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer la tâche "' + tacheTitre + '" ?\n\nCette action supprimera également toutes les affectations de bénévoles associées.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/taches/' + tacheId + '/delete';
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

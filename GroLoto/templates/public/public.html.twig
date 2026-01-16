@@ -1,0 +1,829 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Interface Public & Analytics{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/public.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Interface Public & Analytics</h1>
+        <p class="hero-description">Gestion des participants et analyses de fréquentation pour vos événements.</p>
+        <a href="#analytics" class="hero-btn yellow smooth-scroll">Voir les analytics</a>
+    </div>
+</div>
+
+<div class="page-header">
+    <h1 class="page-title">Analytics & Participants</h1>
+</div>
+
+<div class="public-container">
+
+    <!-- Partie 1: Métriques principales -->
+    <div class="metrics-section">
+        <div class="metrics-grid">
+            <div class="metric-card total">
+                <div class="metric-header">
+                    <span class="metric-label">Total Inscrits</span>
+                </div>
+                <div class="metric-value">{{ total_inscrits }}</div>
+                <div class="metric-subtitle">sur ce mois</div>
+            </div>
+
+            <div class="metric-card revenus">
+                <div class="metric-header">
+                    <span class="metric-label">Revenus</span>
+                </div>
+                <div class="metric-value">{{ revenus }}€</div>
+                <div class="metric-subtitle">estimés</div>
+            </div>
+
+            <div class="metric-card nouveaux">
+                <div class="metric-header">
+                    <span class="metric-label">Nouveaux</span>
+                </div>
+                <div class="metric-value">{{ nouveaux }}</div>
+                <div class="metric-subtitle">ce mois</div>
+            </div>
+
+            <div class="metric-card fideles">
+                <div class="metric-header">
+                    <span class="metric-label">Fidèles</span>
+                </div>
+                <div class="metric-value">{{ fideles }}</div>
+                <div class="metric-subtitle">participants</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partie 2: Navigation entre sections -->
+    {% if is_granted('ROLE_ADMIN') %}
+    <div class="action-buttons">
+        <button class="btn btn-participants active" onclick="showSection('participants')">
+            Participants
+        </button>
+        <button class="btn btn-analytics" onclick="showSection('analytics')">
+            Analytics
+        </button>
+        <button class="btn btn-import" onclick="showSection('import')">
+            Import
+        </button>
+    </div>
+    {% endif %}
+
+    <!-- Section Participants -->
+    <div id="participants-section" class="participants-section">
+        <div class="section-header">
+            <h2>Gestion des Participants</h2>
+            <p>Vue d'ensemble de tous les participants inscrits</p>
+        </div>
+
+        <div class="participants-table-container">
+            <table class="participants-table">
+                <thead>
+                    <tr>
+                        <th>Participant</th>
+                        <th>Contact</th>
+                        <th>Type</th>
+                        <th>Date inscription</th>
+                        <th>Statut</th>
+                        <th>Fidélité</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for participant in participants %}
+                    <tr>
+                        <td>
+                            <div class="participant-info">
+                                <strong>{{ participant.nom }} {{ participant.prenom }}</strong>
+                                <small>{{ participant.roles[0] ?? 'Utilisateur' }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="contact-info">
+                                <div>📧 {{ participant.email }}</div>
+                                {% if participant.telephone %}
+                                <div>📱 {{ participant.telephone }}</div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="billet-type {{ participant.roles[0] ? participant.roles[0]|lower|replace({'role_': ''}) : 'utilisateur' }}">
+                                {{ participant.roles[0] ? participant.roles[0]|replace({'ROLE_': ''})|title : 'Utilisateur' }}
+                            </span>
+                        </td>
+                        <td>{{ participant.dateCreation|date('d/m/Y') }}</td>
+                        <td>
+                            <span class="statut actif">Actif</span>
+                        </td>
+                        <td>
+                            <span class="fidelite nouveau">Nouveau</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-actions">
+            {% if is_granted('ROLE_ADMIN') %}
+            <button class="btn btn-export">📤 Exporter CSV</button>
+            {% endif %}
+            <button class="btn btn-filter">🔍 Filtrer</button>
+            <button class="btn btn-refresh">🔄 Actualiser</button>
+        </div>
+    </div>
+
+    <!-- Section Analytics -->
+    {% if is_granted('ROLE_ADMIN') %}
+    <div id="analytics" class="analytics-section" style="display: none;">
+        <div class="section-header">
+            <h2>Analytics & Statistiques</h2>
+            <p>Analyses détaillées de la fréquentation et des tendances</p>
+        </div>
+
+        <div class="evolution-section">
+            <div class="chart-container">
+                <h3>Évolution des inscriptions</h3>
+                <p>Nombre d'inscriptions par mois</p>
+                <div class="chart-placeholder">
+                    <canvas id="inscriptionsChart" width="400" height="200"></canvas>
+                </div>
+                <div class="legend">
+                    <div class="legend-item total">Total: {{ total_inscrits }} participants</div>
+                    <div class="legend-item nouveaux">Nouveaux ce mois: {{ nouveaux }}</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Répartition par type</h3>
+                <p>Distribution des participants par rôle</p>
+                <div class="chart-placeholder">
+                    <canvas id="rolesChart" width="400" height="200"></canvas>
+                </div>
+                <div class="legend">
+                    {% for role in analytics.repartition_roles %}
+                    <div class="legend-item">{{ role.nom }}: {{ role.count }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="evolution-section">
+            <div class="evolution-container">
+                <h3>Taux de fidélisation</h3>
+                <p>Pourcentage de participants fidèles</p>
+                <div class="chart-placeholder">
+                    <canvas id="fideliteChart" width="300" height="150"></canvas>
+                </div>
+            </div>
+
+            <div class="evolution-container">
+                <h3>Sources d'inscription</h3>
+                <p>Origine des nouvelles inscriptions</p>
+                <div class="chart-placeholder">
+                    <canvas id="sourcesChart" width="300" height="150"></canvas>
+                </div>
+                <div class="legend">
+                    <div class="legend-item helloasso">HelloAsso: 65%</div>
+                    <div class="legend-item siteweb">Site web: 25%</div>
+                    <div class="legend-item reseaux">Réseaux: 10%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Section Import -->
+    {% if is_granted('ROLE_ADMIN') %}
+    <div id="import-section" class="import-section" style="display: none;">
+        <div class="import-header">
+            <h2>Import de Données</h2>
+            <p>Interface d'importation inspirée de HelloAsso</p>
+        </div>
+
+        <div class="import-dropzone" id="importDropzone">
+            <div class="dropzone-icon">📁</div>
+            <h3>Glissez-déposez vos fichiers ici</h3>
+            <p>ou cliquez pour sélectionner</p>
+            <button class="btn btn-select-file">Sélectionner un fichier</button>
+            <input type="file" id="fileInput" style="display: none;" accept=".csv,.xlsx,.xls">
+        </div>
+
+        <div class="import-instructions">
+            <h4>Instructions d'import</h4>
+            <ul>
+                <li>Formats acceptés: CSV, Excel (.xlsx, .xls)</li>
+                <li>Colonnes requises: Nom, Prénom, Email</li>
+                <li>Colonnes optionnelles: Téléphone, Type, Organisation</li>
+                <li>Encodage recommandé: UTF-8</li>
+                <li>Taille maximum: 10 MB</li>
+            </ul>
+        </div>
+
+        <div class="import-options">
+            <div class="option-group">
+                <h4>Options d'import</h4>
+                <select class="form-control">
+                    <option>Remplacer les données existantes</option>
+                    <option>Fusionner avec les données existantes</option>
+                    <option>Créer uniquement les nouveaux</option>
+                </select>
+            </div>
+
+            <div class="option-group">
+                <h4>Type de participant</h4>
+                <select class="form-control">
+                    <option>Utilisateur</option>
+                    <option>Bénévole</option>
+                    <option>Mécène</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="import-actions">
+            <button class="btn btn-sync">🔄 Synchroniser HelloAsso</button>
+            <button class="btn btn-manual-import">📤 Import Manuel</button>
+        </div>
+
+        <div class="import-results" style="display: none;">
+            <h4>Résultats de l'import</h4>
+            <div class="results-summary">
+                <div class="result-item success">✅ <strong>156</strong> participants importés</div>
+                <div class="result-item warning">⚠️ <strong>12</strong> doublons détectés</div>
+                <div class="result-item error">❌ <strong>3</strong> erreurs de format</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Gestion des onglets
+function showSection(sectionName) {
+    // Masquer toutes les sections
+    document.querySelectorAll('.participants-section, #analytics, .import-section').forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Supprimer la classe active de tous les boutons
+    document.querySelectorAll('.action-buttons .btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Afficher la section demandée
+    const targetSection = document.getElementById(sectionName === 'analytics' ? 'analytics' : sectionName + '-section');
+    if (targetSection) {
+        targetSection.style.display = 'block';
+        // Ne plus faire de défilement automatique ici
+    }
+    
+    // Activer le bouton correspondant
+    const activeBtn = document.querySelector(`.btn-${sectionName}`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+    
+    // Initialiser les graphiques si on va sur analytics
+    if (sectionName === 'analytics') {
+        setTimeout(initCharts, 100);
+    }
+}
+
+// Défilement fluide pour les liens d'ancrage (boutons héros uniquement)
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.smooth-scroll').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                // Si la section analytics est cachée, l'afficher d'abord puis faire défiler
+                if (targetId === '#analytics') {
+                    showSection('analytics');
+                    // Défilement vers la section analytics après l'affichage
+                    setTimeout(() => {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 100);
+                } else {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+    });
+});
+
+// Initialisation des graphiques
+function initCharts() {
+    // Graphique des inscriptions
+    const inscriptionsCtx = document.getElementById('inscriptionsChart');
+    if (inscriptionsCtx) {
+        new Chart(inscriptionsCtx, {
+            type: 'line',
+            data: {
+                labels: {{ analytics.evolution_inscriptions.mois|json_encode|raw }},
+                datasets: [{
+                    label: 'Inscriptions',
+                    data: {{ analytics.evolution_inscriptions.donnees|json_encode|raw }},
+                    borderColor: '#006909',
+                    backgroundColor: 'rgba(0, 105, 9, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+    
+    // Graphique des rôles
+    const rolesCtx = document.getElementById('rolesChart');
+    if (rolesCtx) {
+        const rolesData = {{ analytics.repartition_roles|json_encode|raw }};
+        new Chart(rolesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: rolesData.map(role => role.nom),
+                datasets: [{
+                    data: rolesData.map(role => role.count),
+                    backgroundColor: rolesData.map(role => role.couleur)
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+    
+    // Graphique fidélité
+    const fideliteCtx = document.getElementById('fideliteChart');
+    if (fideliteCtx) {
+        new Chart(fideliteCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Nouveaux', 'Réguliers', 'Fidèles'],
+                datasets: [{
+                    data: [40, 35, 25],
+                    backgroundColor: ['#ffc107', '#17a2b8', '#28a745']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    // Graphique sources
+    const sourcesCtx = document.getElementById('sourcesChart');
+    if (sourcesCtx) {
+        new Chart(sourcesCtx, {
+            type: 'pie',
+            data: {
+                labels: ['HelloAsso', 'Site web', 'Réseaux'],
+                datasets: [{
+                    data: [65, 25, 10],
+                    backgroundColor: ['#007BFF', '#28A745', '#FFC107']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+}
+
+// Gestion du drag & drop pour l'import
+document.addEventListener('DOMContentLoaded', function() {
+    const dropzone = document.getElementById('importDropzone');
+    const fileInput = document.getElementById('fileInput');
+    
+    if (dropzone && fileInput) {
+        dropzone.addEventListener('click', () => fileInput.click());
+        
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+        
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+        
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+    }
+});
+
+function handleFile(file) {
+    console.log('Fichier sélectionné:', file.name);
+    
+    // Vérifier le type de fichier
+    const validTypes = ['.csv', '.xlsx', '.xls'];
+    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+    
+    if (!validTypes.includes(fileExtension)) {
+        alert('Format de fichier non supporté. Veuillez utiliser CSV ou Excel.');
+        return;
+    }
+    
+    // Vérifier la taille du fichier (10 MB max)
+    if (file.size > 10 * 1024 * 1024) {
+        alert('Fichier trop volumineux. Taille maximum: 10 MB');
+        return;
+    }
+    
+    // Afficher un message de traitement
+    const resultsDiv = document.querySelector('.import-results');
+    if (resultsDiv) {
+        resultsDiv.style.display = 'block';
+        resultsDiv.innerHTML = `
+            <h4>Traitement en cours...</h4>
+            <div class="results-summary">
+                <div class="result-item" style="background: #cfe2ff; color: #084298; border-left: 4px solid #0d6efd;">
+                    📤 Téléchargement de ${file.name} en cours...
+                </div>
+            </div>
+        `;
+    }
+    
+    // Simuler le traitement (vous pouvez remplacer par un vrai upload)
+    setTimeout(() => {
+        if (resultsDiv) {
+            resultsDiv.innerHTML = `
+                <h4>Résultats de l'import</h4>
+                <div class="results-summary">
+                    <div class="result-item success">✅ <strong>Fichier traité avec succès</strong></div>
+                    <div class="result-item" style="background: #cfe2ff; color: #084298; border-left: 4px solid #0d6efd;">
+                        ℹ️ Prêt pour l'import - Cliquez sur "Import Manuel" pour continuer
+                    </div>
+                </div>
+            `;
+        }
+    }, 1500);
+}
+
+// Fonction pour exporter en CSV
+function exportToCSV() {
+    const table = document.querySelector('.participants-table');
+    if (!table) return;
+    
+    let csv = [];
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody');
+    
+    // Exporter l'en-tête
+    if (thead) {
+        const headerRow = thead.querySelector('tr');
+        if (headerRow) {
+            const cols = headerRow.querySelectorAll('th');
+            const rowData = [];
+            cols.forEach(col => {
+                let text = col.textContent.trim().replace(/\s+/g, ' ');
+                text = text.replace(/"/g, '""');
+                rowData.push(`"${text}"`);
+            });
+            csv.push(rowData.join(','));
+        }
+    }
+    
+    // Exporter uniquement les lignes visibles (non filtrées)
+    if (tbody) {
+        const rows = tbody.querySelectorAll('tr');
+        let exportedCount = 0;
+        
+        rows.forEach(row => {
+            // Vérifier si la ligne est visible (pas cachée par les filtres)
+            if (row.style.display !== 'none') {
+                const cols = row.querySelectorAll('td');
+                const rowData = [];
+                cols.forEach(col => {
+                    // Nettoyer le texte
+                    let text = col.textContent.trim().replace(/\s+/g, ' ');
+                    // Échapper les guillemets
+                    text = text.replace(/"/g, '""');
+                    rowData.push(`"${text}"`);
+                });
+                csv.push(rowData.join(','));
+                exportedCount++;
+            }
+        });
+        
+        // Vérifier s'il y a des données à exporter
+        if (exportedCount === 0) {
+            showNotification('⚠️ Aucun participant à exporter avec les filtres actuels', 'warning');
+            return;
+        }
+    }
+    
+    const csvContent = csv.join('\n');
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `participants_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Message de confirmation avec le nombre de participants exportés
+    const totalRows = tbody ? tbody.querySelectorAll('tr').length : 0;
+    const visibleRows = tbody ? Array.from(tbody.querySelectorAll('tr')).filter(r => r.style.display !== 'none').length : 0;
+    
+    if (visibleRows < totalRows) {
+        showNotification(`✅ Export CSV réussi ! (${visibleRows}/${totalRows} participants exportés)`, 'success');
+    } else {
+        showNotification('✅ Export CSV réussi !', 'success');
+    }
+}
+
+// Fonction pour filtrer les participants
+function filterParticipants() {
+    const filterModal = `
+        <div id="filterModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+            <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%;">
+                <h3 style="margin-bottom: 20px; color: #0d1b2a;">Filtrer les participants</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Type:</label>
+                    <select id="filterType" class="form-control">
+                        <option value="">Tous</option>
+                        <option value="admin">Admin</option>
+                        <option value="benevole">Bénévole</option>
+                        <option value="mecene">Mécène</option>
+                        <option value="utilisateur">Utilisateur</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Statut:</label>
+                    <select id="filterStatut" class="form-control">
+                        <option value="">Tous</option>
+                        <option value="actif">Actif</option>
+                        <option value="inactif">Inactif</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Fidélité:</label>
+                    <select id="filterFidelite" class="form-control">
+                        <option value="">Tous</option>
+                        <option value="nouveau">Nouveau</option>
+                        <option value="regulier">Régulier</option>
+                        <option value="fidele">Fidèle</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button onclick="closeFilterModal()" class="btn" style="background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer;">Annuler</button>
+                    <button onclick="applyFilters()" class="btn" style="background: #006909; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer;">Appliquer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', filterModal);
+}
+
+function closeFilterModal() {
+    const modal = document.getElementById('filterModal');
+    if (modal) modal.remove();
+}
+
+function applyFilters() {
+    const type = document.getElementById('filterType').value.toLowerCase();
+    const statut = document.getElementById('filterStatut').value.toLowerCase();
+    const fidelite = document.getElementById('filterFidelite').value.toLowerCase();
+    
+    const rows = document.querySelectorAll('.participants-table tbody tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        let show = true;
+        
+        if (type) {
+            const typeCell = row.querySelector('.billet-type');
+            if (typeCell && !typeCell.className.toLowerCase().includes(type)) {
+                show = false;
+            }
+        }
+        
+        if (statut && show) {
+            const statutCell = row.querySelector('.statut');
+            if (statutCell && !statutCell.className.toLowerCase().includes(statut)) {
+                show = false;
+            }
+        }
+        
+        if (fidelite && show) {
+            const fideliteCell = row.querySelector('.fidelite');
+            if (fideliteCell && !fideliteCell.className.toLowerCase().includes(fidelite)) {
+                show = false;
+            }
+        }
+        
+        row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+    });
+    
+    closeFilterModal();
+    showNotification(`🔍 ${visibleCount} participant(s) affiché(s)`, 'info');
+}
+
+// Fonction pour actualiser les données
+function refreshData() {
+    showNotification('🔄 Actualisation en cours...', 'info');
+    setTimeout(() => {
+        window.location.reload();
+    }, 500);
+}
+
+// Fonction de synchronisation HelloAsso
+function syncHelloAsso() {
+    const confirmation = confirm('Voulez-vous synchroniser les données avec HelloAsso ?');
+    if (!confirmation) return;
+    
+    showNotification('🔄 Synchronisation HelloAsso en cours...', 'info');
+    
+    // Simuler la synchronisation
+    setTimeout(() => {
+        const resultsDiv = document.querySelector('.import-results');
+        if (resultsDiv) {
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <h4>Résultats de la synchronisation</h4>
+                <div class="results-summary">
+                    <div class="result-item success">✅ <strong>Synchronisation réussie</strong></div>
+                    <div class="result-item" style="background: #cfe2ff; color: #084298; border-left: 4px solid #0d6efd;">
+                        ℹ️ <strong>Dernière synchronisation:</strong> ${new Date().toLocaleString('fr-FR')}
+                    </div>
+                </div>
+            `;
+        }
+        showNotification('✅ Synchronisation HelloAsso terminée !', 'success');
+    }, 2000);
+}
+
+// Fonction d'import manuel
+function manualImport() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        alert('Veuillez d\'abord sélectionner un fichier à importer.');
+        return;
+    }
+    
+    const confirmation = confirm(`Confirmer l'import de "${file.name}" ?\n\nCette action va traiter le fichier et importer les participants.`);
+    if (!confirmation) return;
+    
+    showNotification('📤 Import en cours...', 'info');
+    
+    // Simuler l'import
+    setTimeout(() => {
+        const resultsDiv = document.querySelector('.import-results');
+        if (resultsDiv) {
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <h4>Résultats de l'import</h4>
+                <div class="results-summary">
+                    <div class="result-item success">✅ <strong>156</strong> participants importés</div>
+                    <div class="result-item warning">⚠️ <strong>12</strong> doublons détectés</div>
+                    <div class="result-item error">❌ <strong>3</strong> erreurs de format</div>
+                    <div class="result-item" style="background: #cfe2ff; color: #084298; border-left: 4px solid #0d6efd;">
+                        ℹ️ <strong>Import terminé le:</strong> ${new Date().toLocaleString('fr-FR')}
+                    </div>
+                </div>
+            `;
+        }
+        showNotification('✅ Import terminé !', 'success');
+        
+        // Réinitialiser le fichier
+        fileInput.value = '';
+    }, 2500);
+}
+
+// Fonction pour afficher des notifications
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: { bg: '#d4edda', border: '#28a745', color: '#155724' },
+        error: { bg: '#f8d7da', border: '#dc3545', color: '#721c24' },
+        warning: { bg: '#fff3cd', border: '#ffc107', color: '#856404' },
+        info: { bg: '#cfe2ff', border: '#0d6efd', color: '#084298' }
+    };
+    
+    const style = colors[type] || colors.info;
+    
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${style.bg};
+        color: ${style.color};
+        padding: 15px 20px;
+        border-left: 4px solid ${style.border};
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        max-width: 400px;
+        font-weight: 500;
+        animation: slideIn 0.3s ease-out;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Ajouter les animations CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(400px); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// Connecter les boutons aux fonctions
+document.addEventListener('DOMContentLoaded', function() {
+    // Bouton Exporter CSV
+    const btnExport = document.querySelector('.btn-export');
+    if (btnExport) {
+        btnExport.addEventListener('click', exportToCSV);
+    }
+    
+    // Bouton Filtrer
+    const btnFilter = document.querySelector('.btn-filter');
+    if (btnFilter) {
+        btnFilter.addEventListener('click', filterParticipants);
+    }
+    
+    // Bouton Actualiser
+    const btnRefresh = document.querySelector('.btn-refresh');
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', refreshData);
+    }
+    
+    // Bouton Synchroniser HelloAsso
+    const btnSync = document.querySelector('.btn-sync');
+    if (btnSync) {
+        btnSync.addEventListener('click', syncHelloAsso);
+    }
+    
+    // Bouton Import Manuel
+    const btnManualImport = document.querySelector('.btn-manual-import');
+    if (btnManualImport) {
+        btnManualImport.addEventListener('click', manualImport);
+    }
+});
+
+// Initialiser la section participants par défaut
+document.addEventListener('DOMContentLoaded', function() {
+    showSection('participants');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+<ul class="nav-list">
+    <li class="nav-item">
+        <a href="{{ path('dashboard') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_dashboard.png') }}" alt="Tableau de bord">
+            </span>
+            <span class="nav-text">Tableau de bord</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_evenement.png') }}" alt="Evenement">
+            </span>
+            <span class="nav-text">Festivals</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="{{ path('app_weekends') }}">Voir les Weekends</a></li>
+            <li><a href="{{ path('app_evenements') }}">Voir les Évenements</a></li>
+            <li><a href="{{ path('benevole_disponibilites_index') }}">Mes disponibilités</a></li>
+            {# Voir les tâches réservé aux admins - option masquée pour les bénévoles/mécènes #}
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="#" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_benevole.png') }}" alt="Bénévoles">
+            </span>
+            <span class="nav-text">Bénévoles</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="{{ path('benevole_mon_planning') }}">Mon planning</a></li>
+            <li><a href="{{ path('benevole_propositions') }}">Propositions reçues</a></li>
+            <li><a href="{{ path('benevoles') }}">Listes des Bénévoles</a></li>
+            <li><a href="{{ path('benevole_recu_fiscal_index') }}">Reçus fiscaux</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('stocks') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_stock.png') }}" alt="Stocks">
+            </span>
+            <span class="nav-text">Stocks</span>
+        </a>
+        <ul class="submenu">
+            <li><a href="{{ path('stocks_inventaire') }}">Inventaire</a></li>
+            <li><a href="{{ path('stocks_mouvements') }}">Mouvements</a></li>
+            <li><a href="{{ path('stocks_historique') }}">Historique</a></li>
+        </ul>
+    </li>
+    <li class="nav-item">
+        <a href="{{ path('public_index') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_public.png') }}" alt="Public">
+            </span>
+            <span class="nav-text">Public</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a href="{{ path('benevole_messages') }}" class="nav-link">
+            <span class="nav-icon">
+                <img src="{{ asset('images/sidebar/logo_contact.png') }}" alt="Messagerie">
+            </span>
+            <span class="nav-text">Messagerie</span>
+        </a>
+    </li>
+</ul>

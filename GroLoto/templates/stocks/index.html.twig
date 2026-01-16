@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Stocks{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-list.css') }}">
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Stocks</h1>
+        <p class="hero-description">Suivi des lots, inventaire et mouvements pour vos événements caritatifs.</p>
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('stocks_gerer') }}" class="btn-login">Gérer les stocks</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
+
+    <!-- Cartes de statistiques -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>Articles</h3>
+            <p class="metric-value">{{ total_items }}</p>
+            <p class="metric-detail">Inventaire actuel</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Valeur totale</h3>
+            <p class="metric-value">{{ stock_value|number_format(0, ',', ' ') }} €</p>
+            <p class="metric-detail">Estimation globale</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Alertes stock</h3>
+            <p class="metric-value">{{ low_stock_count }}</p>
+            <p class="metric-detail">Articles critiques</p>
+        </div>
+
+        <div class="metric-card">
+            <h3>Catégories</h3>
+            <p class="metric-value">{{ categories_count }}</p>
+            <p class="metric-detail">Types d'articles</p>
+        </div>
+    </div>
+
+    <!-- Accès rapide -->
+    <div class="card shadow-sm border-0 mt-4">
+        <div class="card-body">
+            <h3 class="mb-4" style="color: #0d1b2a; font-weight: 600;">
+                <i class="bi bi-grid-3x3-gap me-2"></i>Accès rapide
+            </h3>
+            
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ path('stocks_inventaire') }}" class="quick-access-card">
+                        <div class="icon-wrapper" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div>
+                            <h5>Inventaire</h5>
+                            <p>Consulter le stock</p>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ path('stocks_mouvements') }}" class="quick-access-card">
+                        <div class="icon-wrapper" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="bi bi-arrow-left-right"></i>
+                        </div>
+                        <div>
+                            <h5>Mouvements</h5>
+                            <p>Analyse graphique</p>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ path('stocks_historique') }}" class="quick-access-card">
+                        <div class="icon-wrapper" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div>
+                            <h5>Historique</h5>
+                            <p>Suivi par année</p>
+                        </div>
+                    </a>
+                </div>
+
+                {% if is_granted('ROLE_ADMIN') %}
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ path('stocks_gerer') }}" class="quick-access-card">
+                        <div class="icon-wrapper" style="background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);">
+                            <i class="bi bi-plus-circle"></i>
+                        </div>
+                        <div>
+                            <h5>Gérer Stock</h5>
+                            <p>Ajouter mouvement</p>
+                        </div>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Événements par Weekend{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('css/modele.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/stocks/stocks-common.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/benevoles/benevoles-common.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/benevoles/benevoles-list.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Événements par Weekend</h1>
+        <p class="hero-description">Consultez les événements organisés pour chaque weekend.</p>
+        <a href="{{ path('dashboard') }}" class="btn-login">Retour au tableau de bord</a>
+    </div>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <h3>Weekends</h3>
+        <p class="metric-value">{{ total_weekends }}</p>
+        <p class="metric-detail">Total</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Événements</h3>
+        <p class="metric-value">{{ total_evenements }}</p>
+        <p class="metric-detail">Au total</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="weekends-section">
+            {% if weekends is not empty %}
+                <div class="weekends-grid">
+                    {% for weekend in weekends %}
+                        <div class="weekend-card">
+                            {% if weekend.cover_image %}
+                                {% set imagePath = weekend.cover_image %}
+                                <div class="weekend-image">
+                                    {% if imagePath starts with 'uploads/' %}
+                                        <img src="{{ asset(imagePath) }}" alt="{{ weekend.nom }}">
+                                    {% else %}
+                                        <img src="{{ asset('uploads/weekends/' ~ imagePath) }}" alt="{{ weekend.nom }}">
+                                    {% endif %}
+                                    <div class="weekend-overlay"></div>
+                                </div>
+                            {% else %}
+                                <div class="weekend-image-empty">
+                                    <i class="bi bi-calendar-event"></i>
+                                </div>
+                            {% endif %}
+                            <div class="weekend-content">
+                                <div class="weekend-header">
+                                    <h3>{{ weekend.nom }}</h3>
+                                    <span class="weekend-date">
+                                        <i class="bi bi-calendar-event"></i>
+                                        {{ weekend.date_debut|date('d/m/Y') }} - {{ weekend.date_fin|date('d/m/Y') }}
+                                    </span>
+                                </div>
+                                {% if weekend.description %}
+                                    <div class="weekend-description">
+                                        {{ weekend.description|length > 120 ? weekend.description|slice(0, 120) ~ '...' : weekend.description }}
+                                    </div>
+                                {% endif %}
+                                <div class="weekend-footer">
+                                    <div class="weekend-stats">
+                                        <span class="stat-badge">
+                                            <i class="bi bi-calendar-event"></i>
+                                            {{ weekend.nb_evenements }} événement{{ weekend.nb_evenements > 1 ? 's' : '' }}
+                                        </span>
+                                    </div>
+                                    <a href="{{ path('app_evenements_weekend', {id: weekend.id}) }}" class="btn-primary">
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-calendar-x" style="font-size: 4rem; color: #94a3b8;"></i>
+                    <h3>Aucun weekend</h3>
+                    <p>Aucun weekend n'est enregistré pour le moment.</p>
+                </div>
+            {% endif %}
+    </div>
+</div>
+
+<link rel="stylesheet" href="{{ asset('css/evenements.css') }}">
+
+{% endblock %}

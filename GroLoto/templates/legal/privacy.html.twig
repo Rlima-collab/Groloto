@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Politique de Confidentialité - GroLoto{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <h1 class="mb-4">Politique de Confidentialité</h1>
+
+    <p>Dernière mise à jour : [Date de mise à jour]</p>
+
+    <section class="mb-5">
+        <h2>1. Introduction</h2>
+        <p>L'association <strong>[Nom de l'Association]</strong> (ci-après "nous") accorde une grande importance à la protection de votre vie privée. Cette politique de confidentialité explique comment nous collectons, utilisons, divulguons et protégeons vos informations personnelles lorsque vous utilisez notre site web <strong>GroLoto</strong>.</p>
+    </section>
+
+    <section class="mb-5">
+        <h2>2. Données collectées</h2>
+        <p>Nous pouvons collecter les types de données suivants :</p>
+        <ul>
+            <li><strong>Données d'identification :</strong> Nom, prénom, adresse email, numéro de téléphone, adresse postale (lors de l'inscription ou du contact).</li>
+            <li><strong>Données de connexion :</strong> Adresse IP, type de navigateur, temps de connexion.</li>
+            <li><strong>Données relatives aux bénévoles et mécènes :</strong> Informations professionnelles, disponibilités, historique des dons.</li>
+        </ul>
+    </section>
+
+    <section class="mb-5">
+        <h2>3. Utilisation des données</h2>
+        <p>Vos données sont utilisées pour les finalités suivantes :</p>
+        <ul>
+            <li>Gestion de votre compte utilisateur (Bénévole, Mécène, Administrateur).</li>
+            <li>Organisation des événements et gestion des plannings.</li>
+            <li>Communication d'informations relatives à l'association et à ses événements.</li>
+            <li>Réponse à vos demandes de contact.</li>
+            <li>Respect de nos obligations légales et réglementaires.</li>
+        </ul>
+    </section>
+
+    <section class="mb-5">
+        <h2>4. Partage des données</h2>
+        <p>Nous ne vendons, n'échangeons ni ne louons vos informations personnelles à des tiers. Vos données peuvent être partagées avec :</p>
+        <ul>
+            <li>Les membres autorisés de l'association pour les besoins de l'organisation.</li>
+            <li>Nos prestataires de services techniques (hébergement, maintenance) dans la limite nécessaire à l'exécution de leurs missions.</li>
+            <li>Les autorités légales si la loi l'exige.</li>
+        </ul>
+    </section>
+
+    <section class="mb-5">
+        <h2>5. Sécurité des données</h2>
+        <p>Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles appropriées pour protéger vos données personnelles contre l'accès non autorisé, la modification, la divulgation ou la destruction.</p>
+    </section>
+
+    <section class="mb-5">
+        <h2>6. Vos droits</h2>
+        <p>Conformément au Règlement Général sur la Protection des Données (RGPD) et à la loi Informatique et Libertés, vous disposez des droits suivants :</p>
+        <ul>
+            <li>Droit d'accès à vos données personnelles.</li>
+            <li>Droit de rectification de vos données inexactes ou incomplètes.</li>
+            <li>Droit à l'effacement de vos données ("droit à l'oubli").</li>
+            <li>Droit à la limitation du traitement de vos données.</li>
+            <li>Droit d'opposition au traitement de vos données.</li>
+            <li>Droit à la portabilité de vos données.</li>
+        </ul>
+        <p>Pour exercer ces droits, vous pouvez nous contacter à l'adresse suivante : <strong>[Adresse email de contact pour la confidentialité]</strong>.</p>
+    </section>
+
+    <section class="mb-5">
+        <h2>7. Cookies</h2>
+        <p>Pour plus d'informations sur l'utilisation des cookies sur notre site, veuillez consulter notre <a href="{{ path('legal_cookies') }}">Politique relative aux cookies</a>.</p>
+    </section>
+
+    <section class="mb-5">
+        <h2>8. Modifications de cette politique</h2>
+        <p>Nous nous réservons le droit de modifier cette politique de confidentialité à tout moment. Les modifications seront publiées sur cette page avec la date de mise à jour révisée.</p>
+    </section>
+</div>
+{% endblock %}

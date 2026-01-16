@@ -1,132 +1,303 @@
 {% extends 'base.html.twig' %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}?v={{ 'now'|date('U') }}">
+{% endblock %}
+
 {% block body %}
-<div class="page-header">
-    <h1 class="page-title">Dashboard Groloto</h1>
-    <p class="page-description">Gérez votre événement caritatif en toute simplicité</p>
-</div>
-
-<!-- Key Metrics Cards -->
-<div class="metrics-grid">
-    <div class="card metric-card yellow-border">
-        <div class="card-header">
-            <span class="metric-title">Bénévoles</span>
-            <span class="icon yellow">👥</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ volunteers_count }}</div>
-            <p class="metric-change positive">+12 ce mois</p>
-        </div>
-    </div>
-
-    <div class="card metric-card green-border">
-        <div class="card-header">
-            <span class="metric-title">Mécènes</span>
-            <span class="icon green">🎁</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ sponsors_count }}</div>
-            <p class="metric-change positive">+5 ce mois</p>
-        </div>
-    </div>
-
-    <div class="card metric-card blue-border">
-        <div class="card-header">
-            <span class="metric-title">Lots disponibles</span>
-            <span class="icon blue">📦</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">{{ prizes_count }}</div>
-            <p class="metric-change warning">3 en rupture</p>
-        </div>
-    </div>
-
-    <div class="card metric-card yellow-border">
-        <div class="card-header">
-            <span class="metric-title">Stock total</span>
-            <span class="icon yellow">📊</span>
-        </div>
-        <div class="card-content">
-            <div class="metric-value">€{{ stock_value|number_format(0, ',', ' ') }}</div>
-            <p class="metric-change positive">Valeur estimée</p>
-        </div>
-    </div>
-</div>
-
-<!-- Calendar and Quick Actions -->
-<div class="dashboard-grid">
-    <!-- Calendar -->
-    <div class="card calendar-card">
-        <div class="card-header">
-            <h3 class="card-title">📅 Prochains événements</h3>
-        </div>
-        <div class="card-content">
-            <div class="events-list">
-                <div class="event-item yellow-accent">
-                    <div class="event-date">
-                        <div class="event-month">MAR</div>
-                        <div class="event-day">15</div>
-                    </div>
-                    <div class="event-details">
-                        <h4 class="event-title">Réunion bénévoles</h4>
-                        <p class="event-time">14h00 - Salle communale</p>
-                    </div>
-                </div>
-
-                <div class="event-item green-accent">
-                    <div class="event-date">
-                        <div class="event-month">MAR</div>
-                        <div class="event-day">22</div>
-                    </div>
-                    <div class="event-details">
-                        <h4 class="event-title">Collecte de lots</h4>
-                        <p class="event-time">10h00 - Centre commercial</p>
-                    </div>
-                </div>
-
-                <div class="event-item blue-accent">
-                    <div class="event-date">
-                        <div class="event-month">AVR</div>
-                        <div class="event-day">05</div>
-                    </div>
-                    <div class="event-details">
-                        <h4 class="event-title">Événement Groloto</h4>
-                        <p class="event-time">19h00 - Salle des fêtes</p>
-                    </div>
-                </div>
+<div class="dashboard-wrapper">
+    <!-- Hero Section -->
+    <div class="hero-section dashboard-hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    Bienvenue, {{ app.user.prenom }}
+                </h1>
+                <p class="hero-description">
+                    {% if is_granted('ROLE_ADMIN') %}
+                        Gérez votre organisation et suivez toutes les activités
+                    {% elseif is_granted('ROLE_MECENE') %}
+                        Suivez vos contributions et découvrez les événements
+                    {% elseif is_granted('ROLE_BENEVOLE') %}
+                        Consultez vos tâches et participez aux événements
+                    {% else %}
+                        Découvrez les événements Groloto
+                    {% endif %}
+                </p>
+            </div>
+            <div class="hero-actions">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_evenements') }}" class="btn-hero btn-secondary">
+                        <i class="bi bi-calendar-event"></i> Gérer les événements
+                    </a>
+                {% elseif is_granted('ROLE_MECENE') %}
+                    <a href="{{ path('mecenes') }}" class="btn-hero btn-primary">
+                        <i class="bi bi-gift"></i> Mes lots
+                    </a>
+                    <a href="{{ path('app_evenements') }}" class="btn-hero btn-secondary">
+                        <i class="bi bi-calendar-check"></i> Événements
+                    </a>
+                {% elseif is_granted('ROLE_BENEVOLE') %}
+                    <a href="{{ path('benevole_disponibilites_index') }}" class="btn-hero btn-primary">
+                        <i class="bi bi-calendar-check"></i> Mes disponibilités
+                    </a>
+                    <a href="{{ path('benevole_mon_planning') }}" class="btn-hero btn-secondary">
+                        <i class="bi bi-calendar3"></i> Mon planning
+                    </a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="btn-hero btn-primary">
+                        <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="card actions-card">
-        <div class="card-header">
-            <h3 class="card-title">Actions rapides</h3>
-            <p class="card-description">Accès direct aux fonctions principales</p>
+    <!-- Métriques générales -->
+    {% if app.user %}
+        <div class="metrics-grid">
+            {% if is_granted('ROLE_ADMIN') %}
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-people-fill"></i></div>
+                    <div class="metric-value">{{ volunteers_count }}</div>
+                    <div class="metric-label">Bénévoles actifs</div>
+                    <div class="metric-trend positive">+{{ new_volunteers }} ce mois</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-award-fill"></i></div>
+                    <div class="metric-value">{{ sponsors_count }}</div>
+                    <div class="metric-label">Mécènes</div>
+                    <div class="metric-trend">Partenaires actuels</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-gift-fill"></i></div>
+                    <div class="metric-value">{{ prizes_count }}</div>
+                    <div class="metric-label">Lots disponibles</div>
+                    <div class="metric-trend {% if out_of_stock > 0 %}negative{% endif %}">
+                        {{ out_of_stock }} en rupture
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-cash-stack"></i></div>
+                    <div class="metric-value">{{ stock_value|number_format(0, ',', ' ') }} €</div>
+                    <div class="metric-label">Valeur du stock</div>
+                    <div class="metric-trend">Valeur estimée</div>
+                </div>
+            {% elseif is_granted('ROLE_MECENE') %}
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-gift-fill"></i></div>
+                    <div class="metric-value">{{ role_data.sponsor_prizes|default(0) }}</div>
+                    <div class="metric-label">Vos lots actifs</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-cash-stack"></i></div>
+                    <div class="metric-value">{{ role_data.sponsor_contributions|default(0)|number_format(0, ',', ' ') }} €</div>
+                    <div class="metric-label">Valeur totale</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-calendar-check"></i></div>
+                    <div class="metric-value">{{ upcoming_events|length }}</div>
+                    <div class="metric-label">Événements à venir</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-star-fill"></i></div>
+                    <div class="metric-value">{{ role_data.sponsor_impact|default(0) }}</div>
+                    <div class="metric-label">Impact solidaire</div>
+                </div>
+            {% elseif is_granted('ROLE_BENEVOLE') %}
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-check-circle-fill"></i></div>
+                    <div class="metric-value">{{ role_data.completed_tasks|default(0) }}</div>
+                    <div class="metric-label">Tâches complétées</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-clock-fill"></i></div>
+                    <div class="metric-value">{{ role_data.pending_tasks|default([])|length }}</div>
+                    <div class="metric-label">Tâches en attente</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-clipboard-check"></i></div>
+                    <div class="metric-value">{{ role_data.available_tasks|default(0) }}</div>
+                    <div class="metric-label">Tâches disponibles</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="bi bi-calendar-event"></i></div>
+                    <div class="metric-value">{{ upcoming_events|length }}</div>
+                    <div class="metric-label">Événements à venir</div>
+                </div>
+            {% endif %}
         </div>
-        <div class="card-content">
-            <div class="actions-list">
-                <button class="action-btn yellow">
-                    <span class="btn-icon">👥</span>
-                    Ajouter un bénévole
-                </button>
+    {% endif %}
 
-                <button class="action-btn green">
-                    <span class="btn-icon">🎁</span>
-                    Nouveau mécène
-                </button>
+    <!-- Contenu spécifique par rôle -->
+    <div class="dashboard-content">
+        {% if is_granted('ROLE_ADMIN') %}
+            <!-- Section Admin -->
+            <div class="content-row">
+                <div class="content-card large">
+                    <div class="card-header">
+                        <h3><i class="bi bi-calendar-event"></i> Événements à venir</h3>
+                        <a href="{{ path('app_evenements') }}" class="btn-link">Voir tout</a>
+                    </div>
+                    <div class="card-body">
+                        {% for event in upcoming_events|slice(0, 5) %}
+                            <div class="list-item">
+                                <div class="item-info">
+                                    <div class="item-date">{{ event.dateDebut|date('d/m/Y') }}</div>
+                                    <div class="item-title">{{ event.nom }}</div>
+                                    <div class="item-subtitle">{{ event.lieu }}</div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="empty-state">Aucun événement à venir</p>
+                        {% endfor %}
+                    </div>
+                </div>
 
-                <button class="action-btn blue">
-                    <span class="btn-icon">📦</span>
-                    Ajouter un lot
-                </button>
-
-                <button class="action-btn gray">
-                    <span class="btn-icon">💬</span>
-                    Planifier communication
-                </button>
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="bi bi-clipboard-check"></i> Actions rapides</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-grid">
+                            <a href="{{ path('app_weekend_create') }}" class="action-card">
+                                <i class="bi bi-plus-circle"></i>
+                                <span>Créer un Weekend</span>
+                            </a>
+                            <a href="{{ path('stocks_gerer') }}" class="action-card">
+                                <i class="bi bi-box-seam"></i>
+                                <span>Gérer les stocks</span>
+                            </a>
+                            <a href="{{ path('benevoles') }}" class="action-card">
+                                <i class="bi bi-people"></i>
+                                <span>Voir les bénévoles</span>
+                            </a>
+                            <a href="{{ path('public_analyses') }}" class="action-card">
+                                <i class="bi bi-bar-chart"></i>
+                                <span>Analytics</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+
+        {% elseif is_granted('ROLE_MECENE') %}
+            <!-- Section Mécène -->
+            <div class="content-row">
+                <div class="content-card large">
+                    <div class="card-header">
+                        <h3><i class="bi bi-calendar-event"></i> Prochains événements</h3>
+                        <a href="{{ path('app_evenements') }}" class="btn-link">Voir tout</a>
+                    </div>
+                    <div class="card-body">
+                        {% for event in upcoming_events|slice(0, 5) %}
+                            <div class="list-item">
+                                <div class="item-info">
+                                    <div class="item-date">{{ event.dateDebut|date('d/m/Y') }}</div>
+                                    <div class="item-title">{{ event.nom }}</div>
+                                    <div class="item-subtitle">{{ event.lieu }}</div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="empty-state">Aucun événement à venir</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="bi bi-gift"></i> Vos contributions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-block">
+                            <p class="info-label">Lots actifs</p>
+                            <p class="info-value">{{ role_data.sponsor_prizes|default(0) }}</p>
+                        </div>
+                        <div class="info-block">
+                            <p class="info-label">Valeur totale</p>
+                            <p class="info-value">{{ role_data.sponsor_contributions|default(0)|number_format(0, ',', ' ') }} €</p>
+                        </div>
+                        <a href="{{ path('mecenes') }}" class="btn btn-primary w-100">Gérer mes lots</a>
+                    </div>
+                </div>
+            </div>
+
+        {% elseif is_granted('ROLE_BENEVOLE') %}
+            <!-- Section Bénévole -->
+            <div class="content-row">
+                <div class="content-card large">
+                    <div class="card-header">
+                        <h3><i class="bi bi-list-check"></i> Mes tâches en attente</h3>
+                        <a href="{{ path('benevole_mon_planning') }}" class="btn-link">Voir le planning</a>
+                    </div>
+                    <div class="card-body">
+                        {% for task in role_data.pending_tasks|default([])|slice(0, 5) %}
+                            <div class="list-item">
+                                <div class="item-info">
+                                    <div class="item-title">{{ task.titre }}</div>
+                                    <div class="item-subtitle">
+                                        {{ task.debut|date('d/m/Y H:i') }} - {{ task.fin|date('H:i') }}
+                                    </div>
+                                </div>
+                                <span class="badge badge-warning">En attente</span>
+                            </div>
+                        {% else %}
+                            <p class="empty-state">Aucune tâche en attente</p>
+                        {% endfor %}
+                        {# L'inscription / page de gestion des tâches réservée aux admins #}
+                        <a href="{{ path('benevole_disponibilites_index') }}" class="btn btn-outline-primary w-100 mt-2">
+                            <i class="bi bi-calendar-check"></i> Gérer mes disponibilités
+                        </a>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="bi bi-calendar-event"></i> Événements</h3>
+                    </div>
+                    <div class="card-body">
+                        {% for event in upcoming_events|slice(0, 3) %}
+                            <div class="list-item-simple">
+                                <div class="item-date-small">{{ event.dateDebut|date('d/m') }}</div>
+                                <div class="item-info-simple">
+                                    <div class="item-title-small">{{ event.nom }}</div>
+                                    <div class="item-subtitle-small">{{ event.lieu }}</div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="empty-state">Aucun événement à venir</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- Section Public -->
+            <div class="content-row">
+                <div class="content-card full">
+                    <div class="card-header">
+                        <h3><i class="bi bi-calendar-event"></i> Événements publics</h3>
+                    </div>
+                    <div class="card-body">
+                        {% for event in role_data.public_events|default([]) %}
+                            <div class="list-item">
+                                <div class="item-info">
+                                    <div class="item-date">{{ event.dateDebut|date('d/m/Y') }}</div>
+                                    <div class="item-title">{{ event.nom }}</div>
+                                    <div class="item-subtitle">{{ event.lieu }}</div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="empty-state">Aucun événement public à venir</p>
+                        {% endfor %}
+                        <a href="{{ path('app_login') }}" class="btn btn-primary w-100 mt-3">
+                            <i class="bi bi-box-arrow-in-right"></i> Se connecter pour plus d'options
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

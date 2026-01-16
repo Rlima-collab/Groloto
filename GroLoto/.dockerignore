@@ -1,0 +1,39 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose*.yml
+compose*.yaml
+
+# Cache et logs
+var/cache/*
+var/log/*
+var/sessions/*
+!var/data.db
+
+# Dépendances (seront réinstallées)
+# vendor/
+
+# Node modules
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+tests/
+phpunit.xml.dist
+
+# Documentation
+*.md
+!README.md

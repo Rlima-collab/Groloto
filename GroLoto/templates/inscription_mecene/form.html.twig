@@ -1,0 +1,208 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription à un événement{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/inscription_mecene.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Inscription à un Événement</h1>
+        <p class="hero-description">Participez à nos événements en tant que mécène et soutenez nos actions.</p>
+        <a href="{{ path('app_evenements') }}" class="hero-btn yellow">Retour aux événements</a>
+    </div>
+</div>
+
+<div class="page-header">
+    <h1 class="page-title">Formulaire d'Inscription</h1>
+</div>
+
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger">
+        <strong>Erreur :</strong> {{ message }}
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success">
+        <strong>Succès :</strong> {{ message }}
+    </div>
+{% endfor %}
+
+<div style="max-width: 900px; margin: 0 auto; padding: 0 2rem 2rem;">
+    <!-- Informations du mécène -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Vos informations</h2>
+            <p class="card-description">Ces informations seront associées à votre inscription</p>
+        </div>
+        <div class="card-content">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label class="info-label">Organisation</label>
+                    <p class="info-value">{{ mecene.organisation }}</p>
+                </div>
+                <div class="info-item">
+                    <label class="info-label">Contact</label>
+                    <p class="info-value">{{ mecene.utilisateur.prenom }} {{ mecene.utilisateur.nom }}</p>
+                </div>
+                <div class="info-item">
+                    <label class="info-label">Email</label>
+                    <p class="info-value">{{ mecene.utilisateur.email }}</p>
+                </div>
+                <div class="info-item">
+                    <label class="info-label">Téléphone</label>
+                    <p class="info-value">{{ mecene.utilisateur.telephone|default('Non renseigné') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire d'inscription -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Formulaire d'inscription</h2>
+            <p class="card-description">Complétez les informations ci-dessous pour soumettre votre don</p>
+        </div>
+        <div class="card-content">
+            {{ form_start(form) }}
+            
+            {{ form_errors(form) }}
+            
+            <!-- Section 1 : Événement -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">Événement</h3>
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(form.evenement, null, {'label_attr': {'class': 'form-label required'}}) }}
+                    {{ form_widget(form.evenement, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.evenement) }}
+                    {% if form.evenement.vars.help %}
+                        <small class="form-help">{{ form.evenement.vars.help }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Section 2 : Informations sur le don -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">Informations sur votre don</h3>
+                    <p class="section-description">Ces informations seront utilisées pour ajouter votre don au stock si votre demande est acceptée</p>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.type_don, null, {'label_attr': {'class': 'form-label required'}}) }}
+                    <div class="radio-group">
+                        {{ form_widget(form.type_don) }}
+                    </div>
+                    {{ form_errors(form.type_don) }}
+                    {% if form.type_don.vars.help %}
+                        <small class="form-help">{{ form.type_don.vars.help }}</small>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form_label(form.nom_don, null, {'label_attr': {'class': 'form-label required'}}) }}
+                        {{ form_widget(form.nom_don, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.nom_don) }}
+                        {% if form.nom_don.vars.help %}
+                            <small class="form-help">{{ form.nom_don.vars.help }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.categorie, null, {'label_attr': {'class': 'form-label required'}}) }}
+                        {{ form_widget(form.categorie, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.categorie) }}
+                        {% if form.categorie.vars.help %}
+                            <small class="form-help">{{ form.categorie.vars.help }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form_label(form.quantite, null, {'label_attr': {'class': 'form-label required'}}) }}
+                        {{ form_widget(form.quantite, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.quantite) }}
+                        {% if form.quantite.vars.help %}
+                            <small class="form-help">{{ form.quantite.vars.help }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.valeur_unitaire, null, {'label_attr': {'class': 'form-label'}}) }}
+                        <div style="position: relative;">
+                            <span class="input-icon">€</span>
+                            {{ form_widget(form.valeur_unitaire, {'attr': {'class': 'form-control input-with-icon'}}) }}
+                        </div>
+                        {{ form_errors(form.valeur_unitaire) }}
+                        {% if form.valeur_unitaire.vars.help %}
+                            <small class="form-help">{{ form.valeur_unitaire.vars.help }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.description_don, null, {'label_attr': {'class': 'form-label required'}}) }}
+                    {{ form_widget(form.description_don, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.description_don) }}
+                    {% if form.description_don.vars.help %}
+                        <small class="form-help">{{ form.description_don.vars.help }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Section 3 : Remarques -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">Remarques complémentaires</h3>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.remarques, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.remarques, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.remarques) }}
+                    {% if form.remarques.vars.help %}
+                        <small class="form-help">{{ form.remarques.vars.help }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ path('app_evenements') }}" class="btn btn-secondary">
+                    <span>×</span> Annuler
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <span></span> Soumettre ma demande
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <!-- Information importante -->
+    <div class="info-box">
+        <div class="info-box-content">
+            <div class="info-box-icon">i</div>
+            <div>
+                <h4 class="info-box-title">Information importante</h4>
+                <p class="info-box-text">
+                    Votre demande sera examinée par notre équipe dans les plus brefs délais. 
+                    Vous recevrez une confirmation par email une fois votre participation validée. 
+                    En cas de questions, n'hésitez pas à nous contacter.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

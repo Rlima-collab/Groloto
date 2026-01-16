@@ -1,0 +1,316 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Notifications{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="notifications-container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            Mes Notifications
+        </h1>
+        <div class="header-actions">
+            <button type="button" class="btn btn-sm btn-outline" id="markAllAsReadBtn">
+                Tout marquer comme lu
+            </button>
+        </div>
+    </div>
+
+    <nav class="notif-nav">
+        <a href="{{ path('app_notifications', {'view':'inbox'}) }}" class="nav-item {{ view != 'trash' ? 'active' : '' }}">Notifications reçues</a>
+        <a href="{{ path('app_notifications', {'view':'trash'}) }}" class="nav-item {{ view == 'trash' ? 'active' : '' }}">Corbeille</a>
+    </nav>
+
+    {% if notifications|length > 0 %}
+        <div class="notifications-list">
+            {% for notif in notifications %}
+             <div class="notification-card {% if not notif.lue %}notification-unread{% endif %} type-{{ notif.type }}"
+                 data-id="{{ notif.id }}"
+                 data-type="{{ notif.type }}"
+                 data-message="{{ notif.message|e('html_attr') }}"
+                 {% if notif.lien %}data-link="{{ notif.lien }}"{% endif %}>
+                    <!-- EN-TÊTE -->
+                    <div class="notification-header">
+                        <div class="notification-icon">
+                            {% if notif.type == 'nouvelle_inscription' %}
+                                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            {% elseif notif.type == 'inscription_acceptee' %}
+                                <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            {% elseif notif.type == 'inscription_refusee' %}
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                            {% elseif notif.type == 'contact' %}
+                                <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            {% else %}
+                                <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                            {% endif %}
+                        </div>
+                        <div class="notification-body">
+                            <p class="notification-message">
+                                {% if notif.type == 'reponse_contact' %}
+                                    Un admin a répondu à votre message
+                                {% else %}
+                                    {{ notif.message }}
+                                {% endif %}
+                            </p>
+                            <div class="notification-meta">
+                                <span class="notification-date">{{ notif.createdAt|date('d/m à H:i') }}</span>
+                            </div>
+                        </div>
+                        <div class="notification-actions">
+                            {% if notif.lien %}
+                                {% set is_admin_link = notif.lien starts with('/admin') %}
+                                {% if is_admin_link and not is_granted('ROLE_ADMIN') %}
+                                    <span class="btn-view disabled" title="Accès restreint">Voir</span>
+                                {% else %}
+                                    <a href="{{ notif.lien }}" class="btn-view fetch-link">Voir</a>
+                                {% endif %}
+                            {% endif %}
+                            {% if view != 'trash' and not notif.lue %}
+                                <button type="button" class="btn-mark-read" data-action="mark-read" title="Marquer comme lu">
+                                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </button>
+                            {% endif %}
+
+                            <div class="more">
+                                <button class="more-btn" aria-expanded="false" title="Plus d'actions">⋯</button>
+                                <div class="more-menu" role="menu" style="display:none;">
+                                    {% if view == 'trash' %}
+                                        <button class="menu-item text-danger" data-action="delete" title="Supprimer">Supprimer</button>
+                                    {% else %}
+                                        <button class="menu-item" data-action="trash" title="Corbeille">Corbeille</button>
+                                        <button class="menu-item text-danger" data-action="delete" title="Supprimer">Supprimer</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CONTENU DÉROULANT -->
+                    <div class="notification-content">
+                        <!-- Message original de l'utilisateur -->
+                        <div class="user-message">
+                            <strong>Votre message initial :</strong><br>
+                            {{ notif.message }}
+                        </div>
+
+                        <!-- Formulaire de réponse (pour tout le monde) -->
+                        {% if notif.type == 'contact' %}
+                            <div class="reply-form">
+                                <form class="reply-form-inner" data-id="{{ notif.id }}">
+                                    <textarea class="reply-textarea" placeholder="Votre réponse..." required></textarea>
+                                    <div class="reply-actions">
+                                        <button type="button" class="btn btn-outline" data-action="cancel">Annuler</button>
+                                        <button type="submit" class="btn btn-primary">Envoyer la réponse</button>
+                                    </div>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <h3>Aucune notification</h3>
+            <p>Vous êtes à jour !</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Toggle contenu
+                    document.querySelectorAll('[data-action="toggle"]').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const card = this.closest('.notification-card');
+                    card.classList.toggle('open');
+                    if (card.classList.contains('open') && card.classList.contains('notification-unread')) {
+                        markAsRead(card.dataset.id, card);
+                    }
+                });
+            });
+
+            // Marquer comme lu
+            document.querySelectorAll('[data-action="mark-read"]').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const card = this.closest('.notification-card');
+                    markAsRead(card.dataset.id, card);
+                });
+            });
+
+            // Toggle more-menu
+            document.querySelectorAll('.more-btn').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const menu = this.nextElementSibling;
+                    const open = menu.style.display === 'block';
+                    // close all
+                    document.querySelectorAll('.more-menu').forEach(m => m.style.display = 'none');
+                    if (!open) menu.style.display = 'block';
+                });
+            });
+
+            // close menus on outside click
+            document.addEventListener('click', function () {
+                document.querySelectorAll('.more-menu').forEach(m => m.style.display = 'none');
+            });
+
+            // Intercept "Voir" links to avoid navigating to nonexistent routes
+            document.querySelectorAll('.fetch-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const href = this.getAttribute('href');
+                    if (!href) return;
+                    // Use HEAD to check existence without requesting full resource
+                    fetch(href, { method: 'HEAD' })
+                        .then(res => {
+                            if (res.ok) {
+                                // open in new tab to avoid interfering with current list UI
+                                window.open(href, '_blank');
+                            } else {
+                                alert('Lien introuvable ou inaccessible.');
+                            }
+                        })
+                        .catch(() => alert('Erreur réseau lors de la vérification du lien.'));
+                });
+            });
+
+            // Réponse au message
+            document.querySelectorAll('.reply-form-inner').forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const id = this.dataset.id;
+                    const response = this.querySelector('textarea').value.trim();
+                    if (!response) return;
+
+                    fetch(`{{ path('app_contact_message_reply_user', {'id':'ID'}) }}`.replace('ID', id), {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: new URLSearchParams({ message: response })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            const content = this.closest('.notification-content');
+                            const replyForm = this.closest('.reply-form');
+                            
+                            // Ajouter la nouvelle réponse
+                            replyForm.insertAdjacentHTML('beforebegin', `
+                                <div class="admin-reply">
+                                    <strong>Votre réponse :</strong>
+                                    <div>${response.replace(/\n/g, '<br>')}</div>
+                                </div>
+                            `);
+                            
+                            // Mettre à jour le message principal
+                            const notificationMessage = this.closest('.notification-card').querySelector('.notification-message');
+                            if (notificationMessage) {
+                                notificationMessage.textContent = "Vous avez répondu au message";
+                            }
+                            
+                            // Cacher le formulaire
+                            replyForm.remove();
+                            this.closest('.notification-card').classList.remove('open');
+                            
+                            // Afficher un message de succès
+                            alert('Votre réponse a été envoyée avec succès!');
+                        } else {
+                            alert('Erreur lors de l\'envoi de la réponse');
+                        }
+                    })
+                    .catch(() => alert('Erreur réseau'));
+                });
+
+                form.querySelector('[data-action="cancel"]').addEventListener('click', () => {
+                    form.closest('.notification-card').classList.remove('open');
+                });
+            });
+
+            // Tout marquer comme lu
+            document.getElementById('markAllAsReadBtn').addEventListener('click', () => {
+                fetch('{{ path('app_notifications_mark_all_read') }}', { 
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(() => location.reload());
+            });
+
+            function markAsRead(id, card) {
+                    fetch(`{{ path('app_notification_mark_read', {'id':'ID'}) }}`.replace('ID', id), { 
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                .then(() => {
+                    card.classList.remove('notification-unread');
+                    card.querySelector('[data-action="mark-read"]')?.remove();
+                });
+            }
+               // Mettre en corbeille
+               document.querySelectorAll('[data-action="trash"]').forEach(btn => {
+                   btn.addEventListener('click', function (e) {
+                       e.stopPropagation();
+                       const card = this.closest('.notification-card');
+                       moveToTrash(card.dataset.id, card);
+                   });
+               });
+
+               // Supprimer définitivement
+               document.querySelectorAll('[data-action="delete"]').forEach(btn => {
+                   btn.addEventListener('click', function (e) {
+                       e.stopPropagation();
+                       const card = this.closest('.notification-card');
+                       deleteNotification(card.dataset.id, card);
+                   });
+               });
+
+               function moveToTrash(id, card) {
+                   fetch(`{{ path('app_notification_trash', {'id':'ID'}) }}`.replace('ID', id), {
+                       method: 'POST',
+                       headers: {
+                           'X-Requested-With': 'XMLHttpRequest'
+                       }
+                   })
+                   .then(() => {
+                       card.remove();
+                   });
+               }
+
+               function deleteNotification(id, card) {
+                   if (!confirm('Supprimer définitivement cette notification ?')) return;
+                   fetch(`{{ path('app_notification_delete', {'id':'ID'}) }}`.replace('ID', id), {
+                       method: 'POST',
+                       headers: {
+                           'X-Requested-With': 'XMLHttpRequest'
+                       }
+                   })
+                   .then(() => {
+                       card.remove();
+                   });
+               }
+        });
+    </script>
+{% endblock %}

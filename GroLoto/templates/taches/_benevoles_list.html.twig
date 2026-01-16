@@ -1,0 +1,99 @@
+{% for item in benevolesData %}
+    {% set benevole = item.benevole %}
+    {% set statut = item.statut %}
+    {% set affectation = item.affectation %}
+    {% set disponibilite = item.disponibilite|default(null) %}
+    {% set matchCreneau = item.matchCreneau|default(null) %}
+    {% set creneauTache = item.creneauTache|default(null) %}
+    {% set aRenseigneDispos = item.aRenseigneDispos|default(false) %}
+    
+    <div class="benevole-item {% if statut == 'indisponible' %}disabled{% endif %}">
+        <div class="benevole-info">
+            <div style="font-weight: 600;">
+                {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}
+            </div>
+            <span style="color: #6b7280; font-size: 0.875rem;">{{ benevole.utilisateur.email }}</span>
+            
+            {# Indicateur de disponibilité renseignée pour ce créneau #}
+            {% if creneauTache %}
+                {% set creneauLabel = creneauTache == 'matin' ? 'matin' : (creneauTache == 'apres_midi' ? 'après-midi' : 'soir') %}
+                <div class="disponibilite-indicator" style="margin-top: 4px;">
+                    {% if disponibilite is not null %}
+                        {# Le bénévole a renseigné une disponibilité pour ce jour #}
+                        {% if matchCreneau is same as(true) %}
+                            <span class="badge bg-success" style="font-size: 0.7rem;" title="Le bénévole s'est déclaré disponible pour le créneau {{ creneauLabel }}">
+                                <i class="bi bi-check-circle-fill"></i> Dispo renseignée : <strong>OUI</strong> ({{ creneauLabel }})
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger" style="font-size: 0.7rem;" title="Le bénévole ne s'est pas déclaré disponible pour le créneau {{ creneauLabel }}">
+                                <i class="bi bi-x-circle-fill"></i> Dispo renseignée : <strong>NON</strong> ({{ creneauLabel }})
+                            </span>
+                        {% endif %}
+                    {% elseif aRenseigneDispos %}
+                        {# Le bénévole a renseigné des dispos pour ce weekend mais pas pour ce jour spécifique #}
+                        <span class="badge bg-danger" style="font-size: 0.7rem;" title="Le bénévole n'a pas renseigné de disponibilité pour ce jour précis">
+                            <i class="bi bi-calendar-x"></i> Pas de dispo pour ce jour
+                        </span>
+                    {% else %}
+                        {# Le bénévole n'a rien renseigné pour ce weekend #}
+                        <span class="badge bg-secondary" style="font-size: 0.7rem;" title="Le bénévole n'a pas renseigné ses disponibilités pour ce weekend">
+                            <i class="bi bi-question-circle"></i> Dispo non renseignée
+                        </span>
+                    {% endif %}
+                    
+                    {# Afficher la remarque si elle existe #}
+                    {% if disponibilite is not null and disponibilite.remarque is not empty %}
+                        <div class="remarque-dispo" style="margin-top: 4px;">
+                            <span style="font-size: 0.75rem; color: #6b7280; font-style: italic;">
+                                <i class="bi bi-chat-left-text"></i> {{ disponibilite.remarque }}
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="benevole-status status-{{ statut }}">
+            {% if statut == 'assigne' %}
+                <i class="bi bi-check-circle-fill"></i> Assigné
+            {% elseif statut == 'proposee' %}
+                <i class="bi bi-hourglass-split"></i> Proposition envoyée
+            {% elseif statut == 'indisponible' %}
+                <i class="bi bi-x-circle"></i> Indisponible
+            {% else %}
+                <i class="bi bi-circle"></i> Disponible
+            {% endif %}
+        </div>
+        
+        <div class="benevole-actions">
+            {% if statut == 'disponible' %}
+                <form method="post" style="display: inline;">
+                    <input type="hidden" name="benevole_id" value="{{ benevole.id }}">
+                    <input type="hidden" name="action" value="assigner">
+                    <button type="submit" class="btn btn-small btn-primary" title="Assigner directement">
+                        <i class="bi bi-person-check"></i> Assigner
+                    </button>
+                </form>
+                <form method="post" style="display: inline;">
+                    <input type="hidden" name="benevole_id" value="{{ benevole.id }}">
+                    <input type="hidden" name="action" value="proposer">
+                    <button type="submit" class="btn btn-small btn-warning" title="Envoyer une proposition">
+                        <i class="bi bi-send"></i> Proposer
+                    </button>
+                </form>
+            {% elseif statut == 'assigne' or statut == 'proposee' %}
+                <form method="post" style="display: inline;">
+                    <input type="hidden" name="benevole_id" value="{{ benevole.id }}">
+                    <input type="hidden" name="action" value="retirer">
+                    <button type="submit" class="btn btn-small btn-outline-danger" title="Retirer l'affectation">
+                        <i class="bi bi-x-lg"></i> Retirer
+                    </button>
+                </form>
+            {% else %}
+                <span class="text-muted" style="font-size: 0.75rem;">Non disponible</span>
+            {% endif %}
+        </div>
+    </div>
+{% else %}
+    <p style="text-align: center; padding: 2rem; color: #6b7280;">Aucun bénévole trouvé.</p>
+{% endfor %}

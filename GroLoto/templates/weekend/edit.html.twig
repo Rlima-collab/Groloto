@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier {{ weekend.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-create.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section weekend-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Modifier le Weekend</h1>
+        <p class="hero-description">{{ weekend.nom }}</p>
+        <a href="{{ path('app_weekend_liste') }}" class="btn-login">Retour à la liste</a>
+    </div>
+</div>
+
+<div class="weekend-create-container">
+    <div class="weekend-form-card">
+        <div class="weekend-form-header">
+            <h2>Informations du Weekend</h2>
+        </div>
+
+        {% for message in app.flashes('warning') %}
+            <div class="alert alert-warning">{{ message }}</div>
+        {% endfor %}
+
+        {{ form_start(form, {'attr': {'class': 'form-night-blue'}}) }}
+
+            <div class="mb-4">
+                {{ form_row(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Weekend Groloto Novembre 2025'}}) }}
+            </div>
+
+            <div class="grid-2 mb-4">
+                {{ form_row(form.date_debut, {'attr': {'class': 'form-control'}}) }}
+                {{ form_row(form.date_dimanche, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="grid-2 mb-4">
+                {{ form_row(form.task_offset_before, {'attr': {'class': 'form-control'}, 'help': 'Jours avant la date de début (ex: 2 pour J-2)'} ) }}
+                {{ form_row(form.task_offset_after, {'attr': {'class': 'form-control'}, 'help': 'Jours après la date de fin (ex: 3 pour J+3)'} ) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_row(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Description du weekend...'}}) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(form.cover_image) }}
+                
+                {% if weekend.coverImage %}
+                    <div class="current-image">
+                        <p>Image actuelle :</p>
+                        <img src="{{ asset(weekend.coverImage) }}" alt="Image de couverture actuelle" style="max-width: 300px; border-radius: 8px; margin: 1rem 0;">
+                    </div>
+                {% endif %}
+                
+                {{ form_widget(form.cover_image, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.cover_image) }}
+                <small class="form-help">Laissez vide pour conserver l'image actuelle</small>
+            </div>
+
+            <div class="text-center mt-8">
+                <button type="submit" class="btn-night-blue">
+                    Enregistrer les modifications
+                </button>
+                <a href="{{ path('app_weekend_liste') }}" class="btn-outline-night-blue ml-3">
+                    Annuler
+                </a>
+            </div>
+
+            <div style="display: none;">
+                {{ form_rest(form) }}
+            </div>
+
+        {{ form_end(form, {'render_rest': false}) }}
+    </div>
+</div>
+
+<link rel="stylesheet" href="{{ asset('css/weekends.css') }}">
+{% endblock %}

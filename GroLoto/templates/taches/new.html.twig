@@ -1,0 +1,165 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer une tâche{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/taches/taches-forms.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="taches-page">
+<div class="container" style="padding-top: calc(71px + 2rem);">
+    <div class="page-header" style="display: flex; align-items: center; justify-content: center; position: relative;">
+        <a href="{{ path('tache_index') }}" class="btn btn-secondary" style="position: absolute; left: 0;">← Retour à la liste</a>
+        <h1 class="page-title" style="margin: 0 auto; text-align: center; width: 100%;">Créer une nouvelle tâche</h1>
+    </div>
+
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Informations de la tâche</h2>
+                <p class="card-description">Remplissez les détails de la nouvelle tâche</p>
+            </div>
+            <div class="card-content">
+                {{ form_start(form) }}
+                    <div class="form-grid">
+                        <div class="form-group required full-width">
+                            {{ form_label(form.titre) }}
+                            {{ form_widget(form.titre) }}
+                            {{ form_errors(form.titre) }}
+                        </div>
+
+                        <div class="form-group required full-width">
+                            {{ form_label(form.weekend) }}
+                            {{ form_widget(form.weekend) }}
+                            {{ form_errors(form.weekend) }}
+                            <small class="form-text">Le weekend auquel cette tâche est rattachée</small>
+                        </div>
+                    </div>
+
+                    {# Plage horaire sur une ligne #}
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 0.375rem; margin: 1.5rem 0;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 1rem; color: #1f2937;">📅 Plage horaire</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                {{ form_label(form.jour_plage) }}
+                                {{ form_widget(form.jour_plage) }}
+                                {{ form_errors(form.jour_plage) }}
+                                    <small id="jourRangeHelp" class="form-text text-muted">Plage autorisée: —</small>
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(form.heure_debut_plage) }}
+                                {{ form_widget(form.heure_debut_plage) }}
+                                {{ form_errors(form.heure_debut_plage) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(form.heure_fin_plage) }}
+                                {{ form_widget(form.heure_fin_plage) }}
+                                {{ form_errors(form.heure_fin_plage) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            {{ form_label(form.maxPersonnes) }}
+                            {{ form_widget(form.maxPersonnes) }}
+                            {{ form_errors(form.maxPersonnes) }}
+                            <small class="form-text">Limite globale de bénévoles</small>
+                        </div>
+
+                        <div class="form-group full-width">
+                            {{ form_label(form.remarque) }}
+                            {{ form_widget(form.remarque) }}
+                            {{ form_errors(form.remarque) }}
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Créer la tâche</button>
+                        <a href="{{ path('tache_index') }}" class="btn btn-secondary">Annuler</a>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+
+        <div class="card alert-conseil">
+            <div class="card-content">
+                <h4>💡 Besoin d'ajouter d'autres plages?</h4>
+                <p>
+                    Vous pouvez créer la tâche avec une première plage horaire, puis utiliser le bouton "Dupliquer" dans la liste pour créer d'autres plages sur d'autres jours!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const weekendSelect = document.querySelector('select[name$="[weekend]"]');
+        const jourInput = document.querySelector('input[name$="[jour_plage]"]');
+        const help = document.getElementById('jourRangeHelp');
+        // offsets will be read from the selected option if available
+        const defaultOffsetBefore = 2; // fallback J-2
+        const defaultOffsetAfter = 3;  // fallback J+3
+
+        function formatDate(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        function formatDisplay(d) {
+            return d.toLocaleDateString();
+        }
+
+        function applyRange() {
+            if (!weekendSelect || !jourInput) return;
+            const opt = weekendSelect.selectedOptions[0];
+            if (!opt) return;
+            const start = opt.dataset.start;
+            const end = opt.dataset.end;
+            if (!start || !end) {
+                jourInput.removeAttribute('min');
+                jourInput.removeAttribute('max');
+                if (help) help.textContent = 'Plage autorisée: —';
+                return;
+            }
+            const s = new Date(start + 'T00:00:00');
+            const e = new Date(end + 'T00:00:00');
+            const before = parseInt(opt.dataset.offsetBefore || defaultOffsetBefore, 10);
+            const after = parseInt(opt.dataset.offsetAfter || defaultOffsetAfter, 10);
+            const min = new Date(s);
+            min.setDate(min.getDate() - before);
+            const max = new Date(e);
+            max.setDate(max.getDate() + after);
+
+            jourInput.setAttribute('min', formatDate(min));
+            jourInput.setAttribute('max', formatDate(max));
+            if (help) help.textContent = `Plage autorisée: ${formatDisplay(min)} → ${formatDisplay(max)}`;
+
+            // if current value out of range, clear it
+            if (jourInput.value) {
+                const cur = new Date(jourInput.value + 'T00:00:00');
+                if (cur < min || cur > max) {
+                    jourInput.value = '';
+                }
+            }
+        }
+
+        if (weekendSelect) {
+            weekendSelect.addEventListener('change', applyRange);
+            applyRange();
+        }
+    });
+    </script>
+{% endblock %}
+

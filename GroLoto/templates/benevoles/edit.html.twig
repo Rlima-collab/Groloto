@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier le bénévole{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="edit-container">
+    <div class="edit-card">
+        <div class="edit-header">
+            <h1>Modifier le bénévole</h1>
+            <p>{{ utilisateur.prenom }} {{ utilisateur.nom }}</p>
+        </div>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {{ form_start(form) }}
+
+        <div class="form-section">
+            <h5>Informations personnelles</h5>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.prenom) }}
+                        {{ form_widget(form.prenom) }}
+                        {{ form_errors(form.prenom) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.nom) }}
+                        {{ form_widget(form.nom) }}
+                        {{ form_errors(form.nom) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email) }}
+                {{ form_errors(form.email) }}
+                <div class="small-text">Cette adresse email sera utilisée pour la connexion.</div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.telephone) }}
+                {{ form_widget(form.telephone) }}
+                {{ form_errors(form.telephone) }}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h5>Informations complémentaires</h5>
+            
+            <div class="form-group">
+                {{ form_label(form.remarque) }}
+                {{ form_widget(form.remarque) }}
+                {{ form_errors(form.remarque) }}
+                <div class="small-text">Notes ou informations importantes concernant ce bénévole.</div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-check">
+                    {{ form_widget(form.actif) }}
+                    {{ form_label(form.actif) }}
+                </div>
+                {{ form_errors(form.actif) }}
+                <div class="small-text">Décochez cette case pour désactiver temporairement ce bénévole.</div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ path('benevoles') }}" class="btn btn-secondary">
+                Annuler
+            </a>
+            <button type="submit" class="btn btn-primary">
+                Enregistrer les modifications
+            </button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+
+    <div class="info-card">
+        <h6>Informations du compte</h6>
+        <p><strong>Rôle :</strong> {{ utilisateur.role.nom|capitalize }}</p>
+        <p><strong>Membre depuis :</strong> {{ utilisateur.dateCreation ? utilisateur.dateCreation|date('d/m/Y à H:i') : 'Non renseigné' }}</p>
+        <p><strong>Dernière modification :</strong> {{ utilisateur.dateModification ? utilisateur.dateModification|date('d/m/Y à H:i') : 'Jamais' }}</p>
+    </div>
+</div>
+{% endblock %}

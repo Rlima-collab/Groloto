@@ -2,52 +2,49 @@
 
 {% block title %}Connexion{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+{% endblock %}
+
 {% block body %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">Connexion</h4>
+<div class="login-container">
+    <div class="login-card">
+        <div class="shine"></div>
+        <div class="login-content">
+            <h2 class="login-title">Connexion</h2>
+            <p class="login-subtitle">Accédez à votre espace personnel</p>
+
+            {% if error %}
+                <div class="login-alert alert-danger">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
                 </div>
-                <div class="card-body">
-                    {% if error %}
-                        <div class="alert alert-danger">
-                            {{ error.messageKey|trans(error.messageData, 'security') }}
-                        </div>
-                    {% endif %}
+            {% endif %}
 
-                    <form method="post">
-                        <div class="mb-3">
-                            <label for="inputEmail" class="form-label">Email</label>
-                            <input type="email" value="{{ last_username }}" name="_username" id="inputEmail" 
-                                   class="form-control" autocomplete="email" required autofocus>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="inputPassword" class="form-label">Mot de passe</label>
-                            <input type="password" name="_password" id="inputPassword" 
-                                   class="form-control" autocomplete="current-password" required>
-                        </div>
-
-                        <input type="hidden" name="_csrf_token"
-                               value="{{ csrf_token('authenticate') }}">
-
-                        <div class="d-grid">
-                            <button class="btn btn-primary" type="submit">
-                                Se connecter
-                            </button>
-                        </div>
-                    </form>
-
-                    <div class="text-center mt-3">
-                        <p>Pas encore de compte ? 
-                            <a href="{{ path('app_register') }}" class="text-decoration-none">
-                                S'inscrire
-                            </a>
-                        </p>
-                    </div>
+            <form method="post" class="login-form">
+                <div class="login-form-group">
+                    <label for="inputEmail" class="login-label">Email</label>
+                    <input type="email" value="{{ last_username }}" name="_username" id="inputEmail"
+                           class="login-input" autocomplete="email" required autofocus>
                 </div>
+
+                <div class="login-form-group">
+                    <label for="inputPassword" class="login-label">Mot de passe</label>
+                    <input type="password" name="_password" id="inputPassword"
+                           class="login-input" autocomplete="current-password" required>
+                </div>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                <button class="login-btn" type="submit">Se connecter</button>
+            </form>
+
+            <div class="login-footer">
+                <p>Pas encore de compte ?
+                    <a href="{{ path('app_register_choice') }}" class="login-link">S'inscrire</a>
+                </p>
             </div>
         </div>
     </div>

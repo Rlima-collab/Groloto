@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Reçus fiscaux - Mécène{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/recu_fiscal.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="recu-fiscal-container">
+    <div class="recu-fiscal-card">
+        <div class="recu-fiscal-header">
+            <h1 class="recu-fiscal-title">Mes reçus fiscaux</h1>
+            <p class="recu-fiscal-description">
+                Consultez et téléchargez les reçus fiscaux officiels qui vous ont été envoyés par l'association.
+            </p>
+        </div>
+
+        {% if recus is defined and recus|length > 0 %}
+            <div class="recu-stats-bar">
+                <div class="recu-stat-item">
+                    <div class="recu-stat-icon">Total</div>
+                    <div class="recu-stat-content">
+                        <h4>{{ recus|length }}</h4>
+                        <p>Reçu{{ recus|length > 1 ? 's' : '' }} disponible{{ recus|length > 1 ? 's' : '' }}</p>
+                    </div>
+                </div>
+                <div class="recu-stat-item">
+                    <div class="recu-stat-icon">Année</div>
+                    <div class="recu-stat-content">
+                        <h4>{{ recus|first.annee }}</h4>
+                        <p>Dernière année</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recu-grid">
+                {% for recu in recus %}
+                    <div class="recu-card">
+                        <div class="recu-card-header">
+                            <div class="recu-card-icon">PDF</div>
+                            <div class="recu-card-info">
+                                <h3>Reçu fiscal {{ recu.annee }}</h3>
+                                <div class="recu-card-meta">
+                                    Envoyé le {{ recu.createdAt|date('d/m/Y à H:i') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="recu-card-actions">
+                            <a href="{{ asset(recu.fichier) }}" class="recu-btn-download" target="_blank">
+                                Télécharger le PDF
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="recu-empty-state">
+                <h3>Aucun reçu fiscal disponible pour le moment</h3>
+                <p>Les reçus fiscaux apparaîtront ici dès qu'ils auront été générés et envoyés par l'administration.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

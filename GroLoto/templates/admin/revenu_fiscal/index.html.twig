@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reçus fiscaux{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Reçus fiscaux</h1>
+        <p class="hero-description">Gestion centralisée des reçus fiscaux envoyés par les mécènes et bénévoles</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Liste des Reçus fiscaux</h2>
+            <p class="card-description">Recherche et téléchargement des reçus</p>
+        </div>
+
+        <div class="search-section">
+            <form method="get" action="{{ path('admin_revenu_fiscal_index') }}" style="display: flex; gap: 0.75rem; width: 100%;">
+                <input type="text" name="q" class="search-input" placeholder="Recherche par nom, email ou type..." value="{{ q|default('') }}">
+                <button type="submit" class="btn-primary">Rechercher</button>
+                <a href="{{ path('admin_revenu_fiscal_index') }}" class="btn-secondary">Réinitialiser</a>
+            </form>
+        </div>
+
+        {% if messages is empty %}
+            <div class="empty-state">
+                <div class="empty-state-icon"></div>
+                <h3>Aucun envoi trouvé</h3>
+                <p>Aucun reçu fiscal n'a été envoyé pour le moment.</p>
+            </div>
+        {% else %}
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Type</th>
+                            <th>Fichier</th>
+                            <th>Date d'envoi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for m in messages %}
+                        {% set parts = m.message|split('Fichier:') %}
+                        {% set file = parts|length > 1 ? parts|last|trim : '' %}
+                        {% set type = ('mécène' in (m.message|lower)) ? 'Mécène' : 'Bénévole' %}
+                        <tr>
+                            <td><strong>{{ m.nom }}</strong></td>
+                            <td>{{ m.email }}</td>
+                            <td><span class="badge badge-info">{{ type }}</span></td>
+                            <td>
+                                {% if file != '' %}
+                                    <a href="{{ asset(file) }}" target="_blank" class="download-link">Télécharger</a>
+                                {% else %}
+                                    <span style="color: #94a3b8;">—</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ m.createdAt ? m.createdAt|date('d/m/Y à H:i') : '—' }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-top: 1rem; color: #64748b; font-size: 0.9rem;">
+                <strong>{{ messages|length }}</strong> envoi(s) au total
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

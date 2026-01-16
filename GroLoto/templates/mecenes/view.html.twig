@@ -1,0 +1,262 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil Mécène - {{ mecene.organisation }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mecenes.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">{{ mecene.organisation }}</h1>
+        <p class="hero-description">Profil et contributions</p>
+        {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('mecenes') }}" class="hero-btn yellow">Retour à la liste</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="page-header">
+    <h1 class="page-title">Profil du Mécène</h1>
+</div>
+
+<div class="mecenes-page">
+    <!-- Statistiques -->
+    <div class="metrics-grid">
+        <div class="card metric-card">
+            <div class="card-header">
+                <span class="metric-title">Nombre de lots</span>
+            </div>
+            <div class="card-content">
+                <div class="metric-value">{{ stats.nombre_lots }}</div>
+                <p class="metric-change positive">🎁 Lots offerts</p>
+            </div>
+        </div>
+        <div class="card metric-card">
+            <div class="card-header">
+                <span class="metric-title">Valeur totale</span>
+            </div>
+            <div class="card-content">
+                <div class="metric-value">{{ stats.valeur_totale|number_format(2, ',', ' ') }} €</div>
+                <p class="metric-change positive">💰 Contribution</p>
+            </div>
+        </div>
+        <div class="card metric-card">
+            <div class="card-header">
+                <span class="metric-title">Inscriptions</span>
+            </div>
+            <div class="card-content">
+                <div class="metric-value">{{ stats.nombre_inscriptions }}</div>
+                <p class="metric-change positive">📋 Événements</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <a href="#informations" class="tab selected" onclick="showTab(event, 'informations')">
+                <span class="tab-icon">ℹ️</span>
+                <span class="tab-text">Informations</span>
+            </a>
+            <a href="#lots" class="tab" onclick="showTab(event, 'lots')">
+                <span class="tab-icon">🎁</span>
+                <span class="tab-text">Mes Lots ({{ stats.nombre_lots }})</span>
+            </a>
+            <a href="#inscriptions" class="tab" onclick="showTab(event, 'inscriptions')">
+                <span class="tab-icon">📋</span>
+                <span class="tab-text">Mes Inscriptions ({{ stats.nombre_inscriptions }})</span>
+            </a>
+        </div>
+
+        <!-- Onglet Informations -->
+        <div id="informations" class="tab-content active">
+            <div class="card main-card">
+                <div class="card-header">
+                    <h2 class="card-title">Informations du Mécène</h2>
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('mecene_edit', {'id': mecene.id}) }}" class="btn btn-primary">✏️ Modifier</a>
+                    {% endif %}
+                </div>
+                <div class="card-content">
+                    <div class="info-grid">
+                        <div class="info-section">
+                            <h3 class="info-section-title">👤 Contact</h3>
+                            <div class="info-item">
+                                <span class="info-label">Nom complet :</span>
+                                <span class="info-value">{{ mecene.utilisateur.prenom }} {{ mecene.utilisateur.nom }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Email :</span>
+                                <span class="info-value">{{ mecene.utilisateur.email }}</span>
+                            </div>
+                            {% if mecene.utilisateur.telephone %}
+                            <div class="info-item">
+                                <span class="info-label">Téléphone :</span>
+                                <span class="info-value">{{ mecene.utilisateur.telephone }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="info-section">
+                            <h3 class="info-section-title">🏢 Organisation</h3>
+                            <div class="info-item">
+                                <span class="info-label">Organisation :</span>
+                                <span class="info-value">{{ mecene.organisation }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">SIRET :</span>
+                                <span class="info-value">{{ mecene.siret }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Date d'inscription :</span>
+                                <span class="info-value">{{ mecene.utilisateur.dateCreation|date('d/m/Y') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Lots -->
+        <div id="lots" class="tab-content">
+            <div class="card main-card">
+                <div class="card-header">
+                    <h2 class="card-title">Mes Lots</h2>
+                    <div class="card-actions">
+                        <span class="badge">{{ stats.nombre_lots }} lot(s)</span>
+                        <span class="badge success">{{ stats.valeur_totale|number_format(2, ',', ' ') }} €</span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    {% if lots|length > 0 %}
+                        <div class="lots-grid">
+                            {% for lot in lots %}
+                                <div class="lot-card">
+                                    <div class="lot-header">
+                                        <h3 class="lot-title">{{ lot.titre }}</h3>
+                                        <span class="badge success">{{ lot.valeurEstimee|number_format(2, ',', ' ') }} €</span>
+                                    </div>
+                                    {% if lot.description %}
+                                    <p class="lot-description">{{ lot.description }}</p>
+                                    {% endif %}
+                                    <div class="lot-info">
+                                        <div class="info-item">
+                                            <span class="info-icon">📦</span>
+                                            <span class="info-text">Quantité : {{ lot.quantite }}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-icon">💰</span>
+                                            <span class="info-text">Valeur totale : {{ (lot.valeurEstimee * lot.quantite)|number_format(2, ',', ' ') }} €</span>
+                                        </div>
+                                        {% if lot.dateCreation %}
+                                        <div class="info-item">
+                                            <span class="info-icon">📅</span>
+                                            <span class="info-text">Ajouté le {{ lot.dateCreation|date('d/m/Y') }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">🎁</div>
+                            <h3>Aucun lot</h3>
+                            <p>Vous n'avez pas encore proposé de lots pour les événements.</p>
+                            <a href="{{ path('mecene_inscription') }}" class="btn btn-primary">Proposer un lot</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Inscriptions -->
+        <div id="inscriptions" class="tab-content">
+            <div class="card main-card">
+                <div class="card-header">
+                    <h2 class="card-title">Mes Inscriptions aux Événements</h2>
+                    <a href="{{ path('mecene_inscription') }}" class="btn btn-primary">➕ Nouvelle inscription</a>
+                </div>
+                <div class="card-content">
+                    {% if inscriptions|length > 0 %}
+                        <div class="inscriptions-list">
+                            {% for inscription in inscriptions %}
+                                <div class="inscription-card">
+                                    <div class="inscription-header">
+                                        <h3 class="inscription-title">{{ inscription.evenement.nom }}</h3>
+                                        <span class="badge 
+                                            {% if inscription.statut == 'accepte' %}success
+                                            {% elseif inscription.statut == 'refuse' %}danger
+                                            {% else %}warning{% endif %}">
+                                            {% if inscription.statut == 'accepte' %}✅ Acceptée
+                                            {% elseif inscription.statut == 'refuse' %}❌ Refusée
+                                            {% else %}⏳ En attente{% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="inscription-info">
+                                        <div class="info-item">
+                                            <span class="info-icon">📅</span>
+                                            <span class="info-text">Événement le {{ inscription.evenement.dateDebut|date('d/m/Y') }}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-icon">🎁</span>
+                                            <span class="info-text">Don : {{ inscription.descriptionDon }}</span>
+                                        </div>
+                                        {% if inscription.montantEstime %}
+                                        <div class="info-item">
+                                            <span class="info-icon">💰</span>
+                                            <span class="info-text">Montant estimé : {{ inscription.montantEstime|number_format(2, ',', ' ') }} €</span>
+                                        </div>
+                                        {% endif %}
+                                        <div class="info-item">
+                                            <span class="info-icon">⏰</span>
+                                            <span class="info-text">Inscrit le {{ inscription.dateInscription|date('d/m/Y à H:i') }}</span>
+                                        </div>
+                                    </div>
+                                    {% if inscription.remarques %}
+                                    <div class="inscription-comment">
+                                        <strong>Remarques :</strong>
+                                        <p>{{ inscription.remarques }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <h3>Aucune inscription</h3>
+                            <p>Vous n'avez pas encore participé à des événements.</p>
+                            <a href="{{ path('mecene_inscription') }}" class="btn btn-primary">S'inscrire à un événement</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(event, tabName) {
+    event.preventDefault();
+    
+    // Cacher tous les contenus
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    // Retirer la classe selected de tous les tabs
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => tab.classList.remove('selected'));
+    
+    // Afficher le contenu sélectionné
+    document.getElementById(tabName).classList.add('active');
+    
+    // Ajouter la classe selected au tab cliqué
+    event.currentTarget.classList.add('selected');
+}
+</script>
+{% endblock %}

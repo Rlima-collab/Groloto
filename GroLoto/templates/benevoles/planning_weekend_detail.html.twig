@@ -1,0 +1,555 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Planning - {{ weekend.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section benevoles-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">{{ weekend.nom }}</h1>
+        <p class="hero-description">
+            <i class="bi bi-calendar-event"></i>
+            Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+            <a href="{{ path('benevole_mon_planning') }}" class="btn-login">
+                <i class="bi bi-arrow-left"></i> Retour à mes weekends
+            </a>
+            <a href="{{ path('benevole_planning_weekend_pdf', {id: weekend.id}) }}" class="btn-download">
+                <i class="bi bi-download"></i> Télécharger en PDF
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="view-toggle" style="text-align: center; margin-bottom: 1.5rem;">
+        <button class="btn-view active" id="btn-calendar" onclick="switchView('calendar')">
+            <i class="bi bi-calendar-week"></i> Vue Calendrier
+        </button>
+        <button class="btn-view" id="btn-timeline" onclick="switchView('timeline')">
+            <i class="bi bi-list-ul"></i> Vue Timeline
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Mon Planning - {{ taches|length }} tâche{{ taches|length > 1 ? 's' : '' }}</h5>
+        </div>
+        <div class="card-content">
+            {% if weekend.description %}
+                <div class="weekend-info">
+                    <h6><i class="bi bi-info-circle"></i> Description du weekend</h6>
+                    <p>{{ weekend.description|nl2br }}</p>
+                </div>
+            {% endif %}
+
+            {# Vue Calendrier #}
+            <div id="calendar-view" style="display: block;">
+                <div id="calendar"></div>
+            </div>
+
+            {# Vue Timeline #}
+            <div id="timeline-view" style="display: none;">
+                <div class="planning-timeline">
+                {% set currentDate = null %}
+                {% for tache in taches %}
+                    {% set tacheDate = tache.debut|date('Y-m-d') %}
+                    {% if currentDate != tacheDate %}
+                        {% set currentDate = tacheDate %}
+                        <div class="date-separator">
+                            <span class="date-badge">
+                                {{ tache.debut|date('l d F Y')|capitalize }}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    <div class="tache-item">
+                        <div class="tache-time">
+                            <div class="time-badge">
+                                <i class="bi bi-clock"></i>
+                                {{ tache.debut|date('H:i') }}
+                            </div>
+                            <div class="time-line"></div>
+                        </div>
+                        <div class="tache-content">
+                            <div class="tache-card">
+                                <h4 class="tache-title">{{ tache.titre }}</h4>
+                                <div class="tache-details">
+                                    <span class="detail-item">
+                                        <i class="bi bi-hourglass-split"></i>
+                                        {{ tache.debut|date('H:i') }} - {{ tache.fin|date('H:i') }}
+                                        <small>({{ ((tache.fin.timestamp - tache.debut.timestamp) / 3600)|number_format(1) }}h)</small>
+                                    </span>
+                                    {% if tache.posteRequis %}
+                                        <span class="detail-item">
+                                            <i class="bi bi-person-badge"></i>
+                                            {{ tache.posteRequis }}
+                                        </span>
+                                    {% endif %}
+                                    {% if tache.maxPersonnes %}
+                                        <span class="detail-item">
+                                            <i class="bi bi-people"></i>
+                                            {{ tache.maxPersonnes }} personne{{ tache.maxPersonnes > 1 ? 's' : '' }} max
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {% if tache.remarque %}
+                                    <div class="tache-remarque">
+                                        <i class="bi bi-chat-left-text"></i>
+                                        <span>{{ tache.remarque }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            </div>
+
+            <div class="planning-summary">
+                <h6>Résumé</h6>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <i class="bi bi-list-check"></i>
+                        <span>{{ taches|length }} tâche{{ taches|length > 1 ? 's' : '' }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="bi bi-hourglass"></i>
+                        <span>
+                            {% set totalHeures = 0 %}
+                            {% for tache in taches %}
+                                {% set totalHeures = totalHeures + ((tache.fin.timestamp - tache.debut.timestamp) / 3600) %}
+                            {% endfor %}
+                            {{ totalHeures|number_format(1) }}h au total
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-view {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-view:hover {
+    border-color: #1a3c5a;
+    color: #1a3c5a;
+}
+
+.btn-view.active {
+    background: #1a3c5a;
+    color: white;
+    border-color: #1a3c5a;
+}
+
+.fc-button-active {
+    background-color: #2b5d8a !important;
+}
+
+.btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-download:hover {
+    background: #15803d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.weekend-info {
+    background: #f8fafc;
+    border-left: 4px solid #1a3c5a;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+}
+
+.weekend-info h6 {
+    color: #1a3c5a;
+    font-weight: 600;
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.weekend-info p {
+    color: #475569;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.planning-timeline {
+    position: relative;
+    margin: 2rem 0;
+}
+
+.date-separator {
+    text-align: center;
+    margin: 2rem 0 1.5rem;
+}
+
+.date-badge {
+    background: #1a3c5a;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-block;
+}
+
+.tache-item {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.tache-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+}
+
+.time-badge {
+    background: #1a3c5a;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-align: center;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.time-badge i {
+    font-size: 1rem;
+}
+
+.time-line {
+    width: 2px;
+    flex-grow: 1;
+    background: #e2e8f0;
+    margin-top: 0.5rem;
+}
+
+.tache-item:last-child .time-line {
+    display: none;
+}
+
+.tache-content {
+    flex: 1;
+}
+
+.tache-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.tache-card:hover {
+    box-shadow: 0 4px 12px rgba(26, 60, 90, 0.1);
+    border-color: #1a3c5a;
+}
+
+.tache-title {
+    color: #1a3c5a;
+    font-size: 1.3rem;
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+}
+
+.tache-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.detail-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.detail-item i {
+    color: #1a3c5a;
+    font-size: 1rem;
+}
+
+.detail-item small {
+    color: #94a3b8;
+    margin-left: 0.25rem;
+}
+
+.tache-remarque {
+    background: #fef3c7;
+    border-left: 3px solid #f59e0b;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: start;
+}
+
+.tache-remarque i {
+    color: #f59e0b;
+    font-size: 1.1rem;
+    margin-top: 0.1rem;
+}
+
+.tache-remarque span {
+    color: #92400e;
+    flex: 1;
+    line-height: 1.5;
+}
+
+.planning-summary {
+    background: #f1f5f9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.planning-summary h6 {
+    color: #1a3c5a;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+}
+
+.summary-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #475569;
+    font-size: 1rem;
+}
+
+.stat-item i {
+    color: #1a3c5a;
+    font-size: 1.3rem;
+}
+
+/* Style d'impression */
+@media print {
+    .hero-section, .btn-login, .btn-download, nav, footer, .card-header {
+        display: none !important;
+    }
+    
+    .container {
+        max-width: 100%;
+        padding: 0;
+    }
+    
+    .card {
+        border: none;
+        box-shadow: none;
+    }
+    
+    .tache-card {
+        page-break-inside: avoid;
+    }
+    
+    .date-separator {
+        page-break-after: avoid;
+    }
+}
+
+@media (max-width: 768px) {
+    .tache-item {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .time-line {
+        display: none;
+    }
+    
+    .tache-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+// Calculer la date de début et de fin pour le calendrier
+let calendarStart, calendarEnd;
+
+// Préparer les événements pour FullCalendar
+const events = [
+    {% for tache in taches %}
+    {
+        id: {{ tache.id }},
+        title: '{{ tache.titre|e('js') }}',
+        start: '{{ tache.debut|date('Y-m-d\\TH:i:s') }}',
+        end: '{{ tache.fin|date('Y-m-d\\TH:i:s') }}',
+        backgroundColor: '#1a3c5a',
+        borderColor: '#2b5d8a',
+        extendedProps: {
+            poste: '{{ tache.posteRequis|default('')|e('js') }}',
+            maxPersonnes: {{ tache.maxPersonnes|default(0) }},
+            remarque: '{{ tache.remarque|default('')|e('js') }}'
+        }
+    }{{ not loop.last ? ',' : '' }}
+    {% endfor %}
+];
+
+// Calculer la date de début (première tâche ou début du weekend)
+const weekendStart = new Date('{{ weekend.dateDebut|date('Y-m-d') }}');
+const weekendEnd = new Date('{{ weekend.dateFin|date('Y-m-d') }}');
+
+if (events.length > 0) {
+    const firstTaskDate = new Date(events[0].start);
+    const lastTaskDate = new Date(events[events.length - 1].end);
+    
+    // Prendre la date la plus précoce entre la première tâche et le début du weekend
+    calendarStart = firstTaskDate < weekendStart ? firstTaskDate : weekendStart;
+    
+    // Prendre la date la plus tardive entre la dernière tâche et la fin du weekend
+    calendarEnd = lastTaskDate > weekendEnd ? lastTaskDate : weekendEnd;
+} else {
+    calendarStart = weekendStart;
+    calendarEnd = weekendEnd;
+}
+
+// Initialiser FullCalendar
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    
+    if (calendarEl && typeof FullCalendar !== 'undefined') {
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            locale: 'fr',
+            height: 'auto',
+            initialDate: calendarStart,
+            validRange: {
+                start: calendarStart,
+                end: new Date(calendarEnd.getTime() + 24 * 60 * 60 * 1000) // +1 jour
+            },
+            headerToolbar: {
+                left: 'prev,next',
+                center: 'title',
+                right: ''
+            },
+            buttonText: {
+                today: 'Aujourd\'hui'
+            },
+            slotMinTime: '00:00:00',
+            slotMaxTime: '24:00:00',
+            slotLabelFormat: {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            },
+            allDaySlot: false,
+            nowIndicator: true,
+            dayHeaderFormat: { weekday: 'long', day: 'numeric', month: 'long' },
+            events: events,
+            eventClick: function(info) {
+                const props = info.event.extendedProps;
+                let details = info.event.title + '\n\n';
+                details += '🕐 ' + info.event.start.toLocaleString('fr-FR') + '\n';
+                details += '   → ' + info.event.end.toLocaleString('fr-FR') + '\n';
+                
+                const duration = (info.event.end - info.event.start) / (1000 * 60 * 60);
+                details += '⏱️  Durée: ' + duration.toFixed(1) + 'h\n';
+                
+                if (props.poste) details += '\n👤 Poste: ' + props.poste;
+                if (props.maxPersonnes) details += '\n👥 Max: ' + props.maxPersonnes + ' personne(s)';
+                if (props.remarque) details += '\n\n💬 ' + props.remarque;
+                
+                alert(details);
+            },
+            eventContent: function(arg) {
+                return {
+                    html: '<div style="padding: 2px 4px; font-size: 0.85rem;">' +
+                          '<strong>' + arg.event.title + '</strong><br>' +
+                          '<small>' + arg.timeText + '</small>' +
+                          (arg.event.extendedProps.poste ? '<br><small>📍 ' + arg.event.extendedProps.poste + '</small>' : '') +
+                          '</div>'
+                };
+            },
+            firstDay: 1 // Lundi en premier
+        });
+        
+        calendar.render();
+        window.calendarInstance = calendar;
+    }
+});
+
+function switchView(view) {
+    const calendarView = document.getElementById('calendar-view');
+    const timelineView = document.getElementById('timeline-view');
+    const btnCalendar = document.getElementById('btn-calendar');
+    const btnTimeline = document.getElementById('btn-timeline');
+    
+    if (view === 'calendar') {
+        calendarView.style.display = 'block';
+        timelineView.style.display = 'none';
+        btnCalendar.classList.add('active');
+        btnTimeline.classList.remove('active');
+        
+        // Forcer le re-render du calendrier
+        if (window.calendarInstance) {
+            setTimeout(() => window.calendarInstance.updateSize(), 100);
+        }
+    } else {
+        calendarView.style.display = 'none';
+        timelineView.style.display = 'block';
+        btnCalendar.classList.remove('active');
+        btnTimeline.classList.add('active');
+    }
+}
+</script>
+
+{% endblock %}

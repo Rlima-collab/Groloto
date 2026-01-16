@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un weekend{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-create.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section weekend-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Créer un Weekend</h1>
+        <p class="hero-description">Organisez un nouveau weekend d'événements caritatifs.</p>
+        <a href="{{ path('app_weekends') }}" class="btn-login">Voir tous les weekends</a>
+    </div>
+</div>
+
+<div class="weekend-create-container">
+    <div class="weekend-form-card">
+        <div class="weekend-form-header">
+            <h2>Informations du Weekend</h2>
+        </div>
+
+        {{ form_start(form, {'attr': {'class': 'form-night-blue'}}) }}
+
+            <div class="mb-4">
+                {{ form_row(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Weekend Groloto Novembre 2025'}}) }}
+            </div>
+
+            <div class="grid-2 mb-4">
+                {{ form_row(form.date_debut, {'attr': {'class': 'form-control'}}) }}
+                {{ form_row(form.date_dimanche, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <div class="grid-2 mb-4">
+                {{ form_row(form.task_offset_before, {'attr': {'class': 'form-control'}, 'help': 'Jours avant la date de début (ex: 2 pour J-2)'} ) }}
+                {{ form_row(form.task_offset_after, {'attr': {'class': 'form-control'}, 'help': 'Jours après la date de fin (ex: 3 pour J+3)'} ) }}
+            </div>
+            
+            <div class="alert alert-info mb-4" style="background: #e0f2fe; border-left: 4px solid #0ea5e9; padding: 1rem; border-radius: 8px;">
+                <strong>Info :</strong> Le weekend doit durer au minimum 2 jours. La date du samedi (jour du milieu) sera calculée automatiquement.
+
+            </div>
+
+            <div class="mb-4">
+                {{ form_row(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Description du weekend...'}}) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_row(form.cover_image, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="text-center mt-8">
+                <button type="submit" class="btn-night-blue">
+                    Créer le weekend
+                </button>
+                <a href="{{ path('app_weekends') }}" class="btn-outline-night-blue ml-3">
+                    Annuler
+                </a>
+            </div>
+
+            <div style="display: none;">
+                {{ form_rest(form) }}
+            </div>
+
+        {{ form_end(form, {'render_rest': false}) }}
+    </div>
+</div>
+
+<script>
+// Pas de JavaScript nécessaire pour ce formulaire simple
+</script>
+
+<link rel="stylesheet" href="{{ asset('css/weekends.css') }}">
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Weekend créé avec succès{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/festival/festival-create.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section weekend-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Confirmation de création</h1>
+        <p class="hero-description">Votre weekend a été enregistré dans le système.</p>
+    </div>
+</div>
+
+<div class="weekend-create-container">
+    <div class="weekend-form-card">
+        <div class="success-header">
+            <svg class="success-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M8 12.5L10.5 15L16 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h2>Weekend créé avec succès</h2>
+            <p class="weekend-name">{{ weekend.nom }}</p>
+            <div class="weekend-dates">
+                Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}
+            </div>
+            {% if weekend.description %}
+                <div class="weekend-description-box">
+                    {{ weekend.description }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="next-steps">
+            <h3>Prochaine étape</h3>
+            <p class="step-description">
+                Vous pouvez maintenant ajouter des événements pour ce weekend.
+            </p>
+            
+            <a href="{{ path('app_evenement_create', {'preselect_weekend': weekend.id}) }}" 
+               class="btn-primary">
+                Créer un événement pour ce weekend
+            </a>
+        </div>
+
+        <div class="actions">
+            <a href="{{ path('app_weekends') }}" class="btn-secondary">
+                Voir tous les weekends
+            </a>
+            <a href="{{ path('app_weekend_create') }}" class="btn-secondary">
+                Créer un autre weekend
+            </a>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{{ asset('css/weekends.css') }}">
+{% endblock %}

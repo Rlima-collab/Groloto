@@ -1,0 +1,68 @@
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0" style="color: #0d1b2a; font-weight: 600;">
+                <i class="bi bi-clock-history me-2"></i>Historique des Stocks
+            </h3>
+        </div>
+
+        <p class="text-muted mb-4">Suivi des mouvements de stock par année</p>
+
+        {% if historique_par_annee is empty %}
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <h3>Aucun historique disponible</h3>
+                <p>Les mouvements de stock apparaîtront ici.</p>
+            </div>
+        {% else %}
+            {% for data in historique_par_annee %}
+                <div class="year-section mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                        <h4 class="mb-0" style="color: #0d1b2a; font-weight: 600;">
+                            <i class="bi bi-calendar-event me-2"></i>Année {{ data.annee }}
+                        </h4>
+                        <a href="{{ path('stocks_export_historique', {annee: data.annee}) }}" 
+                           class="btn btn-sm btn-night-blue">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>Exporter PDF
+                        </a>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="stat-card info">
+                                <div class="stat-header">
+                                    <span class="stat-title">Articles gérés</span>
+                                    <span class="stat-icon">📦</span>
+                                </div>
+                                <div class="stat-value">{{ data.nb_articles }}</div>
+                                <div class="stat-label">Articles différents</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card success">
+                                <div class="stat-header">
+                                    <span class="stat-title">Valeur totale</span>
+                                    <span class="stat-icon">💰</span>
+                                </div>
+                                <div class="stat-value">{{ data.valeur_totale|number_format(0, ',', ' ') }} €</div>
+                                <div class="stat-label">Valeur estimée</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card warning">
+                                <div class="stat-header">
+                                    <span class="stat-title">Mouvements</span>
+                                    <span class="stat-icon">🔄</span>
+                                </div>
+                                <div class="stat-value">{{ data.nb_mouvements }}</div>
+                                <div class="stat-label">Entrées/Sorties/Ajustements</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<link rel="stylesheet" href="{{ asset('css/stocks.css') }}">

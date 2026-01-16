@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Historique Stock {{ annee }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 11pt;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28pt;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .header p {
+            font-size: 12pt;
+            opacity: 0.9;
+        }
+        
+        .container {
+            padding: 0 20px;
+        }
+        
+        .info-section {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .info-section p {
+            margin: 5px 0;
+            font-size: 10pt;
+            color: #555;
+        }
+        
+        .info-section strong {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .metrics {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        
+        .metric-row {
+            display: table-row;
+        }
+        
+        .metric-card {
+            display: table-cell;
+            width: 33.33%;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            background: #ffffff;
+        }
+        
+        .metric-card:not(:last-child) {
+            border-right: none;
+        }
+        
+        .metric-card.blue {
+            border-top: 4px solid #007bff;
+        }
+        
+        .metric-card.green {
+            border-top: 4px solid #28a745;
+        }
+        
+        .metric-card.yellow {
+            border-top: 4px solid #ffc107;
+        }
+        
+        .metric-label {
+            font-size: 9pt;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .metric-subtitle {
+            font-size: 8pt;
+            color: #868e96;
+        }
+        
+        h2 {
+            font-size: 16pt;
+            color: #2c3e50;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 9pt;
+        }
+        
+        thead {
+            background: #f4f6f8;
+        }
+        
+        th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            text-transform: uppercase;
+            font-size: 8pt;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        
+        tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 8pt;
+            font-weight: 600;
+        }
+        
+        .badge-entree {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-sortie {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .badge-ajustement {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            font-size: 8pt;
+            color: #6c757d;
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Historique des Stocks</h1>
+    </div>
+    
+    <div class="container">
+        <!-- Informations du rapport -->
+        <div class="info-section">
+            <p><strong>Date de génération :</strong> {{ date_generation|date('d/m/Y à H:i') }}</p>
+            <p><strong>Période :</strong> Année {{ annee }}</p>
+            <p><strong>Document :</strong> Rapport d'historique des mouvements de stock</p>
+        </div>
+        
+        <!-- Métriques principales -->
+        <div class="metrics">
+            <div class="metric-row">
+                <div class="metric-card blue">
+                    <div class="metric-label">Articles Gérés</div>
+                    <div class="metric-value">{{ nb_articles }}</div>
+                    <div class="metric-subtitle">Articles différents</div>
+                </div>
+                <div class="metric-card green">
+                    <div class="metric-label">Valeur Totale</div>
+                    <div class="metric-value">€{{ valeur_totale|number_format(0, ',', ' ') }}</div>
+                    <div class="metric-subtitle">Mouvements cumulés</div>
+                </div>
+                <div class="metric-card yellow">
+                    <div class="metric-label">Mouvements</div>
+                    <div class="metric-value">{{ nb_mouvements }}</div>
+                    <div class="metric-subtitle">Entrées/Sorties</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Détail des mouvements -->
+        <h2>Détail des Mouvements</h2>
+        
+        {% if historiques is empty %}
+            <div class="empty-message">
+                Aucun mouvement enregistré pour l'année {{ annee }}
+            </div>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Article</th>
+                        <th>Type</th>
+                        <th class="text-right">Quantité</th>
+                        <th class="text-right">Valeur Unit.</th>
+                        <th class="text-right">Valeur Total</th>
+                        <th>Raison</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for histo in historiques %}
+                        <tr>
+                            <td>{{ histo.dateCreation ? histo.dateCreation|date('d/m/Y') : 'N/A' }}</td>
+                            <td>{{ histo.stock ? histo.stock.nom : 'N/A' }}</td>
+                            <td>
+                                {% if histo.typeChangement == 'entree' %}
+                                    <span class="badge badge-entree">Entrée</span>
+                                {% elseif histo.typeChangement == 'sortie' %}
+                                    <span class="badge badge-sortie">Sortie</span>
+                                {% else %}
+                                    <span class="badge badge-ajustement">{{ histo.typeChangement|capitalize }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">{{ histo.quantite }}</td>
+                            <td class="text-right">€{{ histo.stock ? histo.stock.valeurUnitaire|number_format(2, ',', ' ') : '0,00' }}</td>
+                            <td class="text-right">
+                                €{{ histo.stock ? (histo.quantite * histo.stock.valeurUnitaire)|number_format(2, ',', ' ') : '0,00' }}
+                            </td>
+                            <td>{{ histo.raison ?? '-' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>Document généré automatiquement par GroLoto - Système de Gestion des Stocks</p>
+            <p>© {{ 'now'|date('Y') }} GroLoto - Tous droits réservés</p>
+        </div>
+    </div>
+</body>
+</html>

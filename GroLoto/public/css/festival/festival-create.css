@@ -1,0 +1,234 @@
+/* =============== PAGE CRÉATION/MODIFICATION WEEKEND - STYLES SPÉCIFIQUES =============== */
+
+/* Container principal */
+.weekend-create-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* Card du formulaire */
+.weekend-form-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 16px rgba(13, 27, 42, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Header des sections du formulaire */
+.weekend-form-header {
+    background-color: #0d1b2a;
+    color: #fff;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.weekend-form-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Form Styles - Bleu Nocturne */
+.form-night-blue .form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-night-blue .form-control:focus {
+    border-color: #0d1b2a;
+    box-shadow: 0 0 0 3px rgba(13, 27, 42, 0.1);
+    outline: none;
+}
+
+.form-night-blue label {
+    color: #1e293b;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-night-blue .form-group {
+    margin-bottom: 1.5rem;
+}
+
+/* Items événement dans le formulaire */
+.evenement-item {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.evenement-item:hover {
+    border-color: #0d1b2a;
+    box-shadow: 0 4px 12px rgba(13, 27, 42, 0.15);
+}
+
+/* Bouton de suppression d'événement */
+.btn-remove-evenement {
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-remove-evenement:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+/* Bouton d'ajout d'événement */
+.btn-add-evenement {
+    background: transparent;
+    color: #0d1b2a;
+    border: 2px dashed #0d1b2a;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
+    display: block;
+    text-align: center;
+}
+
+.btn-add-evenement:hover {
+    background: #f3f4f6;
+    border-color: #0a1419;
+    color: #0a1419;
+}
+
+/* Section des événements */
+#evenements {
+    margin-bottom: 1.5rem;
+}
+
+/* Description box in success page */
+.weekend-description-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    color: #475569;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Conteneur des boutons d'action */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e2e8f0;
+}
+
+/* Utilitaires pour les marges */
+.mt-3 {
+    margin-top: 1rem;
+}
+
+.mt-4 {
+    margin-top: 1.5rem;
+}
+
+.mt-6 {
+    margin-top: 2rem;
+}
+
+.mt-8 {
+    margin-top: 3rem;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
+}
+
+.ml-3 {
+    margin-left: 1rem;
+}
+
+/* Styles responsive pour le formulaire */
+@media (max-width: 768px) {
+    .weekend-create-container {
+        padding: 0 0.5rem;
+    }
+
+    .weekend-form-card {
+        padding: 1rem;
+    }
+
+    .weekend-form-header {
+        padding: 1rem 1.5rem;
+    }
+
+    .evenement-item {
+        padding: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn-night-blue,
+    .form-actions .btn-outline-night-blue {
+        width: 100%;
+    }
+
+    .ml-3 {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Animation pour les nouveaux événements ajoutés */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.evenement-item.new-item {
+    animation: slideIn 0.4s ease;
+}
+
+/* Animation de suppression */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+.evenement-item.removing {
+    animation: fadeOut 0.3s ease;
+}

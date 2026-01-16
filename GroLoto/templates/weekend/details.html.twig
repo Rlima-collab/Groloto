@@ -1,0 +1,277 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ weekend.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section avec image de fond -->
+<div class="hero-section stocks-hero weekend-detail-hero" {% if weekend.coverImage %}style="background-image: linear-gradient(rgba(26, 31, 58, 0.85), rgba(45, 53, 97, 0.85)), url('{{ asset(weekend.coverImage) }}'); background-size: cover; background-position: center;"{% endif %}>
+    <div class="shine"></div>
+    <div class="hero-content">
+        <div class="hero-breadcrumb">
+            <a href="{{ path('app_weekend_liste') }}">Weekends</a>
+            <span>/</span>
+            <span>{{ weekend.nom }}</span>
+        </div>
+        <h1 class="hero-title">{{ weekend.nom }}</h1>
+        <p class="hero-description">
+            <svg style="width: 20px; height: 20px; display: inline; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}
+        </p>
+        <div class="hero-actions">
+            <a href="{{ path('app_weekend_liste') }}" class="btn-secondary-outline">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Retour à la liste
+            </a>
+            {% if isAdmin %}
+            <a href="{{ path('app_weekend_edit', {'id': weekend.id}) }}" class="btn-login">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Modifier
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="details-container">
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% if weekend.description %}
+    <!-- Description en pleine largeur -->
+    <div class="description-card">
+        <div class="card-header">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+            </svg>
+            <h2>Description</h2>
+        </div>
+        <div class="card-content">
+            <div class="description-content">
+                {{ weekend.description|nl2br }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="details-grid">
+        <!-- Informations principales -->
+        <div class="details-card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h2>Informations</h2>
+            </div>
+            <div class="card-content">
+                <div class="info-row">
+                    <span class="info-label">Nom du weekend :</span>
+                    <span class="info-value">{{ weekend.nom }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date de début :</span>
+                    <span class="info-value">{{ weekend.dateDebut|date('d/m/Y') }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date de fin :</span>
+                    <span class="info-value">{{ weekend.dateFin|date('d/m/Y') }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Créé le :</span>
+                    <span class="info-value">{{ weekend.dateCreation|date('d/m/Y à H:i') }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Événements -->
+        <div class="details-card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <h2>Événements ({{ weekend.evenements|length }})</h2>
+            </div>
+            <div class="card-content">
+                {% if weekend.evenements is empty %}
+                    <p class="empty-message">Aucun événement pour ce weekend.</p>
+                    {% if isAdmin %}
+                    <a href="{{ path('app_evenement_create', {'preselect_weekend': weekend.id}) }}" class="btn-add">
+                        <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Ajouter un événement
+                    </a>
+                    {% endif %}
+                {% else %}
+                    <div class="list-items">
+                        {% for evenement in weekend.evenements %}
+                        <div class="list-item">
+                            <div class="item-icon event-icon">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                            </div>
+                            <div class="item-content">
+                                <h4>{{ evenement.nom }}</h4>
+                                <div class="item-meta">
+                                    <span>{{ evenement.dateDebut|date('d/m/Y') }}</span>
+                                    {% if evenement.heureDebut %}
+                                        <span>{{ evenement.heureDebut|date('H:i') }}</span>
+                                    {% endif %}
+                                    {% if evenement.lieu %}
+                                        <span>{{ evenement.lieu }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if isAdmin %}
+                    <a href="{{ path('app_evenement_create', {'preselect_weekend': weekend.id}) }}" class="btn-add">
+                        <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Ajouter un événement
+                    </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tâches -->
+        <div class="details-card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                </svg>
+                <h2>Tâches ({{ weekend.taches|length }})</h2>
+            </div>
+            <div class="card-content">
+                {% if weekend.taches is empty %}
+                    <p class="empty-message">Aucune tâche pour ce weekend.</p>
+                {% else %}
+                    <div class="list-items">
+                        {% for tache in weekend.taches %}
+                        <div class="list-item">
+                            <div class="item-icon task-icon">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="item-content">
+                                <h4>{{ tache.titre }}</h4>
+                                <div class="item-meta">
+                                    <span>{{ tache.debut|date('d/m/Y H:i') }} - {{ tache.fin|date('H:i') }}</span>
+                                    {% if tache.posteRequis %}
+                                        <span>{{ tache.posteRequis }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if tache.affectations|length > 0 %}
+                                    <div class="item-volunteers" style="margin-top: 0.5rem;">
+                                        <strong style="font-size: 0.9em; color: #666;">Bénévoles :</strong>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem;">
+                                            {% for affectation in tache.affectations %}
+                                                {% if affectation.benevole and affectation.benevole.utilisateur %}
+                                                    <span class="badge" style="background-color: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; font-weight: 500;">
+                                                        {{ affectation.benevole.utilisateur.prenom }} {{ affectation.benevole.utilisateur.nom }}
+                                                    </span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if isAdmin and benevoles is defined and benevoles is not empty %}
+    <div class="details-card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <h2>Bénévoles mobilisés ({{ benevoles|length }})</h2>
+        </div>
+        <div class="card-content">
+            <div class="list-items">
+                {% for benevole in benevoles %}
+                <div class="list-item">
+                    <div class="item-icon" style="background: #eef2ff; color: #4f46e5;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <div class="item-content">
+                        <h4>{{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}</h4>
+                        <div class="item-meta">
+                            <span>{{ benevole.utilisateur.email }}</span>
+                            {% if benevole.utilisateur.telephone %}
+                                <span>{{ benevole.utilisateur.telephone }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Section Disponibilités des bénévoles pour ce weekend (admin uniquement) #}
+    {% if isAdmin %}
+    <div class="details-card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <h2>📅 Disponibilités des bénévoles</h2>
+        </div>
+        <div class="card-content">
+            <p style="color: #6b7280; margin-bottom: 1rem;">Consultez les disponibilités des bénévoles pour ce weekend afin de planifier les tâches efficacement.</p>
+            <a href="{{ path('admin_disponibilites_weekend', {'id': weekend.id}) }}" class="btn-add" style="background: #6366f1; color: white; border: none;">
+                <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                Voir les disponibilités
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if isAdmin %}
+    <div class="danger-zone">
+        <h3>Zone de danger</h3>
+        <p>La suppression du weekend est irréversible et supprimera également tous les événements et tâches associés.</p>
+        <form method="post" action="{{ path('app_weekend_delete', {'id': weekend.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce weekend ? Cette action est irréversible.');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ weekend.id) }}">
+            <button type="submit" class="btn-danger">Supprimer le weekend</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<link rel="stylesheet" href="{{ asset('css/weekends.css') }}">
+{% endblock %}

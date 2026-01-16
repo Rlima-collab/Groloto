@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Weekends{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles/benevoles-list.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section benevoles-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Mon Planning</h1>
+        <p class="hero-description">Consultez vos weekends et téléchargez votre planning.</p>
+        <a href="{{ path('dashboard') }}" class="btn-login">Retour au tableau de bord</a>
+    </div>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <h3>Weekends</h3>
+        <p class="metric-value">{{ total_weekends }}</p>
+        <p class="metric-detail">Où vous êtes inscrit</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Tâches futures</h3>
+        <p class="metric-value">{{ total_taches_futures }}</p>
+        <p class="metric-detail">À venir</p>
+    </div>
+
+    <div class="metric-card">
+        <h3>Tâches réalisées</h3>
+        <p class="metric-value">{{ total_taches_realisees }}</p>
+        <p class="metric-detail">Terminées</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Mes Weekends</h5>
+        </div>
+        <div class="card-content">
+            {% if weekends is not empty %}
+                <div class="weekends-grid">
+                    {% for weekend in weekends %}
+                        <div class="weekend-card">
+                            {% if weekend.cover_image %}
+                                {% set imagePath = weekend.cover_image %}
+                                <div class="weekend-image">
+                                    {% if imagePath starts with 'uploads/' %}
+                                        <img src="{{ asset(imagePath) }}" alt="{{ weekend.nom }}">
+                                    {% else %}
+                                        <img src="{{ asset('uploads/weekends/' ~ imagePath) }}" alt="{{ weekend.nom }}">
+                                    {% endif %}
+                                    <div class="weekend-overlay"></div>
+                                </div>
+                            {% else %}
+                                <div class="weekend-image-empty">
+                                    <i class="bi bi-calendar-event"></i>
+                                </div>
+                            {% endif %}
+                            <div class="weekend-content">
+                                <div class="weekend-header">
+                                    <h3>{{ weekend.nom }}</h3>
+                                    <span class="weekend-date">
+                                        <i class="bi bi-calendar-event"></i>
+                                        {{ weekend.date_debut|date('d/m/Y') }} - {{ weekend.date_fin|date('d/m/Y') }}
+                                    </span>
+                                </div>
+                                {% if weekend.description %}
+                                    <div class="weekend-description">
+                                        {{ weekend.description|length > 120 ? weekend.description|slice(0, 120) ~ '...' : weekend.description }}
+                                    </div>
+                                {% endif %}
+                                <div class="weekend-footer">
+                                    <div class="weekend-stats">
+                                        <span class="stat-badge">
+                                            <i class="bi bi-list-check"></i>
+                                            {{ weekend.nb_taches }} tâche{{ weekend.nb_taches > 1 ? 's' : '' }}
+                                        </span>
+                                    </div>
+                                    <a href="{{ path('benevole_planning_weekend', {id: weekend.id}) }}" class="btn-voir-details">
+                                        <span>Voir détails</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-calendar-x" style="font-size: 4rem; color: #94a3b8;"></i>
+                    <h3>Aucun weekend</h3>
+                    <p>Vous n'êtes inscrit à aucune tâche pour le moment.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

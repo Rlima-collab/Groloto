@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Disponibilités{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/stocks/stocks-common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/weekends.css') }}?v={{ 'now'|date('U') }}">
+    <link rel="stylesheet" href="{{ asset('css/weekends_cards.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hero-section stocks-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1 class="hero-title">Mes Disponibilités</h1>
+            <p class="hero-description">Indiquez vos disponibilités pour chaque weekend. Cela permettra aux organisateurs de vous assigner aux tâches qui correspondent à vos créneaux libres.</p>
+        </div>
+    </div>
+</div>
+
+<div class="weekends-grid dispo-list">
+    {% for data in weekendsData %}
+        {% set weekend = data.weekend %}
+        {% set hasDispos = data.hasDisponibilites %}
+        {% set isPast = data.isPast %}
+        <div class="weekend-card {{ isPast ? 'past' : '' }}" data-weekend-id="{{ weekend.id }}">
+            <div class="weekend-card-image {% if not weekend.coverImage %}no-image{% endif %}">
+                {% if weekend.coverImage %}
+                    <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}">
+                {% else %}
+                    <i class="bi bi-calendar-event"></i>
+                {% endif %}
+            </div>
+
+            <div class="weekend-card-body">
+                <h3 class="weekend-card-title">{{ weekend.nom }}</h3>
+
+                <div class="weekend-card-dates">
+                    <i class="bi bi-calendar-range"></i>
+                    <span>{{ weekend.dateDebut|date('d/m/Y') }} → {{ weekend.dateFin|date('d/m/Y') }}</span>
+                </div>
+
+                {% if isPast %}
+                    <div class="status-badge past">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Weekend terminé</span>
+                    </div>
+                {% elseif hasDispos %}
+                    <div class="status-badge completed">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Disponibilités renseignées</span>
+                    </div>
+                {% else %}
+                    <div class="status-badge pending">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>Disponibilités non renseignées</span>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <div class="weekend-card-footer">
+                <span class="weekend-status {{ isPast ? 'past' : 'upcoming' }}">
+                    <i class="bi bi-{{ isPast ? 'check-circle' : 'clock' }}"></i>
+                    {{ isPast ? 'Terminé' : 'À venir' }}
+                </span>
+                <a href="{{ path('benevole_disponibilites_weekend', {id: weekend.id}) }}" class="weekend-view-btn">Indiquer mes disponibilités <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
