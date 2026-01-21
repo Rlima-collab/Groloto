@@ -42,30 +42,18 @@
 
         <form method="post" enctype="multipart/form-data" id="recu-form">
             <div class="recu-form-section">
-                <h3 class="recu-form-section-title">Type et année</h3>
-                <div class="recu-form-group">
-                    <label class="recu-form-label">Type de reçu <span class="required">*</span></label>
-                    <div class="recu-radio-group">
-                        <div class="recu-radio-option">
-                            <input type="radio" name="type" value="mecene" id="type-mecene" checked>
-                            <label for="type-mecene">Mécène</label>
-                        </div>
-                        <div class="recu-radio-option">
-                            <input type="radio" name="type" value="benevole" id="type-benevole">
-                            <label for="type-benevole">Bénévole</label>
-                        </div>
-                    </div>
-                </div>
+                <h3 class="recu-form-section-title">Année fiscale</h3>
                 <div class="recu-form-group">
                     <label class="recu-form-label" for="annee">Année fiscale <span class="required">*</span></label>
                     <input type="number" name="annee" id="annee" class="recu-form-input" value="{{ current_year }}" min="2020" max="{{ current_year + 1 }}" required>
+                    <input type="hidden" name="type" value="mecene">
                 </div>
             </div>
 
             <div class="recu-form-section">
                 <h3 class="recu-form-section-title">Sélection du destinataire</h3>
                 <div class="recu-form-group">
-                    <label class="recu-form-label">Utilisateur destinataire <span class="required">*</span></label>
+                    <label class="recu-form-label">Mécène destinataire <span class="required">*</span></label>
 
                     <div id="mecene-list" class="recu-user-list">
                         <div class="recu-search-container" style="margin-bottom: 1rem;">
@@ -83,28 +71,6 @@
                                     <div class="recu-user-info">
                                         <h4>{{ mecene.prenom }} {{ mecene.nom }}</h4>
                                         <p>{{ mecene.email }}</p>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <div id="benevole-list" class="recu-user-list" style="display: none;">
-                        <div class="recu-search-container" style="margin-bottom: 1rem;">
-                            <input type="text" id="search-benevole" class="recu-form-input" placeholder="Rechercher un bénévole..." style="width: 100%;">
-                        </div>
-                        <h4 class="recu-user-list-title">Bénévoles disponibles</h4>
-                        {% if benevoles is empty %}
-                            <p style="color: #6b7280; text-align: center; padding: 2rem;">Aucun bénévole disponible</p>
-                        {% else %}
-                            {% for benevole in benevoles %}
-                                <div class="recu-user-item" data-user-id="{{ benevole.id }}" data-type="benevole" data-search="{{ benevole.prenom|lower }} {{ benevole.nom|lower }} {{ benevole.email|lower }}">
-                                    <div class="recu-user-avatar">
-                                        {{ benevole.prenom|first|upper ~ benevole.nom|first|upper }}
-                                    </div>
-                                    <div class="recu-user-info">
-                                        <h4>{{ benevole.prenom }} {{ benevole.nom }}</h4>
-                                        <p>{{ benevole.email }}</p>
                                     </div>
                                 </div>
                             {% endfor %}
