@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     libsqlite3-dev \
     libpq-dev \
+    $PHPIZE_DEPS \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
     pdo \
@@ -23,8 +24,17 @@ RUN apt-get update && apt-get install -y \
     zip \
     gd \
     opcache \
+    && pecl install pcov \
+    && docker-php-ext-enable pcov \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Activer PCOV uniquement pour la couverture de code (PHPUnit)
+RUN { \
+      echo 'pcov.enabled=1'; \
+      echo 'pcov.directory=/var/www/html/src'; \
+      echo 'pcov.exclude="~vendor~"'; \
+    } > /usr/local/etc/php/conf.d/pcov.ini
 
 # Installation de Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
