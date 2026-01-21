@@ -57,6 +57,83 @@
                 </h3>
             </div>
 
+            <!-- Filtres -->
+            <div class="filters-section" style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <!-- Filtre Catégorie -->
+                    <div>
+                        <label for="filter-category" style="font-weight: 600; color: #0d1b2a; display: block; margin-bottom: 0.5rem;">
+                            <i class="bi bi-filter"></i> Catégorie
+                        </label>
+                        <select id="filter-category" class="form-control" style="padding: 0.5rem;">
+                            <option value="">-- Toutes les catégories --</option>
+                            <option value="bar">🍺 Bar</option>
+                            <option value="resto">🍽️ Resto</option>
+                            <option value="deco">🎨 Déco</option>
+                            <option value="materiel">🔧 Matériel</option>
+                            <option value="autre">📋 Autre</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtre Source -->
+                    <div>
+                        <label for="filter-source" style="font-weight: 600; color: #0d1b2a; display: block; margin-bottom: 0.5rem;">
+                            <i class="bi bi-filter"></i> Source
+                        </label>
+                        <select id="filter-source" class="form-control" style="padding: 0.5rem;">
+                            <option value="">-- Toutes les sources --</option>
+                            <option value="achat">Achat</option>
+                            <option value="don">Don</option>
+                            <option value="pret">Prêt</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtre Statut -->
+                    <div>
+                        <label for="filter-status" style="font-weight: 600; color: #0d1b2a; display: block; margin-bottom: 0.5rem;">
+                            <i class="bi bi-filter"></i> Statut
+                        </label>
+                        <select id="filter-status" class="form-control" style="padding: 0.5rem;">
+                            <option value="">-- Tous les statuts --</option>
+                            <option value="normal">Normal</option>
+                            <option value="faible">Faible</option>
+                            <option value="critique">Critique</option>
+                        </select>
+                    </div>
+
+                    <!-- Recherche texte -->
+                    <div>
+                        <label for="filter-search" style="font-weight: 600; color: #0d1b2a; display: block; margin-bottom: 0.5rem;">
+                            <i class="bi bi-search"></i> Rechercher
+                        </label>
+                        <input type="text" id="filter-search" class="form-control" placeholder="Nom de l'article..." style="padding: 0.5rem;">
+                    </div>
+
+                    <!-- Tri -->
+                    <div>
+                        <label for="sort-by" style="font-weight: 600; color: #0d1b2a; display: block; margin-bottom: 0.5rem;">
+                            <i class="bi bi-sort-down"></i> Trier par
+                        </label>
+                        <select id="sort-by" class="form-control" style="padding: 0.5rem;">
+                            <option value="">-- Ordre par défaut --</option>
+                            <option value="name-asc">Nom (A → Z)</option>
+                            <option value="name-desc">Nom (Z → A)</option>
+                            <option value="stock-asc">Stock (↑ faible)</option>
+                            <option value="stock-desc">Stock (↓ élevé)</option>
+                            <option value="value-asc">Valeur (↑ faible)</option>
+                            <option value="value-desc">Valeur (↓ élevée)</option>
+                            <option value="threshold-asc">Seuil (↑ faible)</option>
+                            <option value="threshold-desc">Seuil (↓ élevé)</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <button id="reset-filters" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Réinitialiser filtres
+                    </button>
+                </div>
+            </div>
+
             {% if stock_items is empty %}
                 <div class="empty-state">
                     <i class="bi bi-inbox"></i>
@@ -141,4 +218,149 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterCategory = document.getElementById('filter-category');
+    const filterSource = document.getElementById('filter-source');
+    const filterStatus = document.getElementById('filter-status');
+    const filterSearch = document.getElementById('filter-search');
+    const sortBy = document.getElementById('sort-by');
+    const resetButton = document.getElementById('reset-filters');
+    const table = document.querySelector('table tbody');
+
+    if (!table) return;
+
+    function applyFilters() {
+        const rows = Array.from(table.querySelectorAll('tr'));
+        const categoryValue = filterCategory.value.toLowerCase();
+        const sourceValue = filterSource.value.toLowerCase();
+        const statusValue = filterStatus.value.toLowerCase();
+        const searchValue = filterSearch.value.toLowerCase();
+        const sortValue = sortBy.value;
+
+        // Filtrer les lignes
+        const visibleRows = rows.filter(row => {
+            let show = true;
+
+            // Filtre Catégorie
+            if (categoryValue) {
+                const categoryBadge = row.querySelector('.category');
+                if (!categoryBadge || !categoryBadge.textContent.toLowerCase().includes(categoryValue)) {
+                    show = false;
+                }
+            }
+
+            // Filtre Source
+            if (sourceValue && show) {
+                const sourceCell = row.cells[6];
+                if (!sourceCell.textContent.toLowerCase().includes(sourceValue)) {
+                    show = false;
+                }
+            }
+
+            // Filtre Statut
+            if (statusValue && show) {
+                const statusBadge = row.querySelector('.status');
+                if (!statusBadge || !statusBadge.textContent.toLowerCase().includes(statusValue)) {
+                    show = false;
+                }
+            }
+
+            // Recherche texte (sur le nom de l'article)
+            if (searchValue && show) {
+                const nameCell = row.cells[0];
+                if (!nameCell.textContent.toLowerCase().includes(searchValue)) {
+                    show = false;
+                }
+            }
+
+            return show;
+        });
+
+        // Trier les lignes
+        if (sortValue) {
+            visibleRows.sort((a, b) => {
+                let aValue, bValue;
+
+                switch (sortValue) {
+                    case 'name-asc':
+                        aValue = a.cells[0].textContent.toLowerCase();
+                        bValue = b.cells[0].textContent.toLowerCase();
+                        return aValue.localeCompare(bValue);
+                    
+                    case 'name-desc':
+                        aValue = a.cells[0].textContent.toLowerCase();
+                        bValue = b.cells[0].textContent.toLowerCase();
+                        return bValue.localeCompare(aValue);
+                    
+                    case 'stock-asc':
+                        aValue = parseInt(a.cells[2].textContent);
+                        bValue = parseInt(b.cells[2].textContent);
+                        return aValue - bValue;
+                    
+                    case 'stock-desc':
+                        aValue = parseInt(a.cells[2].textContent);
+                        bValue = parseInt(b.cells[2].textContent);
+                        return bValue - aValue;
+                    
+                    case 'value-asc':
+                        aValue = parseFloat(a.cells[4].textContent.replace(/[^\d,]/g, '').replace(',', '.'));
+                        bValue = parseFloat(b.cells[4].textContent.replace(/[^\d,]/g, '').replace(',', '.'));
+                        return aValue - bValue;
+                    
+                    case 'value-desc':
+                        aValue = parseFloat(a.cells[4].textContent.replace(/[^\d,]/g, '').replace(',', '.'));
+                        bValue = parseFloat(b.cells[4].textContent.replace(/[^\d,]/g, '').replace(',', '.'));
+                        return bValue - aValue;
+                    
+                    case 'threshold-asc':
+                        aValue = parseInt(a.cells[3].textContent);
+                        bValue = parseInt(b.cells[3].textContent);
+                        return aValue - bValue;
+                    
+                    case 'threshold-desc':
+                        aValue = parseInt(a.cells[3].textContent);
+                        bValue = parseInt(b.cells[3].textContent);
+                        return bValue - aValue;
+                    
+                    default:
+                        return 0;
+                }
+            });
+        }
+
+        // Réafficher les lignes dans le bon ordre
+        rows.forEach(row => {
+            if (visibleRows.includes(row)) {
+                row.style.display = '';
+                table.appendChild(row);
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Réordonner les lignes visibles
+        visibleRows.forEach(row => {
+            table.appendChild(row);
+        });
+    }
+
+    function resetFilters() {
+        filterCategory.value = '';
+        filterSource.value = '';
+        filterStatus.value = '';
+        filterSearch.value = '';
+        sortBy.value = '';
+        applyFilters();
+    }
+
+    filterCategory.addEventListener('change', applyFilters);
+    filterSource.addEventListener('change', applyFilters);
+    filterStatus.addEventListener('change', applyFilters);
+    filterSearch.addEventListener('keyup', applyFilters);
+    sortBy.addEventListener('change', applyFilters);
+    resetButton.addEventListener('click', resetFilters);
+});
+</script>
 {% endblock %}
