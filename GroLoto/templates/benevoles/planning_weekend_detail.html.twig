@@ -562,63 +562,12 @@
         font-size: 0.875rem;
     }
     
-    /* Planning timeline mobile - scroll horizontal */
-    #timeline-view {
-        overflow-x: auto;
-        overflow-y: visible;
-        -webkit-overflow-scrolling: touch;
-        padding: 1rem 0;
-    }
-    
-    .planning-timeline {
-        display: flex;
-        flex-direction: column;
-        min-width: 500px;
-        width: auto;
-    }
-    
     .tache-item {
         flex-direction: column;
         gap: 0.5rem;
         margin-bottom: 1rem;
-        min-width: 400px;
-        width: auto;
+        min-width: 320px;
         flex-shrink: 0;
-    }
-    
-    .tache-card {
-        padding: 1rem;
-        width: 100%;
-        box-sizing: border-box;
-    }
-    
-    .tache-title {
-        font-size: 1rem;
-        margin-bottom: 0.75rem;
-    }
-    
-    .tache-details {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .detail-item {
-        font-size: 0.813rem;
-    }
-    
-    .tache-remarque {
-        padding: 0.65rem 0.875rem;
-        margin-top: 0.75rem;
-    }
-    
-    .date-separator {
-        margin: 1.5rem 0 1rem;
-        flex-shrink: 0;
-    }
-    
-    .date-badge {
-        padding: 0.4rem 1rem;
-        font-size: 0.875rem;
     }
     
     .tache-time {
@@ -718,7 +667,7 @@
         padding: 1rem;
     }
     
-    /* FullCalendar responsive */
+    /* FullCalendar responsive - afficher avec scroll horizontal */
     #calendar {
         font-size: 0.75rem;
     }
@@ -747,41 +696,48 @@
         font-size: 0.75rem;
     }
     
-    /* Scroll horizontal seulement pour la grille */
-    .fc-scroller {
-        overflow-x: auto !important;
-        overflow-y: auto;
-        min-width: 600px;
-        width: 100vw;
-        margin: 0 calc(-50vw + 50%);
-        padding: 0 calc(50vw - 50%);
+    /* Container avec scroll horizontal */
+    #calendar-view {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .fc {
+        min-width: 500px;
+        width: auto;
     }
     
     .fc-col-header-cell {
         font-size: 0.7rem;
-        padding: 0.5rem 0 !important;
+        padding: 0.4rem 0.2rem !important;
         white-space: normal;
-        min-width: 120px;
+        min-width: 80px;
     }
     
     .fc-timegrid-slot-label {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
+        width: 45px;
+        padding: 0 0.2rem !important;
     }
     
     .fc-event {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         padding: 1px 2px;
     }
     
-    .fc-daygrid,
-    .fc-timegrid {
-        width: 100%;
+    .fc-daygrid-day,
+    .fc-col-time-cell {
+        padding: 0.2rem !important;
     }
     
-    .fc-col-header,
     .fc-timegrid-body {
-        width: auto;
-        min-width: 600px;
+        min-width: 500px;
     }
 }
 </style>
