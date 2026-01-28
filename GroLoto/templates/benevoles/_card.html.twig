@@ -1,0 +1,58 @@
+<div class="benevole-card" 
+     data-nom="{{ benevole.utilisateur.nom|lower }}" 
+     data-prenom="{{ benevole.utilisateur.prenom|lower }}" 
+     data-email="{{ benevole.utilisateur.email|lower }}">
+    <div class="benevole-header">
+        <h3 class="benevole-name">
+            {{ benevole.utilisateur.prenom }} {{ benevole.utilisateur.nom }}
+        </h3>
+        <span class="badge status success">Actif</span>
+    </div>
+    <div class="benevole-info">
+        <div class="info-item">
+            <span class="info-icon">✉️</span>
+            <span class="info-text">{{ benevole.utilisateur.email }}</span>
+        </div>
+        {% if benevole.utilisateur.telephone %}
+        <div class="info-item">
+            <span class="info-icon">📞</span>
+            <span class="info-text">{{ benevole.utilisateur.telephone }}</span>
+        </div>
+        {% endif %}
+        <div class="info-item">
+            <span class="info-icon"></span>
+            <span class="info-text">Inscrit le {{ benevole.utilisateur.dateCreation|date('d/m/Y') }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-icon"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i></span>
+            <span class="info-text"><strong>{{ nb_taches_realisees }}</strong> tâche{% if nb_taches_realisees > 1 %}s{% endif %} réalisée{% if nb_taches_realisees > 1 %}s{% endif %}</span>
+        </div>
+        {# Disponibilités (résumé) #}
+        {% set dmap = {'lundi':'Lun.','mardi':'Mar.','mercredi':'Mer.','jeudi':'Jeu.','vendredi':'Ven.','samedi':'Sam.','dimanche':'Dim.'} %}
+        {% set smap = {'matin':'Matin','pm':'Après-midi','soir':'Soir'} %}
+        {% set dispos = benevole.getDisponibilites() %}
+        <div class="info-item">
+            <span class="info-icon">🗓️</span>
+            <span class="info-text">
+                {% if dispos %}
+                    {% set has_any = false %}
+                    {% for day, slots in dispos %}
+                        {% if slots %}
+                            {% set has_any = true %}
+                            {{ dmap[day]|default(day) }}: {% for slot in slots %}{{ smap[slot]|default(slot) }}{% if not loop.last %}, {% endif %}{% endfor %}<br>
+                        {% endif %}
+                    {% endfor %}
+                    {% if not has_any %}Pas de disponibilité{% endif %}
+                {% else %}
+                    Pas de disponibilité
+                {% endif %}
+            </span>
+        </div>
+        {% if benevole.remarque %}
+        <div class="info-item">
+            <span class="info-icon">📝</span>
+            <span class="info-text">{{ benevole.remarque }}</span>
+        </div>
+        {% endif %}
+    </div>
+</div>

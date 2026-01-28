@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Export Mécènes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: DejaVu Sans, Arial, sans-serif;
+            font-size: 10px;
+            color: #333;
+            line-height: 1.4;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #059669;
+            padding-bottom: 15px;
+        }
+        .header h1 {
+            font-size: 24px;
+            color: #059669;
+            margin-bottom: 5px;
+        }
+        .header p {
+            font-size: 10px;
+            color: #666;
+        }
+        .info-row {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #666;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th {
+            background-color: #059669;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 8px;
+            border: 1px solid #ddd;
+        }
+        table td {
+            padding: 6px;
+            border: 1px solid #ddd;
+            font-size: 8px;
+        }
+        table tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 8px;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Liste des Mécènes</h1>
+        <p>Export généré le {{ date_generation|date('d/m/Y à H:i:s') }}</p>
+    </div>
+
+    <div class="info-row">
+        <span><strong>Total mécènes:</strong> {{ mecenes|length }}</span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 8%">Prénom</th>
+                <th style="width: 8%">Nom</th>
+                <th style="width: 15%">Organisation</th>
+                <th style="width: 15%">Email</th>
+                <th style="width: 12%">Téléphone</th>
+                <th style="width: 12%">SIRET</th>
+                <th style="width: 20%">Adresse postale</th>
+                <th style="width: 10%">Date d'inscription</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mecene in mecenes %}
+                <tr>
+                    <td>{{ mecene.utilisateur.prenom ?? 'N/A' }}</td>
+                    <td>{{ mecene.utilisateur.nom ?? 'N/A' }}</td>
+                    <td>{{ mecene.organisation ?? 'N/A' }}</td>
+                    <td>{{ mecene.utilisateur.email ?? 'N/A' }}</td>
+                    <td>{{ mecene.utilisateur.telephone ?? 'N/A' }}</td>
+                    <td>{{ mecene.siret ?? 'N/A' }}</td>
+                    <td>{{ mecene.adressePostale ?? 'N/A' }}</td>
+                    <td>{% if mecene.utilisateur and mecene.utilisateur.dateCreation %}{{ mecene.utilisateur.dateCreation|date('d/m/Y') }}{% else %}N/A{% endif %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Ce document a été généré automatiquement par le système de gestion de GroLoto.</p>
+    </div>
+</body>
+</html>

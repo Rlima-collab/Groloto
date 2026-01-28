@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
 class BenevoleController extends AbstractController
@@ -128,6 +130,75 @@ class BenevoleController extends AbstractController
             'taches_proches' => $tachesProchesData,
             'taches_realisees' => $tachesRealiseesData
         ]);
+    }
+
+    /**
+     * Route AJAX pour récupérer les bénévoles filtrés en temps réel
+     */
+    #[Route('/api/benevoles/filter', name: 'api_benevoles_filter')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function filterBenevoles(
+        Request $request,
+        BenevoleRepository $benevoleRepository,
+        TacheRepository $tacheRepository
+    ): Response {
+        // Récupérer les paramètres de filtre
+        $search = $request->query->get('search', '');
+        $sort = $request->query->get('sort', 'date-desc');
+
+        // Récupération de tous les bénévoles
+        $benevoles = $benevoleRepository->findActiveWithUser();
+
+        // Filtrer par recherche
+        if ($search) {
+            $searchLower = strtolower($search);
+            $benevoles = array_filter($benevoles, function($benevole) use ($searchLower) {
+                $nom = strtolower($benevole->getUtilisateur()?->getNom() ?? '');
+                $prenom = strtolower($benevole->getUtilisateur()?->getPrenom() ?? '');
+                $email = strtolower($benevole->getUtilisateur()?->getEmail() ?? '');
+                return strpos($nom, $searchLower) !== false 
+                    || strpos($prenom, $searchLower) !== false 
+                    || strpos($email, $searchLower) !== false;
+            });
+        }
+
+        // Tri
+        usort($benevoles, function($a, $b) use ($sort) {
+            $util_a = $a->getUtilisateur();
+            $util_b = $b->getUtilisateur();
+            
+            switch ($sort) {
+                case 'nom-asc':
+                    return strcmp($util_a?->getNom() ?? '', $util_b?->getNom() ?? '');
+                case 'nom-desc':
+                    return strcmp($util_b?->getNom() ?? '', $util_a?->getNom() ?? '');
+                case 'prenom-asc':
+                    return strcmp($util_a?->getPrenom() ?? '', $util_b?->getPrenom() ?? '');
+                case 'prenom-desc':
+                    return strcmp($util_b?->getPrenom() ?? '', $util_a?->getPrenom() ?? '');
+                case 'date-asc':
+                    return ($util_a?->getDateCreation() ?? new \DateTime(0)) <=> ($util_b?->getDateCreation() ?? new \DateTime(0));
+                case 'date-desc':
+                default:
+                    return ($util_b?->getDateCreation() ?? new \DateTime(0)) <=> ($util_a?->getDateCreation() ?? new \DateTime(0));
+            }
+        });
+
+        // Ajouter les stats et générer le HTML
+        $html = '';
+        foreach ($benevoles as $benevole) {
+            $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
+            $html .= $this->renderView('benevoles/_card.html.twig', [
+                'benevole' => $benevole,
+                'nb_taches_realisees' => count($tachesRealisees)
+            ]);
+        }
+
+        return new Response(json_encode([
+            'success' => true,
+            'html' => $html,
+            'count' => count($benevoles)
+        ]), Response::HTTP_OK, ['Content-Type' => 'application/json']);
     }
 
     #[Route('/benevole/propositions', name: 'benevole_propositions')]
@@ -555,5 +626,98 @@ class BenevoleController extends AbstractController
             'total_futures' => count($tachesFutures),
             'total_realisees' => count($tachesRealisees)
         ]);
+    }
+
+    #[Route('/benevoles/export/csv', name: 'benevoles_export_csv')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function exportCSV(BenevoleRepository $benevoleRepository, TacheRepository $tacheRepository): Response
+    {
+        $benevoles = $benevoleRepository->findActiveWithUser();
+        
+        // Préparer le CSV
+        $output = fopen('php://memory', 'w');
+        
+        // Entête CSV
+        fputcsv($output, ['Prénom', 'Nom', 'Email', 'Téléphone', 'Date d\'inscription', 'Nombre de tâches réalisées', 'Remarques'], ';');
+        
+        // Données
+        foreach ($benevoles as $benevole) {
+            $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
+            fputcsv($output, [
+                $benevole->getUtilisateur()?->getPrenom() ?? '',
+                $benevole->getUtilisateur()?->getNom() ?? '',
+                $benevole->getUtilisateur()?->getEmail() ?? '',
+                $benevole->getUtilisateur()?->getTelephone() ?? '',
+                $benevole->getUtilisateur()?->getDateCreation()?->format('d/m/Y') ?? '',
+                count($tachesRealisees),
+                $benevole->getRemarque() ?? ''
+            ], ';');
+        }
+        
+        rewind($output);
+        $csv = stream_get_contents($output);
+        fclose($output);
+        
+        return new Response(
+            $csv,
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'text/csv; charset=utf-8',
+                'Content-Disposition' => 'attachment; filename="benevoles_' . date('Y-m-d') . '.csv"'
+            ]
+        );
+    }
+
+    #[Route('/benevoles/export/pdf', name: 'benevoles_export_pdf')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function exportPDF(BenevoleRepository $benevoleRepository, TacheRepository $tacheRepository): Response
+    {
+        $benevoles = $benevoleRepository->findActiveWithUser();
+        
+        // Ajouter le nombre de tâches réalisées pour chaque bénévole
+        $benevolesAvecStats = [];
+        foreach ($benevoles as $benevole) {
+            $tachesRealisees = $tacheRepository->findTachesRealiseesForBenevole($benevole->getId());
+            $benevolesAvecStats[] = [
+                'benevole' => $benevole,
+                'nb_taches_realisees' => count($tachesRealisees)
+            ];
+        }
+        
+        // Configuration de Dompdf
+        try {
+            $options = new Options();
+            $options->set('defaultFont', 'DejaVu Sans');
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isRemoteEnabled', true);
+            $dompdf = new Dompdf($options);
+        } catch (\Exception $e) {
+            // Fallback si Options n'est pas disponible
+            $dompdf = new Dompdf();
+            $dompdf->setOptions([
+                'defaultFont' => 'DejaVu Sans',
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true
+            ]);
+        }
+        
+        // Génération du HTML depuis un template Twig
+        $html = $this->renderView('benevoles/export_pdf.html.twig', [
+            'benevoles' => $benevolesAvecStats,
+            'date_generation' => new \DateTime()
+        ]);
+        
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        
+        return new Response(
+            $dompdf->output(),
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="benevoles_' . date('Y-m-d') . '.pdf"'
+            ]
+        );
     }
 }

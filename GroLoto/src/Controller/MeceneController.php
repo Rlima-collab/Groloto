@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 #[IsGranted('ROLE_MECENE')]
 class MeceneController extends AbstractController
@@ -88,6 +90,44 @@ class MeceneController extends AbstractController
             'weekends' => $weekends,
             'weekend_filtre' => $weekendFiltre
         ]);
+    }
+
+    /**
+     * Route AJAX pour récupérer les mécènes filtrés en temps réel
+     */
+    #[Route('/api/mecenes/filter', name: 'api_mecenes_filter')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function filterMecenes(
+        Request $request,
+        MeceneRepository $meceneRepository
+    ): Response {
+        // Récupérer les paramètres de filtre
+        $search = $request->query->get('search', '');
+        $sort = $request->query->get('sort', 'date-desc');
+
+        // Construction des critères de recherche
+        $criteria = [
+            'weekend' => null,
+            'search' => $search,
+            'sort' => $sort
+        ];
+
+        // Récupération des mécènes selon les critères
+        $mecenes = $meceneRepository->search($criteria);
+
+        // Rendre le HTML des cartes de mécènes
+        $html = '';
+        foreach ($mecenes as $mecene) {
+            $html .= $this->renderView('mecenes/_card.html.twig', [
+                'mecene' => $mecene
+            ]);
+        }
+
+        return new Response(json_encode([
+            'success' => true,
+            'html' => $html,
+            'count' => count($mecenes)
+        ]), Response::HTTP_OK, ['Content-Type' => 'application/json']);
     }
 
     /**
@@ -517,5 +557,90 @@ class MeceneController extends AbstractController
         $response->headers->set('Content-Disposition', 'attachment; filename="reseaux_sociaux_mecenes.csv"');
 
         return $response;
+    }
+
+    #[Route('/mecenes/export/csv', name: 'mecenes_export_csv')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function exportCSV(MeceneRepository $meceneRepository): Response
+    {
+        $mecenes = $meceneRepository->findAll();
+        
+        // Préparer le CSV
+        $output = fopen('php://memory', 'w');
+        
+        // Entête CSV
+        fputcsv($output, ['Prénom', 'Nom', 'Organisation', 'Email', 'Téléphone', 'SIRET', 'Adresse postale', 'Date d\'inscription', 'Instagram', 'Facebook'], ';');
+        
+        // Données
+        foreach ($mecenes as $mecene) {
+            fputcsv($output, [
+                $mecene->getUtilisateur()?->getPrenom() ?? '',
+                $mecene->getUtilisateur()?->getNom() ?? '',
+                $mecene->getOrganisation() ?? '',
+                $mecene->getUtilisateur()?->getEmail() ?? '',
+                $mecene->getUtilisateur()?->getTelephone() ?? '',
+                $mecene->getSiret() ?? '',
+                $mecene->getAdressePostale() ?? '',
+                $mecene->getUtilisateur()?->getDateCreation()?->format('d/m/Y') ?? '',
+                $mecene->getInstagram() ?? '',
+                $mecene->getFacebook() ?? ''
+            ], ';');
+        }
+        
+        rewind($output);
+        $csv = stream_get_contents($output);
+        fclose($output);
+        
+        return new Response(
+            $csv,
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'text/csv; charset=utf-8',
+                'Content-Disposition' => 'attachment; filename="mecenes_' . date('Y-m-d') . '.csv"'
+            ]
+        );
+    }
+
+    #[Route('/mecenes/export/pdf', name: 'mecenes_export_pdf')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function exportPDF(MeceneRepository $meceneRepository): Response
+    {
+        $mecenes = $meceneRepository->findAll();
+        
+        // Configuration de Dompdf
+        try {
+            $options = new Options();
+            $options->set('defaultFont', 'DejaVu Sans');
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isRemoteEnabled', true);
+            $dompdf = new Dompdf($options);
+        } catch (\Exception $e) {
+            // Fallback si Options n'est pas disponible
+            $dompdf = new Dompdf();
+            $dompdf->setOptions([
+                'defaultFont' => 'DejaVu Sans',
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true
+            ]);
+        }
+        
+        // Génération du HTML depuis un template Twig
+        $html = $this->renderView('mecenes/export_pdf.html.twig', [
+            'mecenes' => $mecenes,
+            'date_generation' => new \DateTime()
+        ]);
+        
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        
+        return new Response(
+            $dompdf->output(),
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="mecenes_' . date('Y-m-d') . '.pdf"'
+            ]
+        );
     }
 }
