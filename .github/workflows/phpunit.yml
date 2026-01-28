@@ -1,0 +1,30 @@
+name: PHPUnit Tests & Coverage
+
+on: [push, pull_request]
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.1','8.2','8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, pdo, pdo_sqlite, intl
+      - name: Install dependencies
+        run: composer install --no-progress --prefer-dist --no-interaction
+      - name: Run tests + coverage
+        run: phpdbg -qrr ./vendor/bin/phpunit --coverage-clover=clover.xml --coverage-html=build/coverage --testdox
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: build/coverage
+      - name: Upload Clover to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: clover.xml
