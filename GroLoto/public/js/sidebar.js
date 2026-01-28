@@ -3,27 +3,42 @@ document.addEventListener('DOMContentLoaded', function () {
     const sidebar = document.getElementById('sidebar');
     const navLinks = document.querySelectorAll('.nav-link');
     const currentPath = window.location.pathname;
-    
-    // Initialiser l'état du body en fonction de la sidebar
-    if (sidebar.classList.contains('collapsed')) {
-        document.body.classList.add('sidebar-collapsed');
-    }
 
+    // Au chargement, s'assurer que la sidebar est fermée
+    sidebar.classList.remove('open');
+    burgerMenu.classList.remove('active');
+    burgerMenu.setAttribute('aria-expanded', 'false');
+
+    // Clic sur le burger menu pour ouvrir/fermer la sidebar
     burgerMenu.addEventListener('click', function (event) {
         event.stopPropagation();
-        sidebar.classList.toggle('collapsed');
-        
-        // Ajouter/retirer la classe au body pour gérer le header
-        document.body.classList.toggle('sidebar-collapsed');
+        sidebar.classList.toggle('open');
 
-        // Close all submenus when collapsing the sidebar
-        if (sidebar.classList.contains('collapsed')) {
+        // Mettre à jour aria-expanded + état visuel du burger
+        const isOpen = sidebar.classList.contains('open');
+        burgerMenu.setAttribute('aria-expanded', isOpen);
+        burgerMenu.classList.toggle('active', isOpen);
+
+        // Fermer tous les sous-menus quand on ferme la sidebar
+        if (!isOpen) {
             document.querySelectorAll('.submenu.active').forEach(activeSubmenu => {
                 activeSubmenu.classList.remove('active');
             });
             document.querySelectorAll('.nav-link.active').forEach(activeLink => {
                 activeLink.classList.remove('active');
             });
+        }
+    });
+
+    // Fermer la sidebar si on clique en dehors
+    document.addEventListener('click', function(event) {
+        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickOnBurger = burgerMenu.contains(event.target);
+        
+        if (!isClickInsideSidebar && !isClickOnBurger && sidebar.classList.contains('open')) {
+            sidebar.classList.remove('open');
+            burgerMenu.classList.remove('active');
+            burgerMenu.setAttribute('aria-expanded', 'false');
         }
     });
 
@@ -106,9 +121,11 @@ document.addEventListener('DOMContentLoaded', function () {
             link.addEventListener('click', function (event) {
                 event.preventDefault();
 
-                // Si sidebar est pliée, on l'ouvre temporairement
-                if (sidebar.classList.contains('collapsed')) {
-                    sidebar.classList.remove('collapsed');
+                // Ouvrir la sidebar si elle n'est pas déjà ouverte
+                if (!sidebar.classList.contains('open')) {
+                    sidebar.classList.add('open');
+                    burgerMenu.classList.add('active');
+                    burgerMenu.setAttribute('aria-expanded', 'true');
                 }
 
                 const isActive = submenu.classList.contains('active');

@@ -2,22 +2,23 @@
 .site-header {
     position: fixed;
     top: 0;
-    left: 250px; /* par défaut sidebar ouverte */
+    left: 0;
     right: 0;
     height: 70px;
     background: white;
     border-bottom: 1px solid #eee;
     display: flex;
     align-items: center;
-    z-index: 1001;
+    z-index: 2000;
     padding: 0 20px;
     box-sizing: border-box;
     transition: left 0.3s ease;
+    margin-top: 0;
 }
 
 /* Quand la sidebar est fermée (collapsed) */
 body.sidebar-collapsed .site-header {
-    left: 60px; /* se décale à gauche quand sidebar fermée */
+    left: 0;
 }
 
 .site-header .container {
@@ -29,8 +30,9 @@ body.sidebar-collapsed .site-header {
     padding: 0;
 }
 
+
 .site-header .logo {
-    margin-left: 10px;
+    margin-left: 60px;
     transition: margin-left 0.3s ease;
 }
 
@@ -38,32 +40,49 @@ body.sidebar-collapsed .site-header {
     height: 40px;
 }
 
-.sidebar.collapsed ~ .site-header .logo {
-    margin-left: 0;
+.sidebar.open .site-header .logo {
+    margin-left: 10px;
 }
 
+/* Burger menu indépendant */
 .burger-menu {
+    position: fixed;
+    top: 15px;
+    left: 15px;
     display: none;
     flex-direction: column;
-    justify-content: space-around;
-    width: 30px;
-    height: 25px;
+    justify-content: space-between;
+    width: 40px;
+    height: 32px;
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 0;
-    z-index: 1002;
-}
-
-.burger-menu span {
-    width: 100%;
-    height: 3px;
-    background: #444;
+    padding: 8px 6px;
+    z-index: 9999;
     transition: all 0.3s ease;
 }
 
+.burger-menu:hover {
+    opacity: 0.8;
+}
+
+.burger-menu span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background: #333;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* Barres blanches quand le menu est ouvert */
+.burger-menu.active span {
+    background: white;
+}
+
+/* Animation croix quand actif */
 .burger-menu.active span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+    transform: translateY(10px) rotate(45deg);
 }
 
 .burger-menu.active span:nth-child(2) {
@@ -71,7 +90,7 @@ body.sidebar-collapsed .site-header {
 }
 
 .burger-menu.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -7px);
+    transform: translateY(-10px) rotate(-45deg);
 }
 
 .nav-menu {
@@ -176,13 +195,14 @@ body.sidebar-collapsed .site-header {
 .notification-dropdown {
     position: absolute;
     top: 120%;
-    right: -10px;
+    right: 0;
+    left: auto;
     background: white;
     width: 380px;
     max-height: 500px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 12px;
     z-index: 1001;
     margin-top: 8px;
     overflow: hidden;
@@ -209,33 +229,34 @@ body.sidebar-collapsed .site-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 18px;
-    border-bottom: 1px solid #eee;
-    background: #f8f9fa;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e8e8e8;
+    background: linear-gradient(135deg, #1e445c 0%, #19384e 60%, #152e40 90%);
+    color: white;
 }
 
 .notification-header h3 {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: #333;
+    color: white;
 }
 
 .mark-all-read {
-    background: transparent;
-    border: 1px solid linear-gradient(180deg, #0f2c3e 0%, #081b27 60%, #000000 90%);
-    color: linear-gradient(180deg, #0f2c3e 0%, #081b27 60%, #000000 90%);
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
     font-size: 12px;
     cursor: pointer;
     padding: 6px 12px;
-    border-radius: 4px;
+    border-radius: 6px;
     transition: all 0.2s ease;
     font-weight: 500;
 }
 
 .mark-all-read:hover {
-    background: linear-gradient(135deg, #1e445c 0%, #19384e 60%, #152e40 90%);
-    color: white;
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .notification-list {
@@ -245,28 +266,29 @@ body.sidebar-collapsed .site-header {
 }
 
 .notification-list.has-scroll::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 
 .notification-list.has-scroll::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #f8f8f8;
+    border-radius: 4px;
 }
 
 .notification-list.has-scroll::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
+    background: #c0c0c0;
+    border-radius: 4px;
 }
 
 .notification-list.has-scroll::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: #a0a0a0;
 }
 
 .notification-item {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 14px 18px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 12px 18px;
+    border-bottom: 1px solid #f5f5f5;
     transition: background 0.2s ease;
     cursor: pointer;
     position: relative;
@@ -274,7 +296,7 @@ body.sidebar-collapsed .site-header {
 }
 
 .notification-item:hover {
-    background: #f8f9fa;
+    background: #f9fafb;
 }
 
 .notification-item.marking-read {
@@ -435,19 +457,20 @@ body.sidebar-collapsed .site-header {
 .settings-dropdown {
     position: relative;
     display: inline-block;
+    z-index: 1200;
 }
 
 .settings-menu {
     display: none;
     position: absolute;
-    top: 120%;
-    right: -10px;
+    top: 115%;
+    right: 0;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     min-width: 180px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
-    z-index: 1000;
+    z-index: 1201;
     padding: 10px 0;
     margin-top: 8px;
     backdrop-filter: blur(10px);
@@ -469,7 +492,7 @@ body.sidebar-collapsed .site-header {
     content: '';
     position: absolute;
     top: -6px;
-    right: 20px;
+    right: 16px;
     width: 12px;
     height: 12px;
     background-color: #fff;
@@ -484,17 +507,19 @@ body.sidebar-collapsed .site-header {
     align-items: center;
     padding: 14px 20px;
     text-decoration: none;
-    color: #2c3e50;
+    color: #1b1b1b;
     font-size: 15px;
     font-weight: 500;
     border-radius: 8px;
     margin: 2px 8px;
     transition: background 0.3s ease, color 0.3s ease;
+    gap: 10px;
+    white-space: nowrap;
 }
 
 .settings-menu a:hover {
     background-color: #f0f0f0;
-    color: linear-gradient(180deg, #0f2c3e 0%, #081b27 60%, #000000 90%);
+    color: #0f2c3e;
     box-shadow: none;
 }
 
@@ -584,6 +609,7 @@ body.sidebar-collapsed .site-header {
         left: 60px;
     }
 
+    /* Afficher le burger sur mobile */
     .burger-menu {
         display: flex;
     }
@@ -598,7 +624,7 @@ body.sidebar-collapsed .site-header {
     
     /* Logo visible et bien dimensionné sur mobile */
     .site-header .logo {
-        margin-left: 0;
+        margin-left: 60px;
         flex-shrink: 0;
     }
     
@@ -623,6 +649,7 @@ body.sidebar-collapsed .site-header {
         opacity: 1;
         gap: 8px;
         margin-right: 0;
+        order: 2;
     }
     
     /* Les icônes notifications et settings restent visibles */
@@ -644,10 +671,19 @@ body.sidebar-collapsed .site-header {
     }
 
     .notification-dropdown {
-        width: calc(100vw - 40px);
-        max-width: 400px;
-        right: 10px;
+        position: absolute;
+        top: 50px;
+        right: -10px;
         left: auto;
+        width: 90vw;
+        max-width: 350px;
+        max-height: 350px;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        z-index: 1001;
+        overflow: hidden;
     }
 
     .notification-dropdown::before {
@@ -677,13 +713,23 @@ body.sidebar-collapsed .site-header {
 
 @media (max-width: 480px) {
     .notification-dropdown {
-        width: calc(100vw - 20px);
-        max-width: none;
-        right: 10px;
+        position: absolute;
+        top: 45px;
+        right: -5px;
+        left: auto;
+        width: 95vw;
+        max-width: 320px;
+        max-height: 45vh;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        z-index: 1001;
+        overflow: hidden;
     }
 
     .notification-dropdown::before {
-        right: 15px;
+        right: 10px;
     }
     
     .settings-menu {
@@ -697,50 +743,7 @@ body.sidebar-collapsed .site-header {
     }
 }
 
-/* --- HEADER ET BURGER --- */
-.sidebar-header {
-    padding: 15px 15px 15px 3px; /* top right bottom left */
-    text-align: left; /* Aligné à gauche */
-}
-
-.burger-menu {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    width: 30px;
-    height: 25px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 10px; /* espace à gauche */
-}
-
-.burger-menu span {
-    width: 100%;
-    height: 3px;
-    background: white;
-    transition: all 0.3s ease;
-}
-
-/* --- CROIX PAR DÉFAUT (menu ouvert) --- */
-.burger-menu span:nth-child(2) {
-    opacity: 0;
-}
-
-.burger-menu span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-}
-
-.burger-menu span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -7px);
-}
-
-/* --- Quand le menu est fermé (sidebar.collapsed) → icône burger classique --- */
-.sidebar.collapsed .burger-menu span {
-    transform: none;
-    opacity: 1;
-}
+/* --- HEADER ET BURGER (legacy supprimé, voir définitions en haut) --- */
 
 /* --- USER INFO --- */
 .user-info {
@@ -774,22 +777,6 @@ body.sidebar-collapsed .site-header {
 .sidebar.collapsed .user-info .user-role,
 .sidebar.collapsed .nav-text {
     display: none;
-}
-
-/* --- RESPONSIVE --- */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 60px;
-    }
-
-    .main-content {
-        margin-left: 60px;
-    }
-
-    .user-role,
-    .nav-text {
-        display: none;
-    }
 }
 
 /* Dark mode overrides for header and notifications */
@@ -954,3 +941,134 @@ body.sidebar-collapsed .site-header {
 .theme-toggle label { font-size: 14px; color: var(--muted-text); }
 
 .theme-toggle input[type="checkbox"] { width: 18px; height: 18px; }
+/* Responsive Design - Header */
+@media (max-width: 1200px) {
+    .site-header {
+        padding: 0 15px;
+    }
+    
+    .nav-menu {
+        gap: 15px;
+    }
+}
+
+@media (max-width: 1024px) {
+    body.sidebar-collapsed .site-header {
+        left: 60px;
+    }
+    
+    .notification-dropdown {
+        width: 340px;
+        max-height: 450px;
+    }
+}
+
+@media (max-width: 768px) {
+    .site-header {
+        left: 0 !important;
+        padding: 0 10px;
+        height: 60px;
+    }
+    
+    .site-header .logo img {
+        height: 35px;
+    }
+    
+    .nav-menu {
+        gap: 10px;
+        margin-right: 5px;
+    }
+    
+    .nav-menu a {
+        font-size: 13px;
+    }
+    
+    .nav-menu > a span {
+        display: none;
+    }
+    
+    .notification-dropdown {
+        width: 90vw;
+        max-width: 340px;
+        right: -5px;
+    }
+    
+    .notification-bell {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .notification-bell svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .theme-toggle {
+        padding: 8px 12px;
+    }
+
+    .settings-dropdown {
+        z-index: 1300;
+    }
+
+    .settings-menu {
+        right: 0;
+        left: auto;
+        min-width: 160px;
+        top: 110%;
+        z-index: 2001;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-header {
+        height: 55px;
+        padding: 0 8px;
+    }
+    
+    .site-header .logo img {
+        height: 30px;
+    }
+    
+    .nav-menu {
+        gap: 8px;
+    }
+    
+    .nav-menu > a,
+    .nav-menu > .settings-dropdown > a {
+        font-size: 0;
+        padding: 8px;
+    }
+    
+    .nav-menu a i {
+        font-size: 18px;
+    }
+    
+    .notification-dropdown {
+        width: 95vw;
+        max-width: 320px;
+        max-height: 45vh;
+        right: -5px;
+        left: auto;
+    }
+    
+    .notification-item {
+        padding: 12px;
+    }
+    
+    .notification-content {
+        gap: 8px;
+    }
+    
+    .notification-message {
+        font-size: 13px;
+    }
+    
+    .theme-toggle label {
+        display: none;
+    }
+    
+    .theme-toggle {
+        padding: 6px 10px;
+    }
+}

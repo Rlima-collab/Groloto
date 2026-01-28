@@ -1495,6 +1495,28 @@ textarea.form-control {
 /* ============================================
    Responsive Design
    ============================================ */
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    
+    .weekends-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .dispo-table th,
+    .dispo-table td {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .weekends-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+}
+
 @media (max-width: 768px) {
     .dispo-hero {
         padding: 1.5rem 1rem;
@@ -1505,13 +1527,39 @@ textarea.form-control {
         font-size: 1.5rem;
     }
     
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .dispo-table {
+        font-size: 0.8rem;
+    }
+    
     .dispo-table th,
     .dispo-table td {
         padding: 0.75rem 0.5rem;
     }
     
+    .dispo-card-body {
+        padding: 1rem;
+    }
+    
     .dispo-submit-row {
         flex-direction: column;
+    }
+    
+    .btn-submit,
+    .btn-cancel {
+        width: 100%;
     }
     
     .filter-tabs {
@@ -1535,5 +1583,82 @@ textarea.form-control {
     .tache-details {
         flex-direction: column;
         gap: 0.5rem;
+    }
+    
+    .dispo-actions {
+        flex-direction: column;
+    }
+    
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .dispo-hero {
+        padding: 1.25rem 0.75rem;
+    }
+    
+    .dispo-hero h1 {
+        font-size: 1.25rem;
+    }
+    
+    .dispo-hero .dates {
+        font-size: 0.95rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card {
+        padding: 0.875rem;
+    }
+    
+    .dispo-table {
+        font-size: 0.75rem;
+    }
+    
+    .dispo-table th,
+    .dispo-table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .badge-dispo {
+        padding: 0.15rem 0.35rem;
+        font-size: 0.65rem;
+    }
+    
+    .dispo-card-header {
+        padding: 1rem;
+    }
+    
+    .dispo-card-header h2 {
+        font-size: 1.1rem;
+    }
+    
+    .dispo-card-body {
+        padding: 0.75rem;
+    }
+    
+    .dispo-checkbox {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .creneau-label {
+        font-size: 0.7rem;
+    }
+    
+    .btn-submit,
+    .btn-cancel {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .summary-stats {
+        flex-direction: column;
+        gap: 1rem;
     }
 }

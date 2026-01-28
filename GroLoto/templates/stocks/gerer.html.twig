@@ -105,7 +105,15 @@
                         </div>
                         
                         <div class="col-md-12">
-                            {{ form_row(form.source, {'attr': {'class': 'form-check-inline'}}) }}
+                            <div class="source-selection">
+                                {% for choice in form.source %}
+                                    <div class="source-option" data-source="{{ choice.vars.value }}">
+                                        {{ form_widget(choice) }}
+                                        {{ form_label(choice) }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {{ form_errors(form.source) }}
                         </div>
                         
                         <div class="col-md-6" id="preteur-field">

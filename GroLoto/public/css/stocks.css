@@ -318,7 +318,47 @@
     font-size: 0.875rem;
 }
 
+/* =============== RESPONSIVE DESIGN =============== */
+@media (max-width: 1200px) {
+    .metrics-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .table-wrapper {
+        overflow-x: auto;
+    }
+}
+
 @media (max-width: 768px) {
+    .hero-section {
+        padding: 1.5rem 1.5rem 3rem 1.5rem;
+    }
+    
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .hero-description {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-btn.yellow {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
     .quick-access-card {
         padding: 1rem;
     }
@@ -328,7 +368,50 @@
         height: 50px;
         font-size: 1.5rem;
     }
+    
+    .inventory-table {
+        font-size: 0.85rem;
+    }
+    
+    .inventory-table th,
+    .inventory-table td {
+        padding: 10px 8px;
+    }
 }
+
+@media (max-width: 480px) {
+    .hero-section {
+        padding: 1.25rem 1rem 2.5rem 1rem;
+    }
+    
+    .hero-title {
+        font-size: 1.5rem;
+    }
+    
+    .hero-description {
+        font-size: 0.9rem;
+    }
+    
+    .hero-btn.yellow {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .inventory-table {
+        font-size: 0.75rem;
+    }
+    
+    .inventory-table th,
+    .inventory-table td {
+        padding: 8px 5px;
+    }
+    
+    .badge {
+        padding: 3px 6px;
+        font-size: 0.7rem;
+    }
+}
+
 
 /* ==========================================================================
    _mouvements.html.twig - Conteneurs de graphiques

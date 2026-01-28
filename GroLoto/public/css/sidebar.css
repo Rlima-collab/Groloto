@@ -1,8 +1,8 @@
-/* Sidebar Styles */
+/* ===== SIDEBAR - PAR DÉFAUT CACHÉE ===== */
 .sidebar {
     width: 250px;
     background: linear-gradient(180deg, #0f2c3e 0%, #081b27 60%, #000000 90%);
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.05);
+    box-shadow: none;
     color: white;
     display: flex;
     flex-direction: column;
@@ -11,63 +11,32 @@
     left: 0;
     height: 100vh;
     overflow-y: auto;
-    z-index: 1002;
-    transition: width 0.3s ease, background 0.5s ease;
-    padding-top: 0;
-    min-width: 60px;
-    justify-content: center;
+    z-index: 1004;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    padding-top: 70px;
 }
 
-.sidebar.collapsed {
-    width: 60px;
+/* Sidebar ouverte */
+.sidebar.open {
+    transform: translateX(0);
+    z-index: 9998;
 }
 
-/* --- HEADER ET BURGER --- */
-.sidebar-header {
-    padding: 15px 15px 15px 3px; /* top right bottom left */
-    text-align: left; /* Aligné à gauche */
+/* Overlay quand sidebar est ouverte */
+.sidebar.open::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 250px;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1003;
 }
 
-.burger-menu {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    width: 30px;
-    height: 25px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 10px; /* espace à gauche */
-}
 
-.burger-menu span {
-    width: 100%;
-    height: 3px;
-    background: white;
-    transition: all 0.3s ease;
-}
-
-/* --- CROIX PAR DÉFAUT (menu ouvert) --- */
-.burger-menu span:nth-child(2) {
-    opacity: 0;
-}
-
-.burger-menu span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-}
-
-.burger-menu span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -7px);
-}
-
-/* --- Quand le menu est fermé (sidebar.collapsed) → icône burger classique --- */
-.sidebar.collapsed .burger-menu span {
-    transform: none;
-    opacity: 1;
-}
-
-/* --- USER INFO --- */
+/* ===== USER INFO ===== */
 .user-info {
     display: flex;
     flex-direction: column;
@@ -124,18 +93,8 @@
     transition: background 0.15s ease, transform 0.08s ease;
 }
 
-.admin-create-btn:hover {
-    background: #ffffff;
-    color: #0d1b2a;
-    transform: translateY(-1px);
-}
 
-.sidebar.collapsed .user-info .user-role,
-.sidebar.collapsed .nav-text {
-    display: none;
-}
-
-/* --- NAVIGATION --- */
+/* ===== NAVIGATION ===== */
 .sidebar-nav {
     flex-grow: 1;
     padding: 10px 0;
@@ -209,33 +168,18 @@
     display: inline-block;
 }
 
-.nav-link.active .arrow {
-    transform: rotate(90deg);
-}
 
-.sidebar.collapsed .nav-icon {
-    margin-right: 0;
-}
-
-.sidebar.collapsed .nav-icon img {
-    width: 24px;
-    height: 24px;
-}
-
-.sidebar.collapsed .nav-text {
-    display: none;
-}
-
+/* ===== SOUS-MENUS ===== */
 .submenu {
     display: none;
     list-style: none;
     padding-left: 20px;
-    background: linear-gradient(180deg, rgba(15,44,62,0.8) 0%, rgba(8,27,39,0.9) 100%);
+    background: linear-gradient(180deg, rgba(15, 44, 62, 0.8) 0%, rgba(8, 27, 39, 0.9) 100%);
     margin: 0;
     width: 100%;
-    border-left: 3px solid rgba(108,99,255,0.7); /* Ligne violette plus visible */
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3); /* Légère ombre pour détacher */
-    border-radius: 0 8px 8px 0; /* Coins arrondis côté droit pour l'effet esthétique */
+    border-left: 3px solid rgba(108, 99, 255, 0.7);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+    border-radius: 0 8px 8px 0;
 }
 
 .submenu.active {
@@ -254,27 +198,6 @@
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-.submenu li a:hover {
-    background-color: rgba(108, 99, 255, 0.3); /* violet plus visible au hover */
-    color: #ffffff;
-}
-
-/* Ensure main content is offset to the right of the fixed sidebar */
-.main-content {
-    margin-left: 250px;
-    transition: margin-left 0.3s ease;
-}
-
-/* When sidebar is collapsed, reduce the left offset */
-body.sidebar-collapsed .main-content {
-    margin-left: 60px;
-}
-
-/* Small screens: remove offset so layout stacks naturally */
-@media (max-width: 768px) {
-    .main-content { margin-left: 0; }
-    .site-header { left: 0; }
-}
 
 .submenu li a.active-page {
     background-color: rgba(108, 99, 255, 0.5);
@@ -284,55 +207,73 @@ body.sidebar-collapsed .main-content {
     padding-left: 17px;
 }
 
-
-
-/* --- CONTENU PRINCIPAL --- */
-.main-content {
-    margin-left: 250px;
-    flex-grow: 1;
-    transition: margin-left 0.3s ease;
-    padding: 0;
-}
-
-.sidebar.collapsed ~ .main-content {
-    margin-left: 60px;
-}
-
-/* Ensure main content stretches so footer sits at bottom */
-html, body {
-    height: 100%;
-}
+/* ===== MAIN CONTENT - TOUJOURS PLEINE LARGEUR ===== */
 .app-container {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: stretch;
 }
+
 .main-content {
+    margin-left: 0;
+    flex-grow: 1;
+    transition: margin-left 0.3s ease;
+    padding: 0;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    margin-top: 15px;
 }
+
 .content {
     flex: 1 1 auto;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
 
-/* --- RESPONSIVE --- */
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
+    .burger-toggle {
+        top: 12px;
+        left: 12px;
+        width: 35px;
+        height: 26px;
+    }
+
+    .burger-toggle span {
+        height: 2.5px;
+    }
+
     .sidebar {
-        width: 60px;
-    }
-
-    .main-content {
-        margin-left: 60px;
-    }
-
-    .user-role,
-    .nav-text {
-        display: none;
+        width: 250px;
     }
 }
 
-.sidebar.collapsed .nav-link .arrow {
-    display: none;
+@media (max-width: 480px) {
+    .burger-toggle {
+        top: 10px;
+        left: 10px;
+    }
+
+    .sidebar {
+        width: calc(100vw - 40px);
+        max-width: 250px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .admin-create-btn {
+        width: 30px;
+        height: 30px;
+    }
 }

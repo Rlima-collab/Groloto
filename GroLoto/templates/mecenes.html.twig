@@ -47,16 +47,16 @@
         <div class="card-header">
             <h2 class="card-title">Liste des Mécènes</h2>
             <p class="card-description">Gestion des mécènes et partenaires</p>
-            {% if is_granted('ROLE_ADMIN') %}
-            <div class="header-actions">
-                <a href="{{ path('mecenes_download_logos', app.request.query.all|merge({'weekend': weekend_filtre ? weekend_filtre.id : null})) }}" class="btn btn-primary">Télécharger tous les logos</a>
-                <a href="{{ path('mecenes_export_social_csv', app.request.query.all|merge({'weekend': weekend_filtre ? weekend_filtre.id : null})) }}" class="btn btn-secondary">Exporter en CSV les réseaux sociaux</a>
-            </div>
-            {% endif %}
         </div>
 
-        <!-- Barre de recherche et filtres -->
-        <div class="search-filter-section">
+        {% if is_granted('ROLE_ADMIN') %}
+        <div class="header-actions">
+            <a href="{{ path('mecenes_download_logos', app.request.query.all|merge({'weekend': weekend_filtre ? weekend_filtre.id : null})) }}" class="btn btn-primary">Télécharger tous les logos</a>
+            <a href="{{ path('mecenes_export_social_csv', app.request.query.all|merge({'weekend': weekend_filtre ? weekend_filtre.id : null})) }}" class="btn btn-secondary">Exporter en CSV les réseaux sociaux</a>
+        </div>
+        {% endif %}
+
+        <div class="card-content">
             <form method="GET" id="filtersForm">
                 <div class="search-bar-container">
                     <input type="text" id="searchInput" name="search" class="search-input" placeholder="Rechercher par nom, organisation, email..." value="{{ app.request.query.get('search') }}">
