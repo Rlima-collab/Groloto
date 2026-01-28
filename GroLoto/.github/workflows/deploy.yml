@@ -1,0 +1,117 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'staging'
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, xml
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
+
+      - name: Run PHPUnit
+        run: ./bin/phpunit --configuration=phpunit.dist.xml
+
+      - name: Create release archive
+        run: tar -czf release.tar.gz --exclude='vendor' --exclude='.git' .
+
+      - name: Copy release to remote (SCP)
+        uses: appleboy/scp-action@v0.1.6
+        with:
+          host: ${{ secrets.STAGING_DEPLOY_HOST }}
+          username: ${{ secrets.STAGING_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.STAGING_DEPLOY_PORT }}
+          source: 'release.tar.gz'
+          target: ${{ secrets.STAGING_DEPLOY_PATH }}
+
+      - name: Run remote deploy commands (SSH)
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.STAGING_DEPLOY_HOST }}
+          username: ${{ secrets.STAGING_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.STAGING_DEPLOY_PORT }}
+          script: |
+            set -e
+            cd ${{ secrets.STAGING_DEPLOY_PATH }}
+            tar -xzf release.tar.gz -C .
+            composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+            # Appliquer les migrations si présentes (consulter l'équipe dev pour migrations sensibles)
+            php bin/console doctrine:migrations:migrate --no-interaction || true
+            php bin/console cache:clear --no-warmup || true
+            # Redémarrer les services (modifier selon votre stack)
+            if [ -f docker-compose.yml ]; then docker compose down && docker compose up -d --build; else sudo systemctl restart apache2 || true; fi
+
+  deploy-production:
+    name: Deploy to Production
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, xml
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
+
+      - name: Run PHPUnit
+        run: ./bin/phpunit --configuration=phpunit.dist.xml
+
+      - name: Create release archive
+        run: tar -czf release.tar.gz --exclude='vendor' --exclude='.git' .
+
+      - name: Copy release to production server (SCP)
+        uses: appleboy/scp-action@v0.1.6
+        with:
+          host: ${{ secrets.PROD_DEPLOY_HOST }}
+          username: ${{ secrets.PROD_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PROD_DEPLOY_PORT }}
+          source: 'release.tar.gz'
+          target: ${{ secrets.PROD_DEPLOY_PATH }}
+
+      - name: Run remote deploy commands (SSH)
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.PROD_DEPLOY_HOST }}
+          username: ${{ secrets.PROD_DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PROD_DEPLOY_PORT }}
+          script: |
+            set -e
+            cd ${{ secrets.PROD_DEPLOY_PATH }}
+            tar -xzf release.tar.gz -C .
+            composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+            php bin/console doctrine:migrations:migrate --no-interaction || true
+            php bin/console cache:clear --no-warmup || true
+            if [ -f docker-compose.yml ]; then docker compose down && docker compose up -d --build; else sudo systemctl restart apache2 || true; fi
+
+# Notes:
+# - Add the following repository secrets in GitHub settings:
+#   - SSH_PRIVATE_KEY (private key for SSH access)
+#   - STAGING_DEPLOY_HOST, STAGING_DEPLOY_USER, STAGING_DEPLOY_PATH, STAGING_DEPLOY_PORT (optional)
+#   - PROD_DEPLOY_HOST, PROD_DEPLOY_USER, PROD_DEPLOY_PATH, PROD_DEPLOY_PORT (optional)
+# - Protect the 'production' environment in GitHub to require manual approvals if desired.
+# - Adjust remote commands to match your server's setup (Docker vs system services).
