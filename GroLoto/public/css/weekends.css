@@ -803,19 +803,292 @@
         grid-template-columns: 1fr;
     }
 
-    /* Page Details */
+    /* Page Details - Container */
+    .details-container {
+        padding: 2rem 1rem;
+    }
+
+    /* Page Details - Grid */
     .details-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Cards des détails */
+    .details-card {
+        border-radius: 10px;
+    }
+
+    .card-header {
+        padding: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    .card-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .card-content {
+        padding: 1.25rem;
+    }
+
+    /* Info rows - Stack on mobile */
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+        padding: 0.65rem 0;
+    }
+
+    .info-label {
+        font-size: 0.813rem;
+        color: #64748b;
+    }
+
+    .info-value {
+        font-size: 0.938rem;
+    }
+
+    /* List items */
+    .list-item {
+        padding: 0.875rem;
+        gap: 0.75rem;
+    }
+
+    .item-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .item-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .item-content h4 {
+        font-size: 0.938rem;
+    }
+
+    .item-meta {
+        flex-direction: column;
+        gap: 0.35rem;
+        font-size: 0.813rem;
+    }
+
+    /* Volunteers badges - wrap better on mobile */
+    .item-volunteers {
+        margin-top: 0.5rem;
+    }
+
+    .item-volunteers strong {
+        font-size: 0.813rem !important;
+    }
+
+    .item-volunteers .badge {
+        font-size: 0.75rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+
+    /* Buttons */
+    .btn-add {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+    }
+
+    /* Description card */
+    .description-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .description-content {
+        font-size: 0.938rem;
+        line-height: 1.7;
+    }
+
+    /* Danger zone */
+    .danger-zone {
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .danger-zone h3 {
+        font-size: 1.1rem;
+    }
+
+    .danger-zone p {
+        font-size: 0.875rem;
     }
 
     /* Page Liste */
     .weekends-grid {
         grid-template-columns: 1fr;
+        padding: 1.5rem 1rem;
+        gap: 1.5rem;
     }
 
     .weekend-card-stats {
         flex-direction: column;
         gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Page Details - Tighter spacing on small phones */
+    .details-container {
+        padding: 1.5rem 0.75rem;
+    }
+
+    .details-grid {
+        gap: 1rem;
+    }
+
+    /* Cards */
+    .details-card {
+        border-radius: 8px;
+    }
+
+    .card-header {
+        padding: 1rem;
+        gap: 0.5rem;
+    }
+
+    .card-header svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .card-header h2 {
+        font-size: 1rem;
+    }
+
+    .card-content {
+        padding: 1rem;
+    }
+
+    /* Info rows */
+    .info-row {
+        padding: 0.5rem 0;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+    }
+
+    .info-value {
+        font-size: 0.875rem;
+    }
+
+    /* List items - More compact */
+    .list-item {
+        padding: 0.75rem;
+        gap: 0.65rem;
+        flex-direction: column;
+    }
+
+    .item-icon {
+        width: 32px;
+        height: 32px;
+        align-self: flex-start;
+    }
+
+    .item-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .item-content {
+        width: 100%;
+    }
+
+    .item-content h4 {
+        font-size: 0.875rem;
+        line-height: 1.3;
+    }
+
+    .item-meta {
+        gap: 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .item-meta span {
+        display: block;
+    }
+
+    /* Volunteers - Stack vertically */
+    .item-volunteers {
+        margin-top: 0.5rem;
+    }
+
+    .item-volunteers > div {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.35rem !important;
+    }
+
+    .item-volunteers .badge {
+        font-size: 0.7rem !important;
+        padding: 0.2rem 0.45rem !important;
+    }
+
+    /* Buttons */
+    .btn-add {
+        padding: 0.65rem 1rem;
+        font-size: 0.813rem;
+    }
+
+    .btn-add svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    /* Description */
+    .description-card {
+        margin-bottom: 1rem;
+    }
+
+    .description-content {
+        font-size: 0.875rem;
+        line-height: 1.6;
+    }
+
+    /* Danger zone */
+    .danger-zone {
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .danger-zone h3 {
+        font-size: 1rem;
+    }
+
+    .danger-zone p {
+        font-size: 0.813rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-danger {
+        width: 100%;
+        padding: 0.65rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    /* Weekends grid */
+    .weekends-grid {
+        padding: 1rem 0.75rem;
+        gap: 1rem;
+    }
+
+    /* Empty state */
+    .empty-state {
+        padding: 3rem 1.5rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.25rem;
+    }
+
+    .empty-state p {
+        font-size: 0.875rem;
     }
 }
 

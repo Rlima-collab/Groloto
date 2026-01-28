@@ -142,23 +142,28 @@
 <style>
 .btn-view {
     padding: 0.75rem 1.5rem;
-    border: 2px solid #e2e8f0;
-    background: white;
-    color: #64748b;
+    border: 2px solid #cbd5e1;
+    background: #cbd5e1;
+    color: white !important;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
     transition: all 0.3s ease;
 }
 
+.btn-view i {
+    color: white !important;
+}
+
 .btn-view:hover {
-    border-color: #1a3c5a;
-    color: #1a3c5a;
+    border-color: #cbd5e1;
+    color: white !important;
+    background: #cbd5e1;
 }
 
 .btn-view.active {
     background: #1a3c5a;
-    color: white;
+    color: white !important;
     border-color: #1a3c5a;
 }
 
@@ -213,6 +218,28 @@
 .planning-timeline {
     position: relative;
     margin: 2rem 0;
+}
+
+/* Scroll horizontal sur mobile */
+@media (max-width: 480px) {
+    .planning-timeline {
+        overflow-x: auto;
+        overflow-y: visible;
+        padding: 1rem 0;
+        margin: 1rem -1rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+    
+    .planning-timeline::before {
+        content: '';
+        display: block;
+        position: sticky;
+        left: 0;
+        min-width: 0;
+    }
 }
 
 .date-separator {
@@ -404,18 +431,357 @@
 }
 
 @media (max-width: 768px) {
+    .hero-content > div {
+        flex-wrap: wrap;
+    }
+    
+    .btn-login,
+    .btn-download {
+        padding: 0.65rem 1.25rem !important;
+        font-size: 0.875rem !important;
+    }
+    
+    .view-toggle {
+        margin-bottom: 1rem !important;
+    }
+    
+    .btn-view {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.875rem;
+    }
+    
+    .weekend-info {
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .weekend-info h6 {
+        font-size: 0.938rem;
+    }
+    
+    .weekend-info p {
+        font-size: 0.875rem;
+    }
+    
+    .date-badge {
+        padding: 0.4rem 1.25rem;
+        font-size: 0.938rem;
+    }
+    
+    .tache-item {
+        gap: 1rem;
+    }
+    
+    .tache-time {
+        min-width: 70px;
+    }
+    
+    .time-badge {
+        font-size: 0.813rem;
+        padding: 0.4rem;
+    }
+    
+    .tache-title {
+        font-size: 1.1rem;
+    }
+    
+    .tache-card {
+        padding: 1.25rem;
+    }
+    
+    .tache-details {
+        gap: 0.75rem;
+    }
+    
+    .detail-item {
+        font-size: 0.875rem;
+    }
+    
+    .planning-summary {
+        padding: 1.25rem;
+    }
+    
+    .summary-stats {
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-content > div {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+        width: 100%;
+        max-width: 300px;
+        margin: 1rem auto 0 !important;
+    }
+    
+    .btn-login,
+    .btn-download {
+        width: 100% !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.875rem !important;
+        justify-content: center;
+    }
+    
+    .view-toggle {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem !important;
+    }
+    
+    .btn-view {
+        padding: 0.6rem 1rem;
+        font-size: 0.813rem;
+        flex: 1;
+    }
+    
+    .btn-view i {
+        font-size: 0.938rem;
+    }
+    
+    .weekend-info {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .weekend-info h6 {
+        font-size: 0.875rem;
+    }
+    
+    .weekend-info p {
+        font-size: 0.813rem;
+        line-height: 1.5;
+    }
+    
+    .date-separator {
+        margin: 1.5rem 0 1rem;
+    }
+    
+    .date-badge {
+        padding: 0.4rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Planning timeline mobile - scroll horizontal */
+    #timeline-view {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        padding: 1rem 0;
+    }
+    
+    .planning-timeline {
+        display: flex;
+        flex-direction: column;
+        min-width: 500px;
+        width: auto;
+    }
+    
     .tache-item {
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        min-width: 400px;
+        width: auto;
+        flex-shrink: 0;
+    }
+    
+    .tache-card {
+        padding: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .tache-title {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .tache-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .detail-item {
+        font-size: 0.813rem;
+    }
+    
+    .tache-remarque {
+        padding: 0.65rem 0.875rem;
+        margin-top: 0.75rem;
+    }
+    
+    .date-separator {
+        margin: 1.5rem 0 1rem;
+        flex-shrink: 0;
+    }
+    
+    .date-badge {
+        padding: 0.4rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .tache-time {
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .time-badge {
+        flex-direction: row;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.813rem;
+        width: auto;
+    }
+    
+    .time-badge i {
+        font-size: 0.938rem;
     }
     
     .time-line {
         display: none;
     }
     
+    .tache-card {
+        padding: 1rem;
+    }
+    
+    .tache-title {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
     .tache-details {
         flex-direction: column;
         gap: 0.5rem;
+    }
+    
+    .detail-item {
+        font-size: 0.813rem;
+    }
+    
+    .detail-item i {
+        font-size: 0.938rem;
+    }
+    
+    .tache-remarque {
+        padding: 0.65rem 0.875rem;
+        margin-top: 0.75rem;
+    }
+    
+    .tache-remarque i {
+        font-size: 1rem;
+    }
+    
+    .tache-remarque span {
+        font-size: 0.813rem;
+    }
+    
+    .planning-summary {
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .planning-summary h6 {
+        font-size: 0.938rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .summary-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .stat-item {
+        font-size: 0.813rem;
+    }
+    
+    .stat-item i {
+        font-size: 0.938rem;
+    }
+    
+    .card {
+        border-radius: 8px;
+    }
+    
+    .card-header {
+        padding: 1rem;
+    }
+    
+    .card-title {
+        font-size: 1rem !important;
+    }
+    
+    .card-content {
+        padding: 1rem;
+    }
+    
+    /* FullCalendar responsive */
+    #calendar {
+        font-size: 0.75rem;
+    }
+    
+    .fc {
+        width: 100%;
+    }
+    
+    .fc-toolbar {
+        flex-direction: column;
+        gap: 0.5rem;
+        position: relative;
+        z-index: 10;
+        background: white;
+        padding: 0.5rem 0;
+        margin-bottom: 1rem;
+    }
+    
+    .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+    }
+    
+    .fc-button {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Scroll horizontal seulement pour la grille */
+    .fc-scroller {
+        overflow-x: auto !important;
+        overflow-y: auto;
+        min-width: 600px;
+        width: 100vw;
+        margin: 0 calc(-50vw + 50%);
+        padding: 0 calc(50vw - 50%);
+    }
+    
+    .fc-col-header-cell {
+        font-size: 0.7rem;
+        padding: 0.5rem 0 !important;
+        white-space: normal;
+        min-width: 120px;
+    }
+    
+    .fc-timegrid-slot-label {
+        font-size: 0.7rem;
+    }
+    
+    .fc-event {
+        font-size: 0.7rem;
+        padding: 1px 2px;
+    }
+    
+    .fc-daygrid,
+    .fc-timegrid {
+        width: 100%;
+    }
+    
+    .fc-col-header,
+    .fc-timegrid-body {
+        width: auto;
+        min-width: 600px;
     }
 }
 </style>
