@@ -1,0 +1,345 @@
+/* =============== GESTION DES ADMINISTRATEURS - TABLES ET LISTES =============== */
+
+:root {
+    --primary-color: #0d1b2a;
+    --primary-dark: #071018;
+    --primary-light: #1e3a5f;
+    --accent-color: #2563eb;
+    --danger-color: #dc2626;
+    --success-color: #16a34a;
+    --warning-color: #f59e0b;
+    --info-color: #3b82f6;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --border-radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =============== CONTENEUR PRINCIPAL =============== */
+.admin-manage-container {
+    max-width: 1200px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem;
+}
+
+.admin-manage-card {
+    background: #ffffff;
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+}
+
+/* =============== HEADER =============== */
+.admin-manage-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: #ffffff;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.admin-manage-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* =============== ALERTE =============== */
+.alert-admin-manage {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.alert-admin-manage-success {
+    background-color: rgba(22, 163, 74, 0.08);
+    border-left-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.alert-admin-manage-danger {
+    background-color: rgba(220, 38, 38, 0.08);
+    border-left-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+.alert-admin-manage-info {
+    background-color: rgba(59, 130, 246, 0.08);
+    border-left-color: var(--info-color);
+    color: var(--info-color);
+}
+
+.alert-admin-manage i {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.alert-admin-manage p {
+    margin: 0;
+    font-weight: 500;
+}
+
+/* =============== TABLE =============== */
+.admin-table-wrapper {
+    overflow: hidden;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.admin-table thead {
+    background: var(--gray-100);
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.admin-table thead th {
+    padding: 1.2rem 1.5rem;
+    text-align: left;
+    font-weight: 700;
+    color: var(--gray-800);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-table tbody tr {
+    border-bottom: 1px solid var(--gray-200);
+    transition: var(--transition);
+}
+
+.admin-table tbody tr:hover {
+    background-color: var(--gray-50);
+}
+
+.admin-table tbody td {
+    padding: 1.2rem 1.5rem;
+    color: var(--gray-700);
+    font-size: 0.95rem;
+}
+
+.admin-table-email {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-family: 'Courier New', monospace;
+}
+
+.admin-table-action {
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* =============== BOUTONS D'ACTION =============== */
+.btn-admin-action {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    letter-spacing: 0.4px;
+    margin: 0.25rem;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.btn-admin-edit {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #1d4ed8 100%);
+    color: #ffffff;
+    border: 1px solid rgba(37, 99, 235, 0.5);
+}
+
+.btn-admin-edit:hover {
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+    transform: translateY(-2px);
+}
+
+.btn-admin-edit:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+}
+
+.btn-admin-delete {
+    background: linear-gradient(135deg, var(--danger-color) 0%, #b91c1c 100%);
+    color: #ffffff;
+    border: 1px solid rgba(220, 38, 38, 0.5);
+}
+
+.btn-admin-delete:hover {
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
+    transform: translateY(-2px);
+}
+
+.btn-admin-delete:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);
+}
+
+/* =============== FORMULAIRE DE SUPPRESSION =============== */
+.delete-form-inline {
+    display: inline;
+    margin: 0;
+}
+
+/* =============== MESSAGE VIDE =============== */
+.admin-empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--gray-600);
+}
+
+.admin-empty-state i {
+    font-size: 3rem;
+    color: var(--gray-400);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.admin-empty-state p {
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* =============== BOUTONS DE FOOTER =============== */
+.admin-footer-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 2rem;
+    border-top: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.btn-footer-admin {
+    padding: 0.85rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    letter-spacing: 0.4px;
+}
+
+.btn-footer-admin-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(13, 27, 42, 0.15);
+}
+
+.btn-footer-admin-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(13, 27, 42, 0.25);
+}
+
+.btn-footer-admin-secondary {
+    background: transparent;
+    color: var(--danger-color);
+    border: 2px solid var(--danger-color);
+}
+
+.btn-footer-admin-secondary:hover {
+    background: var(--danger-color);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* =============== RESPONSIVE =============== */
+@media (max-width: 992px) {
+    .admin-manage-container {
+        padding: 0 1rem;
+    }
+
+    .admin-table thead th,
+    .admin-table tbody td {
+        padding: 0.9rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-admin-action {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-manage-header {
+        padding: 1.5rem;
+    }
+
+    .admin-manage-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .admin-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .admin-table thead th,
+    .admin-table tbody td {
+        padding: 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .btn-admin-action {
+        display: block;
+        margin: 0.3rem 0;
+        width: 100%;
+    }
+
+    .admin-footer-actions {
+        flex-direction: column;
+    }
+
+    .btn-footer-admin {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-manage-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .admin-table thead th {
+        font-size: 0.75rem;
+        padding: 0.6rem;
+    }
+
+    .admin-table tbody td {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+    }
+}

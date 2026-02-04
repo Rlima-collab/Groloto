@@ -1,0 +1,340 @@
+/* =============== GESTION DES ADMINISTRATEURS - STYLES PROFESSIONNELS =============== */
+
+:root {
+    --primary-color: #0d1b2a;
+    --primary-dark: #071018;
+    --primary-light: #1e3a5f;
+    --accent-color: #2563eb;
+    --danger-color: #dc2626;
+    --success-color: #16a34a;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --border-radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =============== CONTAINER PRINCIPAL =============== */
+.admin-container {
+    max-width: 1100px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem;
+}
+
+.admin-card {
+    background: #ffffff;
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+}
+
+/* =============== ONGLETS - DESIGN MODERNE =============== */
+.admin-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--gray-200);
+    background: var(--gray-50);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.admin-tabs .nav-item {
+    flex: 1;
+    margin: 0;
+}
+
+.admin-tabs .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem !important;
+    color: var(--gray-600) !important;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+}
+
+.admin-tabs .nav-link:hover {
+    color: var(--primary-color) !important;
+    background: rgba(13, 27, 42, 0.04);
+}
+
+.admin-tabs .nav-link.active {
+    color: var(--primary-color) !important;
+    background: transparent !important;
+    border-bottom-color: var(--primary-color) !important;
+}
+
+.admin-tabs .nav-link i {
+    font-size: 1.1rem;
+}
+
+/* =============== CONTENU DES ONGLETS =============== */
+.admin-tab-content {
+    padding: 2.5rem;
+}
+
+.admin-tab-content .tab-pane {
+    animation: fadeInUp 0.4s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =============== HEADER DES SECTIONS =============== */
+.admin-header {
+    margin-bottom: 2rem;
+}
+
+.admin-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid var(--accent-color);
+    display: inline-block;
+}
+
+/* =============== FORMULAIRE =============== */
+.admin-form {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.3px;
+}
+
+.form-group .form-control {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--gray-700);
+    background: #ffffff;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.form-group .form-control::placeholder {
+    color: var(--gray-400);
+}
+
+.form-group .form-control:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background: rgba(37, 99, 235, 0.02);
+}
+
+.form-group .form-control:hover:not(:focus) {
+    border-color: var(--gray-400);
+}
+
+/* =============== LAYOUT DES INPUTS (2 COLONNES) =============== */
+.form-row-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .form-row-two {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =============== BOUTONS =============== */
+.btn-admin {
+    padding: 0.85rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    letter-spacing: 0.4px;
+}
+
+.btn-admin-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(13, 27, 42, 0.15);
+}
+
+.btn-admin-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(13, 27, 42, 0.25);
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+}
+
+.btn-admin-primary:active {
+    transform: translateY(0);
+}
+
+.btn-admin-secondary {
+    background: transparent;
+    color: var(--danger-color);
+    border: 2px solid var(--danger-color);
+}
+
+.btn-admin-secondary:hover {
+    background: var(--danger-color);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+.btn-admin-secondary:active {
+    transform: translateY(0);
+}
+
+.btn-action-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+/* =============== ALERTE =============== */
+.alert-admin {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid;
+    background-color: var(--gray-50);
+}
+
+.alert-admin-danger {
+    border-left-color: var(--danger-color);
+    background-color: rgba(220, 38, 38, 0.05);
+}
+
+.alert-admin-danger ul {
+    color: var(--danger-color);
+    font-weight: 500;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.alert-admin-danger li {
+    padding: 0.25rem 0;
+}
+
+.alert-admin-danger li:before {
+    content: "⚠ ";
+    margin-right: 0.5rem;
+}
+
+/* =============== IFRAME GESTION =============== */
+.admin-iframe-wrapper {
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-iframe-wrapper iframe {
+    width: 100%;
+    height: 650px;
+    border: none;
+    display: block;
+}
+
+/* =============== RESPONSIVE =============== */
+@media (max-width: 992px) {
+    .admin-container {
+        padding: 0 1rem;
+    }
+
+    .admin-tab-content {
+        padding: 1.5rem;
+    }
+
+    .admin-tabs .nav-link {
+        padding: 1rem 1rem !important;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-tabs .nav-link {
+        flex-direction: column;
+        padding: 0.85rem 0.5rem !important;
+        font-size: 0.85rem;
+    }
+
+    .admin-tabs .nav-link i {
+        font-size: 1rem;
+    }
+
+    .btn-action-group {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-admin {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* =============== COULEURS ET ÉTATS =============== */
+.text-muted-admin {
+    color: var(--gray-600);
+}
+
+.text-danger-admin {
+    color: var(--danger-color);
+}
+
+.text-success-admin {
+    color: var(--success-color);
+}
+
+/* =============== SHADOW UTILITIES =============== */
+.shadow-sm-admin {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md-admin {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
