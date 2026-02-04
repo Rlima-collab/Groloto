@@ -4,15 +4,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const navLinks = document.querySelectorAll('.nav-link');
     const currentPath = window.location.pathname;
 
-    // Au chargement, s'assurer que la sidebar est fermée
-    sidebar.classList.remove('open');
-    burgerMenu.classList.remove('active');
-    burgerMenu.setAttribute('aria-expanded', 'false');
+    // Au chargement, s'assurer que la sidebar est ouverte par défaut
+    sidebar.classList.add('open');
+    document.body.classList.add('sidebar-open');
+    burgerMenu.classList.add('active');
+    burgerMenu.setAttribute('aria-expanded', 'true');
 
     // Clic sur le burger menu pour ouvrir/fermer la sidebar
     burgerMenu.addEventListener('click', function (event) {
         event.stopPropagation();
         sidebar.classList.toggle('open');
+        document.body.classList.toggle('sidebar-open');
 
         // Mettre à jour aria-expanded + état visuel du burger
         const isOpen = sidebar.classList.contains('open');
@@ -37,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
         if (!isClickInsideSidebar && !isClickOnBurger && sidebar.classList.contains('open')) {
             sidebar.classList.remove('open');
+            document.body.classList.remove('sidebar-open');
             burgerMenu.classList.remove('active');
             burgerMenu.setAttribute('aria-expanded', 'false');
         }
