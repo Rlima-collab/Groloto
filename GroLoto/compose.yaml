@@ -16,9 +16,10 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-prod}
       APP_SECRET: ${APP_SECRET:-SomeRandomSecret123}
-      DATABASE_URL: "sqlite:///%kernel.project_dir%/var/data.db"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-groloto}:${POSTGRES_PASSWORD:-secret}@db:5432/${POSTGRES_DB:-groloto}"
     depends_on:
       - mailer
+      - db
     networks:
       - groloto_network
     restart: unless-stopped
@@ -37,6 +38,30 @@ services:
       - groloto_network
     restart: unless-stopped
 
+  # Service Base de données PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: groloto_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-groloto}
+      POSTGRES_USER: ${POSTGRES_USER:-groloto}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - groloto_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-groloto}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   groloto_network:
     driver: bridge
+
+volumes:
+  db-data:
