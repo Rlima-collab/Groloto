@@ -729,6 +729,19 @@
     gap: 0.75rem;
     align-items: center;
     margin-top: auto;
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+}
+
+.weekend-card-actions-right {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.weekend-card-actions form {
+    margin: 0;
+    display: inline-flex;
 }
 
 .btn-view {
@@ -747,6 +760,7 @@
     gap: 0.5rem;
     border: 1px solid #e2e8f0;
     font-size: 0.9rem;
+    min-width: 200px;
 }
 
 .btn-view svg {
@@ -759,7 +773,7 @@
 .btn-view:hover {
     background: #f8fafc;
     border-color: #cbd5e1;
-    color: #0f172a;
+    color: #0f172a !important;
     transform: translateY(-1px);
 }
 
@@ -788,6 +802,34 @@
 }
 
 .btn-edit svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-delete {
+    padding: 0.625rem;
+    background: #fee2e2;
+    color: #ef4444;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    flex-shrink: 0;
+    border: 1px solid #fecaca;
+    cursor: pointer;
+    min-width: 38px;
+    min-height: 38px;
+}
+
+.btn-delete:hover {
+    background: #fecaca;
+    color: #dc2626;
+    transform: translateY(-1px);
+}
+
+.btn-delete svg {
     width: 18px;
     height: 18px;
 }

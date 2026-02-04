@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/festival/festival-common.css') }}">
     <link rel="stylesheet" href="{{ asset('css/festival/festival-create.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/weekends.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -79,7 +80,16 @@
 
         {{ form_end(form, {'render_rest': false}) }}
     </div>
-</div>
 
-<link rel="stylesheet" href="{{ asset('css/weekends.css') }}">
+    {% if isAdmin %}
+    <div class="danger-zone" style="margin-top: 2rem;">
+        <h3>Zone de danger</h3>
+        <p>La suppression du weekend est irréversible et supprimera également tous les événements et tâches associés.</p>
+        <form method="post" action="{{ path('app_weekend_delete', {'id': weekend.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce weekend ? Cette action est irréversible.');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ weekend.id) }}">
+            <button type="submit" class="btn-danger">Supprimer le weekend</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
