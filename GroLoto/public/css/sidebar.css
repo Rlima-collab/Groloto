@@ -17,10 +17,20 @@
     padding-top: 0;
 }
 
+/* Contenu principal qui se décale avec la sidebar */
+.app-container {
+    transition: margin-left 0.3s ease;
+    margin-left: 0;
+}
+
 /* Sidebar ouverte */
 .sidebar.open {
     transform: translateX(0);
     z-index: 9998;
+}
+
+body.sidebar-open .app-container {
+    margin-left: 250px;
 }
 
 /* Overlay quand sidebar est ouverte */
