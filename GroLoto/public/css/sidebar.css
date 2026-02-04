@@ -14,7 +14,7 @@
     z-index: 1004;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
-    padding-top: 70px;
+    padding-top: 0;
 }
 
 /* Sidebar ouverte */
@@ -42,6 +42,7 @@
     flex-direction: column;
     align-items: center;
     padding: 20px;
+    padding-top: 90px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
 }
