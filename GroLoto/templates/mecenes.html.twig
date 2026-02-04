@@ -61,8 +61,7 @@
             {% endif %}
         </div>
 
-        <!-- Barre de recherche et filtres -->
-        <div class="search-filter-section">
+        <div class="card-content">
             <form method="GET" id="filtersForm">
                 <div class="search-bar-container">
                     <input type="text" id="searchInput" name="search" class="search-input" placeholder="Rechercher par nom, organisation, email..." value="{{ app.request.query.get('search') }}">

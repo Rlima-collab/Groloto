@@ -16,12 +16,14 @@
     color: #fff;
     padding: 2rem 0 4rem 0;
     padding-top: calc(2rem + 71px);
-    margin: 0;
-    margin-bottom: 0.5rem;
+    margin: 0 !important;
+    margin-bottom: 0 !important;
     text-align: center;
     position: relative;
     overflow: hidden;
-    width: 100%;
+    width: 100vw !important;
+    margin-left: calc(-50vw + 50%) !important;
+    margin-right: calc(-50vw + 50%) !important;
 }
 
 .hero-section.weekend-hero::before {
@@ -59,11 +61,24 @@
 .hero-section.weekend-hero .shine {
     background: linear-gradient(
         135deg,
-        rgba(96, 165, 250, 0) 0%,
-        rgba(96, 165, 250, 0.4) 50%,
-        rgba(96, 165, 250, 0) 100%
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0) 100%
     );
     z-index: 1;
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 100%;
+    height: 100%;
+    animation: shine-move 8s infinite ease-in-out;
+    transform: skewX(-30deg);
+    pointer-events: none;
+}
+
+@keyframes shine-move {
+    0%   { left: -150%; }
+    100% { left: 150%; }
 }
 
 .hero-section.weekend-hero .hero-content {
@@ -120,6 +135,10 @@
     display: inline-block;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 90vw;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .btn-login::before {
@@ -209,6 +228,28 @@
     .grid-2,
     .grid-3 {
         grid-template-columns: 1fr;
+    }
+
+    .btn-login {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-2,
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-login {
+        padding: 0.65rem 1rem;
+        font-size: 0.85rem;
+        max-width: calc(100% - 1rem);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
     }
 }
 

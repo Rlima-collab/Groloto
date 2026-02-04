@@ -13,16 +13,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
+    <!-- Burger menu indépendant -->
+    <button class="burger-menu" id="burgerMenu" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    
     <div class="app-container">
         <!-- Barre latérale -->
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <button class="burger-menu" id="burgerMenu" aria-label="Toggle menu">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-            </div>
             {% if app.user %}
                 <div class="user-info">
                     <div class="user-avatar">
