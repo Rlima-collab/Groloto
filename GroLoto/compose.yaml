@@ -14,11 +14,34 @@ services:
       # Monter les assets pour le développement (optionnel)
       - ./public:/var/www/html/public
     environment:
+      # For Docker use Postgres by default so the app works the same for everyone
       APP_ENV: ${APP_ENV:-prod}
+      APP_DEBUG: ${APP_DEBUG:-0}
       APP_SECRET: ${APP_SECRET:-SomeRandomSecret123}
-      DATABASE_URL: "sqlite:///%kernel.project_dir%/var/data.db"
+      DATABASE_URL: ${DATABASE_URL:-"pgsql://postgres:postgres@db:5432/groloto?serverVersion=15&charset=utf8"}
     depends_on:
+      - db
       - mailer
+    networks:
+      - groloto_network
+    restart: unless-stopped
+    entrypoint: ["/usr/local/bin/docker-entrypoint.sh"]
+
+  # Service Postgres pour persistance et stabilité (shared by all devs)
+  db:
+    image: postgres:15
+    container_name: groloto_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: groloto
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres -d groloto"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - groloto_network
     restart: unless-stopped
@@ -36,6 +59,9 @@ services:
     networks:
       - groloto_network
     restart: unless-stopped
+
+volumes:
+  pgdata:
 
 networks:
   groloto_network:

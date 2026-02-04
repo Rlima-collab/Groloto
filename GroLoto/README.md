@@ -103,20 +103,33 @@ docker compose exec app php bin/console debug:router
 
 ### 7️⃣ Réinitialiser la base de données
 
-Si vous devez réinitialiser la base de données :
+L'installation Docker utilise désormais PostgreSQL par défaut pour garantir une expérience reproductible entre postes de travail (évite les problèmes de verrouillage liés à SQLite sur NFS).
+
+Si vous utilisez Docker (Postgres) :
+
+```bash
+# Démarrer les conteneurs
+docker compose up -d
+
+# Appliquer les migrations (crée les tables si nécessaire)
+docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
+
+# Ou réinitialiser en supprimant le volume Postgres (attention aux données !) et en relançant
+docker compose down -v
+docker compose up --build -d
+```
+
+Si vous utilisez la base SQLite locale (installation manuelle) :
 
 ```bash
 # Supprimer la base existante
 rm -f var/data.db
 
 # Recréer depuis le fichier SQL
-docker compose exec app sqlite3 var/data.db < sql/groLoto.sql
-
-# Ou reconstruire complètement
-docker compose down -v
-docker compose up --build -d
+sqlite3 var/data.db < sql/groLoto.sql
 ```
 
+> ⚠️ Conseil : En équipe, préférez la configuration Docker/Postgres pour éviter les erreurs d'I/O sur des systèmes de fichiers partagés (NFS).
 ---
 
 ## 💻 Installation Manuelle
