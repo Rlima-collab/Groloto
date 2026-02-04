@@ -22,6 +22,7 @@ services:
     depends_on:
       - db
       - mailer
+      - db
     networks:
       - groloto_network
     restart: unless-stopped
@@ -60,9 +61,35 @@ services:
       - groloto_network
     restart: unless-stopped
 
+<<<<<<< HEAD
 volumes:
   pgdata:
+=======
+  # Service Base de données PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: groloto_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-groloto}
+      POSTGRES_USER: ${POSTGRES_USER:-groloto}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - groloto_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-groloto}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+>>>>>>> 13427ba3b298491ef7392664d5c704a928d610c4
 
 networks:
   groloto_network:
     driver: bridge
+
+volumes:
+  db-data:

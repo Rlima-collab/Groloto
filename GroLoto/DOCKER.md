@@ -192,7 +192,7 @@ services:
   app:
     environment:
       APP_ENV: dev
-      APP_DEBUG: 1
+      APP_DEBUG: 0
 ```
 
 Puis redémarrez :
