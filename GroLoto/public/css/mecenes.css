@@ -162,6 +162,23 @@
     justify-content: space-between;
     align-items: center;
     padding: 2rem 2rem 0.5rem 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem 2rem;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.header-actions .btn {
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
 }
 
 .mecenes-page .metric-title {
@@ -360,6 +377,8 @@
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 5;
 }
 
 .mecenes-page .btn {
@@ -466,30 +485,186 @@
 
 
 @media (max-width: 768px) {
+    .hero-section {
+        padding: 1.5rem 1rem 3rem 1rem;
+        padding-top: calc(1.5rem + 71px);
+        margin: 0;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-login {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+    }
+
     .page-title {
         font-size: 1.75rem;
     }
+
     .metrics-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+        padding: 0 1rem;
     }
+
     .mecenes-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+        padding: 0 1rem;
     }
+
+    .mecenes-page .card-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+    }
+
+    .header-actions {
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .header-actions .btn {
+        min-width: auto;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
     .tabs {
         flex-direction: column;
     }
+
     .tab {
         border-radius: 0;
     }
+
     .mecene-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.75rem;
     }
+
     .mecene-actions {
         justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        padding: 1rem 0.75rem 2rem 0.75rem;
+        padding-top: calc(1rem + 71px);
+        margin: 0;
+    }
+
+    .hero-title {
+        font-size: 1.3rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .hero-description {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-login {
+        padding: 0.65rem 1rem;
+        font-size: 0.85rem;
+        max-width: calc(100% - 1rem);
+        width: auto;
+        display: inline-block;
+    }
+
+    .page-title {
+        font-size: 1.4rem;
+        padding: 0 0.75rem;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 0 0.75rem;
+    }
+
+    .mecenes-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 0 0.75rem;
+    }
+
+    .mecenes-page .card-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem 1rem 0.5rem 1rem;
+    }
+
+    .card-title {
+        font-size: 1.3rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .card-description {
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .header-actions {
+        gap: 0.5rem;
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .header-actions .btn {
+        flex: 1;
+        min-width: auto;
+        padding: 0.5rem 0.6rem;
+        font-size: 0.75rem;
+        word-wrap: break-word;
+        white-space: normal;
+        width: 100%;
+    }
+
+    .tabs {
+        flex-direction: column;
+        padding: 0 0.75rem;
+    }
+
+    .tab {
+        border-radius: 0;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .mecene-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .mecene-actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        width: 100%;
+    }
+
+    .mecenes-page .btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.7rem;
+        flex: 0 0 auto;
+    }
+
+    .mecenes-page .btn-small {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.65rem;
     }
 }
 
@@ -837,11 +1012,14 @@
 }
 
 .benevole-social-links {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
+    position: static;
     display: flex;
     gap: 8px;
+    z-index: 10;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e5e7eb;
+    justify-content: center;
 }
 
 .social-link {
@@ -1216,4 +1394,165 @@
     transform: translateY(-1px);
     box-shadow: 0 6px 18px rgba(7, 32, 79, 0.28);
     color: white;
+}/* Responsive mecenes */
+
+/* =============== RESPONSIVE DESIGN =============== */
+@media (max-width: 1400px) {
+    .mecenes-page .metrics-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 1200px) {
+    .hero-title {
+        font-size: 2.2rem;
+    }
+    
+    .hero-description {
+        font-size: 1.1rem;
+    }
+    
+    .mecenes-table-wrapper {
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 1024px) {
+    .mecenes-page .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .lots-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    
+    .inscription-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 1.5rem 1.5rem 3rem 1.5rem;
+    }
+    
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .hero-description {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-btn.yellow {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .mecenes-page .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .mecenes-page .card-header,
+    .mecenes-page .card-content {
+        padding: 1.5rem;
+    }
+    
+    .mecenes-page .metric-value {
+        font-size: 2.5rem;
+    }
+    
+    .mecenes-page .tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+    
+    .mecenes-page .tab {
+        white-space: nowrap;
+        min-width: fit-content;
+    }
+    
+    .lots-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mecenes-table {
+        font-size: 0.85rem;
+    }
+    
+    .mecenes-table th,
+    .mecenes-table td {
+        padding: 0.5rem;
+    }
+    
+    .card-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .card-actions .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        padding: 1.25rem 1rem 2.5rem 1rem;
+    }
+    
+    .hero-title {
+        font-size: 1.5rem;
+    }
+    
+    .hero-description {
+        font-size: 0.9rem;
+    }
+    
+    .hero-btn.yellow {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .mecenes-page .card-header,
+    .mecenes-page .card-content {
+        padding: 1rem;
+    }
+    
+    .mecenes-page .metric-title {
+        font-size: 0.9rem;
+    }
+    
+    .mecenes-page .metric-value {
+        font-size: 2rem;
+    }
+    
+    .mecenes-page .tab {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .mecenes-table {
+        font-size: 0.75rem;
+    }
+    
+    .mecenes-table th,
+    .mecenes-table td {
+        padding: 0.4rem;
+    }
+    
+    .inscription-card {
+        padding: 1rem;
+    }
+    
+    .inscription-title {
+        font-size: 1.1rem;
+    }
+    
+    .inscription-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
 }

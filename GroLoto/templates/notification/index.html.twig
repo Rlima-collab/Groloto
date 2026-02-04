@@ -4,8 +4,8 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -58,11 +58,19 @@
                                 {% if notif.type == 'reponse_contact' %}
                                     Un admin a répondu à votre message
                                 {% else %}
-                                    {{ notif.message }}
+                                    {{ notif.message|slice(0, 100) }}{% if notif.message|length > 100 %}...{% endif %}
                                 {% endif %}
                             </p>
                             <div class="notification-meta">
                                 <span class="notification-date">{{ notif.createdAt|date('d/m à H:i') }}</span>
+                                {% if notif.type == 'contact' %}
+                                    <button type="button" class="btn-expand" data-action="toggle">
+                                        <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                        <span class="expand-text">Voir détails</span>
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="notification-actions">
@@ -84,10 +92,9 @@
                                 <button class="more-btn" aria-expanded="false" title="Plus d'actions">⋯</button>
                                 <div class="more-menu" role="menu" style="display:none;">
                                     {% if view == 'trash' %}
-                                        <button class="menu-item text-danger" data-action="delete" title="Supprimer">Supprimer</button>
+                                        <button class="menu-item text-danger" data-action="delete" title="Supprimer définitivement">Supprimer</button>
                                     {% else %}
-                                        <button class="menu-item" data-action="trash" title="Corbeille">Corbeille</button>
-                                        <button class="menu-item text-danger" data-action="delete" title="Supprimer">Supprimer</button>
+                                        <button class="menu-item" data-action="trash" title="Mettre à la corbeille">Corbeille</button>
                                     {% endif %}
                                 </div>
                             </div>

@@ -248,9 +248,9 @@ class EvenementController extends AbstractController
         // Récupérer tous les weekends pour le filtre
         $weekends = $weekendRepo->findAll();
         
-        // Récupérer le filtre depuis la requête
+        // Récupérer le filtre depuis la requête (par défaut: futurs)
         $weekendFilter = $request->query->get('weekend', 'all');
-        $statutFilter = $request->query->get('statut', 'all');
+        $statutFilter = $request->query->get('statut', 'futurs');
         
         // Récupérer tous les événements
         $evenements = $evenementRepo->findAll();
