@@ -149,49 +149,54 @@
 
 /* =============== BOUTONS D'ACTION =============== */
 .btn-admin-action {
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1.2rem;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: 600;
     font-size: 0.85rem;
     cursor: pointer;
     transition: var(--transition);
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    justify-content: center;
+    gap: 0.5rem;
     text-decoration: none;
-    letter-spacing: 0.3px;
-    margin: 0 0.3rem;
+    letter-spacing: 0.4px;
+    margin: 0.25rem;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .btn-admin-edit {
-    background-color: rgba(37, 99, 235, 0.15);
-    color: var(--accent-color);
-    border: 1px solid rgba(37, 99, 235, 0.3);
+    background: linear-gradient(135deg, var(--accent-color) 0%, #1d4ed8 100%);
+    color: #ffffff;
+    border: 1px solid rgba(37, 99, 235, 0.5);
 }
 
 .btn-admin-edit:hover {
-    background-color: var(--accent-color);
-    color: #ffffff;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+    transform: translateY(-2px);
+}
+
+.btn-admin-edit:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
 }
 
 .btn-admin-delete {
-    background-color: rgba(220, 38, 38, 0.15);
-    color: var(--danger-color);
-    border: 1px solid rgba(220, 38, 38, 0.3);
+    background: linear-gradient(135deg, var(--danger-color) 0%, #b91c1c 100%);
+    color: #ffffff;
+    border: 1px solid rgba(220, 38, 38, 0.5);
 }
 
 .btn-admin-delete:hover {
-    background-color: var(--danger-color);
-    color: #ffffff;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
+    transform: translateY(-2px);
 }
 
 .btn-admin-delete:active {
     transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);
 }
 
 /* =============== FORMULAIRE DE SUPPRESSION =============== */

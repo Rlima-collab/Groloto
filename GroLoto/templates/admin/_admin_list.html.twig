@@ -10,6 +10,17 @@
     {% endfor %}
 {% endfor %}
 
+<style>
+.btn-admin-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-admin-action:active {
+    transform: translateY(0);
+}
+</style>
+
 <!-- Tableau des administrateurs -->
 {% if admins|length > 0 %}
     <div class="admin-table-wrapper">
@@ -37,14 +48,14 @@
                             {% endif %}
                         </td>
                         <td class="admin-table-action">
-                            <a href="{{ path('admin_edit', {id: admin.id}) }}" class="btn-admin-action btn-admin-edit" title="Modifier cet administrateur">
+                            <a href="{{ path('admin_edit', {id: admin.id}) }}" class="btn-admin-action btn-admin-edit" title="Modifier cet administrateur" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration: none; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); transition: all 0.3s;">
                                 <i class="bi bi-pencil-square"></i>
                                 <span>Éditer</span>
                             </a>
                             {% if admins|length > 1 %}
                                 <form method="post" action="{{ path('admin_delete', {id: admin.id}) }}" class="delete-form-inline" onsubmit="return confirm('Êtes-vous sûr ? Cette action est irréversible.');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ admin.id) }}">
-                                    <button type="submit" class="btn-admin-action btn-admin-delete" title="Supprimer cet administrateur">
+                                    <button type="submit" class="btn-admin-action btn-admin-delete" title="Supprimer cet administrateur" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration: none; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); transition: all 0.3s; margin: 0.25rem;">
                                         <i class="bi bi-trash3"></i>
                                         <span>Supprimer</span>
                                     </button>
