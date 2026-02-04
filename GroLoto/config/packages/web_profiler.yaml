@@ -1,7 +1,7 @@
 when@dev:
     web_profiler:
             toolbar:
-                enabled: '%env(bool:APP_DEBUG)%'
+                enabled: false
 
     framework:
         profiler:
