@@ -24,8 +24,9 @@ class InscriptionMeceneType extends AbstractType
                 'class' => Evenement::class,
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('e')
-                        ->where('e.date_debut >= :today')
-                        ->setParameter('today', new \DateTime())
+                        ->where('e.date_fin >= :now OR (e.date_fin IS NULL AND e.date_debut >= :today)')
+                        ->setParameter('now', new \DateTime())
+                        ->setParameter('today', new \DateTime('today'))
                         ->orderBy('e.date_debut', 'ASC');
                 },
                 'choice_label' => function(Evenement $evenement) {
