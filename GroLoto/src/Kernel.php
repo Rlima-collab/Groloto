@@ -13,9 +13,6 @@ class Kernel extends BaseKernel
     {
         parent::boot();
         date_default_timezone_set('Europe/Paris');
-        
-        // Prevent SQLite on NFS (causes disk I/O errors and locking issues)
-        $this->checkDatabaseConfiguration();
     }
 
     private function checkDatabaseConfiguration(): void
@@ -26,11 +23,21 @@ class Kernel extends BaseKernel
             return; // No DATABASE_URL set, skip check
         }
 
+        // Only check in production to avoid warnings in dev
+        if ($this->getEnvironment() === 'dev') {
+            return;
+        }
+
         // Check if using SQLite
         if (strpos($databaseUrl, 'sqlite://') === 0) {
             // Extract file path from DATABASE_URL
             $path = str_replace('sqlite:///', '', $databaseUrl);
             $path = str_replace('%kernel.project_dir%', $this->getProjectDir(), $path);
+            
+            // Skip check if using /tmp (local filesystem)
+            if (strpos($path, '/tmp/') === 0) {
+                return;
+            }
             
             if (file_exists($path)) {
                 // Check if the file or its parent directory is on NFS
