@@ -1,0 +1,64 @@
+{# Template partiel: Liste des administrateurs #}
+
+<!-- Affichage des messages flash -->
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert-admin-manage alert-admin-manage-{{ type == 'error' ? 'danger' : (type == 'success' ? 'success' : 'info') }}">
+            <i class="bi bi-{{ type == 'error' ? 'exclamation-circle' : (type == 'success' ? 'check-circle' : 'info-circle') }}"></i>
+            <p>{{ message }}</p>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<!-- Tableau des administrateurs -->
+{% if admins|length > 0 %}
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Prénom</th>
+                    <th>Nom</th>
+                    <th>Créé le</th>
+                    <th class="admin-table-action">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for admin in admins %}
+                    <tr>
+                        <td class="admin-table-email">{{ admin.email }}</td>
+                        <td>{{ admin.prenom ?: '—' }}</td>
+                        <td>{{ admin.nom ?: '—' }}</td>
+                        <td>
+                            {% if admin.dateCreation %}
+                                <small class="text-muted-admin">{{ admin.dateCreation|date('d M Y') }}</small>
+                            {% else %}
+                                <small class="text-muted-admin">—</small>
+                            {% endif %}
+                        </td>
+                        <td class="admin-table-action">
+                            <a href="{{ path('admin_edit', {id: admin.id}) }}" class="btn-admin-action btn-admin-edit" title="Modifier cet administrateur">
+                                <i class="bi bi-pencil-square"></i>
+                                <span>Éditer</span>
+                            </a>
+                            {% if admins|length > 1 %}
+                                <form method="post" action="{{ path('admin_delete', {id: admin.id}) }}" class="delete-form-inline" onsubmit="return confirm('Êtes-vous sûr ? Cette action est irréversible.');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ admin.id) }}">
+                                    <button type="submit" class="btn-admin-action btn-admin-delete" title="Supprimer cet administrateur">
+                                        <i class="bi bi-trash3"></i>
+                                        <span>Supprimer</span>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="admin-empty-state">
+        <i class="bi bi-inbox"></i>
+        <p>Aucun administrateur trouvé.</p>
+    </div>
+{% endif %}
