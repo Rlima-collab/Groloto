@@ -32,7 +32,7 @@
                         <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}" class="festival-image" onerror="this.style.display='none';this.parentElement.querySelector('.festival-placeholder').style.display='flex';">
                         {% set showPlaceholder = false %}
                     {% else %}
-                        <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}" class="festival-image" onerror="this.style.display='none';this.parentElement.querySelector('.festival-placeholder').style.display='flex';">
+                        <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}" class="festival-image" onerror="this.style.display='none';this.parentElement.querySelector('.festival-placeholder').style.display='flex';">​
                         {% set showPlaceholder = false %}
                     {% endif %}
                 {% endif %}

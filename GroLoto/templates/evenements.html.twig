@@ -46,7 +46,7 @@
                                     {% if imagePath starts with 'uploads/' %}
                                         <img src="{{ asset(imagePath) }}" alt="{{ weekend.nom }}">
                                     {% else %}
-                                        <img src="{{ asset('uploads/weekends/' ~ imagePath) }}" alt="{{ weekend.nom }}">
+                                        <img src="{{ asset(imagePath) }}" alt="{{ weekend.nom }}">
                                     {% endif %}
                                     <div class="weekend-overlay"></div>
                                 </div>
