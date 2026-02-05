@@ -32,18 +32,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Fermer la sidebar si on clique en dehors
-    document.addEventListener('click', function(event) {
-        const isClickInsideSidebar = sidebar.contains(event.target);
-        const isClickOnBurger = burgerMenu.contains(event.target);
-        
-        if (!isClickInsideSidebar && !isClickOnBurger && sidebar.classList.contains('open')) {
-            sidebar.classList.remove('open');
-            document.body.classList.remove('sidebar-open');
-            burgerMenu.classList.remove('active');
-            burgerMenu.setAttribute('aria-expanded', 'false');
-        }
-    });
+    // La sidebar reste ouverte jusqu'à ce qu'on clique sur le burger menu
+    // Pas de fermeture automatique au clic ailleurs
 
     // Fonction pour ouvrir automatiquement le sous-menu contenant la page active
     function openActiveSubmenu() {
