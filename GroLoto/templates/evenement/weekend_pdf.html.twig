@@ -176,6 +176,121 @@
             padding: 24px;
             color: #64748b;
         }
+
+        .benevoles-list {
+            margin-top: 8px;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 4px;
+        }
+
+        .benevoles-title {
+            font-size: 10px;
+            font-weight: bold;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .benevole-item {
+            display: inline-block;
+            background: #dcfce7;
+            color: #166534;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 9px;
+            margin: 3px 4px 3px 0;
+        }
+
+        .benevole-item.confirme {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .benevole-horaire {
+            font-size: 8px;
+            opacity: 0.8;
+            margin-left: 4px;
+        }
+
+        .item-type-tache {
+            border-left: 4px solid #2563eb;
+        }
+
+        .item-type-evenement {
+            border-left: 4px solid #7c3aed;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .type-badge.tache {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .type-badge.evenement {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .legend-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            font-size: 9px;
+        }
+
+        .legend-title {
+            font-weight: bold;
+            color: #0f172a;
+            margin-bottom: 6px;
+            font-size: 10px;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .legend-color.tache {
+            background: #2563eb;
+        }
+
+        .legend-color.evenement {
+            background: #7c3aed;
+        }
+
+        .legend-color.confirme {
+            background: #dbeafe;
+            border: 1px solid #1e40af;
+        }
+
+        .legend-color.assigne {
+            background: #dcfce7;
+            border: 1px solid #166534;
+        }
     </style>
 </head>
 <body>
@@ -199,46 +314,75 @@
         </div>
     {% endif %}
 
-    {% if evenements is not empty %}
-        {% set evenementsByDate = {} %}
-        {% for evenement in evenements %}
-            {% set dateKey = evenement.dateDebut|date('Y-m-d') %}
-            {% if evenementsByDate[dateKey] is not defined %}
-                {% set evenementsByDate = evenementsByDate|merge({(dateKey): []}) %}
-            {% endif %}
-            {% set evenementsByDate = evenementsByDate|merge({(dateKey): evenementsByDate[dateKey]|merge([evenement])}) %}
-        {% endfor %}
+    <div class="legend-box">
+        <div class="legend-title">Légende des couleurs</div>
+        <div class="legend-items">
+            <div class="legend-item">
+                <span class="legend-color tache"></span>
+                <span>Tâche</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color evenement"></span>
+                <span>Événement</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color confirme"></span>
+                <span>Bénévole demandé (en attente)</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color assigne"></span>
+                <span>Bénévole confirmé</span>
+            </div>
+        </div>
+    </div>
 
-        {% for dateKey, dateEvenements in evenementsByDate %}
+    {% if planningParJour is defined and planningParJour|length > 0 %}
+        {% for jour, dayData in planningParJour %}
             <div class="date-section">
                 <div class="date-header">
-                    {{ dateEvenements[0].dateDebut|date('l d F Y')|capitalize }}
+                    {{ dayData.jourNom }} {{ dayData.date }}
                 </div>
 
-                {% for evenement in dateEvenements %}
-                    <div class="evenement-card">
-                        <div class="evenement-title">{{ evenement.nom }}</div>
+                {% for item in dayData.items %}
+                    <div class="evenement-card item-type-{{ item.type }}">
+                        <div class="evenement-title">
+                            {{ item.titre }}
+                            <span class="type-badge {{ item.type }}">{{ item.type == 'tache' ? 'Tâche' : 'Événement' }}</span>
+                        </div>
                         
                         <div class="evenement-meta">
                             <span class="meta-item">
                                 <span class="meta-label">Horaire:</span>
-                                {{ evenement.dateDebut|date('H\\hi') }}
-                                {% if evenement.dateFin and evenement.dateFin != evenement.dateDebut %}
-                                    - {{ evenement.dateFin|date('H\\hi') }}
-                                {% endif %}
+                                {{ item.horaire }}
                             </span>
                             
-                            {% if evenement.lieu %}
+                            {% if item.lieu %}
                                 <span class="meta-item">
-                                    <span class="meta-label">Lieu:</span>
-                                    {{ evenement.lieu }}
+                                    <span class="meta-label">{{ item.type == 'tache' ? 'Poste:' : 'Lieu:' }}</span>
+                                    {{ item.lieu }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if item.maxPersonnes is defined and item.maxPersonnes %}
+                                <span class="meta-item">
+                                    <span class="meta-label">Effectif:</span>
+                                    {{ item.benevoles|length }}/{{ item.maxPersonnes }}
                                 </span>
                             {% endif %}
                         </div>
 
-                        {% if evenement.description %}
+                        {% if item.description %}
                             <div class="evenement-description">
-                                {{ evenement.description }}
+                                {{ item.description }}
+                            </div>
+                        {% endif %}
+
+                        {% if item.benevoles|length > 0 %}
+                            <div class="benevoles-list">
+                                <div class="benevoles-title">Bénévoles assignés ({{ item.benevoles|length }}):</div>
+                                {% for benevole in item.benevoles %}
+                                    <span class="benevole-item {{ benevole.statut }}">{{ benevole.nom }}{% if benevole.horaire %}<span class="benevole-horaire">({{ benevole.horaire }})</span>{% endif %}</span>
+                                {% endfor %}
                             </div>
                         {% endif %}
                     </div>
@@ -249,13 +393,17 @@
         <div class="summary-box">
             <div class="summary-title">Résumé</div>
             <div class="summary-content">
-                Ce planning comprend <strong>{{ evenements|length }} événement{{ evenements|length > 1 ? 's' : '' }}</strong>
+                {% set totalItems = 0 %}
+                {% for jour, dayData in planningParJour %}
+                    {% set totalItems = totalItems + dayData.items|length %}
+                {% endfor %}
+                Ce planning comprend <strong>{{ totalItems }} activité{{ totalItems > 1 ? 's' : '' }}</strong>
                 pour le weekend du {{ weekend.dateDebut|date('d/m/Y') }} au {{ weekend.dateFin|date('d/m/Y') }}.
             </div>
         </div>
     {% else %}
         <div class="no-events">
-            <p>Aucun événement n'est prévu pour ce weekend.</p>
+            <p>Aucun événement ou tâche n'est prévu pour ce weekend.</p>
         </div>
     {% endif %}
 

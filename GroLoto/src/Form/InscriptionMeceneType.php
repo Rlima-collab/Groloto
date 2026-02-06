@@ -24,8 +24,9 @@ class InscriptionMeceneType extends AbstractType
                 'class' => Evenement::class,
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('e')
-                        ->where('e.date_debut >= :today')
-                        ->setParameter('today', new \DateTime())
+                        ->where('e.date_fin >= :now OR (e.date_fin IS NULL AND e.date_debut >= :today)')
+                        ->setParameter('now', new \DateTime())
+                        ->setParameter('today', new \DateTime('today'))
                         ->orderBy('e.date_debut', 'ASC');
                 },
                 'choice_label' => function(Evenement $evenement) {
@@ -39,16 +40,21 @@ class InscriptionMeceneType extends AbstractType
                     new Assert\NotBlank(['message' => 'Veuillez sélectionner un événement'])
                 ]
             ])
-            ->add('type_don', ChoiceType::class, [
-                'label' => 'Type de don',
-                'choices' => [
-                    'Don pour le fonctionnement du festival' => 'fonctionnement',
-                    'Don pour les lots' => 'lot'
-                ],
-                'expanded' => true,
-                'multiple' => false,
-                'required' => true,
-                'data' => 'fonctionnement'
+            ->add('don_fonctionnement', null, [
+                'label' => '✓ Don pour le fonctionnement du festival',
+                'required' => false,
+                'help' => 'Contribuez au fonctionnement des événements (organisation, matériel, etc.)',
+                'attr' => [
+                    'class' => 'form-checkbox'
+                ]
+            ])
+            ->add('don_lots', null, [
+                'label' => '✓ Don pour les lots de la tombola',
+                'required' => false,
+                'help' => 'Contribuez en offrant des lots pour la tombola',
+                'attr' => [
+                    'class' => 'form-checkbox'
+                ]
             ])
             ->add('nom_don', TextType::class, [
                 'label' => 'Nom du don',

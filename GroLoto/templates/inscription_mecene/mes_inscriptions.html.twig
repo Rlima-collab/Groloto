@@ -79,21 +79,36 @@
                         <tbody>
                             {% for inscription in inscriptions %}
                                 <tr>
-                                    <td class="name">{{ inscription.evenement.nom }}</td>
-                                    <td>{{ inscription.evenement.dateDebut|date('d/m/Y') }}</td>
+                                    <td class="name">
+                                        {% if inscription.evenement %}
+                                            {{ inscription.evenement.nom }}
+                                        {% else %}
+                                            <em class="text-muted">Événement supprimé</em>
+                                        {% endif %}
+                                    </td>
                                     <td>
-                                        {% if inscription.evenement.lieu %}
+                                        {% if inscription.evenement and inscription.evenement.dateDebut %}
+                                            {{ inscription.evenement.dateDebut|date('d/m/Y') }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if inscription.evenement and inscription.evenement.lieu %}
                                             <span class="text-muted">{{ inscription.evenement.lieu }}</span>
                                         {% else %}
                                             <span class="text-muted">-</span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if inscription.typeDon == 'lots' %}
-                                            <span class="badge" style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">🎁 Don pour les lots</span>
-                                        {% else %}
-                                            <span class="badge" style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">🎪 Don pour le fonctionnement du festival</span>
-                                        {% endif %}
+                                        <div class="badge-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                            {% if inscription.donFonctionnement %}
+                                                <span class="badge" style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">🎪 Fonctionnement</span>
+                                            {% endif %}
+                                            {% if inscription.donLots %}
+                                                <span class="badge" style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">🎁 Lots</span>
+                                            {% endif %}
+                                        </div>
                                     </td>
                                     <td>
                                         <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ inscription.descriptionDon }}">

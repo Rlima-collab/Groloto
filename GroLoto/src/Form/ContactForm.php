@@ -22,7 +22,7 @@ class ContactForm extends AbstractType
                 'attr' => ['placeholder' => 'Jean Dupont'],
                 'required' => true,
                 'constraints' => [
-                    new NotBlank(['message' => 'Le nom est requis.']),
+                    new NotBlank(message: 'Le nom est requis.'),
                 ],
             ])
             ->add('email', EmailType::class, [
@@ -30,15 +30,15 @@ class ContactForm extends AbstractType
                 'attr' => ['placeholder' => 'jean@example.com'],
                 'required' => true,
                 'constraints' => [
-                    new NotBlank(['message' => 'L\'email est requis.']),
-                    new EmailConstraint(['message' => 'L\'adresse email n\'est pas valide.']),
+                    new NotBlank(message: 'L\'email est requis.'),
+                    new EmailConstraint(message: 'L\'adresse email n\'est pas valide.'),
                 ],
             ])
             ->add('sujet', TextType::class, [
                 'label' => 'Sujet',
                 'required' => true,
                 'constraints' => [
-                    new NotBlank(['message' => 'Le sujet est requis.']),
+                    new NotBlank(message: 'Le sujet est requis.'),
                 ],
                 'attr' => ['placeholder' => 'Ex: Demande d\'information'],
             ])
@@ -47,7 +47,7 @@ class ContactForm extends AbstractType
                 'attr' => ['rows' => 5, 'placeholder' => 'Écrivez votre message ici...'],
                 'required' => true,
                 'constraints' => [
-                    new NotBlank(['message' => 'Le message est requis.']),
+                    new NotBlank(message: 'Le message est requis.'),
                 ],
             ])
             ->add('envoyer', SubmitType::class, [

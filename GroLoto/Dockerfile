@@ -1,7 +1,7 @@
 # Dockerfile pour l'application Symfony GroLoto
 FROM php:8.2-apache
 
-# Installation des dépendances système et extensions PHP
+# Installation des dépendances système et extensions
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     libsqlite3-dev \
     libpq-dev \
+    postgresql-client \
+    $PHPIZE_DEPS \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
     pdo \
@@ -23,8 +25,17 @@ RUN apt-get update && apt-get install -y \
     zip \
     gd \
     opcache \
+    && pecl install pcov \
+    && docker-php-ext-enable pcov \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Activer PCOV uniquement pour la couverture de code (PHPUnit)
+RUN { \
+      echo 'pcov.enabled=1'; \
+      echo 'pcov.directory=/var/www/html/src'; \
+      echo 'pcov.exclude="~vendor~"'; \
+    } > /usr/local/etc/php/conf.d/pcov.ini
 
 # Installation de Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -49,12 +60,9 @@ RUN mkdir -p var/cache var/log var && \
 # Installation des dépendances PHP (avec dev pour éviter les erreurs de bundles)
 RUN composer install --optimize-autoloader --no-interaction --ignore-platform-reqs
 
-# Créer la base de données SQLite si elle n'existe pas
-RUN if [ ! -f var/data.db ]; then \
-        sqlite3 var/data.db < sql/groLoto.sql && \
-        chown www-data:www-data var/data.db && \
-        chmod 664 var/data.db; \
-    fi
+# Copier le script d'entrée Docker (gère attente de la DB, migrations, cache)
+COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Vider le cache Symfony
 RUN php bin/console cache:clear --env=prod && \

@@ -1,0 +1,20 @@
+monolog:
+    handlers:
+        # Write to file only when an ERROR (or worse) occurs
+        main:
+            type: fingers_crossed
+            action_level: error
+            handler: file_nested
+
+        file_nested:
+            type: rotating_file
+            path: '%kernel.project_dir%/var/log/prod.log'
+            level: debug
+            max_files: 30
+
+        console:
+            type: console
+            process_psr_3_messages: false
+            channels: ['!event', '!doctrine']
+
+        # Note: extend with Sentry/Slack handlers in prod if needed

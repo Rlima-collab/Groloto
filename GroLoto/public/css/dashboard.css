@@ -445,6 +445,32 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1400px) {
+    .dashboard-hero {
+        padding: 50px 30px;
+    }
+    
+    .dashboard-content,
+    .metrics-grid {
+        padding: 0 30px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .hero-title {
+        font-size: 2.2rem;
+    }
+    
+    .hero-description {
+        font-size: 1.1rem;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+    }
+}
+
 @media (max-width: 1024px) {
     .content-row {
         grid-template-columns: 1fr;
@@ -458,20 +484,26 @@
     .action-grid {
         grid-template-columns: 1fr;
     }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
     .dashboard-hero {
         padding: 40px 20px;
+        border-radius: 0 0 20px 20px;
     }
     
     .hero-content {
         flex-direction: column;
         text-align: center;
+        gap: 30px;
     }
     
     .hero-title {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
     
     .hero-description {
@@ -479,6 +511,14 @@
     }
     
     .hero-actions {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .btn-hero {
+        padding: 12px 24px;
+        font-size: 0.95rem;
+        flex: 1;
         justify-content: center;
     }
     
@@ -489,11 +529,74 @@
     
     .metrics-grid {
         grid-template-columns: 1fr;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .metric-card {
+        padding: 20px;
+    }
+    
+    .content-card {
+        padding: 20px;
     }
     
     .list-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-hero {
+        padding: 30px 15px;
+    }
+    
+    .hero-title {
+        font-size: 1.5rem;
+    }
+    
+    .hero-description {
+        font-size: 0.9rem;
+    }
+    
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-hero {
+        width: 100%;
+        padding: 12px 20px;
+    }
+    
+    .metrics-grid,
+    .dashboard-content {
+        padding: 0 15px;
+    }
+    
+    .metric-icon {
+        font-size: 2rem;
+    }
+    
+    .metric-value {
+        font-size: 1.8rem;
+    }
+    
+    .metric-label {
+        font-size: 0.85rem;
+    }
+    
+    .content-card {
+        padding: 15px;
+    }
+    
+    .card-header h2 {
+        font-size: 1.1rem;
+    }
+    
+    .list-item {
+        padding: 12px;
     }
 }

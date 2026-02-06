@@ -10,17 +10,14 @@
 {% endblock %}
 
 {% block body %}
-<!-- Hero Section -->
-<div class="full-width-hero">
-    <div class="hero-section weekend-hero">
-        <div class="shine"></div>
-        <div class="hero-content">
-            <h1 class="hero-title">Gestion des Événements</h1>
-            <p class="hero-description">Consultez et gérez tous les événements GroLoto</p>
-            {% if isAdmin %}
-                <a href="{{ path('app_evenements_create') }}" class="btn-login">Créer un événement</a>
-            {% endif %}
-        </div>
+<div class="hero-section weekend-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Gestion des Événements</h1>
+        <p class="hero-description">Consultez et gérez tous les événements GroLoto</p>
+        {% if isAdmin %}
+            <a href="{{ path('app_evenements_create') }}" class="btn-login">Créer un événement</a>
+        {% endif %}
     </div>
 </div>
 

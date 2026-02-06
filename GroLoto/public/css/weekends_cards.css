@@ -301,6 +301,13 @@
 
 .weekend-view-btn i { color: inherit; }
 
+/* Export PDF Button */
+.weekend-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 /* =============================================
    WEEKEND DETAIL MODAL
    ============================================= */

@@ -1,9 +1,3 @@
 <?php
-
-use App\Kernel;
-
-require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
-
-return function (array $context) {
-    return new Kernel($context['APP_ENV'], (bool) $context['APP_DEBUG']);
-};
+// Point d'entrée relais : inclut et renvoie le callable de l'index placé à la racine du projet
+return require __DIR__ . '/../index.php';

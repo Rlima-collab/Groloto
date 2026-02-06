@@ -78,14 +78,21 @@ class NotificationServiceTest extends TestCase
         $benevole = new Utilisateur();
         $tacheNom = 'Tâche Test';
 
+        $captured = null;
         $this->entityManager->expects($this->once())
-            ->method('persist');
+            ->method('persist')
+            ->willReturnCallback(function (Notification $notification) use (&$captured): void {
+                $captured = $notification;
+            });
         $this->entityManager->expects($this->once())
             ->method('flush');
 
         $this->notificationService->notifyBenevoleDemandeAcceptee($benevole, $tacheNom);
         
-        $this->assertTrue(true); // Test passes if no exception thrown
+        $this->assertInstanceOf(Notification::class, $captured);
+        $this->assertSame('acceptation_tache', $captured->getType());
+        $this->assertStringContainsString($tacheNom, $captured->getMessage());
+        $this->assertSame('/benevole/taches-disponibles', $captured->getLien());
     }
 
     public function testNotifyBenevoleDemandeRefusee(): void
@@ -94,19 +101,33 @@ class NotificationServiceTest extends TestCase
         $tacheNom = 'Tâche Test';
         $raison = 'Manque de compétences';
 
+        $captured = null;
         $this->entityManager->expects($this->once())
-            ->method('persist');
+            ->method('persist')
+            ->willReturnCallback(function (Notification $notification) use (&$captured): void {
+                $captured = $notification;
+            });
         $this->entityManager->expects($this->once())
             ->method('flush');
 
         $this->notificationService->notifyBenevoleDemandeRefusee($benevole, $tacheNom, $raison);
         
-        $this->assertTrue(true);
+        $this->assertInstanceOf(Notification::class, $captured);
+        $this->assertSame('refus_tache', $captured->getType());
+        $this->assertStringContainsString($tacheNom, $captured->getMessage());
+        $this->assertStringContainsString('Motif', $captured->getMessage());
     }
 
     public function testNotifyBenevoleDemandeRefuseeSansRaison(): void
     {
         $benevole = new Utilisateur();
+
+        $captured = null;
+        $this->entityManager->expects($this->once())
+            ->method('persist')
+            ->willReturnCallback(function (Notification $notification) use (&$captured): void {
+                $captured = $notification;
+            });
         
         $this->entityManager->expects($this->once())
             ->method('persist');
@@ -114,13 +135,22 @@ class NotificationServiceTest extends TestCase
             ->method('flush');
 
         $this->notificationService->notifyBenevoleDemandeRefusee($benevole, 'Tâche');
-        
-        $this->assertTrue(true);
+
+        $this->assertInstanceOf(Notification::class, $captured);
+        $this->assertSame('refus_tache', $captured->getType());
+        $this->assertStringNotContainsString('Motif', $captured->getMessage());
     }
 
     public function testNotifyBenevoleAffectation(): void
     {
         $benevole = new Utilisateur();
+
+        $captured = null;
+        $this->entityManager->expects($this->once())
+            ->method('persist')
+            ->willReturnCallback(function (Notification $notification) use (&$captured): void {
+                $captured = $notification;
+            });
         
         $this->entityManager->expects($this->once())
             ->method('persist');
@@ -128,13 +158,22 @@ class NotificationServiceTest extends TestCase
             ->method('flush');
 
         $this->notificationService->notifyBenevoleAffectation($benevole, 'Tâche Test');
-        
-        $this->assertTrue(true);
+
+        $this->assertInstanceOf(Notification::class, $captured);
+        $this->assertSame('affectation_tache', $captured->getType());
+        $this->assertSame('/benevoles', $captured->getLien());
     }
 
     public function testNotifyAdminDemandeMecene(): void
     {
         $admin = new Utilisateur();
+
+        $captured = null;
+        $this->entityManager->expects($this->once())
+            ->method('persist')
+            ->willReturnCallback(function (Notification $notification) use (&$captured): void {
+                $captured = $notification;
+            });
         
         $this->entityManager->expects($this->once())
             ->method('persist');
@@ -142,13 +181,22 @@ class NotificationServiceTest extends TestCase
             ->method('flush');
 
         $this->notificationService->notifyAdminDemandeMecene($admin, 'Mécène Test', 'Événement Test');
-        
-        $this->assertTrue(true);
+
+        $this->assertInstanceOf(Notification::class, $captured);
+        $this->assertSame('demande_mecene', $captured->getType());
+        $this->assertSame('/mecenes', $captured->getLien());
     }
 
     public function testNotifyMeceneDemandeAcceptee(): void
     {
         $mecene = new Utilisateur();
+
+        $captured = null;
+        $this->entityManager->expects($this->once())
+            ->method('persist')
+            ->willReturnCallback(function (Notification $notification) use (&$captured): void {
+                $captured = $notification;
+            });
         
         $this->entityManager->expects($this->once())
             ->method('persist');
@@ -156,13 +204,21 @@ class NotificationServiceTest extends TestCase
             ->method('flush');
 
         $this->notificationService->notifyMeceneDemandeAcceptee($mecene, 'Événement Test');
-        
-        $this->assertTrue(true);
+
+        $this->assertInstanceOf(Notification::class, $captured);
+        $this->assertSame('acceptation_mecene', $captured->getType());
     }
 
     public function testNotifyMeceneDemandeRefusee(): void
     {
         $mecene = new Utilisateur();
+
+        $captured = null;
+        $this->entityManager->expects($this->once())
+            ->method('persist')
+            ->willReturnCallback(function (Notification $notification) use (&$captured): void {
+                $captured = $notification;
+            });
         
         $this->entityManager->expects($this->once())
             ->method('persist');
@@ -170,13 +226,22 @@ class NotificationServiceTest extends TestCase
             ->method('flush');
 
         $this->notificationService->notifyMeceneDemandeRefusee($mecene, 'Événement Test', 'Budget insuffisant');
-        
-        $this->assertTrue(true);
+
+        $this->assertInstanceOf(Notification::class, $captured);
+        $this->assertSame('refus_mecene', $captured->getType());
+        $this->assertStringContainsString('Motif', $captured->getMessage());
     }
 
     public function testNotifyAdminDemandeAnnulation(): void
     {
         $admin = new Utilisateur();
+
+        $captured = null;
+        $this->entityManager->expects($this->once())
+            ->method('persist')
+            ->willReturnCallback(function (Notification $notification) use (&$captured): void {
+                $captured = $notification;
+            });
         
         $this->entityManager->expects($this->once())
             ->method('persist');
@@ -184,7 +249,51 @@ class NotificationServiceTest extends TestCase
             ->method('flush');
 
         $this->notificationService->notifyAdminDemandeAnnulation($admin, 'Jean', 'Tâche Test');
-        
-        $this->assertTrue(true);
+
+        $this->assertInstanceOf(Notification::class, $captured);
+        $this->assertSame('demande_annulation', $captured->getType());
+        $this->assertSame('/admin/demandes-annulations', $captured->getLien());
+    }
+
+    public function testNotifyBenevolePropositionAndAssignationAndRetraitAndSuppression(): void
+    {
+        $benevole = new Utilisateur();
+
+        $captured = [];
+        $this->entityManager->expects($this->exactly(4))
+            ->method('persist')
+            ->willReturnCallback(function (Notification $notification) use (&$captured): void {
+                $captured[] = $notification;
+            });
+        $this->entityManager->expects($this->exactly(4))->method('flush');
+
+        $this->notificationService->notifyBenevoleProposition($benevole, 'T1');
+        $this->notificationService->notifyBenevoleAssigne($benevole, 'T2');
+        $this->notificationService->notifyBenevoleRetireDeTache($benevole, 'T3');
+        $this->notificationService->notifyBenevoleTacheSupprimee($benevole, 'T4');
+
+        $this->assertCount(4, $captured);
+        $this->assertSame('proposition_tache', $captured[0]->getType());
+        $this->assertSame('assignation_tache', $captured[1]->getType());
+        $this->assertSame('retrait_tache', $captured[2]->getType());
+        $this->assertSame('suppression_tache', $captured[3]->getType());
+    }
+
+    public function testMarkAsReadAndMarkAllAsRead(): void
+    {
+        $notification = new Notification();
+        $notification->setLue(false);
+
+        $this->entityManager->expects($this->once())->method('flush');
+
+        $this->notificationService->markAsRead($notification);
+        $this->assertTrue($notification->isLue());
+
+        $user = new Utilisateur();
+        $this->notificationRepository->expects($this->once())
+            ->method('markAllAsReadByUser')
+            ->with($user);
+
+        $this->notificationService->markAllAsRead($user);
     }
 }

@@ -140,25 +140,30 @@ docker compose exec app bash
 docker compose exec app php bin/console debug:router
 docker compose exec app php bin/console cache:clear
 
-# Accéder à la base de données
-docker compose exec app sqlite3 var/data.db
+# Accéder à la base de données (Docker utilise PostgreSQL par défaut)
+# Via psql dans le conteneur 'db' :
+# docker compose exec db psql -U postgres -d groloto -c "SELECT * FROM utilisateur;"
 
-# Exemple: Lister les utilisateurs
-docker compose exec app sqlite3 var/data.db "SELECT * FROM UTILISATEUR;"
+# Ou via Symfony Doctrine depuis le conteneur app :
+# docker compose exec app php bin/console doctrine:query:sql "SELECT * FROM utilisateur;"
 ```
 
 ### Gestion de la base de données
 
+Docker utilise **PostgreSQL** en développement (plus fiable sur systèmes de fichiers partagés).
+
 ```bash
-# Sauvegarder la base
-docker compose cp app:/var/www/html/var/data.db ./backup/data.db.backup
+# Appliquer les migrations (crée les tables si nécessaire)
+docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
 
-# Restaurer la base
-docker compose cp ./backup/data.db.backup app:/var/www/html/var/data.db
+# Sauvegarder la base (Postgres)
+docker compose exec db pg_dump -U postgres -d groloto -f /tmp/groloto.sql
+# Récupérer la sauvegarde sur l'hôte
+docker compose exec db cat /tmp/groloto.sql > ./backup/groloto_$(date +%Y%m%d_%H%M%S).sql
 
-# Réinitialiser la base
-docker compose exec app rm var/data.db
-docker compose exec app sqlite3 var/data.db < sql/groLoto.sql
+# Réinitialiser en supprimant le volume Postgres (attention: données perdues) et en relançant
+docker compose down -v
+docker compose up --build -d
 ```
 
 ### Reconstruction
@@ -187,7 +192,7 @@ services:
   app:
     environment:
       APP_ENV: dev
-      APP_DEBUG: 1
+      APP_DEBUG: 0
 ```
 
 Puis redémarrez :

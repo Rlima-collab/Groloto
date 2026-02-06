@@ -58,20 +58,48 @@ class InscriptionMecene
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $adresse_postale = null;
 
-    #[ORM\Column(length: 20, options: ["default" => "fonctionnement"])]
-    private ?string $type_don = 'fonctionnement';
+    #[ORM\Column(type: 'boolean', options: ["default" => true])]
+    private ?bool $don_fonctionnement = true;
+
+    #[ORM\Column(type: 'boolean', options: ["default" => false])]
+    private ?bool $don_lots = false;
 
     // --- GETTERS & SETTERS ---
 
-    public function getTypeDon(): ?string
+    public function isDonFonctionnement(): ?bool
     {
-        return $this->type_don;
+        return $this->don_fonctionnement;
     }
 
-    public function setTypeDon(string $type_don): self
+    public function setDonFonctionnement(bool $don_fonctionnement): self
     {
-        $this->type_don = $type_don;
+        $this->don_fonctionnement = $don_fonctionnement;
         return $this;
+    }
+
+    public function isDonLots(): ?bool
+    {
+        return $this->don_lots;
+    }
+
+    public function setDonLots(bool $don_lots): self
+    {
+        $this->don_lots = $don_lots;
+        return $this;
+    }
+
+    /**
+     * Getter de compatibilité pour l'ancien champ (si utilisé dans des templates)
+     * Retourne 'fonctionnement' si seulement don_fonctionnement, 'lot' si seulement don_lots, 'both' sinon
+     */
+    public function getTypeDon(): ?string
+    {
+        if ($this->don_fonctionnement && $this->don_lots) {
+            return 'both';
+        } elseif ($this->don_lots) {
+            return 'lot';
+        }
+        return 'fonctionnement';
     }
 
     public function getId(): ?int

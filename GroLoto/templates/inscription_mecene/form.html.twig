@@ -97,13 +97,24 @@
                 </div>
 
                 <div class="form-group">
-                    {{ form_label(form.type_don, null, {'label_attr': {'class': 'form-label required'}}) }}
-                    <div class="radio-group">
-                        {{ form_widget(form.type_don) }}
+                    {{ form_label(form.don_fonctionnement, null, {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="checkbox-group">
+                        {{ form_widget(form.don_fonctionnement) }}
                     </div>
-                    {{ form_errors(form.type_don) }}
-                    {% if form.type_don.vars.help %}
-                        <small class="form-help">{{ form.type_don.vars.help }}</small>
+                    {{ form_errors(form.don_fonctionnement) }}
+                    {% if form.don_fonctionnement.vars.help %}
+                        <small class="form-help">{{ form.don_fonctionnement.vars.help }}</small>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.don_lots, null, {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="checkbox-group">
+                        {{ form_widget(form.don_lots) }}
+                    </div>
+                    {{ form_errors(form.don_lots) }}
+                    {% if form.don_lots.vars.help %}
+                        <small class="form-help">{{ form.don_lots.vars.help }}</small>
                     {% endif %}
                 </div>
 

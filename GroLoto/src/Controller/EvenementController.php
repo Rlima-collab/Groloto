@@ -7,6 +7,7 @@ use App\Form\EvenementType;
 use App\Repository\EvenementRepository;
 use App\Repository\TacheRepository;
 use App\Repository\WeekendRepository;
+use App\Repository\AffectationTacheRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -83,7 +84,9 @@ class EvenementController extends AbstractController
     #[Route('/evenements/weekend/{id}/pdf', name: 'app_evenements_weekend_pdf')]
     public function weekendPdf(
         int $id,
-        WeekendRepository $weekendRepo
+        WeekendRepository $weekendRepo,
+        TacheRepository $tacheRepo,
+        AffectationTacheRepository $affectationRepo
     ): Response {
         $weekend = $weekendRepo->find($id);
         
@@ -93,16 +96,110 @@ class EvenementController extends AbstractController
         }
         
         $evenements = $weekend->getEvenements()->toArray();
+        $taches = $tacheRepo->findBy(['weekend' => $weekend]);
         
-        if (empty($evenements)) {
-            $this->addFlash('warning', 'Aucun événement pour ce weekend.');
-            return $this->redirectToRoute('app_evenements');
+        // Organiser les données par jour
+        $joursFr = [
+            1 => 'Lundi', 2 => 'Mardi', 3 => 'Mercredi',
+            4 => 'Jeudi', 5 => 'Vendredi', 6 => 'Samedi', 7 => 'Dimanche'
+        ];
+        
+        $planningParJour = [];
+        
+        // Ajouter les événements
+        foreach ($evenements as $evenement) {
+            $dateDebut = $evenement->getDateDebut();
+            if ($dateDebut) {
+                $jour = $dateDebut->format('Y-m-d');
+                $jourNom = $joursFr[(int)$dateDebut->format('N')] ?? 'Jour';
+                
+                if (!isset($planningParJour[$jour])) {
+                    $planningParJour[$jour] = [
+                        'jourNom' => $jourNom,
+                        'date' => $dateDebut->format('d/m/Y'),
+                        'items' => []
+                    ];
+                }
+                
+                $planningParJour[$jour]['items'][] = [
+                    'type' => 'evenement',
+                    'titre' => $evenement->getNom(),
+                    'horaire' => $evenement->getHeureDebut() ? $evenement->getHeureDebut()->format('H\hi') : 'Horaire non défini',
+                    'lieu' => $evenement->getLieu(),
+                    'description' => $evenement->getDescription(),
+                    'benevoles' => []
+                ];
+            }
+        }
+        
+        // Ajouter les tâches avec leurs bénévoles
+        foreach ($taches as $tache) {
+            $affectations = $affectationRepo->findBy(['tache' => $tache]);
+            $benevoles = [];
+            
+            // Calculer l'horaire de la tâche
+            $tacheDebut = $tache->getDebut();
+            $tacheFin = $tache->getFin();
+            $horaireDebutStr = $tacheDebut ? $tacheDebut->format('H\hi') : '';
+            $horaireFinStr = $tacheFin ? $tacheFin->format('H\hi') : '';
+            $horaireTache = $horaireDebutStr . ($horaireFinStr ? ' - ' . $horaireFinStr : '');
+            
+            foreach ($affectations as $affectation) {
+                $benevole = $affectation->getBenevole();
+                if ($benevole && $benevole->getUtilisateur()) {
+                    $user = $benevole->getUtilisateur();
+                    $benevoles[] = [
+                        'nom' => $user->getPrenom() . ' ' . $user->getNom(),
+                        'statut' => $affectation->getStatut(),
+                        'horaire' => $horaireTache
+                    ];
+                }
+            }
+            
+            $dateDebut = $tache->getDebut();
+            if ($dateDebut) {
+                $jour = $dateDebut->format('Y-m-d');
+                $jourNom = $joursFr[(int)$dateDebut->format('N')] ?? 'Jour';
+                
+                if (!isset($planningParJour[$jour])) {
+                    $planningParJour[$jour] = [
+                        'jourNom' => $jourNom,
+                        'date' => $dateDebut->format('d/m/Y'),
+                        'items' => []
+                    ];
+                }
+                
+                $horaireFin = $tache->getFin() ? $tache->getFin()->format('H\hi') : '';
+                $horaireDebut = $dateDebut->format('H\hi');
+                $horaire = $horaireDebut . ($horaireFin ? ' - ' . $horaireFin : '');
+                
+                $planningParJour[$jour]['items'][] = [
+                    'type' => 'tache',
+                    'titre' => $tache->getTitre(),
+                    'horaire' => $horaire,
+                    'lieu' => $tache->getPosteRequis(),
+                    'description' => $tache->getRemarque(),
+                    'benevoles' => $benevoles,
+                    'maxPersonnes' => $tache->getMaxPersonnes()
+                ];
+            }
+        }
+        
+        // Trier par jour
+        ksort($planningParJour);
+        
+        // Trier les items de chaque jour par horaire
+        foreach ($planningParJour as &$dayData) {
+            usort($dayData['items'], function($a, $b) {
+                return strcmp($a['horaire'], $b['horaire']);
+            });
         }
         
         // Générer le HTML pour le PDF
         $html = $this->renderView('evenement/weekend_pdf.html.twig', [
             'weekend' => $weekend,
             'evenements' => $evenements,
+            'planningParJour' => $planningParJour,
         ]);
         
         // Créer le PDF avec Dompdf
@@ -248,9 +345,9 @@ class EvenementController extends AbstractController
         // Récupérer tous les weekends pour le filtre
         $weekends = $weekendRepo->findAll();
         
-        // Récupérer le filtre depuis la requête
+        // Récupérer le filtre depuis la requête (par défaut: futurs)
         $weekendFilter = $request->query->get('weekend', 'all');
-        $statutFilter = $request->query->get('statut', 'all');
+        $statutFilter = $request->query->get('statut', 'futurs');
         
         // Récupérer tous les événements
         $evenements = $evenementRepo->findAll();

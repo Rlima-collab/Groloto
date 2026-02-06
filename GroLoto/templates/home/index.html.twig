@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - GroLoto{% endblock %}
+
+{% block body %}
+    <main class="container py-4">
+        <h1>GroLoto</h1>
+        <p>Page d'accueil.</p>
+        <nav>
+            <a href="{{ path('public_festivals') }}">Festivals</a>
+            <a href="{{ path('app_contact') }}">Contact</a>
+        </nav>
+    </main>
+{% endblock %}

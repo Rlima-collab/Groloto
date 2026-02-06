@@ -1,0 +1,328 @@
+@startuml
+skinparam classAttributeIconSize 0
+class Stock {
+  id : ?int
+  nom : ?string
+  categorie : ?string
+  quantite : ?int
+  unite : ?string
+  seuil : ?int
+  valeur_unitaire : ?float
+  remarque : ?string
+  derniere_modif : ?\DateTimeInterface
+  source : ?string
+  date_retour : ?\DateTimeInterface
+  preteur : ?string
+}
+class AffectationTache {
+  id : ?int
+  tache : ?Tache
+  benevole : ?Benevole
+  utilisateur : ?Utilisateur
+  date_affectation : ?\DateTimeInterface
+  statut : ?string
+  remarque : ?string
+}
+class Lot {
+  id : ?int
+  mecene : ?Mecene
+  weekend : ?Weekend
+  titre : string
+  description : ?string
+  quantite : int
+  valeur_estimee : float
+  date_creation : ?\DateTimeInterface
+}
+class RecuFiscal {
+  id : ?int
+  destinataire : ?Utilisateur
+  type : ?string
+  fichier : ?string
+  annee : ?int
+  createdAt : ?\DateTimeInterface
+  envoyePar : ?Utilisateur
+}
+class Notification {
+  id : ?int
+  destinataire : ?Utilisateur
+  type : ?string
+  message : ?string
+  lien : ?string
+  lue : bool
+  createdAt : ?\DateTimeInterface
+}
+class InscriptionMecene {
+  id : ?int
+  mecene : ?Mecene
+  evenement : ?Evenement
+  description_don : ?string
+  montant_estime : ?float
+  statut : ?string
+  date_inscription : ?\DateTimeInterface
+  remarques : ?string
+  nom_don : ?string
+  categorie : ?string
+  quantite : ?int
+  valeur_unitaire : ?float
+  remarque_refus : ?string
+  remarque_acceptation : ?string
+  adresse_postale : ?string
+  don_fonctionnement : ?bool
+  don_lots : ?bool
+}
+class Communication {
+  id : ?int
+  evenement : ?Evenement
+  titre : string
+  type : ?string
+  date_prevue : ?\DateTimeInterface
+  statut : ?string
+  budget : ?float
+  notes : ?string
+  date_creation : ?\DateTimeInterface
+}
+class Convention {
+  id : ?int
+  mecene : ?Mecene
+  nom_modele : ?string
+  url_pdf : ?string
+  date_signature : ?\DateTimeInterface
+  methode_signature : string
+  date_creation : ?\DateTimeInterface
+}
+class DisponibiliteBenevole {
+  id : ?int
+  benevole : ?Benevole
+  evenement : ?Evenement
+  debut : ?\DateTimeInterface
+  fin : ?\DateTimeInterface
+  notes : ?string
+  date_creation : ?\DateTimeInterface
+}
+class HelloAsso {
+  id : ?int
+  evenement : ?Evenement
+  id_externe : ?string
+  prenom : ?string
+  nom : ?string
+  email : ?string
+  telephone : ?string
+  type_ticket : ?string
+  date_achat : ?\DateTimeInterface
+  date_import : ?\DateTimeInterface
+}
+class Parametre {
+  id : ?int
+  cle : string
+  valeur : ?string
+  date_modification : ?\DateTimeInterface
+}
+class Role {
+}
+class HistoriqueEvenement {
+  id : ?int
+  evenement : ?Evenement
+  action : ?string
+  description : ?string
+  utilisateur : ?Utilisateur
+  date_action : ?\DateTimeInterface
+}
+class HistoriqueStock {
+  id : ?int
+  stock : ?Stock
+  type_changement : string
+  quantite : int
+  raison : ?string
+  evenement : ?Evenement
+  utilisateur : ?Utilisateur
+  date_creation : ?\DateTimeInterface
+}
+class Creneau {
+  id : ?int
+  evenement : ?Evenement
+  titre : string
+  poste_requis : ?string
+  debut : \DateTimeInterface
+  fin : \DateTimeInterface
+  max_personnes : int
+  remarque : ?string
+  date_creation : ?\DateTimeInterface
+}
+class Benevole {
+  id : ?int
+  utilisateur : ?Utilisateur
+  remarque : ?string
+  actif : bool
+  disponibilites : ?string
+}
+class DemandeAnnulation {
+  id : ?int
+  affectation : ?AffectationTache
+  benevole : ?Benevole
+  dateDemande : ?\DateTimeInterface
+  statut : ?string
+  motifBenevole : ?string
+  tacheTitre : ?string
+  messageAdmin : ?string
+  dateReponse : ?\DateTimeInterface
+  adminReponse : ?Utilisateur
+}
+class PlageHoraire {
+  id : ?int
+  tache : ?Tache
+  jour : ?\DateTimeInterface
+  heureDebut : ?\DateTimeInterface
+  heureFin : ?\DateTimeInterface
+  maxPersonnesPlage : ?int
+}
+class DisponibiliteWeekend {
+  id : ?int
+  benevole : ?Benevole
+  weekend : ?Weekend
+  jour : ?\DateTimeInterface
+  matin : bool
+  apresMidi : bool
+  soir : bool
+  remarque : ?string
+  dateCreation : ?\DateTimeInterface
+}
+class ExcelData {
+  id : ?int
+  sheet_name : ?string
+  columns : array
+  data : array
+  imported_at : ?DateTime
+  original_filename : ?string
+}
+class ContactMessage {
+  id : ?int
+  nom : ?string
+  email : ?string
+  destinataire : ?string
+  message : ?string
+  createdAt : ?\DateTimeInterface
+  lu : bool
+  reponduPar : ?Utilisateur
+  reponse : ?string
+  reponduLe : ?\DateTimeInterface
+  parent_id : ?int
+  cloturee : bool
+  masqueePour : ?string
+}
+class Membre {
+  id : ?int
+  nom : ?string
+  prenom : ?string
+  email : ?string
+  numero_billet : ?string
+  tarif : ?string
+  date_creation : ?DateTime
+  date_seance : ?DateTime
+  montant_tarif : ?int
+  code_promo : ?string
+  montant_code_promo : ?string
+}
+class Utilisateur {
+  id : ?int
+  role : ?Role
+  email : ?string
+  mot_de_passe : ?string
+  prenom : ?string
+  nom : ?string
+  telephone : ?string
+  date_creation : ?\DateTimeInterface
+  date_modification : ?\DateTimeInterface
+  profile_image : ?string
+}
+class Evenement {
+  id : ?int
+  nom : ?string
+  description : ?string
+  date_debut : ?\DateTimeInterface
+  date_fin : ?\DateTimeInterface
+  lieu : ?string
+  heure_debut : ?\DateTimeInterface
+  duree_minutes : ?int
+  image : ?string
+  date_creation : ?\DateTimeInterface
+  weekend : ?Weekend
+  taches : Collection
+}
+class Mecene {
+  id : ?int
+  utilisateur : ?Utilisateur
+  organisation : ?string
+  siret : ?string
+  adresse_postale : ?string
+  logo : ?string
+  instagram : ?string
+  facebook : ?string
+  lots : Collection
+}
+class Weekend {
+  id : ?int
+  nom : ?string
+  date_debut : ?\DateTimeInterface
+  date_fin : ?\DateTimeInterface
+  date_creation : ?\DateTimeInterface
+  cover_image : ?string
+  description : ?string
+  evenements : Collection
+  taches : Collection
+  task_offset_before : int
+  task_offset_after : int
+}
+class Tache {
+  id : ?int
+  titre : ?string
+  debut : ?\DateTimeInterface
+  fin : ?\DateTimeInterface
+  maxPersonnes : ?int
+  remarque : ?string
+  posteRequis : ?string
+  weekend : ?Weekend
+  evenement : ?Evenement
+  plagesHoraires : Collection
+  affectations : Collection
+}
+Tache "1" <.. "0..*" AffectationTache : tache
+Benevole "1" <.. "0..*" AffectationTache : benevole
+Utilisateur "1" <.. "0..*" AffectationTache : utilisateur
+Mecene "1" <.. "0..*" Lot : mecene
+Weekend "1" <.. "0..*" Lot : weekend
+Utilisateur "1" <.. "0..*" RecuFiscal : destinataire
+Utilisateur "1" <.. "0..*" RecuFiscal : envoyePar
+Utilisateur "1" <.. "0..*" Notification : destinataire
+Mecene "1" <.. "0..*" InscriptionMecene : mecene
+Evenement "1" <.. "0..*" InscriptionMecene : evenement
+Evenement "1" <.. "0..*" Communication : evenement
+Mecene "1" <.. "0..*" Convention : mecene
+Benevole "1" <.. "0..*" DisponibiliteBenevole : benevole
+Evenement "1" <.. "0..*" DisponibiliteBenevole : evenement
+Evenement "1" <.. "0..*" HelloAsso : evenement
+Evenement "1" <.. "0..*" HistoriqueEvenement : evenement
+Utilisateur "1" <.. "0..*" HistoriqueEvenement : utilisateur
+Stock "1" <.. "0..*" HistoriqueStock : stock
+Evenement "1" <.. "0..*" HistoriqueStock : evenement
+Utilisateur "1" <.. "0..*" HistoriqueStock : utilisateur
+Evenement "1" <.. "0..*" Creneau : evenement
+Utilisateur "1" <.. "0..*" Benevole : utilisateur
+AffectationTache "1" <.. "0..*" DemandeAnnulation : affectation
+Benevole "1" <.. "0..*" DemandeAnnulation : benevole
+Utilisateur "1" <.. "0..*" DemandeAnnulation : adminReponse
+Tache "1" <.. "0..*" PlageHoraire : tache
+Benevole "1" <.. "0..*" DisponibiliteWeekend : benevole
+Weekend "1" <.. "0..*" DisponibiliteWeekend : weekend
+Utilisateur "1" <.. "0..*" ContactMessage : reponduPar
+Role "1" <.. "0..*" Utilisateur : role
+Weekend "1" <.. "0..*" Evenement : weekend
+Evenement "1" --> "0..*" Tache : taches
+Utilisateur "1" <.. "0..*" Mecene : utilisateur
+Mecene "1" --> "0..*" Lot : lots
+Weekend "1" --> "0..*" Evenement : evenements
+Weekend "1" --> "0..*" Tache : taches
+Weekend "1" <.. "0..*" Tache : weekend
+Evenement "1" <.. "0..*" Tache : evenement
+note left of Tache : relation plagesHoraires (collection)
+note left of Tache : relation affectations (collection)
+@enduml

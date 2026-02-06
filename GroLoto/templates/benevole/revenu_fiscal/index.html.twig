@@ -7,13 +7,23 @@
     <link rel="stylesheet" href="{{ asset('css/modele.css') }}">
     <link rel="stylesheet" href="{{ asset('css/recu_fiscal.css') }}">
     <link rel="stylesheet" href="{{ asset('css/benevoles.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/public/public-common.css') }}">
 {% endblock %}
 
 {% block body %}
+<!-- Hero Section -->
+<div class="hero-section public-hero">
+    <div class="shine"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Mes Reçus Fiscaux</h1>
+        <p class="hero-description">Consultez et téléchargez vos attestations officielles</p>
+    </div>
+</div>
+
 <div class="recu-fiscal-container">
     <div class="recu-fiscal-card">
         <div class="recu-fiscal-header">
-            <h1 class="recu-fiscal-title">Mes reçus fiscaux</h1>
+            <h2 class="recu-fiscal-title">Mes reçus fiscaux</h2>
             <p class="recu-fiscal-description">
                 Consultez et téléchargez les reçus fiscaux officiels qui vous ont été envoyés par l'association.
             </p>

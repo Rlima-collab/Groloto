@@ -14,11 +14,35 @@ services:
       # Monter les assets pour le développement (optionnel)
       - ./public:/var/www/html/public
     environment:
+      # For Docker use Postgres by default so the app works the same for everyone
       APP_ENV: ${APP_ENV:-prod}
+      APP_DEBUG: ${APP_DEBUG:-0}
       APP_SECRET: ${APP_SECRET:-SomeRandomSecret123}
-      DATABASE_URL: "sqlite:///%kernel.project_dir%/var/data.db"
+      DATABASE_URL: ${DATABASE_URL:-"pgsql://postgres:postgres@db:5432/groloto?serverVersion=15&charset=utf8"}
     depends_on:
+      - db
       - mailer
+      - db
+    networks:
+      - groloto_network
+    restart: unless-stopped
+    entrypoint: ["/usr/local/bin/docker-entrypoint.sh"]
+
+  # Service Postgres pour persistance et stabilité (shared by all devs)
+  db:
+    image: postgres:15
+    container_name: groloto_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: groloto
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres -d groloto"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - groloto_network
     restart: unless-stopped
@@ -37,6 +61,35 @@ services:
       - groloto_network
     restart: unless-stopped
 
+<<<<<<< HEAD
+volumes:
+  pgdata:
+=======
+  # Service Base de données PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: groloto_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-groloto}
+      POSTGRES_USER: ${POSTGRES_USER:-groloto}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - groloto_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-groloto}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+>>>>>>> 13427ba3b298491ef7392664d5c704a928d610c4
+
 networks:
   groloto_network:
     driver: bridge
+
+volumes:
+  db-data:

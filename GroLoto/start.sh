@@ -34,6 +34,11 @@ echo ""
 echo -e "${BLUE}🚀 Démarrage des conteneurs...${NC}"
 docker compose up -d
 
+# Appliquer automatiquement les migrations pour que l'environnement soit prêt
+echo ""
+echo -e "${BLUE}🛠️  Application des migrations...${NC}"
+docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction || true
+
 echo ""
 echo -e "${GREEN}✅ Application démarrée avec succès !${NC}"
 echo ""

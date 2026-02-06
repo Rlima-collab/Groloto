@@ -6,11 +6,6 @@
                 <img src="{{ asset('images/logo_gro.png') }}" alt="Groloto Logo">
             </a>
         </div>
-        <button class="burger-menu" id="burgerMenu" aria-label="Toggle menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
         <nav class="nav-menu" id="navMenu">
             {% if app.user %}
                 <div class="notification-icon-wrapper">
@@ -63,14 +58,11 @@
         const markAllReadButton = document.getElementById('markAllReadButton');
         const settingsToggle = document.getElementById('settingsToggle');
         const settingsMenu = document.getElementById('settingsMenu');
-
-        // Only run notification code if user is logged in (elements exist)
-        if (!notificationBell || !notificationBadge) {
-            return;
-        }
+        const hasNotifications = notificationBell && notificationBadge && notificationDropdown && notificationList;
 
         // Helper: fetch unread count and update badge
         async function updateBadge() {
+            if (!hasNotifications) return;
             try {
                 const res = await fetch('{{ path('app_notifications_count') }}');
                 if (!res.ok) return;
@@ -89,6 +81,7 @@
 
         // Helper: fetch unread notifications and render list
         async function loadUnread() {
+            if (!hasNotifications) return;
             try {
                 const res = await fetch('{{ path('app_notifications_unread') }}');
                 if (!res.ok) return;
@@ -214,19 +207,21 @@
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
-            if (notificationDropdown && !notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
+            if (notificationDropdown && notificationBell && !notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
                 notificationDropdown.style.display = 'none';
                 notificationDropdown.classList.remove('show-animation');
             }
-            if (settingsMenu && !settingsToggle.contains(event.target) && !settingsMenu.contains(event.target)) {
+            if (settingsMenu && settingsToggle && !settingsToggle.contains(event.target) && !settingsMenu.contains(event.target)) {
                 settingsMenu.style.display = 'none';
             }
         });
 
         // Initial badge load
-        updateBadge();
-        // Poll badge every 30s
-        setInterval(updateBadge, 30000);
+        if (hasNotifications) {
+            updateBadge();
+            // Poll badge every 30s
+            setInterval(updateBadge, 30000);
+        }
     });
 
 </script>

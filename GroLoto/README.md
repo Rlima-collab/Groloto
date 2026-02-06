@@ -1,8 +1,192 @@
-# 🎰 GroLoto - Application de Gestion de Lotos
+# 🎰 GroLoto — Application de gestion de lotos
+
+[![Tests](https://img.shields.io/badge/tests-PHPUnit-blue)](./bin/phpunit) [![License](https://img.shields.io/badge/license-Proprietary-lightgrey)]()
+
+**Court résumé :** GroLoto est une application Symfony pour gérer des événements (lotos) : bénévoles, mécènes, stocks, tâches et planning.
+
+---
+
+## 🚀 Aperçu
+
+- Gestion des utilisateurs et des rôles (admin / bénévole / mécène)
+- Messagerie interne, notifications, historique
+- Création et suivi d'événements, gestion des inscriptions
+- Gestion de stock et historique des mouvements
+- Tests automatisés (PHPUnit) et support pour rapports de couverture
+
+---
+
+## 🔧 Prérequis
+
+- Docker & Docker Compose (recommandé) ou
+- PHP 8.2+, Composer 2.x
+- Node.js + npm (si vous développez le front)
+- Extensions PHP usuelles : `pdo_sqlite` / `pdo_mysql`, `intl`, `mbstring`, `xml`
+
+---
+
+## ⚙️ Démarrage rapide (Docker)
+
+1. Construire et lancer (script fourni) :
+
+```bash
+./start.sh
+```
+
+2. Arrêter :
+
+```bash
+./stop.sh
+```
+
+Utilisation directe de Docker Compose :
+
+```bash
+docker compose -f compose.yaml up -d --build
+docker compose -f compose.yaml down
+```
+
+Accès :
+- Application : http://localhost:8080
+- Mail tool (Mailpit) : http://localhost:8025
+
+Conseils utiles :
+- Voir les logs : `docker compose logs -f app`
+- Shell dans le conteneur : `docker compose exec app bash`
+
+---
+
+## 🧰 Installation locale (sans Docker)
+
+1. Installer les dépendances PHP :
+
+```bash
+composer install --no-interaction --prefer-dist
+```
+
+2. Copier le fichier d'environnement et ajuster :
+
+```bash
+cp .env .env.local
+# éditer .env.local (DATABASE_URL, MAILER_DSN, etc.)
+```
+
+3. Base de données (SQLite par défaut) :
+
+```bash
+# créer le dossier var si besoin
+mkdir -p var
+# importer le schéma SQL
+sqlite3 var/data.db < sql/groLoto.sql
+# ou, si vous utilisez doctrine/migrations
+php bin/console doctrine:migrations:migrate
+```
+
+4. (Optionnel) Construire les assets :
+
+```bash
+npm install
+npm run build
+```
+
+5. Lancer le serveur de développement :
+
+```bash
+symfony server:start
+# ou
+php -S 127.0.0.1:8000 -t public/
+```
+
+---
+
+## ✅ Tests
+
+Exécuter la suite :
+
+```bash
+./bin/phpunit --configuration=phpunit.dist.xml
+```
+
+Générer un rapport de couverture (Xdebug ou PCOV requis) :
+
+```bash
+# activer Xdebug/PCOV dans php.ini
+./bin/phpunit --configuration=phpunit.dist.xml --coverage-text --coverage-html=var/coverage
+```
+
+Si vous voyez : `No code coverage driver available` → activez Xdebug ou PCOV.
+
+---
+
+## 📦 Intégration continue (GitHub Actions)
+
+Fichier recommandé : `.github/workflows/ci.yml`
+
+```yaml
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      sqlite:
+        image: "nouchka/sqlite:latest"
+        options: >-
+          --health-cmd "sqlite3 --version" --health-interval 10s
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, xml
+          coverage: xdebug
+      - name: Install Composer deps
+        run: composer install --no-progress --no-suggest --prefer-dist
+      - name: Run tests
+        run: ./bin/phpunit --configuration=phpunit.dist.xml --coverage-text --coverage-clover=coverage.xml
+      - name: Upload coverage (optional)
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+```
+
+Ajoutez ce workflow si vous voulez exécuter les tests et récupérer la couverture automatiquement.
+
+---
+
+## Debug & dépannage
+
+- Logs Symfony : `var/log/dev.log` ou `docker compose exec app tail -f var/log/dev.log`
+- Permissions : `docker compose exec app chown -R www-data:www-data var` et `chmod -R 755 var`
+- Réinitialiser la DB (SQLite) : `rm -f var/data.db && docker compose exec app sqlite3 var/data.db < sql/groLoto.sql`
+- Ports : modifiez `compose.yaml` si 8080 est occupé
+
+---
+
+## Contribuer
+
+1. Créez une branche descriptive : `git checkout -b feat/ma-fonction`
+2. Ajoutez des tests couvrant votre changement
+3. Ouvrez une PR avec une description claire et la marche à reproduire
+
+---
+
+## Licence & contact
+
+- Licence : propriétaire (voir `LICENSE` si présent)
+- Pour toute question : ouvrez une issue sur le dépôt
+
+---
+
+# GroLoto - Application de Gestion de Lotos
 
 Application Symfony 7.3 pour la gestion complète d'événements de loto : bénévoles, mécènes, stocks, tâches et planning.
 
-## 📋 Table des matières
+## Table des matières
 
 - [Prérequis](#prérequis)
 - [Installation avec Docker (Recommandé)](#installation-avec-docker-recommandé)
@@ -13,7 +197,7 @@ Application Symfony 7.3 pour la gestion complète d'événements de loto : bén�
 
 ---
 
-## 🔧 Prérequis
+## Prérequis
 
 ### Pour Docker (Recommandé)
 - **Docker** (version 20.10 ou supérieure)
@@ -27,23 +211,23 @@ Application Symfony 7.3 pour la gestion complète d'événements de loto : bén�
 
 ---
 
-## 🐳 Installation avec Docker (Recommandé)
+## Installation avec Docker (Recommandé)
 
-### 1️⃣ Cloner le projet
+### Cloner le projet
 
 ```bash
 git clone https://github.com/Rlima-collab/Groloto.git
 cd Groloto/GroLoto
 ```
 
-### 2️⃣ Vérifier la présence des fichiers Docker
+### Vérifier la présence des fichiers Docker
 
 Assurez-vous que les fichiers suivants existent :
 - `Dockerfile` - Configuration du conteneur
 - `compose.yaml` - Orchestration des services
 - `docker/apache/000-default.conf` - Configuration Apache
 
-### 3️⃣ Construire et démarrer les conteneurs
+### Construire et démarrer les conteneurs
 
 ```bash
 # Construction de l'image Docker et démarrage des services
@@ -54,25 +238,12 @@ docker compose up --build -d
 - `--build` : Reconstruit l'image si nécessaire
 - `-d` : Mode détaché (en arrière-plan)
 
-### 4️⃣ Vérifier le statut des conteneurs
-
-```bash
-docker compose ps
-```
-
-Vous devriez voir :
-```
-NAME                IMAGE              STATUS         PORTS
-groloto_app         groloto-app        Up             0.0.0.0:8080->80/tcp
-groloto_mailer      axllent/mailpit    Up             0.0.0.0:1025->1025/tcp, 0.0.0.0:8025->8025/tcp
-```
-
-### 5️⃣ Accéder à l'application
+### Accéder à l'application
 
 - **Application principale** : [http://localhost:8080](http://localhost:8080)
 - **Interface MailPit** (emails) : [http://localhost:8025](http://localhost:8025)
 
-### 6️⃣ Commandes Docker utiles
+### Commandes Docker utiles
 
 ```bash
 # Voir les logs de l'application
@@ -101,34 +272,47 @@ docker compose exec app php bin/console cache:clear
 docker compose exec app php bin/console debug:router
 ```
 
-### 7️⃣ Réinitialiser la base de données
+### Réinitialiser la base de données
 
-Si vous devez réinitialiser la base de données :
+L'installation Docker utilise désormais PostgreSQL par défaut pour garantir une expérience reproductible entre postes de travail (évite les problèmes de verrouillage liés à SQLite sur NFS).
+
+Si vous utilisez Docker (Postgres) :
+
+```bash
+# Démarrer les conteneurs
+docker compose up -d
+
+# Appliquer les migrations (crée les tables si nécessaire)
+docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
+
+# Ou réinitialiser en supprimant le volume Postgres (attention aux données !) et en relançant
+docker compose down -v
+docker compose up --build -d
+```
+
+Si vous utilisez la base SQLite locale (installation manuelle) :
 
 ```bash
 # Supprimer la base existante
 rm -f var/data.db
 
 # Recréer depuis le fichier SQL
-docker compose exec app sqlite3 var/data.db < sql/groLoto.sql
-
-# Ou reconstruire complètement
-docker compose down -v
-docker compose up --build -d
+sqlite3 var/data.db < sql/groLoto.sql
 ```
 
+> ⚠️ Conseil : En équipe, préférez la configuration Docker/Postgres pour éviter les erreurs d'I/O sur des systèmes de fichiers partagés (NFS).
 ---
 
-## 💻 Installation Manuelle
+## Installation Manuelle
 
-### 1️⃣ Cloner le projet
+### Cloner le projet
 
 ```bash
 git clone https://github.com/Rlima-collab/Groloto.git
 cd Groloto/GroLoto
 ```
 
-### 2️⃣ Installer PHP 8.2 (si nécessaire)
+### Installer PHP 8.2 (si nécessaire)
 
 **Sur Ubuntu/Debian :**
 ```bash
@@ -138,13 +322,13 @@ sudo apt install -y php8.2 php8.2-cli php8.2-sqlite3 php8.2-xml \
     php8.2-mbstring php8.2-intl php8.2-curl php8.2-zip
 ```
 
-### 3️⃣ Installer les dépendances
+### Installer les dépendances
 
 ```bash
 composer install
 ```
 
-### 4️⃣ Créer la base de données
+### Créer la base de données
 
 ```bash
 # Créer le dossier var s'il n'existe pas
@@ -157,20 +341,20 @@ sqlite3 var/data.db < sql/groLoto.sql
 sqlite3 var/data.db ".tables"
 ```
 
-### 5️⃣ Configurer l'environnement
+### Configurer l'environnement
 
 Copiez le fichier `.env` et adaptez-le :
 ```bash
 cp .env .env.local
 ```
 
-### 6️⃣ Vider le cache
+### Vider le cache
 
 ```bash
 php bin/console cache:clear
 ```
 
-### 7️⃣ Démarrer le serveur
+### Démarrer le serveur
 
 **Avec Symfony CLI :**
 ```bash
@@ -186,7 +370,7 @@ L'application sera accessible sur : [http://localhost:8000](http://localhost:800
 
 ---
 
-## 🚀 Utilisation
+## Utilisation
 
 ### Fonctionnalités principales
 
@@ -222,7 +406,7 @@ L'application sera accessible sur : [http://localhost:8000](http://localhost:800
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ### Structure du projet
 
@@ -342,7 +526,7 @@ docker compose exec app php bin/phpunit
 
 ---
 
-## 📝 Variables d'environnement
+## Variables d'environnement
 
 ### Fichier `.env`
 
@@ -360,7 +544,7 @@ Les variables sont définies dans `compose.yaml` et `.env.docker`.
 
 ---
 
-## 🔒 Sécurité
+## Sécurité
 
 ### En production
 
@@ -390,7 +574,7 @@ Les variables sont définies dans `compose.yaml` et `.env.docker`.
 
 ---
 
-## 🐛 Dépannage
+## Dépannage
 
 ### L'application ne démarre pas
 
@@ -436,16 +620,12 @@ Pour toute question ou problème :
 
 ---
 
-## 📄 Licence
+## Licence
 
 Ce projet est sous licence propriétaire.
 
 ---
 
-## 👥 Contributeurs
+## Contributeurs
 
 - Équipe GroLoto
-
----
-
-**Bon développement ! 🚀**
