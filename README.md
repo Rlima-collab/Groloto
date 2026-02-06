@@ -464,7 +464,7 @@ L'application utilise **SQLite** avec les tables suivantes :
 
 ---
 
-## 🛠️ Développement
+## Développement
 
 ### Commandes Symfony utiles
 
@@ -629,3 +629,4 @@ Ce projet est sous licence propriétaire.
 ## Contributeurs
 
 - Équipe GroLoto
+
