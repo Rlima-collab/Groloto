@@ -8,6 +8,7 @@ use App\Repository\WeekendRepository;
 use App\Repository\EvenementRepository;
 use App\Repository\TacheRepository;
 use App\Repository\BenevoleRepository;
+use App\Repository\AffectationTacheRepository;
 use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,6 +17,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 #[Route('/weekend')]
 class WeekendController extends AbstractController
@@ -353,5 +356,177 @@ class WeekendController extends AbstractController
         }
 
         return $this->redirectToRoute('app_weekend_liste');
+    }
+
+    #[Route('/{id}/planning/export-pdf', name: 'app_weekend_planning_pdf')]
+    public function exportPlanningPdf(
+        Weekend $weekend,
+        TacheRepository $tacheRepository,
+        AffectationTacheRepository $affectationRepository
+    ): Response {
+        // Récupérer toutes les tâches du weekend
+        $taches = $tacheRepository->findBy(['weekend' => $weekend]);
+        
+        $joursFr = [
+            1 => 'Lundi', 2 => 'Mardi', 3 => 'Mercredi', 
+            4 => 'Jeudi', 5 => 'Vendredi', 6 => 'Samedi', 7 => 'Dimanche'
+        ];
+        
+        // Générer les créneaux de 30 minutes de 8h00 à 00h30
+        $timeSlots = [];
+        for ($h = 8; $h <= 24; $h++) {
+            for ($m = 0; $m < 60; $m += 30) {
+                if ($h == 24 && $m > 0) break;
+                $currentTime = sprintf('%02d:%02d', $h % 24, $m);
+                $timeSlots[] = [
+                    'key' => $currentTime,
+                    'label' => sprintf('%02d:%02d - %02d%s', $h % 24, $m, ($m == 30 ? ($h+1) % 24 : $h % 24), ($m == 30 ? 'h' : 'h30'))
+                ];
+            }
+        }
+        
+        // Collecter toutes les assignations de bénévoles
+        $allAssignments = [];
+        $planningData = [];
+        
+        foreach ($taches as $tache) {
+            // Récupérer TOUTES les affectations (assigne ET confirme)
+            $affectations = $affectationRepository->findBy(['tache' => $tache]);
+            
+            // Déterminer les horaires de la tâche
+            $plagesHoraires = $tache->getPlagesHoraires();
+            
+            $horaires = [];
+            if (!$plagesHoraires->isEmpty()) {
+                foreach ($plagesHoraires as $plage) {
+                    $horaires[] = [
+                        'jour' => $plage->getJour()->format('Y-m-d'),
+                        'jourNom' => $joursFr[(int)$plage->getJour()->format('N')] ?? 'Jour',
+                        'debut' => $plage->getHeureDebut()->format('H:i'),
+                        'fin' => $plage->getHeureFin()->format('H:i')
+                    ];
+                }
+            } elseif ($tache->getDebut()) {
+                $horaires[] = [
+                    'jour' => $tache->getDebut()->format('Y-m-d'),
+                    'jourNom' => $joursFr[(int)$tache->getDebut()->format('N')] ?? 'Jour',
+                    'debut' => $tache->getDebut()->format('H:i'),
+                    'fin' => $tache->getFin() ? $tache->getFin()->format('H:i') : $tache->getDebut()->format('H:i')
+                ];
+            }
+            
+            // Pour chaque bénévole affecté
+            foreach ($affectations as $affectation) {
+                $benevole = $affectation->getBenevole();
+                if (!$benevole || !$benevole->getUtilisateur()) continue;
+                
+                $prenom = $benevole->getUtilisateur()->getPrenom();
+                
+                foreach ($horaires as $horaire) {
+                    $jour = $horaire['jour'];
+                    
+                    if (!isset($planningData[$jour])) {
+                        $planningData[$jour] = [
+                            'jourNom' => $horaire['jourNom'],
+                            'assignments' => []
+                        ];
+                    }
+                    
+                    $allAssignments[] = [
+                        'jour' => $jour,
+                        'nom' => $prenom,
+                        'debut' => $horaire['debut'],
+                        'fin' => $horaire['fin'],
+                        'heuresLabel' => $this->formatHeure($horaire['debut']) . '-' . $this->formatHeure($horaire['fin'])
+                    ];
+                }
+            }
+        }
+        
+        // Trier les jours
+        ksort($planningData);
+        
+        // Organiser les assignations dans la grille par jour
+        foreach ($planningData as $jour => &$dayData) {
+            $dayAssignments = array_filter($allAssignments, fn($a) => $a['jour'] === $jour);
+            $dayData['assignments'] = array_values($dayAssignments);
+            $dayData['maxCols'] = max(3, count($dayAssignments));
+        }
+        
+        // Générer le HTML du PDF
+        $html = $this->renderView('weekend/planning_taches_pdf.html.twig', [
+            'weekend' => $weekend,
+            'planningData' => $planningData,
+            'timeSlots' => $timeSlots,
+            'allAssignments' => $allAssignments
+        ]);
+        
+        // Créer le PDF avec Dompdf
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+        $options->set('defaultFont', 'Arial');
+        
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        
+        // Générer le nom du fichier
+        $filename = 'planning_taches_' . $weekend->getNom() . '_' . date('Y-m-d') . '.pdf';
+        $filename = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $filename);
+        
+        return new Response(
+            $dompdf->output(),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+            ]
+        );
+    }
+    
+    /**
+     * Formate une heure HH:MM en format lisible (ex: 18h, 18h30)
+     */
+    private function formatHeure(string $heure): string
+    {
+        $parts = explode(':', $heure);
+        $h = intval($parts[0]);
+        $m = intval($parts[1] ?? 0);
+        
+        if ($m === 0) {
+            return $h . 'h';
+        }
+        return $h . 'h' . sprintf('%02d', $m);
+    }
+    
+    /**
+     * Vérifie si un temps est dans une plage horaire
+     */
+    private function isTimeInRange(string $time, string $start, string $end): bool
+    {
+        $timeMinutes = $this->timeToMinutes($time);
+        $startMinutes = $this->timeToMinutes($start);
+        $endMinutes = $this->timeToMinutes($end);
+        
+        // Gérer le cas où la fin est après minuit
+        if ($endMinutes < $startMinutes) {
+            $endMinutes += 24 * 60;
+            if ($timeMinutes < $startMinutes) {
+                $timeMinutes += 24 * 60;
+            }
+        }
+        
+        return $timeMinutes >= $startMinutes && $timeMinutes < $endMinutes;
+    }
+    
+    /**
+     * Convertit une heure HH:MM en minutes
+     */
+    private function timeToMinutes(string $time): int
+    {
+        $parts = explode(':', $time);
+        return intval($parts[0]) * 60 + intval($parts[1] ?? 0);
     }
 }

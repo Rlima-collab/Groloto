@@ -1,0 +1,200 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Import de Données{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="alert alert-info">La page d'import a été supprimée et n'est plus disponible.</div>
+    <p>Pour gérer les membres, utilisez la page <a href="{{ path('admin_membres_index') }}">Administration → Membres</a>.</p>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {# Import JS removed #}
+
+            const fileInput = document.getElementById('fileInput');
+            const btnSelectFile = document.getElementById('btnSelectFile');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const btnSync = document.getElementById('btnSync');
+            const btnManualImport = document.getElementById('btnManualImport');
+            const resultsCard = document.getElementById('resultsCard');
+            const resultsContent = document.getElementById('resultsContent');
+            
+            // Ouvrir le sélecteur de fichier
+            btnSelectFile.addEventListener('click', () => fileInput.click());
+            dropzone.addEventListener('click', (e) => {
+                if (e.target === dropzone || e.target.closest('.dropzone-icon, h3, p')) {
+                    fileInput.click();
+                }
+            });
+            
+            // Gestion drag & drop
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            });
+            
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('dragover');
+            });
+            
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+            
+            // Sélection de fichier
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFile(e.target.files[0]);
+                }
+            });
+            
+            // Gérer le fichier sélectionné
+            function handleFile(file) {
+                const validTypes = ['.csv', '.xlsx', '.xls'];
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (!validTypes.includes(fileExtension)) {
+                    showNotification('❌ Format de fichier non supporté. Utilisez CSV ou Excel.', 'error');
+                    return;
+                }
+                
+                if (file.size > 10 * 1024 * 1024) { // 10 MB
+                    showNotification('❌ Fichier trop volumineux. Taille maximum: 10 MB', 'error');
+                    return;
+                }
+                
+                fileName.textContent = file.name;
+                fileInfo.classList.add('show');
+                showNotification('✅ Fichier sélectionné: ' + file.name, 'success');
+            }
+            
+            // Synchroniser HelloAsso
+            btnSync.addEventListener('click', function() {
+                if (!confirm('Voulez-vous synchroniser les données avec HelloAsso ?')) {
+                    return;
+                }
+                
+                showNotification('🔄 Synchronisation HelloAsso en cours...', 'info');
+                
+                // Simulation de la synchronisation
+                setTimeout(() => {
+                    resultsContent.innerHTML = `
+                        <div class="result-item success">✅ <strong>Synchronisation réussie</strong></div>
+                        <div class="result-item success">✅ <strong>42</strong> participants synchronisés</div>
+                        <div class="result-item warning">⚠️ <strong>5</strong> participants déjà existants</div>
+                        <div class="result-item info">
+                            ℹ️ <strong>Dernière synchronisation:</strong> ${new Date().toLocaleString('fr-FR')}
+                        </div>
+                    `;
+                    resultsCard.classList.add('show');
+                    showNotification('✅ Synchronisation HelloAsso terminée !', 'success');
+                }, 2000);
+            });
+            
+            // Import manuel
+            btnManualImport.addEventListener('click', function() {
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    showNotification('⚠️ Veuillez d\'abord sélectionner un fichier à importer.', 'warning');
+                    return;
+                }
+                
+                if (!confirm(`Confirmer l'import de "${file.name}" ?`)) {
+                    return;
+                }
+                
+                showNotification('📤 Import en cours...', 'info');
+                
+                // Simulation de l'import
+                setTimeout(() => {
+                    const mode = document.getElementById('importMode').value;
+                    const type = document.getElementById('participantType').value;
+                    
+                    resultsContent.innerHTML = `
+                        <div class="result-item success">✅ <strong>156</strong> participants importés</div>
+                        <div class="result-item warning">⚠️ <strong>12</strong> doublons détectés et ignorés</div>
+                        <div class="result-item error">❌ <strong>3</strong> erreurs de format (lignes ignorées)</div>
+                        <div class="result-item info">
+                            ℹ️ <strong>Mode:</strong> ${mode === 'create' ? 'Création uniquement' : mode === 'merge' ? 'Fusion' : 'Remplacement'}
+                        </div>
+                        <div class="result-item info">
+                            ℹ️ <strong>Type:</strong> ${type.charAt(0).toUpperCase() + type.slice(1)}
+                        </div>
+                        <div class="result-item info">
+                            ℹ️ <strong>Import terminé le:</strong> ${new Date().toLocaleString('fr-FR')}
+                        </div>
+                    `;
+                    resultsCard.classList.add('show');
+                    showNotification('✅ Import terminé !', 'success');
+                    
+                    // Réinitialiser le fichier
+                    fileInput.value = '';
+                    fileInfo.classList.remove('show');
+                }, 2500);
+            });
+            
+            // Fonction de notification
+            function showNotification(message, type = 'info') {
+                const colors = {
+                    success: { bg: '#d4edda', border: '#28a745', color: '#155724' },
+                    error: { bg: '#f8d7da', border: '#dc3545', color: '#721c24' },
+                    warning: { bg: '#fff3cd', border: '#ffc107', color: '#856404' },
+                    info: { bg: '#cfe2ff', border: '#0d6efd', color: '#084298' }
+                };
+                
+                const style = colors[type] || colors.info;
+                
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${style.bg};
+                    color: ${style.color};
+                    padding: 15px 20px;
+                    border-left: 4px solid ${style.border};
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 10000;
+                    max-width: 400px;
+                    font-weight: 500;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease-out';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+            
+            // Ajouter les animations CSS
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(400px); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(400px); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    {% endblock %}

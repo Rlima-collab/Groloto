@@ -70,9 +70,7 @@
         <button class="btn btn-analytics" onclick="showSection('analytics')">
             Analytics
         </button>
-        <button class="btn btn-import" onclick="showSection('import')">
-            Import
-        </button>
+
     </div>
     {% endif %}
 
@@ -199,67 +197,9 @@
     </div>
     {% endif %}
 
-    <!-- Section Import -->
+    <!-- Section Import (supprimée) -->
     {% if is_granted('ROLE_ADMIN') %}
-    <div id="import-section" class="import-section" style="display: none;">
-        <div class="import-header">
-            <h2>Import de Données</h2>
-            <p>Interface d'importation inspirée de HelloAsso</p>
-        </div>
-
-        <div class="import-dropzone" id="importDropzone">
-            <div class="dropzone-icon">📁</div>
-            <h3>Glissez-déposez vos fichiers ici</h3>
-            <p>ou cliquez pour sélectionner</p>
-            <button class="btn btn-select-file">Sélectionner un fichier</button>
-            <input type="file" id="fileInput" style="display: none;" accept=".csv,.xlsx,.xls">
-        </div>
-
-        <div class="import-instructions">
-            <h4>Instructions d'import</h4>
-            <ul>
-                <li>Formats acceptés: CSV, Excel (.xlsx, .xls)</li>
-                <li>Colonnes requises: Nom, Prénom, Email</li>
-                <li>Colonnes optionnelles: Téléphone, Type, Organisation</li>
-                <li>Encodage recommandé: UTF-8</li>
-                <li>Taille maximum: 10 MB</li>
-            </ul>
-        </div>
-
-        <div class="import-options">
-            <div class="option-group">
-                <h4>Options d'import</h4>
-                <select class="form-control">
-                    <option>Remplacer les données existantes</option>
-                    <option>Fusionner avec les données existantes</option>
-                    <option>Créer uniquement les nouveaux</option>
-                </select>
-            </div>
-
-            <div class="option-group">
-                <h4>Type de participant</h4>
-                <select class="form-control">
-                    <option>Utilisateur</option>
-                    <option>Bénévole</option>
-                    <option>Mécène</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="import-actions">
-            <button class="btn btn-sync">🔄 Synchroniser HelloAsso</button>
-            <button class="btn btn-manual-import">📤 Import Manuel</button>
-        </div>
-
-        <div class="import-results" style="display: none;">
-            <h4>Résultats de l'import</h4>
-            <div class="results-summary">
-                <div class="result-item success">✅ <strong>156</strong> participants importés</div>
-                <div class="result-item warning">⚠️ <strong>12</strong> doublons détectés</div>
-                <div class="result-item error">❌ <strong>3</strong> erreurs de format</div>
-            </div>
-        </div>
-    </div>
+    <!-- Import UI removed -->
     {% endif %}
 </div>
 
