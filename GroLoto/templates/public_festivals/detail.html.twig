@@ -277,7 +277,7 @@
             {% if weekend.coverImage matches('/^uploads\\//') or weekend.coverImage matches('/^images\\//') %}
                 <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}" class="banner-image" onerror="this.parentElement.innerHTML='<div class=\'banner-placeholder\'><i class=\'bi bi-calendar-event\'></i><span class=\'placeholder-date\'>{{ weekend.dateDebut|date('d M Y') }}</span></div><a href=\'{{ path('public_festivals') }}\' class=\'back-button\' title=\'Retour à la liste\'><i class=\'bi bi-arrow-left\'></i></a>';">
             {% else %}
-                <img src="{{ asset('uploads/weekends/' ~ weekend.coverImage) }}" alt="{{ weekend.nom }}" class="banner-image" onerror="this.parentElement.innerHTML='<div class=\'banner-placeholder\'><i class=\'bi bi-calendar-event\'></i><span class=\'placeholder-date\'>{{ weekend.dateDebut|date('d M Y') }}</span></div><a href=\'{{ path('public_festivals') }}\' class=\'back-button\' title=\'Retour à la liste\'><i class=\'bi bi-arrow-left\'></i></a>';">
+                <img src="{{ asset(weekend.coverImage) }}" alt="{{ weekend.nom }}" class="banner-image" onerror="this.parentElement.innerHTML='<div class=\'banner-placeholder\'><i class=\'bi bi-calendar-event\'></i><span class=\'placeholder-date\'>{{ weekend.dateDebut|date('d M Y') }}</span></div><a href=\'{{ path('public_festivals') }}\' class=\'back-button\' title=\'Retour à la liste\'><i class=\'bi bi-arrow-left\'></i></a>';">​
             {% endif %}
         {% else %}
             <div class="banner-placeholder">

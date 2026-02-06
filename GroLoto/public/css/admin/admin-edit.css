@@ -1,0 +1,279 @@
+/* =============== ÉDITION DES ADMINISTRATEURS =============== */
+
+:root {
+    --primary-color: #0d1b2a;
+    --primary-dark: #071018;
+    --primary-light: #1e3a5f;
+    --accent-color: #2563eb;
+    --danger-color: #dc2626;
+    --success-color: #16a34a;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --border-radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =============== CONTENEUR =============== */
+.admin-edit-container {
+    max-width: 700px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem;
+}
+
+.admin-edit-card {
+    background: #ffffff;
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+}
+
+/* =============== HEADER =============== */
+.admin-edit-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: #ffffff;
+    padding: 2rem;
+    margin-bottom: 0;
+}
+
+.admin-edit-header h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.admin-edit-email {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    display: inline-block;
+}
+
+/* =============== CONTENU =============== */
+.admin-edit-content {
+    padding: 2.5rem;
+}
+
+/* =============== FORMULAIRE =============== */
+.admin-edit-form {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.form-group-edit {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-edit label {
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-group-edit .form-label-optional {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--gray-400);
+    margin-left: auto;
+}
+
+.form-group-edit .form-control {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--gray-700);
+    background: #ffffff;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.form-group-edit .form-control::placeholder {
+    color: var(--gray-400);
+}
+
+.form-group-edit .form-control:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background: rgba(37, 99, 235, 0.02);
+}
+
+.form-group-edit .form-control:hover:not(:focus) {
+    border-color: var(--gray-400);
+}
+
+.form-group-edit .form-control:disabled {
+    background: var(--gray-100);
+    cursor: not-allowed;
+    color: var(--gray-600);
+}
+
+/* =============== LAYOUT 2 COLONNES =============== */
+.form-row-edit {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .form-row-edit {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =============== SECTION DE MODIFICATIONS =============== */
+.form-section-edit {
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--gray-200);
+}
+
+.form-section-edit-title {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-600);
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+/* =============== ALERTE =============== */
+.alert-edit {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid;
+    background-color: var(--gray-50);
+}
+
+.alert-edit-danger {
+    border-left-color: var(--danger-color);
+    background-color: rgba(220, 38, 38, 0.05);
+}
+
+.alert-edit-danger ul {
+    color: var(--danger-color);
+    font-weight: 500;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.alert-edit-danger li {
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.alert-edit-danger li:before {
+    content: "⚠";
+}
+
+/* =============== BOUTONS =============== */
+.admin-edit-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.btn-edit {
+    padding: 0.85rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    letter-spacing: 0.4px;
+}
+
+.btn-edit-primary {
+    background: linear-gradient(135deg, var(--success-color) 0%, #22c55e 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.15);
+}
+
+.btn-edit-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(22, 163, 74, 0.25);
+    background: linear-gradient(135deg, #22c55e 0%, var(--success-color) 100%);
+}
+
+.btn-edit-primary:active {
+    transform: translateY(0);
+}
+
+.btn-edit-secondary {
+    background: transparent;
+    color: var(--danger-color);
+    border: 2px solid var(--danger-color);
+}
+
+.btn-edit-secondary:hover {
+    background: var(--danger-color);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+.btn-edit-secondary:active {
+    transform: translateY(0);
+}
+
+/* =============== RESPONSIVE =============== */
+@media (max-width: 992px) {
+    .admin-edit-container {
+        padding: 0 1rem;
+    }
+
+    .admin-edit-content {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-edit-header {
+        padding: 1.5rem;
+    }
+
+    .admin-edit-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .admin-edit-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-edit {
+        width: 100%;
+        justify-content: center;
+    }
+}

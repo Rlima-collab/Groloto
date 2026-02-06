@@ -79,10 +79,22 @@
                         <tbody>
                             {% for inscription in inscriptions %}
                                 <tr>
-                                    <td class="name">{{ inscription.evenement.nom }}</td>
-                                    <td>{{ inscription.evenement.dateDebut|date('d/m/Y') }}</td>
+                                    <td class="name">
+                                        {% if inscription.evenement %}
+                                            {{ inscription.evenement.nom }}
+                                        {% else %}
+                                            <em class="text-muted">Événement supprimé</em>
+                                        {% endif %}
+                                    </td>
                                     <td>
-                                        {% if inscription.evenement.lieu %}
+                                        {% if inscription.evenement and inscription.evenement.dateDebut %}
+                                            {{ inscription.evenement.dateDebut|date('d/m/Y') }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if inscription.evenement and inscription.evenement.lieu %}
                                             <span class="text-muted">{{ inscription.evenement.lieu }}</span>
                                         {% else %}
                                             <span class="text-muted">-</span>

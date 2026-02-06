@@ -15,9 +15,23 @@
                 <div class="footer-col item">
                     <h3>Liens</h3>
                     <ul>
-                        <li><a href="#">À propos</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Contact</a></li>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <li><a href="{{ path('admin_inscriptions') }}">Inscriptions</a></li>
+                            <li><a href="{{ path('admin_messages') }}">Messages</a></li>
+                            <li><a href="{{ path('admin_create_user') }}">Utilisateurs</a></li>
+                        {% elseif is_granted('ROLE_MECENE') %}
+                            <li><a href="{{ path('mecene_mes_inscriptions') }}">Mes inscriptions</a></li>
+                            <li><a href="{{ path('mecene_messages') }}">Messages</a></li>
+                            <li><a href="{{ path('mecene_lots') }}">Mes lots</a></li>
+                        {% elseif is_granted('ROLE_BENEVOLE') %}
+                            <li><a href="{{ path('benevole_mon_planning') }}">Mon planning</a></li>
+                            <li><a href="{{ path('benevole_messages') }}">Messages</a></li>
+                            <li><a href="{{ path('benevole_mon_planning') }}">Tâches</a></li>
+                        {% else %}
+                            <li><a href="{{ path('app_home') }}">Accueil</a></li>
+                            <li><a href="{{ path('public_festivals') }}">Festivals</a></li>
+                            <li><a href="{{ path('app_contact') }}">Contact</a></li>
+                        {% endif %}
                     </ul>
                 </div>
                 <div class="footer-col item">

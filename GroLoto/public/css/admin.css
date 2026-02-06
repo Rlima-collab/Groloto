@@ -1378,11 +1378,145 @@ body > .modal .form-control::placeholder {
 
 .inscription-card {
     transition: all 0.2s;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
 }
 
 .inscription-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.inscription-card-header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b3a52 100%);
+    padding: 1rem 1.25rem;
+    color: white;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.inscription-card-header-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.inscription-card-header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.inscription-card-header-org {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.inscription-card-header-person {
+    opacity: 0.85;
+    font-size: 0.813rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inscription-card-header-email {
+    opacity: 0.75;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inscription-card-header-badge {
+    white-space: nowrap;
+    padding: 0.375rem 0.875rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.inscription-card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.inscription-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.inscription-content-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.inscription-details {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.inscription-details-item {
+    flex: 1;
+    min-width: 250px;
+}
+
+.inscription-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.inscription-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.inscription-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.inscription-info-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.inscription-info-value {
+    font-size: 0.95rem;
+    color: #111827;
+    font-weight: 500;
 }
 
 /* Modal d'inscription */
@@ -1513,4 +1647,274 @@ body > .modal .form-control::placeholder {
     outline: none;
     border-color: #dc2626;
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+@media (max-width: 768px) {
+    .hero-section.benevoles-hero {
+        padding: 1.5rem 1rem 3rem 1rem;
+        padding-top: calc(1.5rem + 71px);
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-login {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0 1rem;
+    }
+
+    .inscription-card {
+        padding: 1rem;
+    }
+
+    .inscription-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+
+    .inscription-card-header-info {
+        width: 100%;
+        gap: 0.75rem;
+    }
+
+    .inscription-card-header-badge {
+        align-self: flex-start;
+    }
+
+    .inscription-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .inscription-content-item {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .inscription-details {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .inscription-details-item {
+        min-width: auto;
+    }
+
+    .inscription-actions {
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+
+    .inscription-info {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .card-header {
+        padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.4rem;
+    }
+
+    .card-description {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section.benevoles-hero {
+        padding: 1rem 0.75rem 2rem 0.75rem;
+        padding-top: calc(1rem + 71px);
+    }
+
+    .hero-title {
+        font-size: 1.3rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .hero-description {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-login {
+        padding: 0.65rem 1rem;
+        font-size: 0.85rem;
+        max-width: calc(100% - 1rem);
+        width: auto;
+        display: inline-block;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 0 0.75rem;
+    }
+
+    .metric-card {
+        padding: 0.75rem;
+    }
+
+    .metric-card h3 {
+        font-size: 0.85rem;
+    }
+
+    .metric-value {
+        font-size: 1.8rem !important;
+    }
+
+    .metric-detail {
+        font-size: 0.75rem;
+    }
+
+    .inscriptions-list {
+        gap: 0.75rem;
+    }
+
+    .inscription-card {
+        border-radius: 6px;
+        overflow: hidden;
+        padding: 0;
+    }
+
+    .inscription-card-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .inscription-card-header-info {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .inscription-card-header-icon {
+        display: none;
+    }
+
+    .inscription-card-header-org {
+        font-size: 0.95rem;
+    }
+
+    .inscription-card-header-person {
+        font-size: 0.75rem;
+    }
+
+    .inscription-card-header-email {
+        font-size: 0.7rem;
+    }
+
+    .inscription-card-header-badge {
+        align-self: flex-start;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+    }
+
+    .inscription-card-body {
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .inscription-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .inscription-content-item {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        flex-shrink: 1;
+        gap: 0.35rem;
+    }
+
+    .inscription-content-item svg {
+        display: none;
+    }
+
+    .inscription-details {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+    }
+
+    .inscription-details-item {
+        min-width: auto;
+    }
+
+    .inscription-details-item > div:first-child {
+        font-size: 0.65rem !important;
+        margin-bottom: 0.15rem;
+    }
+
+    .inscription-details-item > div:last-child {
+        font-size: 0.8rem !important;
+    }
+
+    .inscription-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .inscription-actions button {
+        width: 100% !important;
+        padding: 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .inscription-info {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .inscription-info-item {
+        gap: 0.15rem;
+    }
+
+    .inscription-info-label {
+        font-size: 0.65rem;
+    }
+
+    .inscription-info-value {
+        font-size: 0.8rem;
+    }
+
+    .card-header {
+        padding: 1rem 0.75rem 0.5rem 0.75rem;
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+    }
+
+    .card-description {
+        font-size: 0.85rem;
+    }
+
+    .card-content {
+        padding: 0.75rem;
+    }
 }

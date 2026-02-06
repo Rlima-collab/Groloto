@@ -329,6 +329,7 @@ class WeekendController extends AbstractController
         return $this->render('weekend/edit.html.twig', [
             'form' => $form->createView(),
             'weekend' => $weekend,
+            'isAdmin' => $this->isGranted('ROLE_ADMIN'),
         ]);
     }
 
