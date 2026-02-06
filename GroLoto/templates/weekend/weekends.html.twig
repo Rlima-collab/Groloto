@@ -76,15 +76,11 @@
                         </span>
 
                         <div class="weekend-actions">
-                            <a href="{{ path('app_weekend_planning_pdf', {'id': weekend.id}) }}" class="btn-export-pdf" title="Exporter le planning en PDF">
-                                <i class="bi bi-file-earmark-pdf"></i>
-                            </a>
-                           
-
-                        <button class="weekend-view-btn" onclick="openWeekendDetail({{ weekend.id }})">
-                            Planning
-                            <i class="bi bi-calendar-event"></i>
-                        </button>
+                            <button class="weekend-view-btn" onclick="openWeekendDetail({{ weekend.id }})">
+                                Planning
+                                <i class="bi bi-calendar-event"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             {% endfor %}

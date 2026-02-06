@@ -308,34 +308,6 @@
     gap: 0.5rem;
 }
 
-.btn-export-pdf {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: #dc2626;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-}
-
-.btn-export-pdf:hover {
-    background: #b91c1c;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
-    color: white;
-    text-decoration: none;
-}
-
-.btn-export-pdf i {
-    color: inherit;
-}
-
 /* =============================================
    WEEKEND DETAIL MODAL
    ============================================= */
