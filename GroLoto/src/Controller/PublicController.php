@@ -64,25 +64,7 @@ class PublicController extends AbstractController
             'analytics' => $analyticsData,
         ]);
     }
-    
-    #[Route('/public/import', name: 'public_import')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function import(
-        UtilisateurRepository $utilisateurRepository
-    ): Response {
-        // Métriques de base
-        $totalInscrits = $utilisateurRepository->count([]);
-        $nouveauxUtilisateurs = $this->getNouveauxUtilisateurs($utilisateurRepository);
-        $utilisateursFideles = $this->getUtilisateursFideles($utilisateurRepository);
-        $revenus = $this->calculerRevenus($totalInscrits);
-        
-        return $this->render('public/import.html.twig', [
-            'total_inscrits' => $totalInscrits,
-            'revenus' => $revenus,
-            'nouveaux' => $nouveauxUtilisateurs,
-            'fideles' => $utilisateursFideles,
-        ]);
-    }
+
     
     private function getNouveauxUtilisateurs(UtilisateurRepository $repository): int
     {
