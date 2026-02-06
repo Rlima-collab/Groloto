@@ -29,10 +29,28 @@ class ExcelController extends AbstractController
     public function index(Request $request): Response
     {
         $currentSheet = null;
-        $sheets = $this->excelDataRepository->findAllSheets();
+        try {
+            $sheets = $this->excelDataRepository->findAllSheets();
+        } catch (\Exception $e) {
+            // Problème de base de données (table manquante, I/O, etc.) — prévenir l'administrateur et continuer sans planter
+            $this->addFlash('error', 'Erreur base de données: ' . $e->getMessage() . ' — Vérifiez le fichier SQLite et exécutez les migrations si nécessaire.');
+            if ($this->container && $this->container->has('logger')) {
+                $this->container->get('logger')->error('Excel DB error: ' . $e->getMessage(), ['exception' => $e]);
+            }
+            $sheets = [];
+        }
 
         if ($request->query->has('sheet')) {
-            $currentSheet = $this->excelDataRepository->findBySheetName($request->query->get('sheet'));
+            try {
+                $currentSheet = $this->excelDataRepository->findBySheetName($request->query->get('sheet'));
+            } catch (\Exception $e) {
+                // Même comportement si la recherche d'une feuille provoque une erreur DB
+                $this->addFlash('error', 'Erreur base de données: ' . $e->getMessage());
+                if ($this->container && $this->container->has('logger')) {
+                    $this->container->get('logger')->error('Excel DB error on findBySheetName: ' . $e->getMessage(), ['exception' => $e]);
+                }
+                $currentSheet = null;
+            }
         } elseif (!empty($sheets)) {
             $currentSheet = $sheets[0];
         }
@@ -128,7 +146,20 @@ class ExcelController extends AbstractController
     #[Route('/export', name: 'admin_excel_export', methods: ['GET'])]
     public function export(Request $request): StreamedResponse
     {
-        $sheets = $this->excelDataRepository->findAllSheets();
+        try {
+            $sheets = $this->excelDataRepository->findAllSheets();
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur base de données: ' . $e->getMessage() . ' — Impossible d\'exporter. Exécutez les migrations si nécessaire.');
+            if ($this->container && $this->container->has('logger')) {
+                $this->container->get('logger')->error('Excel export DB error: ' . $e->getMessage(), ['exception' => $e]);
+            }
+            return $this->redirectToRoute('admin_excel_index');
+        }
+
+        if (empty($sheets)) {
+            $this->addFlash('warning', 'Aucune donnée à exporter.');
+            return $this->redirectToRoute('admin_excel_index');
+        }
 
         $spreadsheet = new Spreadsheet();
         $spreadsheet->removeSheetByIndex(0);

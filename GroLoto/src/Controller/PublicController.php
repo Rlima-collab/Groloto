@@ -76,12 +76,8 @@ class PublicController extends AbstractController
         $utilisateursFideles = $this->getUtilisateursFideles($utilisateurRepository);
         $revenus = $this->calculerRevenus($totalInscrits);
         
-        return $this->render('public/import.html.twig', [
-            'total_inscrits' => $totalInscrits,
-            'revenus' => $revenus,
-            'nouveaux' => $nouveauxUtilisateurs,
-            'fideles' => $utilisateursFideles,
-        ]);
+        // Import page removed — redirect to participants
+        return $this->redirectToRoute('public_participants');
     }
     
     private function getNouveauxUtilisateurs(UtilisateurRepository $repository): int

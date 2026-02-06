@@ -1,0 +1,109 @@
+%==============================================
+% MCD 1 - Utilisateurs et Authentification
+%==============================================
+
+PARAMETRE: id, cle, valeur, date_modification
+
+ROLE: id, nom, description
+UTILISATEUR: id, email, mot_de_passe, prenom, nom, telephone, profile_image, date_creation, date_modification
+
+APPARTENIR, 11 UTILISATEUR, 1N ROLE
+
+NOTIFICATION: id, type, message, lien, lue, created_at, reponse
+RECEVOIR, 1N NOTIFICATION, 11 UTILISATEUR
+
+CONTACT_MESSAGE: id, nom, email, destinataire, message, created_at, lu, reponse, repondu_le, cloturee, masquee_pour
+REPONDRE_A, 0N CONTACT_MESSAGE, 01 CONTACT_MESSAGE
+REPONDRE_MESSAGE, 0N CONTACT_MESSAGE, 0N UTILISATEUR
+
+BENEVOLE: id, remarque, disponibilites, actif
+ETRE_BENEVOLE, 01 UTILISATEUR, 11 BENEVOLE
+
+MECENE: id, organisation, siret, adresse_postale, logo, instagram, facebook
+ETRE_MECENE, 0N UTILISATEUR, 11 MECENE
+
+MESSENGER_MESSAGES: id, body, headers, queue_name, created_at, available_at, delivered_at
+
+%==============================================
+% MCD 2 - Bénévoles et Tâches
+%==============================================
+
+BENEVOLE: id, remarque, disponibilites, actif
+
+WEEKEND: id, nom, date_debut, date_fin, task_offset_before, task_offset_after, cover_image, description, date_creation
+
+EVENEMENT: id, nom, description, date_debut, date_fin, lieu, heure_debut, duree_minutes, image, date_creation
+
+TACHE: id, titre, poste_requis, debut, fin, max_personnes, remarque
+
+PLANIFIER_TACHE_WEEKEND, 1N TACHE, 11 WEEKEND
+LIER_TACHE_EVENT, 0N TACHE, 01 EVENEMENT
+
+PLAGE_HORAIRE: id, jour, heure_debut, heure_fin, max_personnes_plage
+DECOUPER, 1N PLAGE_HORAIRE, 11 TACHE
+
+DEMANDE_TACHE: id, date_demande, statut, message_benevole, message_admin, date_reponse
+FAIRE_DEMANDE, 0N BENEVOLE, 0N TACHE
+
+AFFECTATION_TACHE: id, date_affectation, statut, remarque
+AFFECTER, 0N BENEVOLE, 0N TACHE
+
+DISPONIBILITE_WEEKEND: id, jour, matin, apres_midi, soir, remarque, date_creation
+DECLARER_DISPO_WEEKEND, 0N BENEVOLE, 0N WEEKEND
+
+DISPONIBILITE_BENEVOLE: id, debut, fin, remarque, date_creation
+DECLARER_DISPO_EVENT, 0N BENEVOLE, 0N EVENEMENT
+
+
+%==============================================
+% MCD 3 - Mécènes et Dons
+%==============================================
+
+MECENE: id, organisation, siret, adresse_postale, logo, instagram, facebook
+
+CONVENTION: id, nom_modele, url_pdf, date_signature, methode_signature, date_creation
+SIGNER, 01 MECENE, 11 CONVENTION
+
+WEEKEND: id, nom, date_debut, date_fin, task_offset_before, task_offset_after, cover_image, description, date_creation
+
+LOT: id, titre, description, quantite, valeur_estimee, date_creation
+OFFRIR_LOT, 0N MECENE, 0N WEEKEND
+
+EVENEMENT: id, nom, description, date_debut, date_fin, lieu, heure_debut, duree_minutes, image, date_creation
+
+INSCRIPTION_MECENE: id, description_don, montant_estime, statut, date_inscription, remarques, nom_don, categorie, quantite, valeur_unitaire, type_don
+INSCRIRE, 0N MECENE, 0N EVENEMENT
+
+
+%==============================================
+% MCD 4 - Événements et Communication
+%==============================================
+
+WEEKEND: id, nom, date_debut, date_fin, task_offset_before, task_offset_after, cover_image, description, date_creation
+
+EVENEMENT: id, nom, description, date_debut, date_fin, lieu, heure_debut, duree_minutes, image, date_creation
+INCLURE_EVENEMENT, 0N WEEKEND, 0N EVENEMENT
+
+COMMUNICATION: id, titre, type, date_prevue, statut, budget, remarque, date_creation
+COMMUNIQUER, 0N EVENEMENT, 1N COMMUNICATION
+
+HELLOASSO: id_externe, prenom, nom, email, telephone, type_ticket, date_achat, date_import
+IMPORTER_PARTICIPANTS, 0N EVENEMENT, 1N HELLOASSO
+
+UTILISATEUR: id, email, mot_de_passe, prenom, nom
+
+HISTORIQUE_EVENEMENT: id, action, description, date_action
+TRACER_ACTION, 1N EVENEMENT, 0N UTILISATEUR
+
+
+%==============================================
+% MCD 5 - Gestion du Stock
+%==============================================
+
+STOCK: id, nom, categorie, quantite, unite, seuil, valeur_unitaire, remarque, derniere_modif, source, date_retour, preteur
+
+UTILISATEUR: id, email, prenom, nom
+EVENEMENT: id, nom
+
+HISTORIQUE_STOCK: id, type_changement, quantite, raison, date_creation
+ENREGISTRER_CHANGEMENT, 1N STOCK, 0N UTILISATEUR, 0N EVENEMENT
