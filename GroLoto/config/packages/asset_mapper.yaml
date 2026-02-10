@@ -1,8 +1,13 @@
 framework:
     asset_mapper:
         # The paths to make available to the asset mapper.
+        # Include all asset directories for proper resolution
         paths:
             - assets/
+            - public/css/
+            - public/js/
+            - public/images/
+            - public/uploads/
         missing_import_mode: strict
 
 when@prod:
