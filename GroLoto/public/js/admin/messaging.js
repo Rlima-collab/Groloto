@@ -6,6 +6,9 @@
  * @since 1.0.0
  */
 
+// Configuration de la base URL - utiliser la variable globale si disponible, sinon déduire du chemin
+const APP_BASE_URL = typeof window.APP_BASE_URL !== 'undefined' ? window.APP_BASE_URL : '';
+
 /**
  * Variables globales pour l'autocomplétion
  */
@@ -54,7 +57,7 @@ function initAutocomplete(inputEl, listEl, onSelect) {
         
         autocompleteTimeout = setTimeout(async () => {
             try {
-                const response = await fetch('/admin/messages/emails?q=' + encodeURIComponent(query));
+                const response = await fetch(APP_BASE_URL + '/admin/messages/emails?q=' + encodeURIComponent(query));
                 const users = await response.json();
                 
                 if (users.length > 0) {
@@ -103,7 +106,7 @@ function initAutocomplete(inputEl, listEl, onSelect) {
  */
 async function validateEmail(email) {
     try {
-        const response = await fetch('/admin/messages/emails?q=' + encodeURIComponent(email));
+        const response = await fetch(APP_BASE_URL + '/admin/messages/emails?q=' + encodeURIComponent(email));
         const users = await response.json();
         return users.find(u => u.email.toLowerCase() === email.toLowerCase());
     } catch (err) {

@@ -85,7 +85,10 @@ function scrollToBottom() {
  * Marque les notifications d'une conversation comme lues
  */
 function markConversationNotificationsAsRead(conversationId) {
-    fetch('/notifications/mark-conversation-read/' + conversationId, {
+    // Note: This URL is overridden in templates where this is included
+    // Fallback for direct usage with relative path
+    const baseUrl = document.querySelector('[data-base-url]')?.getAttribute('data-base-url') || '';
+    fetch(baseUrl + '/notifications/mark-conversation-read/' + conversationId, {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',

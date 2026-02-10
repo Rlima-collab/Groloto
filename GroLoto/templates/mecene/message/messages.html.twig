@@ -145,6 +145,10 @@
 
 {% block javascripts %}
 {{ parent() }}
+<script>
+// Base URL for fetch API calls - handles subdirectory deployments
+window.APP_BASE_URL = '{{ path('app_home')|slice(0, -1) }}';
+</script>
 <script src="{{ asset('js/shared/messaging.js') }}"></script>
 <script>
 const adminEmail = '{{ adminEmail|default('admin@groloto.local') }}';
@@ -397,7 +401,7 @@ if (convId) {
 
 // Fonction pour marquer les notifications d'une conversation comme lues
 function markConversationNotificationsAsRead(conversationId) {
-	fetch('/notifications/mark-conversation-read/' + conversationId, {
+	fetch('{{ path('app_notification_mark_conversation_read', {'conversationId': 'CONV_ID'}) }}'.replace('CONV_ID', conversationId), {
 		method: 'POST',
 		headers: {
 			'X-Requested-With': 'XMLHttpRequest',
@@ -879,7 +883,9 @@ function escapeHtml(text) { const div = document.createElement('div'); div.textC
 
 function createAvatarHtml(name, profileImage) {
 	if (profileImage && profileImage.trim() !== '') {
-		return '<img src="/uploads/profiles/' + escapeHtml(profileImage) + '" alt="Photo de profil">';
+		const baseUrl = document.querySelector('[data-base-url]')?.getAttribute('data-base-url') || '{{ path('app_home') }}'.replace(/\/$/, '');
+		const imagePath = profileImage.startsWith('/') ? profileImage : '/uploads/profiles/' + profileImage;
+		return '<img src="' + baseUrl + imagePath + '" alt="Photo de profil">';
 	} else {
 		const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 		return initials;

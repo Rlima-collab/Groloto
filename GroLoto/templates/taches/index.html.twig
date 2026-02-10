@@ -176,7 +176,7 @@ function confirmDelete(tacheId, tacheTitre, csrfToken) {
     if (confirm('Êtes-vous sûr de vouloir supprimer la tâche "' + tacheTitre + '" ?\n\nCette action supprimera également toutes les affectations de bénévoles associées.')) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '/taches/' + tacheId + '/delete';
+        form.action = '{{ path('tache_delete', {'id': 'TACHE_ID'}) }}'.replace('TACHE_ID', tacheId);
         
         const csrfInput = document.createElement('input');
         csrfInput.type = 'hidden';

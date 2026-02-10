@@ -2,7 +2,7 @@
 <header class="site-header">
     <div class="container">
         <div class="logo">
-            <a href="/">
+            <a href="{{ path('app_home') }}">
                 <img src="{{ asset('images/logo_gro.png') }}" alt="Groloto Logo">
             </a>
         </div>
@@ -120,7 +120,7 @@
         // Mark a single notification as read and redirect
         async function markReadAndRedirect(id, lien) {
             try {
-                const res = await fetch('/notifications/' + id + '/marquer-lue', { method: 'POST', headers: {'X-Requested-With':'XMLHttpRequest', 'Content-Type':'application/json'} });
+                const res = await fetch('{{ path('app_notification_mark_read', {'id': 'ID_PLACEHOLDER'}) }}'.replace('ID_PLACEHOLDER', id), { method: 'POST', headers: {'X-Requested-With':'XMLHttpRequest', 'Content-Type':'application/json'} });
                 if (res.ok) {
                     if (lien) {
                         window.location.href = lien;

@@ -1,5 +1,8 @@
 console.log('Notifications script loaded');
 
+// Configuration de la base URL - utiliser la variable globale si disponible
+const APP_BASE_URL = typeof window.APP_BASE_URL !== 'undefined' ? window.APP_BASE_URL : '';
+
 function toggleNotifications(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -238,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // helper: mark as read (reuse earlier logic)
     function markAsRead(id, card) {
-        fetch(`/notifications/${id}/marquer-lue`, { method: 'POST' })
+        fetch(APP_BASE_URL + `/notifications/${id}/marquer-lue`, { method: 'POST' })
             .then(() => {
                 card.classList.remove('notification-unread');
                 card.querySelector('[data-action="mark-read"]')?.remove();
